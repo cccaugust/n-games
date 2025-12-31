@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモンスタンプお絵かき</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <h1>🎨 ポケモンスタンプお絵かき</h1>
+            <a href="../../pages/portal/portal.html" class="home-btn">🏠 ポータルへ戻る</a>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Canvas Area -->
+        <div class="canvas-wrapper">
+            <canvas id="drawingCanvas" width="800" height="600"></canvas>
+        </div>
+
+        <!-- Sidebar / Tools -->
+        <aside class="sidebar">
+            <div class="tool-section">
+                <h3>ツール</h3>
+                <div class="tool-buttons">
+                    <button id="btnBrush" class="tool-btn active">🖊️ ブラシ</button>
+                    <button id="btnEraser" class="tool-btn">🧽 消しゴム</button>
+                    <button id="btnStamp" class="tool-btn">✨ スタンプ</button>
+                </div>
+            </div>
+
+            <!-- Brush Settings -->
+            <div id="brushSettings" class="tool-settings">
+                <div class="setting-row">
+                    <label>色:</label>
+                    <input type="color" id="brushColor" value="#333333">
+                </div>
+                <div class="setting-row">
+                    <label>太さ:</label>
+                    <input type="range" id="brushSize" min="1" max="50" value="5">
+                </div>
+            </div>
+
+            <!-- Stamp Settings (Initially Hidden) -->
+            <div id="stampSettings" class="tool-settings hidden">
+                <div class="setting-row">
+                    <label>大きさ:</label>
+                    <input type="range" id="stampScale" min="0.2" max="2.0" step="0.1" value="1.0">
+                    <span id="stampScaleVal">1.0x</span>
+                </div>
+                <!-- Hue Slider -->
+                <div class="setting-row">
+                    <label>色相:</label>
+                    <input type="range" id="stampHue" min="0" max="360" value="0">
+                </div>
+
+                <div class="stamp-list-container">
+                    <h4>ポケモンを選ぶ</h4>
+                    <div id="stampList" class="stamp-grid">
+                        <!-- Injected by script -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="btnClear" class="action-btn danger">🗑️ 全消去</button>
+                <button id="btnSave" class="action-btn primary">💾 画像を保存</button>
+            </div>
+        </aside>
+    </main>
+
+    <script type="module" src="./script.js"></script>
+</body>
+
+</html>

@@ -81,6 +81,14 @@ const games = [
     color: '#ff7675',
     icon: '📖',
     link: '/pages/pokedex/'
+  },
+  {
+    id: 'mon-paint',
+    title: 'ポケモンスタンプお絵かき',
+    desc: 'スタンプで自由にアート！',
+    color: '#fab1a0',
+    icon: '🎨',
+    link: '/pages/mon-paint/'
   }
 ];
 

@@ -1,0 +1,160 @@
+// Imports for assets
+// Note: We need to go up one level from 'data' to 'src', then to 'pages/pokedex/assets'
+import kaikefupotoriImg from '../pages/pokedex/assets/kaikefupotori.png';
+import godangiruImg from '../pages/pokedex/assets/godangiru.png';
+import cameramanImg from '../pages/pokedex/assets/cameraman.png';
+import kamasaurusImg from '../pages/pokedex/assets/kamasaurus.png';
+import greatmaiteshImg from '../pages/pokedex/assets/greatmaitesh.png';
+import megaGreatmaiteshImg from '../pages/pokedex/assets/mega_greatmaitesh.png';
+import bottlemanImg from '../pages/pokedex/assets/bottleman.png';
+import hebikingImg from '../pages/pokedex/assets/hebiking.png';
+
+// Pokemon Data
+export const pokemonData = [
+    {
+        id: '0001',
+        name: 'カイケフポトリ',
+        classification: 'じげんトラベラーポケモン',
+        types: ['psychic', 'fairy'],
+        typeNames: ['エスパー', 'フェアリー'],
+        image: kaikefupotoriImg,
+        description: '宇宙の彼方にある異次元の門から、純粋なエネルギー体として現れた存在。彼が微笑みながら輪をくぐり抜けるとき、その場所の重力は消滅し、すべての物体は空へと昇っていくという。',
+        ecology: '実体を持たず、光の屈折によって姿を現しているという説がある。背後の巨大なリングは「事象の地平線」と繋がっており、そこから取り出されるエネルギーは、一つの街の電力を100年分賄えるほど強大。',
+        abilityName: 'マジックゲート',
+        abilityDesc: '場に出ている間、相手の「設置技（ステルスロック等）」の効果を無効化し、さらに相手の能力ランク上昇を無視して攻撃できる。',
+        moveName: 'ポータルバースト',
+        moveType: 'psychic',
+        moveDesc: 'タイプ：エスパー / 威力：90 / 命中：100<br>空間の輪から攻撃する。相手の「まもる」「みきり」を貫通してダメージを与える。',
+        extraInfo: '古代の壁画には、飢饉の際に別次元から食料を運び込み、人々を救った「光の使者」として描かれている。',
+        author: 'TEPPEI',
+        stats: { hp: 100, attack: 70, defense: 80, spAtk: 130, spDef: 110, speed: 110 }
+    },
+    {
+        id: '0002',
+        name: 'ゴダンギル',
+        classification: 'せんりつ騎士ポケモン',
+        types: ['steel', 'ghost'],
+        typeNames: ['はがね', 'ゴースト'],
+        image: godangiruImg,
+        description: '5本の魔剣に宿る魂が完全に同調した姿。一振りで巨岩を両断し、二振りで嵐を呼び寄せる。このポケモンを従えた王は、一夜にして大陸を統一したが、最後はその強大すぎる力に精神を食いつくされたと伝わる。',
+        ecology: '5本の剣はそれぞれ独立した意識を持っており、中央の盾がそれらを統率する脳の役割を果たす。戦闘時以外は、5本の剣を自身の周囲に円状に配置し、絶対的な防御陣形を崩さない。',
+        abilityName: 'クインテットブレード',
+        abilityDesc: '連続技（2〜5回攻撃）の威力が1.5倍になり、必ず5回当たるようになる。',
+        moveName: '五戒の神鎖',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：25×5回 / 命中：90<br>5本の剣で連続攻撃し、相手を「バインド」状態にして交代できなくさせる。',
+        extraInfo: 'かつて、このポケモンを無理に従えようとした軍隊が、一夜にして影も形もなく消え去ったという伝説が残っている。',
+        author: 'TEPPEI',
+        stats: { hp: 85, attack: 140, defense: 100, spAtk: 60, spDef: 90, speed: 95 }
+    },
+    {
+        id: '0003',
+        name: 'カメラマン',
+        classification: 'スクープ記録ポケモン',
+        types: ['grass', 'electric'],
+        typeNames: ['くさ', 'でんき'],
+        image: cameramanImg,
+        description: '首のカメラは数キロ先のプランクトンの動きさえ捉える超高性能。野生の個体は、珍しい現象を見つけるとドローンを飛ばして記録する習性がある。撮影されたデータは、背中の甲羅の中で暗号化され保存されているらしい。',
+        ecology: 'カメのような堅実さと、ラマのような好奇心を併せ持つ。頭部の双眼鏡ユニットで広範囲をスキャンし、珍しいポケモンや戦いの様子を見つけると、即座に自律型ドローンを射出して空中撮影を開始する。',
+        abilityName: 'フラッシュシャッター',
+        abilityDesc: '場に出た時、相手全員の命中率を1段階下げる。',
+        moveName: 'パパラッチ・ドローン',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：80 / 命中：100<br>攻撃後、相手が次に使う技を3ターンの間「封印」状態にする。',
+        extraInfo: '自然写真家たちの憧れの的。このポケモンのドローンが撮影した写真は、数億円の価値がつくと言われている。',
+        author: 'TEPPEI',
+        stats: { hp: 120, attack: 75, defense: 110, spAtk: 95, spDef: 100, speed: 60 }
+    },
+    {
+        id: '0004',
+        name: 'カマサウルス',
+        classification: 'さんみいったいポケモン',
+        types: ['water', 'dragon'],
+        typeNames: ['みず', 'ドラゴン'],
+        image: kamasaurusImg,
+        description: '青、黒、赤の３匹が絡み合うようにして泳ぐ珍しいポケモン。古代の海の支配者だったと言われており、非常に高い知能を持つ。チームワークは完璧だが、３匹の仲が悪くなると解散してしまうこともあるらしい。',
+        ecology: 'それぞれの個体が別々の役割を担当している。青い個体はナビ役、黒い個体は攻撃役、赤い個体は防御役と言われているが、目にも止まらぬ速さで位置を入れ替えるため、正確なところは分かっていない。',
+        abilityName: 'きれあじ',
+        abilityDesc: '相手を切る技（カッター、つばめがえし等）の威力が1.5倍になる。',
+        moveName: 'トリニティ・ダッシュ',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：30×3回 / 命中：95<br>3匹が高速回転しながら順番に突撃する。必ず3回攻撃する。',
+        extraInfo: '目撃例は非常に少ないが、嵐の夜に海面が3色に光ることがあれば、それはカマサウルスが狩りをしている合図かもしれない。',
+        author: 'TEPPEI',
+        stats: { hp: 90, attack: 115, defense: 85, spAtk: 105, spDef: 85, speed: 120 }
+    },
+    {
+        id: '0005',
+        name: 'グレートマイテシ',
+        classification: 'ナノマシンポケモン',
+        types: ['water', 'steel'],
+        typeNames: ['みず', 'はがね'],
+        image: greatmaiteshImg,
+        description: 'おもちゃのような愛らしい見た目をしているが、その体は数億個の超極小ナノマシンで構成されている。どんなに破壊されても、周囲の金属を取り込み数秒で再生する不死身のポケモン。',
+        ecology: '普段は深海の熱水噴出孔付近で金属を摂取しているが、時には宇宙ステーションに出現し、故障箇所を勝手に修理して去っていくこともある。体内のナノマシンは医療にも応用可能と言われている。',
+        abilityName: '自己メンテナンス',
+        abilityDesc: 'ターン終了時、HPが最大HPの1/16回復する。毒状態にならない。',
+        moveName: 'ナノ・スワーム',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：70 / 命中：100<br>体の一部を分解して相手にまとわりつかせる。与えたダメージの半分のHPを回復する。',
+        extraInfo: '「グレート」という名前は、その小さな体に秘められた無限の可能性に畏敬の念を込めて博士が名付けた。',
+        author: 'TEPPEI',
+        stats: { hp: 150, attack: 50, defense: 120, spAtk: 60, spDef: 120, speed: 30 },
+        evolutions: ['0006']
+    },
+    {
+        id: '0006',
+        name: 'メガグレートマイテシ',
+        classification: 'フルメタルシャークポケモン',
+        types: ['water', 'electric'],
+        typeNames: ['みず', 'でんき'],
+        image: megaGreatmaiteshImg,
+        description: 'メガシンカにより、体内のナノマシンが暴走寸前まで活性化した姿。全身から高電圧のプラズマを放ちながら、音速を超えて海中を疾走する。',
+        ecology: '背ビレが赤く発光するのは、エネルギー出力が限界を超えている証拠。周囲の海水は瞬時に沸騰し、通り過ぎた後には巨大な蒸気の柱が立ち上る。制御装置が壊れると、自爆に近いエネルギー放出を行う危険性がある。',
+        abilityName: 'プラズマジェット',
+        abilityDesc: 'でんきタイプの技の威力が1.5倍になる。さらに、自分の素早さが1段階上がる。',
+        moveName: 'ギガボルト・クラッシュ',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：120 / 命中：85<br>全身を雷のようなエネルギー体に変えて突進する。30%の確率で相手をマヒさせる。',
+        extraInfo: 'あまりの速さに、レーダーですら「雷のようなノイズ」としか認識できないという。',
+        author: 'TEPPEI',
+        stats: { hp: 150, attack: 80, defense: 140, spAtk: 110, spDef: 140, speed: 100 },
+        evolutions: ['0005']
+    },
+    {
+        id: '0007',
+        name: 'ボトルマン',
+        classification: 'せいすい魔道士ポケモン',
+        types: ['water', 'psychic'],
+        typeNames: ['みず', 'エスパー'],
+        image: bottlemanImg,
+        description: '清らかな湧き水に魔法が宿り、意思を持った姿。体内の水が濁ると力が弱まるため、常に自身の鮮度を保とうとする。二振りの水の剣は、相手の精神を癒やすこともあれば、一瞬で凍りつかせて粉砕することもある。',
+        ecology: 'ペットボトルのような透明な外殻は、ダイヤモンドに匹敵する硬度を持つ特殊な氷の結晶。中の水はどれだけ激しく動いても決して腐らず、常に清浄な魔力を帯びている。',
+        abilityName: 'リフレッシュ・ボディ',
+        abilityDesc: '状態異常になると、ターンの終わりにペットボトルの水で洗い流して回復する。',
+        moveName: 'ハイドロ・セイバー',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：95 / 命中：100<br>魔法の剣で斬りつける。自分の「特攻」の数値でダメージ計算を行う物理技。',
+        extraInfo: '砂漠地帯の守り神。ボトルマンが訪れた村の井戸は、1000年の間枯れることがないと言い伝えられている。手にした「水のエッジ」は分子レベルで振動しており、細胞組織に水を強制注入して破裂させる。',
+        author: 'TEPPEI',
+        stats: { hp: 80, attack: 60, defense: 90, spAtk: 120, spDef: 100, speed: 85 }
+    },
+    {
+        id: '0008',
+        name: 'ヘビキング',
+        classification: 'しんぱんヘビポケモン',
+        types: ['grass', 'dragon'],
+        typeNames: ['くさ', 'ドラゴン'],
+        image: hebikingImg,
+        description: '三つの頭はそれぞれ『過去・現在・未来』を見守ると言われる高貴な守護神。中心の頭が威厳を放ち、左右の頭が外敵を警戒する。その美しい鱗の輝きに見惚れた者は、蛇の催眠術にかけられ、一生その森から出られなくなるという。',
+        ecology: '非常に高い知能を持ち、人間の言葉を理解するとされる。3つの頭が同時に思考することで、1秒間に数万通りの戦術を計算し、相手の負け筋を完璧に突く。',
+        abilityName: 'トリプルヘッド',
+        abilityDesc: '1ターンに3回攻撃できるが、2回目と3回目の威力は本来の25%になる。',
+        moveName: 'ロイヤル・スネーク・アイ',
+        moveType: 'grass',
+        moveDesc: 'タイプ：くさ / 変化技 / 命中：100<br>相手を「まひ」かつ「こんらん」状態にする。まさに王の威圧感。',
+        extraInfo: '古い王国では裁判官の役割を担わされていた。嘘をついている者は、ヘビキングの前に出された瞬間に石のように硬直してしまうからだ。',
+        author: 'TEPPEI',
+        stats: { hp: 100, attack: 80, defense: 95, spAtk: 115, spDef: 95, speed: 85 }
+    }
+];
