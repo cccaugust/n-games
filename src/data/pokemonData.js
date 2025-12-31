@@ -1,13 +1,13 @@
 // Imports for assets
-// Note: We need to go up one level from 'data' to 'src', then to 'pages/pokedex/assets'
-import kaikefupotoriImg from '../pages/pokedex/assets/kaikefupotori.png';
-import godangiruImg from '../pages/pokedex/assets/godangiru.png';
-import cameramanImg from '../pages/pokedex/assets/cameraman.png';
-import kamasaurusImg from '../pages/pokedex/assets/kamasaurus.png';
-import greatmaiteshImg from '../pages/pokedex/assets/greatmaitesh.png';
-import megaGreatmaiteshImg from '../pages/pokedex/assets/mega_greatmaitesh.png';
-import bottlemanImg from '../pages/pokedex/assets/bottleman.png';
-import hebikingImg from '../pages/pokedex/assets/hebiking.png';
+// Note: Changed to absolute paths from server root for browser compatibility without bundler
+const kaikefupotoriImg = '/pages/pokedex/assets/kaikefupotori.png';
+const godangiruImg = '/pages/pokedex/assets/godangiru.png';
+const cameramanImg = '/pages/pokedex/assets/cameraman.png';
+const kamasaurusImg = '/pages/pokedex/assets/kamasaurus.png';
+const greatmaiteshImg = '/pages/pokedex/assets/greatmaitesh.png';
+const megaGreatmaiteshImg = '/pages/pokedex/assets/mega_greatmaitesh.png';
+const bottlemanImg = '/pages/pokedex/assets/bottleman.png';
+const hebikingImg = '/pages/pokedex/assets/hebiking.png';
 
 // Pokemon Data
 export const pokemonData = [

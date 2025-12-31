@@ -11,64 +11,121 @@ const backBtn = document.getElementById('backBtn');
 
 // Helper: Get Type Color Name
 function getTypeColor(type) {
-    const colors = {
-        normal: '#A8A77A',
-        fire: '#EE8130',
-        water: '#6390F0',
-        electric: '#F7D02C',
-        grass: '#7AC74C',
-        ice: '#96D9D6',
-        fighting: '#C22E28',
-        poison: '#A33EA1',
-        ground: '#E2BF65',
-        flying: '#A98FF3',
-        psychic: '#F95587',
-        bug: '#A6B91A',
-        rock: '#B6A136',
-        ghost: '#735797',
-        dragon: '#6F35FC',
-        dark: '#705746',
-        steel: '#B7B7CE',
-        fairy: '#D685AD'
-    };
-    return colors[type] || '#777';
+    return `var(--type-${type}, #777)`;
 }
 
-// Helper: Render Stats Bars
+// Helper: Render Stats Radar Chart
 function renderStats(stats) {
-    const statLabels = {
-        hp: 'HP',
-        attack: 'こうげき',
-        defense: 'ぼうぎょ',
-        spAtk: 'とくこう',
-        spDef: 'とくぼう',
-        speed: 'すばやさ'
-    };
+    // Return a canvas container instead of the old bars
+    setTimeout(() => drawRadarChart(stats), 100); // Draw after insertion
+    return '<div class="radar-chart-container"><canvas id="statsChart" class="radar-chart-canvas" width="300" height="300"></canvas></div>';
+}
 
-    let html = '<div class="stats-grid">';
+function drawRadarChart(stats) {
+    const canvas = document.getElementById('statsChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = 100; // Radius of the chart
 
-    for (const [key, label] of Object.entries(statLabels)) {
-        const value = stats[key];
-        // Scale 0-150 to 1-15 bars
-        const filledCount = Math.min(15, Math.max(1, Math.round(value / 10)));
+    const statValues = [
+        stats.hp,
+        stats.attack,
+        stats.defense,
+        stats.speed,
+        stats.spDef,
+        stats.spAtk
+    ];
 
-        let barsHtml = '';
-        for (let i = 0; i < 15; i++) {
-            barsHtml += `<div class="stat-point ${i < filledCount ? 'filled' : ''}"></div>`;
+    // Ordered labels matching the polygon points (Clockwise from top)
+    const statLabels = [
+        'HP',
+        'こうげき',
+        'ぼうぎょ',
+        'すばやさ',
+        'とくぼう',
+        'とくこう'
+    ];
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    // Draw Background Hexagons
+    ctx.strokeStyle = '#4466aa';
+    ctx.lineWidth = 1;
+
+    for (let r = 0.2; r <= 1; r += 0.2) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 2;
+            const x = centerX + Math.cos(angle) * (radius * r);
+            const y = centerY + Math.sin(angle) * (radius * r);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         }
-
-        html += `
-            <div class="stat-row">
-                <div class="stat-label">${label}</div>
-                <div class="stat-bar-container">
-                    ${barsHtml}
-                </div>
-            </div>
-        `;
+        ctx.closePath();
+        ctx.stroke();
     }
 
-    html += '</div>';
-    return html;
+    // Draw Axes
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+
+        // Draw Labels
+        const labelX = centerX + Math.cos(angle) * (radius + 25);
+        const labelY = centerY + Math.sin(angle) * (radius + 15);
+        ctx.fillStyle = '#8dbcd8';
+        ctx.font = 'bold 12px "M PLUS Rounded 1c"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(statLabels[i], labelX, labelY);
+    }
+    ctx.stroke();
+
+    // Draw Data Polygon
+    ctx.fillStyle = 'rgba(230, 255, 60, 0.7)'; // Yellowish glow
+    ctx.strokeStyle = '#ffff40';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+
+    // Normalize stats (assuming max 160 for visual balance)
+    const maxStat = 160;
+
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const val = Math.min(statValues[i], maxStat);
+        const r = (val / maxStat) * radius;
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw dots at vertices
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const val = Math.min(statValues[i], maxStat);
+        const r = (val / maxStat) * radius;
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
 }
 
 // Render Grid
@@ -177,8 +234,8 @@ function showDetail(pokemon) {
                         </div>
                         <div>
                             <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">専用技</div>
-                            <div class="ability-box-compact" style="background: #fff8f8; border-color: #ffecec;">
-                                <div class="ability-name" style="color: ${getTypeColor(pokemon.moveType)}">【${pokemon.moveName}】</div>
+                            <div class="ability-box-compact">
+                                <div class="ability-name">【${pokemon.moveName}】</div>
                                 <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.moveDesc}</div>
                             </div>
                         </div>
