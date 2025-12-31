@@ -1,13 +1,13 @@
 // Imports for assets
 // Note: Changed to absolute paths from server root for browser compatibility without bundler
-const kaikefupotoriImg = '/pages/pokedex/assets/kaikefupotori.png';
-const godangiruImg = '/pages/pokedex/assets/godangiru.png';
-const cameramanImg = '/pages/pokedex/assets/cameraman.png';
-const kamasaurusImg = '/pages/pokedex/assets/kamasaurus.png';
-const greatmaiteshImg = '/pages/pokedex/assets/greatmaitesh.png';
-const megaGreatmaiteshImg = '/pages/pokedex/assets/mega_greatmaitesh.png';
-const bottlemanImg = '/pages/pokedex/assets/bottleman.png';
-const hebikingImg = '/pages/pokedex/assets/hebiking.png';
+const kaikefupotoriImg = 'assets/kaikefupotori.png';
+const godangiruImg = 'assets/godangiru.png';
+const cameramanImg = 'assets/cameraman.png';
+const kamasaurusImg = 'assets/kamasaurus.png';
+const greatmaiteshImg = 'assets/greatmaitesh.png';
+const megaGreatmaiteshImg = 'assets/mega_greatmaitesh.png';
+const bottlemanImg = 'assets/bottleman.png';
+const hebikingImg = 'assets/hebiking.png';
 
 // Pokemon Data
 export const pokemonData = [
@@ -163,7 +163,7 @@ export const pokemonData = [
         classification: 'わんぱくウソポケモン',
         types: ['water'],
         typeNames: ['みず'],
-        image: '/pages/pokedex/assets/kawabo.png',
+        image: 'assets/kawabo.png',
         description: '澄んだ川の上流に生息する、好奇心旺盛なカワウソのポケモン。お気に入りの小石を常に持ち歩いており、寝る時も決して離さない。',
         ecology: '泳ぎが得意で、尻尾をスクリューのように回転させて水中を高速移動する。額と頬にある青い房は、水中の酸素を取り込むエラのような役割を果たしているという説もある。',
         abilityName: 'すいすい',
@@ -182,7 +182,7 @@ export const pokemonData = [
         classification: 'ほうじゅポケモン',
         types: ['water'],
         typeNames: ['みず'],
-        image: '/pages/pokedex/assets/tamauso.png',
+        image: 'assets/tamauso.png',
         description: '大切にしていた小石が、自身の魔力によって美しい宝珠へと変化した姿。宝珠から放たれる光は、迷った旅人を川岸へ導くと言われている。',
         ecology: 'ヒゲがアンテナのように伸び、周囲の水の動きを敏感に察知する。宝珠を胸に抱えて瞑想することで、精神を統一し、水のエネルギーを練り上げている。',
         abilityName: 'しめりけ',
@@ -201,7 +201,7 @@ export const pokemonData = [
         classification: 'らいめいジュウポケモン',
         types: ['water', 'electric'],
         typeNames: ['みず', 'でんき'],
-        image: '/pages/pokedex/assets/raijuuso.png',
+        image: 'assets/raijuuso.png',
         description: 'タマウソの宝珠が雷のエネルギーを帯びて巨大化した。ヒゲから激しいスパークを放ちながら、雷雲を呼んで嵐を起こすことができる。',
         ecology: '怒ると宝珠が青白く発光し、周囲に高圧電流を撒き散らす。普段は穏やかだが、縄張りを荒らす者には容赦なく雷撃を浴びせる。その咆哮は雷鳴のように轟く。',
         abilityName: 'ちくでん',
@@ -213,5 +213,62 @@ export const pokemonData = [
         author: 'JUNPEI',
         stats: { hp: 90, attack: 85, defense: 75, spAtk: 125, spDef: 90, speed: 105 },
         evolutions: ['0010']
+    },
+    {
+        id: '0012',
+        name: 'ピコチャージ',
+        classification: 'じゅうでんポケモン',
+        types: ['electric'],
+        typeNames: ['でんき'],
+        image: 'assets/picocharge.png',
+        description: '生まれたばかりの電気ポケモン。2本の触手をコンセントに差し込んでエネルギーを摂取する。満タンになると体のランプが青く光る。',
+        ecology: '家庭の電化製品の裏側に隠れて暮らすことが多い。夜中にスマホが勝手に充電されていたら、それはピコチャージの仕業かもしれない。',
+        abilityName: 'プラス',
+        abilityDesc: '特性「プラス」か「マイナス」のポケモンが味方にいると、特攻が1.5倍になる。',
+        moveName: 'ラピッドチャージ',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 変化技 / 命中：-<br>自分のHPを最大HPの1/2回復し、次のターン電気技の威力が2倍になる。',
+        extraInfo: '最近はUSB Type-Cに対応した個体も発見されており、進化の早さが学界で注目されている。',
+        author: 'JUNPEI',
+        stats: { hp: 45, attack: 40, defense: 40, spAtk: 65, spDef: 50, speed: 60 },
+        evolutions: ['0013']
+    },
+    {
+        id: '0013',
+        name: 'メガハブ',
+        classification: 'ハブポケモン',
+        types: ['electric', 'steel'],
+        typeNames: ['でんき', 'はがね'],
+        image: 'assets/megahub.png',
+        description: '複数のケーブルを自在に操り、電気エネルギーを他のポケモンに分け与えることができる。仲間思いの性格で、群れのエネルギー司令塔。',
+        ecology: '体内には大容量のバッテリーを内蔵している。戦闘時はケーブルをムチのように振るい、高圧電流を流し込んで敵を麻痺させる。',
+        abilityName: 'バッテリー',
+        abilityDesc: '味方の特殊技の威力を1.3倍にする。',
+        moveName: 'マルチコネクト',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：75 / 命中：100<br>複数のケーブルで相手を拘束する。攻撃後、相手の素早さを1段階下げる。',
+        extraInfo: '災害地では非常用電源として重宝される。メガハブ1匹で、一般家庭の電力1週間分を賄えると言われている。',
+        author: 'JUNPEI',
+        stats: { hp: 60, attack: 55, defense: 70, spAtk: 85, spDef: 80, speed: 50 },
+        evolutions: ['0014', '0012']
+    },
+    {
+        id: '0014',
+        name: 'ギガアウトレット',
+        classification: 'かふかポケモン',
+        types: ['electric', 'steel'],
+        typeNames: ['でんき', 'はがね'],
+        image: 'assets/gigaoutlet.png',
+        description: '過剰な電気エネルギーで装甲が鋭利に変形した。全身から常に放電しており、不用意に近づくと黒焦げになる。制御不能のエネルギーの塊。',
+        ecology: 'あまりに強大な電力を持つため、常に周囲の空間が磁場で歪んでいる。怒りでリミッターが外れると、周囲一帯を停電させるほどの電磁パルスを放つ。',
+        abilityName: 'エレキメイカー',
+        abilityDesc: '戦闘に出ると5ターンの間、場の状態を「エレキフィールド」にする。',
+        moveName: 'オーバーロード・バースト',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：150 / 命中：90<br>全エネルギーを放出して大爆発を起こす。使用後、次のターンは動けなくなる。',
+        extraInfo: '都市伝説では、ギガアウトレットが覚醒した場所に新しい発電所が自然に生成されると噂されている。',
+        author: 'JUNPEI',
+        stats: { hp: 80, attack: 95, defense: 110, spAtk: 130, spDef: 100, speed: 45 },
+        evolutions: ['0013']
     }
 ];
