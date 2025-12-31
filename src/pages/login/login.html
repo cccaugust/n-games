@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card login-container">
+            <h2>👋 N-Games へようこそ！</h2>
+            <p style="margin-bottom: 24px; color: var(--text-light);">おなまえとあいことばを入れてね</p>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="familyId">おなまえ (ID)</label>
+                    <input type="text" id="familyId" placeholder="例: nakao" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="pin">あいことば (4つのすうじ)</label>
+                    <input type="password" id="pin" placeholder="****" maxlength="4" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%">しゅっぱつ！ 🚀</button>
+                <p class="error-msg" id="errorMsg">あれ？ おなまえかあいことばがちがうみたい…</p>
+            </form>
+        </div>
+    </div>
+    <script type="module" src="./login.js"></script>
+</body>
+
+</html>

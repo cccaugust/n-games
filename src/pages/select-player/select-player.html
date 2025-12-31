@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>だれがあそぶ？ | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .select-container {
+            max-width: 800px;
+            margin: 60px auto;
+            text-align: center;
+        }
+
+        .player-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .player-card {
+            background: white;
+            border-radius: 20px;
+            width: 160px;
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            border: 4px solid transparent;
+        }
+
+        .player-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--secondary-color);
+        }
+
+        .avatar {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .add-btn {
+            background: #eee;
+            color: #aaa;
+        }
+
+        .add-btn:hover {
+            background: #e0e0e0;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="select-container">
+            <h1>だれがあそぶ？</h1>
+            <div class="player-grid" id="playerGrid">
+                <!-- Players will be injected here -->
+                <div class="player-card add-btn" id="newPlayerBtn">
+                    <div class="avatar">➕</div>
+                    <div class="name">あたらしくつくる</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./select-player.js"></script>
+</body>
+
+</html>

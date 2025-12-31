@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゲーム一覧 | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Custom styles for portal header */
+        .header {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-radius: 0 0 16px 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: block;
+            /* Make anchor block */
+            height: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .game-thumbnail {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+        }
+
+        .game-info {
+            padding: 20px;
+            position: relative;
+        }
+
+        .game-info h3 {
+            margin-bottom: 5px;
+            font-size: 1.3rem;
+        }
+
+        .game-info p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .play-tag {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+        }
+
+        .game-card:hover .play-tag {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-color);">N-Games 🎮</div>
+        <div class="user-info">
+            <span>👤</span>
+            <span id="playerName">Player</span>
+            <button id="logoutBtn"
+                style="margin-left: 20px; font-size: 0.9rem; background: #eee; padding: 5px 10px; border-radius: 8px;">ログアウト</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="mt-4">どのゲームであそぶ？</h2>
+        <div class="game-grid" id="gameGrid">
+            <!-- Games will be injected here -->
+        </div>
+    </div>
+
+    <script type="module" src="./portal.js"></script>
+</body>
+
+</html>

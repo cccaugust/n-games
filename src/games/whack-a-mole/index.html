@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>モグラたたき | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            touch-action: manipulation;
+            /* Prevent zoom on double tap */
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .score-board {
+            background: white;
+            padding: 15px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .hole {
+            background: #7bd4eb;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: inset 0 10px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .mole {
+            width: 80%;
+            height: 80%;
+            background: #fdcb6e;
+            border-radius: 40% 40% 10% 10%;
+            position: absolute;
+            bottom: -100%;
+            /* Hidden */
+            left: 10%;
+            transition: bottom 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .mole::after {
+            content: "🐹";
+        }
+
+        .hole.up .mole {
+            bottom: 0;
+        }
+
+        .hole.bonk .mole::after {
+            content: "💥";
+        }
+
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Back Button -->
+        <a href="/pages/portal/portal.html"
+            style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
+            もどる</a>
+
+        <div class="game-container">
+            <div class="score-board">
+                <div>スコア: <span id="score">0</span></div>
+                <div>じかん: <span id="time">30</span></div>
+            </div>
+
+            <div class="grid">
+                <div class="hole" data-index="0">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="1">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="2">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="3">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="4">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="5">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="6">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="7">
+                    <div class="mole"></div>
+                </div>
+                <div class="hole" data-index="8">
+                    <div class="mole"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="start-overlay" id="overlay">
+        <h1>モグラたたき！</h1>
+        <p>ひょっこり出てくるモグラを叩こう！</p>
+        <button class="btn-primary" id="startBtn" style="margin-top: 20px;">スタート！</button>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+</body>
+
+</html>
