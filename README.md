@@ -6,6 +6,7 @@ AIエージェント「Antigravity」と一緒に開発を進めていきます�
 ## プロジェクト概要
 
 *   **目的**: 子供と一緒にゲーム作りを楽しみながら、Pokiのようなゲームポータルサイトを構築する。
+*   **Live Site**: [https://cccaugust.github.io/n-games/](https://cccaugust.github.io/n-games/) 🚀
 *   **プラットフォーム**: GitHub Pages (本リポジトリ: `https://github.com/cccaugust/n-games.git`)
 *   **ターゲット**: 自分たち家族（親と小学生の子供）
 
