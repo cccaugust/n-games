@@ -224,19 +224,19 @@ function openModal(pokemon) {
         return `<span class="type-badge" style="background-color: ${getTypeColor(type)}; font-size: 1rem; padding: 5px 15px;">${pokemon.typeNames[index]}</span>`;
     }).join(' ');
 
-    const statsHtml = renderStats(pokemon.stats);
-
     // Evolution Links
     let evoHtml = '';
     if (pokemon.evolutions && pokemon.evolutions.length > 0) {
-        evoHtml = '<div class="stats-section"><div class="section-title">進化・関連ポケモン</div><div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">';
+        evoHtml = '<div class="stats-section"><div class="section-title">進化・関連ポケモン</div><div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">';
         pokemon.evolutions.forEach(evoId => {
             const evoPoke = pokemonData.find(p => p.id === evoId);
             if (evoPoke) {
                 evoHtml += `
-                    <div style="cursor: pointer; text-align: center; min-width: 100px;" onclick="openModalById('${evoPoke.id}')">
-                        <img src="${evoPoke.image}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%; background: #f0f0f0; padding: 5px;">
-                        <div style="font-size: 0.8rem; margin-top: 5px; font-weight: bold;">${evoPoke.name}</div>
+                    <div style="cursor: pointer; text-align: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="openModalById('${evoPoke.id}')">
+                        <div style="width: 80px; height: 80px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0 auto 5px;">
+                            <img src="${evoPoke.image}" style="width: 60px; height: 60px; object-fit: contain;">
+                        </div>
+                        <div style="font-size: 0.8rem; font-weight: bold; color: #555;">${evoPoke.name}</div>
                     </div>
                 `;
             }
@@ -245,54 +245,65 @@ function openModal(pokemon) {
     }
 
     modalBody.innerHTML = `
-        <div class="detail-image-section">
-            <img src="${pokemon.image}" alt="${pokemon.name}" class="detail-img">
-        </div>
-        <div class="detail-info-section">
-            <div class="detail-header">
+        <div class="modal-header-strip">
+            <div class="header-left">
                 <span class="detail-id">No.${pokemon.id}</span>
                 <h2 class="detail-name">${pokemon.name}</h2>
+                <span class="detail-category">${pokemon.classification}</span>
             </div>
-            <div class="detail-category">${pokemon.classification}</div>
-            <div class="types" style="margin-bottom: 30px;">
-                ${typesHtml}
-            </div>
-            <div style="margin-bottom: 20px; font-size: 0.9rem; color: #666;">
-                 作者: <strong>${pokemon.author}</strong>
-            </div>
-
-            <div class="description-box">
-                <h3>図鑑説明</h3>
-                <p>${pokemon.description}</p>
-            </div>
-
-            ${evoHtml}
-
-            <div class="stats-section">
-                <div class="section-title">種族値</div>
-                ${statsHtml}
-            </div>
-
-             <div class="description-box" style="border-left-color: #7AC74C; background: #fdfdfd;">
-                <h3>生態・能力</h3>
-                <p>${pokemon.ecology}</p>
-                <div style="margin-top: 10px; font-size: 0.9em; color: #555;">${pokemon.extraInfo}</div>
-            </div>
-
-            <div class="stats-section">
-                <div class="section-title">特性</div>
-                <div class="ability-box">
-                    <div class="ability-name">【${pokemon.abilityName}】</div>
-                    <div style="margin-top: 5px;">${pokemon.abilityDesc}</div>
+            <div class="header-right">
+                <div class="types">
+                    ${typesHtml}
+                </div>
+                <!-- Author moved here -->
+                <div style="margin-top: 5px; text-align: right; font-size: 0.8rem; color: #888;">
+                    作者: <strong>${pokemon.author}</strong>
                 </div>
             </div>
+        </div>
 
-             <div class="moves-section">
-                <div class="section-title">専用技</div>
-                <div class="ability-box" style="background: #fff8f8; border: 1px solid #ffecec;">
-                    <div class="ability-name" style="color: ${getTypeColor(pokemon.moveType)}">【${pokemon.moveName}】</div>
-                    <div style="margin-top: 5px;">${pokemon.moveDesc}</div>
+        <div class="modal-content-split">
+            <div class="detail-visual-section">
+                <!-- Background Circle Decoration -->
+                <div class="visual-bg-circle"></div>
+                <img src="${pokemon.image}" alt="${pokemon.name}" class="detail-img-large">
+            </div>
+            
+            <div class="detail-data-section">
+                <div class="description-box">
+                    <p>${pokemon.description}</p>
                 </div>
+
+                <div class="stats-section">
+                    <div class="section-title">種族値</div>
+                    ${statsHtml}
+                </div>
+
+                <!-- Ability and Move in a grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                    <div>
+                        <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">特性</div>
+                        <div class="ability-box-compact">
+                            <div class="ability-name">【${pokemon.abilityName}】</div>
+                            <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.abilityDesc}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">専用技</div>
+                        <div class="ability-box-compact" style="background: #fff8f8; border-color: #ffecec;">
+                            <div class="ability-name" style="color: ${getTypeColor(pokemon.moveType)}">【${pokemon.moveName}】</div>
+                            <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.moveDesc}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="eco-box">
+                    <div style="font-weight: bold; margin-bottom: 5px; color: #555;">生態・能力</div>
+                    <p style="font-size: 0.9rem; margin: 0; color: #666;">${pokemon.ecology}</p>
+                    <div style="margin-top: 8px; font-size: 0.85rem; color: #888;">Note: ${pokemon.extraInfo}</div>
+                </div>
+
+                ${evoHtml}
             </div>
         </div>
     `;
