@@ -65,6 +65,14 @@ const games = [
     color: '#81ecec',
     icon: '🛡️',
     link: '/games/slime-adventure/'
+  },
+  {
+    id: 'warp-jump',
+    title: 'ワープジャンプ！',
+    desc: 'モンスターでジャンプしよう！',
+    color: '#a8edea',
+    icon: '👾',
+    link: '/games/warp-jump/'
   }
 ];
 

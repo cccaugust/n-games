@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warp Monster Jump</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="game-container">
+        <h1>Warp Monster Jump!</h1>
+        <p>TAP or SPACE to Jump!</p>
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="score-board">Score: <span id="score">0</span></div>
+        <div id="game-over" class="hidden">
+            <h2>GAME OVER</h2>
+            <p>Score: <span id="final-score">0</span></p>
+            <button id="restart-btn">Try Again</button>
+            <a href="../../pages/portal/portal.html" class="home-btn">🏠 Back to Portal</a>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

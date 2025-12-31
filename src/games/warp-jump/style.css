@@ -1,0 +1,94 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+#game-container {
+    text-align: center;
+    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+h1 {
+    margin: 0 0 10px;
+    color: #ff6b6b;
+    text-shadow: 2px 2px 0px #fff;
+    font-size: 2rem;
+}
+
+canvas {
+    background-color: #fff;
+    border: 4px solid #4ecdc4;
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+    height: auto;
+}
+
+#score-board {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #556270;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    border: 4px solid #ff6b6b;
+    width: 80%;
+    max-width: 400px;
+}
+
+#game-over h2 {
+    color: #ff6b6b;
+    font-size: 2.5rem;
+    margin: 0 0 15px;
+}
+
+button,
+.home-btn {
+    display: inline-block;
+    background: #4ecdc4;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    margin: 10px;
+    transition: transform 0.1s, background 0.2s;
+    font-weight: bold;
+}
+
+button:hover,
+.home-btn:hover {
+    background: #45b7af;
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.95);
+}
