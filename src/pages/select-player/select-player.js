@@ -5,7 +5,101 @@ import { supabase } from '../../js/supabaseClient.js';
 requireAuth();
 
 const playerGrid = document.getElementById('playerGrid');
-const AVATARS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙'];
+const modal = document.getElementById('playerModal');
+const modalTitle = document.getElementById('modalTitle');
+const nameInput = document.getElementById('playerNameInput');
+const avatarGrid = document.getElementById('avatarGrid');
+const cancelBtn = document.getElementById('cancelBtn');
+const saveBtn = document.getElementById('saveBtn');
+
+const AVATARS = [
+    '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙',
+    '🦄', '🐲', '🦕', '🦖', '🐳', '🐬', '🐧', '🐔', '🐤', '🦅', '🦉', '🦋', '🐞', '🐝', '🐛',
+    '👦', '👧', '👨‍💻', '👩‍🔬', '🧙‍♂️', '🧚‍♀️', '🧛‍♂️', '🧜‍♀️', '🧞‍♂️', '🧟‍♀️', '🤖', '👾', '👽', '👻', '💀'
+];
+
+let editingPlayerId = null; // null means creating new
+let selectedAvatar = AVATARS[0];
+
+// Initialize Avatar Grid
+function initAvatarGrid() {
+    avatarGrid.innerHTML = '';
+    AVATARS.forEach(emoji => {
+        const div = document.createElement('div');
+        div.className = 'avatar-option';
+        div.textContent = emoji;
+        div.onclick = () => selectAvatar(emoji);
+        avatarGrid.appendChild(div);
+    });
+}
+
+function selectAvatar(emoji) {
+    selectedAvatar = emoji;
+    // Update UI
+    const options = avatarGrid.children;
+    for (let bg of options) {
+        if (bg.textContent === emoji) bg.classList.add('selected');
+        else bg.classList.remove('selected');
+    }
+}
+
+// Modal Control
+function openModal(player = null) {
+    initAvatarGrid(); // Reset grid selection UI
+    modal.style.display = 'flex';
+    nameInput.value = '';
+
+    if (player) {
+        // Edit mode
+        editingPlayerId = player.id;
+        modalTitle.textContent = 'なおす';
+        nameInput.value = player.name;
+        selectAvatar(player.avatar);
+    } else {
+        // Create mode
+        editingPlayerId = null;
+        modalTitle.textContent = 'あたらしくつくる';
+        // Random default avatar
+        selectAvatar(AVATARS[Math.floor(Math.random() * AVATARS.length)]);
+    }
+
+    nameInput.focus();
+}
+
+function closeModal() {
+    modal.style.display = 'none';
+}
+
+cancelBtn.onclick = closeModal;
+// Close on outside click
+modal.onclick = (e) => {
+    if (e.target === modal) closeModal();
+};
+
+saveBtn.onclick = async () => {
+    const name = nameInput.value.trim();
+    if (!name) {
+        alert('なまえをいれてね！');
+        return;
+    }
+
+    // Disable button to prevent double submit
+    saveBtn.disabled = true;
+    saveBtn.textContent = '...';
+
+    if (editingPlayerId) {
+        await updatePlayer(editingPlayerId, name, selectedAvatar);
+    } else {
+        await addPlayer(name, selectedAvatar);
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'これにする！';
+    closeModal();
+};
+
+
+/* ================= API Logic ================= */
 
 async function fetchPlayers() {
     const { data, error } = await supabase
@@ -20,8 +114,7 @@ async function fetchPlayers() {
     return data;
 }
 
-async function addPlayer(name) {
-    const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+async function addPlayer(name, avatar) {
     const { error } = await supabase
         .from('players')
         .insert([{ name, avatar }]);
@@ -42,7 +135,7 @@ async function updatePlayer(id, name, avatar) {
 
 async function deletePlayer(id, event) {
     event.stopPropagation();
-    if (!confirm('本当に削除しますか？')) return;
+    if (!confirm('本当に消しちゃう？')) return;
 
     const { error } = await supabase.from('players').delete().eq('id', id);
     if (error) alert('削除できませんでした');
@@ -64,7 +157,6 @@ async function renderPlayers() {
     `;
 
         card.onclick = (e) => {
-            // Prevent click if clicking buttons
             if (e.target.classList.contains('action-btn')) return;
             choosePlayer(p);
         };
@@ -73,7 +165,10 @@ async function renderPlayers() {
         deleteBtn.onclick = (e) => deletePlayer(p.id, e);
 
         const editBtn = card.querySelector('.edit-btn');
-        editBtn.onclick = (e) => openEditModal(p, e);
+        editBtn.onclick = (e) => {
+            e.stopPropagation();
+            openModal(p);
+        };
 
         playerGrid.appendChild(card);
     });
@@ -81,7 +176,7 @@ async function renderPlayers() {
     const addBtn = document.createElement('div');
     addBtn.className = 'player-card add-btn';
     addBtn.innerHTML = `<div class="avatar">➕</div><div class="name">あたらしくつくる</div>`;
-    addBtn.onclick = handleAddClick;
+    addBtn.onclick = () => openModal(null);
     playerGrid.appendChild(addBtn);
 }
 
@@ -90,29 +185,5 @@ function choosePlayer(player) {
     navigateTo('/pages/portal/portal.html');
 }
 
-function handleAddClick() {
-    const name = prompt('新しいプレイヤーのなまえをおしえてね！');
-    if (name) addPlayer(name);
-}
-
-// Edit Modal Logic
-function openEditModal(player, event) {
-    event.stopPropagation();
-    const newName = prompt('名前を変更:', player.name);
-    if (newName === null) return; // Cancelled
-
-    // Simple avatar cycle for now or prompt? 
-    // Let's implement a simple "Keep or Randomize" prompt or just random for now to keep it simple as requested "change".
-    // Better: Prompt for emoji?
-
-    let newAvatar = player.avatar;
-    if (confirm('アイコンも変更しますか？ (OKでランダムに変更)')) {
-        newAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
-    }
-
-    if (newName !== player.name || newAvatar !== player.avatar) {
-        updatePlayer(player.id, newName || player.name, newAvatar);
-    }
-}
-
+// Initial render
 renderPlayers();
