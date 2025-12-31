@@ -1,6 +1,7 @@
 // Imports for assets
-import kaikefupotoriImg from './assets/kaikefupotori.jpg';
-import godangiruImg from './assets/godangiru.jpg';
+import kaikefupotoriImg from './assets/kaikefupotori.png';
+import godangiruImg from './assets/godangiru.png';
+import cameramanImg from './assets/cameraman.png';
 
 // Pokemon Data
 const pokemonData = [
@@ -24,17 +25,33 @@ const pokemonData = [
         id: '0002',
         name: 'ゴダンギル',
         classification: 'せんりつ騎士ポケモン',
-        types: ['water', 'psychic'],
-        typeNames: ['みず', 'エスパー'],
+        types: ['steel', 'ghost'],
+        typeNames: ['はがね', 'ゴースト'],
         image: godangiruImg,
         description: '5本の魔剣に宿る魂が完全に同調した姿。一振りで巨岩を両断し、二振りで嵐を呼び寄せる。このポケモンを従えた王は、一夜にして大陸を統一したが、最後はその強大すぎる力に精神を食いつくされたと伝わる。',
         ecology: '5本の剣はそれぞれ独立した意識を持っており、中央の盾がそれらを統率する脳の役割を果たす。戦闘時以外は、5本の剣を自身の周囲に円状に配置し、絶対的な防御陣形を崩さない。',
-        abilityName: 'リフレッシュ・ボディ',
-        abilityDesc: '状態異常になると、ターンの終わりにペットボトルの水で洗い流して回復する。',
-        moveName: 'ハイドロ・セイバー',
-        moveType: 'water',
-        moveDesc: 'タイプ：みず / 威力：95 / 命中：100<br>魔法の剣で斬りつける。自分の「特攻」の数値でダメージ計算を行う物理技。',
+        abilityName: 'クインテットブレード',
+        abilityDesc: '連続技（2〜5回攻撃）の威力が1.5倍になり、必ず5回当たるようになる。',
+        moveName: '五戒の神鎖',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：25×5回 / 命中：90<br>5本の剣で連続攻撃し、相手を「バインド」状態にして交代できなくさせる。',
         extraInfo: 'かつて、このポケモンを無理に従えようとした軍隊が、一夜にして影も形もなく消え去ったという伝説が残っている。'
+    },
+    {
+        id: '0003',
+        name: 'カメラマン',
+        classification: 'スクープ記録ポケモン',
+        types: ['grass', 'electric'],
+        typeNames: ['くさ', 'でんき'],
+        image: cameramanImg,
+        description: '首のカメラは数キロ先のプランクトンの動きさえ捉える超高性能。野生の個体は、珍しい現象を見つけるとドローンを飛ばして記録する習性がある。撮影されたデータは、背中の甲羅の中で暗号化され保存されているらしい。',
+        ecology: 'カメのような堅実さと、ラマのような好奇心を併せ持つ。頭部の双眼鏡ユニットで広範囲をスキャンし、珍しいポケモンや戦いの様子を見つけると、即座に自律型ドローンを射出して空中撮影を開始する。',
+        abilityName: 'フラッシュシャッター',
+        abilityDesc: '場に出た時、相手全員の命中率を1段階下げる。',
+        moveName: 'パパラッチ・ドローン',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：80 / 命中：100<br>攻撃後、相手が次に使う技を3ターンの間「封印」状態にする。',
+        extraInfo: '自然写真家たちの憧れの的。このポケモンのドローンが撮影した写真は、数億円の価値がつくと言われている。'
     }
 ];
 
