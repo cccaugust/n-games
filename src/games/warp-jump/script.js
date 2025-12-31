@@ -12,10 +12,13 @@ let gameSpeed = 5;
 let animationId;
 
 // Images
+import playerUrl from './assets/player.png';
+import enemyUrl from './assets/enemy.png';
+
 const playerImg = new Image();
-playerImg.src = './assets/player.png';
+playerImg.src = playerUrl;
 const enemyImg = new Image();
-enemyImg.src = './assets/enemy.png';
+enemyImg.src = enemyUrl;
 
 // Player object
 const player = {
