@@ -201,19 +201,60 @@ body {
 
 /* ... existing modal styles ... */
 
-.modal-content {
+/* Detail View Styles */
+.hidden {
+    display: none !important;
+}
+
+.detail-navigation {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--text-sub);
+    cursor: pointer;
+    padding: 10px 0;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--primary-color);
+}
+
+.detail-card {
     background: white;
-    width: 95%;
+    width: 100%;
+    /* Full width of container */
     max-width: 1000px;
-    /* Slightly wider */
-    max-height: 90vh;
+    margin: 0 auto;
+    /* Center it */
+    min-height: 80vh;
     border-radius: 20px;
     position: relative;
-    overflow-y: auto;
-    /* Scrollable if needed */
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    /* Clip styling */
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-header-strip {
@@ -264,7 +305,7 @@ body {
     flex: 1;
     /* Take remaining height */
     overflow: hidden;
-    /* Hide overflow to handle internal scroll */
+    /* Hide overflow to handle internal styling */
 }
 
 /* VISUAL SECTION (Left) */
@@ -278,13 +319,15 @@ body {
     align-items: center;
     min-height: 400px;
     overflow: hidden;
+    padding: 40px;
 }
 
 /* Decorative Circle behind Pokemon */
 .visual-bg-circle {
     position: absolute;
-    width: 80%;
-    height: 80%;
+    width: 400px;
+    height: 400px;
+
     background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 70%);
     border-radius: 50%;
     z-index: 1;
@@ -315,7 +358,7 @@ body {
 }
 
 .detail-img-large {
-    width: 80%;
+    width: 90%;
     max-width: 450px;
     height: auto;
     object-fit: contain;
@@ -334,8 +377,8 @@ body {
     flex: 1;
     /* Narrower than image? Or equal? Adjust as needed */
     padding: 30px 40px;
-    overflow-y: auto;
-    /* Independent scroll for data */
+    overflow-y: visible;
+    /* Data should flow naturally in the card */
     background: #fff;
 }
 
@@ -369,44 +412,25 @@ body {
     border-left: 4px solid #30a7d7;
 }
 
-/* Close Button Adjustments */
-.close-btn {
-    top: 25px;
-    right: 30px;
-    background: #eee;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.8rem;
-    transition: background 0.2s;
-    position: absolute;
-    color: #999;
-    cursor: pointer;
-    z-index: 20;
-    line-height: 1;
+/* Author Tag */
+.author-tag {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.6rem;
+    margin-top: 5px;
 }
 
-.close-btn:hover {
-    background: #ddd;
-    color: #333;
-}
-
-/* Responsive Adjustments for Modal */
+/* Responsive Adjustments */
 @media (max-width: 900px) {
     .modal-content-split {
         flex-direction: column;
-        overflow-y: auto;
-        /* Allow full scroll on mobile */
     }
 
-    .modal-content {
-        height: 100%;
-        max-height: 100vh;
-        width: 100%;
-        border-radius: 0;
+    .detail-card {
+        height: auto;
     }
 
     .modal-header-strip {
@@ -430,16 +454,16 @@ body {
 
     .detail-visual-section {
         min-height: 250px;
-        max-height: 350px;
+        /* max-height: 350px; Remove max height for better mobile flow */
+        padding: 20px;
     }
 
     .detail-img-large {
-        width: 60%;
+        width: 70%;
     }
 
     .detail-data-section {
         padding: 20px;
-        overflow: visible;
     }
 
     .pokedex-grid {

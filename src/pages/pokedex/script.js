@@ -5,6 +5,8 @@ import cameramanImg from './assets/cameraman.png';
 import kamasaurusImg from './assets/kamasaurus.png';
 import greatmaiteshImg from './assets/greatmaitesh.png';
 import megaGreatmaiteshImg from './assets/mega_greatmaitesh.png';
+import bottlemanImg from './assets/bottleman.png';
+import hebikingImg from './assets/hebiking.png';
 
 // Pokemon Data
 const pokemonData = [
@@ -117,15 +119,52 @@ const pokemonData = [
         author: 'TEPPEI',
         stats: { hp: 150, attack: 80, defense: 140, spAtk: 110, spDef: 140, speed: 100 },
         evolutions: ['0005']
+    },
+    {
+        id: '0007',
+        name: 'ボトルマン',
+        classification: 'せいすい魔道士ポケモン',
+        types: ['water', 'psychic'],
+        typeNames: ['みず', 'エスパー'],
+        image: bottlemanImg,
+        description: '清らかな湧き水に魔法が宿り、意思を持った姿。体内の水が濁ると力が弱まるため、常に自身の鮮度を保とうとする。二振りの水の剣は、相手の精神を癒やすこともあれば、一瞬で凍りつかせて粉砕することもある。',
+        ecology: 'ペットボトルのような透明な外殻は、ダイヤモンドに匹敵する硬度を持つ特殊な氷の結晶。中の水はどれだけ激しく動いても決して腐らず、常に清浄な魔力を帯びている。',
+        abilityName: 'リフレッシュ・ボディ',
+        abilityDesc: '状態異常になると、ターンの終わりにペットボトルの水で洗い流して回復する。',
+        moveName: 'ハイドロ・セイバー',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：95 / 命中：100<br>魔法の剣で斬りつける。自分の「特攻」の数値でダメージ計算を行う物理技。',
+        extraInfo: '砂漠地帯の守り神。ボトルマンが訪れた村の井戸は、1000年の間枯れることがないと言い伝えられている。手にした「水のエッジ」は分子レベルで振動しており、細胞組織に水を強制注入して破裂させる。',
+        author: 'TEPPEI',
+        stats: { hp: 80, attack: 60, defense: 90, spAtk: 120, spDef: 100, speed: 85 }
+    },
+    {
+        id: '0008',
+        name: 'ヘビキング',
+        classification: 'しんぱんヘビポケモン',
+        types: ['grass', 'dragon'],
+        typeNames: ['くさ', 'ドラゴン'],
+        image: hebikingImg,
+        description: '三つの頭はそれぞれ『過去・現在・未来』を見守ると言われる高貴な守護神。中心の頭が威厳を放ち、左右の頭が外敵を警戒する。その美しい鱗の輝きに見惚れた者は、蛇の催眠術にかけられ、一生その森から出られなくなるという。',
+        ecology: '非常に高い知能を持ち、人間の言葉を理解するとされる。3つの頭が同時に思考することで、1秒間に数万通りの戦術を計算し、相手の負け筋を完璧に突く。',
+        abilityName: 'トリプルヘッド',
+        abilityDesc: '1ターンに3回攻撃できるが、2回目と3回目の威力は本来の25%になる。',
+        moveName: 'ロイヤル・スネーク・アイ',
+        moveType: 'grass',
+        moveDesc: 'タイプ：くさ / 変化技 / 命中：100<br>相手を「まひ」かつ「こんらん」状態にする。まさに王の威圧感。',
+        extraInfo: '古い王国では裁判官の役割を担わされていた。嘘をついている者は、ヘビキングの前に出された瞬間に石のように硬直してしまうからだ。',
+        author: 'TEPPEI',
+        stats: { hp: 100, attack: 80, defense: 95, spAtk: 115, spDef: 95, speed: 85 }
     }
 ];
 
 // DOM Elements
+const viewGrid = document.getElementById('view-grid');
+const viewDetail = document.getElementById('view-detail');
+const detailContent = document.getElementById('detail-content');
 const grid = document.getElementById('pokedex-grid');
-const modal = document.getElementById('pokemon-modal');
-const modalBody = document.getElementById('modal-body');
-const closeBtn = document.querySelector('.close-btn');
 const searchInput = document.getElementById('searchInput');
+const backBtn = document.getElementById('backBtn');
 
 // Helper: Get Type Color Name
 function getTypeColor(type) {
@@ -195,7 +234,7 @@ function renderGrid(pokemons) {
     pokemons.forEach(pokemon => {
         const card = document.createElement('div');
         card.className = 'pokemon-card';
-        card.onclick = () => openModal(pokemon);
+        card.onclick = () => showDetail(pokemon);
 
         const typesHtml = pokemon.types.map((type, index) => {
             return `<span class="type-badge" style="background-color: ${getTypeColor(type)}">${pokemon.typeNames[index]}</span>`;
@@ -218,8 +257,13 @@ function renderGrid(pokemons) {
     });
 }
 
-// Open Modal
-function openModal(pokemon) {
+// Show Detail View
+function showDetail(pokemon) {
+    // Update URL
+    const url = new URL(window.location);
+    url.searchParams.set('id', pokemon.id);
+    window.history.pushState({}, '', url);
+
     const typesHtml = pokemon.types.map((type, index) => {
         return `<span class="type-badge" style="background-color: ${getTypeColor(type)}; font-size: 1rem; padding: 5px 15px;">${pokemon.typeNames[index]}</span>`;
     }).join(' ');
@@ -234,7 +278,7 @@ function openModal(pokemon) {
             const evoPoke = pokemonData.find(p => p.id === evoId);
             if (evoPoke) {
                 evoHtml += `
-                    <div style="cursor: pointer; text-align: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="openModalById('${evoPoke.id}')">
+                    <div style="cursor: pointer; text-align: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="openDetailById('${evoPoke.id}')">
                         <div style="width: 80px; height: 80px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 0 auto 5px;">
                             <img src="${evoPoke.image}" style="width: 60px; height: 60px; object-fit: contain;">
                         </div>
@@ -246,85 +290,87 @@ function openModal(pokemon) {
         evoHtml += '</div></div>';
     }
 
-    modalBody.innerHTML = `
-        <div class="modal-header-strip">
-            <div class="header-left">
-                <span class="detail-id">No.${pokemon.id}</span>
-                <h2 class="detail-name">${pokemon.name}</h2>
-                <span class="detail-category">${pokemon.classification}</span>
-            </div>
-            <div class="header-right">
-                <div class="types">
-                    ${typesHtml}
+    detailContent.innerHTML = `
+        <div class="detail-card">
+            <div class="modal-header-strip">
+                <div class="header-left">
+                    <span class="detail-id">No.${pokemon.id}</span>
+                    <h2 class="detail-name">${pokemon.name}</h2>
+                    <span class="detail-category">${pokemon.classification}</span>
                 </div>
-                <!-- Author moved here -->
-                <div style="margin-top: 5px; text-align: right; font-size: 0.8rem; color: #888;">
-                    作者: <strong>${pokemon.author}</strong>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-content-split">
-            <div class="detail-visual-section">
-                <!-- Background Circle Decoration -->
-                <div class="visual-bg-circle"></div>
-                <img src="${pokemon.image}" alt="${pokemon.name}" class="detail-img-large">
-            </div>
-            
-            <div class="detail-data-section">
-                <div class="description-box">
-                    <p>${pokemon.description}</p>
-                </div>
-
-                <div class="stats-section">
-                    <div class="section-title">種族値</div>
-                    ${statsHtml}
-                </div>
-
-                <!-- Ability and Move in a grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                    <div>
-                        <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">特性</div>
-                        <div class="ability-box-compact">
-                            <div class="ability-name">【${pokemon.abilityName}】</div>
-                            <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.abilityDesc}</div>
-                        </div>
+                <div class="header-right">
+                    <div class="types">
+                        ${typesHtml}
                     </div>
-                    <div>
-                        <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">専用技</div>
-                        <div class="ability-box-compact" style="background: #fff8f8; border-color: #ffecec;">
-                            <div class="ability-name" style="color: ${getTypeColor(pokemon.moveType)}">【${pokemon.moveName}】</div>
-                            <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.moveDesc}</div>
-                        </div>
+                    <div style="margin-top: 5px; text-align: right; font-size: 0.8rem; color: #888;">
+                        作者: <strong>${pokemon.author}</strong>
                     </div>
+                </div>
+            </div>
+
+            <div class="modal-content-split">
+                <div class="detail-visual-section">
+                    <div class="visual-bg-circle"></div>
+                    <img src="${pokemon.image}" alt="${pokemon.name}" class="detail-img-large">
                 </div>
                 
-                <div class="eco-box">
-                    <div style="font-weight: bold; margin-bottom: 5px; color: #555;">生態・能力</div>
-                    <p style="font-size: 0.9rem; margin: 0; color: #666;">${pokemon.ecology}</p>
-                    <div style="margin-top: 8px; font-size: 0.85rem; color: #888;">Note: ${pokemon.extraInfo}</div>
-                </div>
+                <div class="detail-data-section">
+                    <div class="description-box">
+                        <p>${pokemon.description}</p>
+                    </div>
 
-                ${evoHtml}
+                    <div class="stats-section">
+                        <div class="section-title">種族値</div>
+                        ${statsHtml}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                        <div>
+                            <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">特性</div>
+                            <div class="ability-box-compact">
+                                <div class="ability-name">【${pokemon.abilityName}】</div>
+                                <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.abilityDesc}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="section-title" style="font-size: 1rem; margin-bottom: 8px;">専用技</div>
+                            <div class="ability-box-compact" style="background: #fff8f8; border-color: #ffecec;">
+                                <div class="ability-name" style="color: ${getTypeColor(pokemon.moveType)}">【${pokemon.moveName}】</div>
+                                <div style="font-size: 0.85rem; margin-top: 3px;">${pokemon.moveDesc}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="eco-box">
+                        <div style="font-weight: bold; margin-bottom: 5px; color: #555;">生態・能力</div>
+                        <p style="font-size: 0.9rem; margin: 0; color: #666;">${pokemon.ecology}</p>
+                        <div style="margin-top: 8px; font-size: 0.85rem; color: #888;">Note: ${pokemon.extraInfo}</div>
+                    </div>
+
+                    ${evoHtml}
+                </div>
             </div>
         </div>
     `;
-    modal.classList.add('visible');
-    modal.classList.remove('hidden');
+
+    // View Switching
+    viewGrid.classList.add('hidden');
+    viewDetail.classList.remove('hidden');
+    window.scrollTo(0, 0);
 }
 
-// Close Modal
-closeBtn.onclick = () => {
-    modal.classList.remove('visible');
-    setTimeout(() => modal.classList.add('hidden'), 300);
-};
+// Go Back to Grid
+function hideDetail() {
+    viewDetail.classList.add('hidden');
+    viewGrid.classList.remove('hidden');
 
-window.onclick = (event) => {
-    if (event.target == modal) {
-        modal.classList.remove('visible');
-        setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-};
+    // Clear URL param
+    const url = new URL(window.location);
+    url.searchParams.delete('id');
+    window.history.pushState({}, '', url);
+}
+
+backBtn.onclick = hideDetail;
 
 // Search Filter
 searchInput.addEventListener('input', (e) => {
@@ -337,11 +383,32 @@ searchInput.addEventListener('input', (e) => {
     renderGrid(filtered);
 });
 
-// Helper to open modal by ID (for evolution links)
-window.openModalById = function (id) {
+// Helper for evolution links
+window.openDetailById = function (id) {
     const poke = pokemonData.find(p => p.id === id);
-    if (poke) openModal(poke);
+    if (poke) showDetail(poke);
 };
 
-// Initial Render
+// Initial Render & URL Check
 renderGrid(pokemonData);
+
+// Check URL params for deep linking
+const urlParams = new URLSearchParams(window.location.search);
+const initialId = urlParams.get('id');
+if (initialId) {
+    const poke = pokemonData.find(p => p.id === initialId);
+    if (poke) showDetail(poke);
+}
+
+// Handle browser back button
+window.onpopstate = () => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+        const poke = pokemonData.find(p => p.id === id);
+        if (poke) showDetail(poke);
+    } else {
+        viewDetail.classList.add('hidden');
+        viewGrid.classList.remove('hidden');
+    }
+};
