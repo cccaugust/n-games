@@ -141,7 +141,8 @@ body {
 }
 
 .card-image-container {
-    background: #f0f0f0;
+    background: #fff;
+    /* Changed from #f0f0f0 to match user request */
     padding: 30px;
     display: flex;
     justify-content: center;
@@ -163,6 +164,8 @@ body {
 
 .card-info {
     padding: 20px;
+    background: #fff;
+    /* Explicitly white */
 }
 
 .card-id {
@@ -269,6 +272,8 @@ body {
     align-items: center;
     padding: 40px;
     position: relative;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
 }
 
 /* Diagonal background pattern for detail view */
@@ -281,6 +286,8 @@ body {
     bottom: 0;
     background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0, 0, 0, 0.03) 10px, rgba(0, 0, 0, 0.03) 20px);
     pointer-events: none;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
 }
 
 .detail-img {
@@ -382,4 +389,62 @@ body {
 .ability-name {
     font-weight: bold;
     color: var(--primary-color);
+}
+
+/* Stats Visualization */
+.stats-grid {
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.stat-label {
+    width: 60px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #555;
+    text-align: right;
+    margin-right: 15px;
+}
+
+.stat-bar-container {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+}
+
+.stat-point {
+    width: 8px;
+    /* Slightly wider */
+    height: 15px;
+    background-color: #eee;
+    border-radius: 2px;
+}
+
+.stat-point.filled {
+    background-color: #FFCC00;
+    /* Yellow-Orange */
+}
+
+/* Author Tag */
+.author-tag {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    margin-top: 5px;
 }

@@ -19,7 +19,9 @@ const pokemonData = [
         moveName: 'ポータルバースト',
         moveType: 'psychic',
         moveDesc: 'タイプ：エスパー / 威力：90 / 命中：100<br>空間の輪から攻撃する。相手の「まもる」「みきり」を貫通してダメージを与える。',
-        extraInfo: '古代の壁画には、飢饉の際に別次元から食料を運び込み、人々を救った「光の使者」として描かれている。'
+        extraInfo: '古代の壁画には、飢饉の際に別次元から食料を運び込み、人々を救った「光の使者」として描かれている。',
+        author: 'TEPPEI',
+        stats: { hp: 100, attack: 70, defense: 80, spAtk: 130, spDef: 110, speed: 110 }
     },
     {
         id: '0002',
@@ -35,7 +37,9 @@ const pokemonData = [
         moveName: '五戒の神鎖',
         moveType: 'steel',
         moveDesc: 'タイプ：はがね / 威力：25×5回 / 命中：90<br>5本の剣で連続攻撃し、相手を「バインド」状態にして交代できなくさせる。',
-        extraInfo: 'かつて、このポケモンを無理に従えようとした軍隊が、一夜にして影も形もなく消え去ったという伝説が残っている。'
+        extraInfo: 'かつて、このポケモンを無理に従えようとした軍隊が、一夜にして影も形もなく消え去ったという伝説が残っている。',
+        author: 'TEPPEI',
+        stats: { hp: 85, attack: 140, defense: 100, spAtk: 60, spDef: 90, speed: 95 }
     },
     {
         id: '0003',
@@ -51,7 +55,9 @@ const pokemonData = [
         moveName: 'パパラッチ・ドローン',
         moveType: 'electric',
         moveDesc: 'タイプ：でんき / 威力：80 / 命中：100<br>攻撃後、相手が次に使う技を3ターンの間「封印」状態にする。',
-        extraInfo: '自然写真家たちの憧れの的。このポケモンのドローンが撮影した写真は、数億円の価値がつくと言われている。'
+        extraInfo: '自然写真家たちの憧れの的。このポケモンのドローンが撮影した写真は、数億円の価値がつくと言われている。',
+        author: 'TEPPEI',
+        stats: { hp: 120, attack: 75, defense: 110, spAtk: 95, spDef: 100, speed: 60 }
     }
 ];
 
@@ -87,6 +93,43 @@ function getTypeColor(type) {
     return colors[type] || '#777';
 }
 
+// Helper: Render Stats Bars
+function renderStats(stats) {
+    const statLabels = {
+        hp: 'HP',
+        attack: 'こうげき',
+        defense: 'ぼうぎょ',
+        spAtk: 'とくこう',
+        spDef: 'とくぼう',
+        speed: 'すばやさ'
+    };
+
+    let html = '<div class="stats-grid">';
+
+    for (const [key, label] of Object.entries(statLabels)) {
+        const value = stats[key];
+        // Scale 0-150 to 1-15 bars
+        const filledCount = Math.min(15, Math.max(1, Math.round(value / 10)));
+
+        let barsHtml = '';
+        for (let i = 0; i < 15; i++) {
+            barsHtml += `<div class="stat-point ${i < filledCount ? 'filled' : ''}"></div>`;
+        }
+
+        html += `
+            <div class="stat-row">
+                <div class="stat-label">${label}</div>
+                <div class="stat-bar-container">
+                    ${barsHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    return html;
+}
+
 // Render Grid
 function renderGrid(pokemons) {
     grid.innerHTML = '';
@@ -109,6 +152,7 @@ function renderGrid(pokemons) {
                 <div class="types">
                     ${typesHtml}
                 </div>
+                <div class="author-tag">作者: ${pokemon.author}</div>
             </div>
         `;
         grid.appendChild(card);
@@ -120,6 +164,8 @@ function openModal(pokemon) {
     const typesHtml = pokemon.types.map((type, index) => {
         return `<span class="type-badge" style="background-color: ${getTypeColor(type)}; font-size: 1rem; padding: 5px 15px;">${pokemon.typeNames[index]}</span>`;
     }).join(' ');
+
+    const statsHtml = renderStats(pokemon.stats);
 
     modalBody.innerHTML = `
         <div class="detail-image-section">
@@ -134,10 +180,18 @@ function openModal(pokemon) {
             <div class="types" style="margin-bottom: 30px;">
                 ${typesHtml}
             </div>
+            <div style="margin-bottom: 20px; font-size: 0.9rem; color: #666;">
+                 作者: <strong>${pokemon.author}</strong>
+            </div>
 
             <div class="description-box">
                 <h3>図鑑説明</h3>
                 <p>${pokemon.description}</p>
+            </div>
+
+            <div class="stats-section">
+                <div class="section-title">種族値</div>
+                ${statsHtml}
             </div>
 
              <div class="description-box" style="border-left-color: #7AC74C; background: #fdfdfd;">
@@ -185,7 +239,8 @@ searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase();
     const filtered = pokemonData.filter(p =>
         p.name.toLowerCase().includes(term) ||
-        p.id.includes(term)
+        p.id.includes(term) ||
+        p.author.toLowerCase().includes(term)
     );
     renderGrid(filtered);
 });
