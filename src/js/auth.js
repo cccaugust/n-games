@@ -2,7 +2,7 @@ import { navigateTo } from './config.js';
 
 export const FAMILY_AUTH_KEY = 'n-games-family-auth';
 export const FAMILY_ID = 'nakao';
-export const FAMILY_PIN = '1234';
+export const FAMILY_PIN = '0818';
 
 export const PLAYER_KEY = 'n-games-player';
 

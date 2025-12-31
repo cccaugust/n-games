@@ -8,40 +8,80 @@
     <link rel="stylesheet" href="../../style.css">
     <style>
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
+            max-width: 360px;
+            margin: 50px auto;
             text-align: center;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+        /* PIN Display */
+        .pin-display {
+            font-size: 2.5rem;
+            letter-spacing: 0.5rem;
+            margin-bottom: 30px;
+            background: #f1f2f6;
+            border-radius: 12px;
+            padding: 15px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3436;
+            font-family: monospace;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+        .pin-placeholder {
+            color: #b2bec3;
+            font-size: 1.5rem;
+            letter-spacing: normal;
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
+        /* Keypad Grid */
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
         }
 
-        input:focus {
-            border-color: var(--primary-color);
-            outline: none;
+        .key-btn {
+            background: white;
+            border: 2px solid #dfe6e9;
+            border-radius: 50%;
+            height: 80px;
+            width: 80px;
+            margin: 0 auto;
+            font-size: 2rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #dfe6e9;
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .key-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+            background: #f8f9fa;
+        }
+
+        .key-btn.action {
+            font-size: 1.2rem;
+            color: #636e72;
+        }
+
+        .key-btn.clear {
+            color: #e74c3c;
         }
 
         .error-msg {
             color: #e74c3c;
-            margin-top: 10px;
-            display: none;
+            margin-top: 20px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
     </style>
 </head>
@@ -49,21 +89,28 @@
 <body>
     <div class="container">
         <div class="card login-container">
-            <h2>👋 N-Games へようこそ！</h2>
-            <p style="margin-bottom: 24px; color: var(--text-light);">おなまえとあいことばを入れてね</p>
+            <h2 style="margin-bottom: 20px;">あいことばを入れてね 🔑</h2>
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="familyId">おなまえ (ID)</label>
-                    <input type="text" id="familyId" placeholder="例: nakao" autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label for="pin">あいことば (4つのすうじ)</label>
-                    <input type="password" id="pin" placeholder="****" maxlength="4" autocomplete="current-password">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%">しゅっぱつ！ 🚀</button>
-                <p class="error-msg" id="errorMsg">あれ？ おなまえかあいことばがちがうみたい…</p>
-            </form>
+            <div class="pin-display" id="pinDisplay">
+                <span class="pin-placeholder">4つのすうじ</span>
+            </div>
+
+            <div class="keypad">
+                <div class="key-btn" data-val="1">1</div>
+                <div class="key-btn" data-val="2">2</div>
+                <div class="key-btn" data-val="3">3</div>
+                <div class="key-btn" data-val="4">4</div>
+                <div class="key-btn" data-val="5">5</div>
+                <div class="key-btn" data-val="6">6</div>
+                <div class="key-btn" data-val="7">7</div>
+                <div class="key-btn" data-val="8">8</div>
+                <div class="key-btn" data-val="9">9</div>
+                <div class="key-btn clear" id="clearBtn">C</div>
+                <div class="key-btn" data-val="0">0</div>
+                <div class="key-btn action" id="backBtn">⬅</div>
+            </div>
+
+            <p class="error-msg" id="errorMsg">ちがうみたい…</p>
         </div>
     </div>
     <script type="module" src="./login.js"></script>

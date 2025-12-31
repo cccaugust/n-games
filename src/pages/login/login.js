@@ -6,22 +6,49 @@ if (isFamilyLoggedIn()) {
     navigateTo('/pages/select-player/select-player.html');
 }
 
-const form = document.getElementById('loginForm');
+const pinDisplay = document.getElementById('pinDisplay');
 const errorMsg = document.getElementById('errorMsg');
+const keys = document.querySelectorAll('.key-btn[data-val]');
+const clearBtn = document.getElementById('clearBtn');
+const backBtn = document.getElementById('backBtn');
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
+let currentPin = '';
 
-    const id = document.getElementById('familyId').value.trim();
-    const pin = document.getElementById('pin').value.trim();
+function updateDisplay() {
+    if (currentPin.length === 0) {
+        pinDisplay.innerHTML = '<span class="pin-placeholder">4つのすうじ</span>';
+    } else {
+        // Show dots instead of numbers
+        pinDisplay.textContent = '•'.repeat(currentPin.length);
+    }
+}
 
-    if (loginFamily(id, pin)) {
-        // Success
+function handleInput(val) {
+    if (currentPin.length < 4) {
+        currentPin += val;
+        updateDisplay();
+        errorMsg.style.opacity = '0';
+
+        if (currentPin.length === 4) {
+            // Auto submit
+            setTimeout(attemptLogin, 300);
+        }
+    }
+}
+
+function attemptLogin() {
+    // Hardcoded family ID 'nakao' since we removed the input
+    // The user said "0818 de haireru youni" (enter with 0818)
+    if (loginFamily('nakao', currentPin)) {
+        pinDisplay.style.color = '#00b894';
         navigateTo('/pages/select-player/select-player.html');
     } else {
-        // Fail
-        errorMsg.style.display = 'block';
-        // Shake animation
+        // Error
+        errorMsg.style.opacity = '1';
+        currentPin = '';
+        updateDisplay();
+
+        // Shake
         const card = document.querySelector('.card');
         card.animate([
             { transform: 'translateX(0)' },
@@ -30,4 +57,20 @@ form.addEventListener('submit', (e) => {
             { transform: 'translateX(0)' }
         ], { duration: 300 });
     }
+}
+
+keys.forEach(key => {
+    key.addEventListener('click', () => {
+        handleInput(key.dataset.val);
+    });
+});
+
+clearBtn.addEventListener('click', () => {
+    currentPin = '';
+    updateDisplay();
+});
+
+backBtn.addEventListener('click', () => {
+    currentPin = currentPin.slice(0, -1);
+    updateDisplay();
 });
