@@ -55,6 +55,7 @@ canvas {
     text-align: center;
     background: -webkit-linear-gradient(#f1c40f, #e67e22);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 10px rgba(230, 126, 34, 0.5));
     animation: pulse 2s infinite;

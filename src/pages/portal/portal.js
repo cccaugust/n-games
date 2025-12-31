@@ -89,6 +89,14 @@ const games = [
     color: '#fab1a0',
     icon: '🎨',
     link: '/pages/mon-paint/'
+  },
+  {
+    id: 'mon-survivor',
+    title: 'モンスターサバイバー',
+    desc: '大量の敵をなぎ倒せ！',
+    color: '#ff4757',
+    icon: '⚔️',
+    link: '/pages/mon-survivor/'
   }
 ];
 
