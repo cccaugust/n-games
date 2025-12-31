@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>さんすうクイズ | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .game-container {
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .question {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 40px;
+            font-family: monospace;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .option-btn {
+            background: #f1f2f6;
+            border: none;
+            padding: 20px;
+            font-size: 2rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.1s;
+            box-shadow: 0 4px 0 #dfe6e9;
+        }
+
+        .option-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .option-btn.correct {
+            background: #55efc4;
+            color: white;
+            box-shadow: 0 4px 0 #00b894;
+        }
+
+        .option-btn.wrong {
+            background: #ff7675;
+            color: white;
+            box-shadow: 0 4px 0 #d63031;
+        }
+
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="../../pages/portal/portal.html"
+            style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
+            もどる</a>
+
+        <div class="game-container">
+            <div class="status-bar">
+                <div>のこり: <span id="time">60</span>びょう</div>
+                <div>せいかい: <span id="score">0</span></div>
+            </div>
+
+            <div id="question" class="question">? + ? = ?</div>
+
+            <div class="options" id="options">
+                <button class="option-btn">?</button>
+                <button class="option-btn">?</button>
+                <button class="option-btn">?</button>
+                <button class="option-btn">?</button>
+            </div>
+
+            <!-- Start/Result Overlay -->
+            <div class="start-overlay" id="overlay">
+                <h1 style="color: var(--primary-color);">さんすうクイズ ✏️</h1>
+                <p style="margin: 20px 0;">1ぷんかん で たくさん<br>せいかい しよう！</p>
+                <button class="btn-primary" id="startBtn">スタート！</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+</body>
+
+</html>

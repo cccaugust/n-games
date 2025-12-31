@@ -33,6 +33,30 @@ const games = [
     color: '#a29bfe',
     icon: '🃏',
     link: '/games/memory-match/'
+  },
+  {
+    id: 'snake',
+    title: 'はらぺこヘビ',
+    desc: 'なが〜〜〜くなるよ',
+    color: '#81ecec',
+    icon: '🐍',
+    link: '/games/snake/'
+  },
+  {
+    id: 'brick-breaker',
+    title: 'ブロックくずし',
+    desc: 'ボールをおとすな！',
+    color: '#ffeaa7',
+    icon: '🧱',
+    link: '/games/brick-breaker/'
+  },
+  {
+    id: 'math-quiz',
+    title: 'さんすうクイズ',
+    desc: 'めざせ！けいさんマスター',
+    color: '#55efc4',
+    icon: '✏️',
+    link: '/games/math-quiz/'
   }
 ];
 

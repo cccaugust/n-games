@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>はらぺこヘビ | N-Games</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 20px auto;
+            position: relative;
+        }
+
+        canvas {
+            background: #fdcb6e;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        .score-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #2d3436;
+            font-size: 1.2rem;
+            font-weight: bold;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        .start-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            z-index: 10;
+        }
+
+        .controls {
+            display: none;
+            /* Mobile only usually */
+            margin-top: 10px;
+            text-align: center;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                display: flex;
+                justify-content: center;
+            }
+
+            .control-btn {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                font-size: 1.5rem;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="../../pages/portal/portal.html"
+            style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
+            もどる</a>
+
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="score-overlay">🍎: <span id="score">0</span></div>
+
+            <div class="start-overlay" id="overlay">
+                <h1>はらぺこヘビ 🐍</h1>
+                <p>リンゴをたくさんたべてね！</p>
+                <p>かべや自分にぶつからないように注意！</p>
+                <button class="btn-primary" id="startBtn" style="margin-top: 20px;">スタート！</button>
+            </div>
+
+            <!-- Mobile D-Pad (Simple) -->
+            <div class="controls" id="mobileControls" style="display: none;">
+                <!-- Hidden by default, enable via JS if touch -->
+                <!-- Actually swipe is better for snake, but let's implement swipe in JS -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+</body>
+
+</html>
