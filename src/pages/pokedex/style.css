@@ -1,29 +1,33 @@
 :root {
-    --bg-color: #f7f7f7;
-    --card-bg: #ffffff;
-    --text-main: #333333;
-    --text-sub: #666666;
-    --primary-color: #e3350d;
-    /* Pokemon Red */
-    --accent-blue: #30a7d7;
-    --type-normal: #A8A77A;
-    --type-fire: #EE8130;
-    --type-water: #6390F0;
-    --type-electric: #F7D02C;
-    --type-grass: #7AC74C;
-    --type-ice: #96D9D6;
-    --type-fighting: #C22E28;
-    --type-poison: #A33EA1;
-    --type-ground: #E2BF65;
-    --type-flying: #A98FF3;
-    --type-psychic: #F95587;
-    --type-bug: #A6B91A;
-    --type-rock: #B6A136;
-    --type-ghost: #735797;
-    --type-dragon: #6F35FC;
-    --type-dark: #705746;
-    --type-steel: #B7B7CE;
-    --type-fairy: #D685AD;
+    /* Tech Dark Theme */
+    --bg-color: #0d1218;
+    --card-bg: rgba(20, 30, 45, 0.7);
+    --text-main: #e0f2ff;
+    --text-sub: #8dbcd8;
+    --primary-color: #00d2ff;
+    /* Cyan Neon */
+    --accent-blue: #0088cc;
+    --glow-color: rgba(0, 210, 255, 0.4);
+
+    /* Types (Neon versions) */
+    --type-normal: #b8b8d0;
+    --type-fire: #ff6040;
+    --type-water: #40a0ff;
+    --type-electric: #ffe040;
+    --type-grass: #60e060;
+    --type-ice: #80ffff;
+    --type-fighting: #ff4050;
+    --type-poison: #d060e0;
+    --type-ground: #e0b060;
+    --type-flying: #a0a0ff;
+    --type-psychic: #ff60a0;
+    --type-bug: #b0d040;
+    --type-rock: #d0c070;
+    --type-ghost: #9080e0;
+    --type-dragon: #6060ff;
+    --type-dark: #706060;
+    --type-steel: #b0b0d0;
+    --type-fairy: #ff90c0;
 }
 
 body {
