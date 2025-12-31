@@ -82,7 +82,7 @@ function showResult() {
     <h1>おしまい！</h1>
     <p style="font-size: 2rem;">スコア: ${score}</p>
     <button class="btn-primary" onclick="window.location.reload()">もういっかい</button>
-    <a href="/pages/portal/portal.html" style="color: white; margin-top: 20px; display: block;">&larr; ほかのゲーム</a>
+    <a href="../../pages/portal/portal.html" style="color: white; margin-top: 20px; display: block;">&larr; ほかのゲーム</a>
   `;
     overlay.style.display = 'flex';
 }

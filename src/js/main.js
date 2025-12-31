@@ -1,17 +1,18 @@
 // Main entry point logic
 import { isFamilyLoggedIn, getCurrentPlayer } from './auth.js';
+import { replaceLocation } from './config.js';
 
 // Simple router check at root
-// Note: In dev, custom pages are at /pages/...
-// In prod, if using MPA, they are true HTML files.
+// Note: In dev, custom pages are at /src/pages/... or /pages/... depending on vite root.
+// In prod, files are flattened or kept in structure.
 
 function init() {
     if (!isFamilyLoggedIn()) {
-        window.location.replace('/pages/login/login.html');
+        replaceLocation('/pages/login/login.html');
     } else if (!getCurrentPlayer()) {
-        window.location.replace('/pages/select-player/select-player.html');
+        replaceLocation('/pages/select-player/select-player.html');
     } else {
-        window.location.replace('/pages/portal/portal.html');
+        replaceLocation('/pages/portal/portal.html');
     }
 }
 

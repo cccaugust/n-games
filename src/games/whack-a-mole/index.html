@@ -94,7 +94,7 @@
 <body>
     <div class="container">
         <!-- Back Button -->
-        <a href="/pages/portal/portal.html"
+        <a href="../../pages/portal/portal.html"
             style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
             もどる</a>
 
@@ -140,6 +140,10 @@
         <h1>モグラたたき！</h1>
         <p>ひょっこり出てくるモグラを叩こう！</p>
         <button class="btn-primary" id="startBtn" style="margin-top: 20px;">スタート！</button>
+    </div>
+
+    <div class="start-overlay" id="resultOverlay" style="display: none;">
+        <!-- Need to make sure game.js targets this if it exists, but game.js creates innerHTML of overlay, so this is fine -->
     </div>
 
     <script type="module" src="./game.js"></script>

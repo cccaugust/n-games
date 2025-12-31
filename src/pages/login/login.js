@@ -1,8 +1,9 @@
 import { loginFamily, isFamilyLoggedIn } from '../../js/auth.js';
+import { navigateTo } from '../../js/config.js';
 
 // Redirect if already logged in
 if (isFamilyLoggedIn()) {
-    window.location.href = '/pages/select-player/select-player.html';
+    navigateTo('/pages/select-player/select-player.html');
 }
 
 const form = document.getElementById('loginForm');
@@ -16,7 +17,7 @@ form.addEventListener('submit', (e) => {
 
     if (loginFamily(id, pin)) {
         // Success
-        window.location.href = '/pages/select-player/select-player.html';
+        navigateTo('/pages/select-player/select-player.html');
     } else {
         // Fail
         errorMsg.style.display = 'block';
