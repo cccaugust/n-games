@@ -4,6 +4,7 @@ import godangiruImg from './assets/godangiru.png';
 import cameramanImg from './assets/cameraman.png';
 import kamasaurusImg from './assets/kamasaurus.png';
 import greatmaiteshImg from './assets/greatmaitesh.png';
+import megaGreatmaiteshImg from './assets/mega_greatmaitesh.png';
 
 // Pokemon Data
 const pokemonData = [
@@ -95,7 +96,27 @@ const pokemonData = [
         moveDesc: 'タイプ：はがね / 威力：70 / 命中：100<br>体の一部を分解して相手にまとわりつかせる。与えたダメージの半分のHPを回復する。',
         extraInfo: '「グレート」という名前は、その小さな体に秘められた無限の可能性に畏敬の念を込めて博士が名付けた。',
         author: 'TEPPEI',
-        stats: { hp: 150, attack: 50, defense: 120, spAtk: 60, spDef: 120, speed: 30 }
+        stats: { hp: 150, attack: 50, defense: 120, spAtk: 60, spDef: 120, speed: 30 },
+        evolutions: ['0006']
+    },
+    {
+        id: '0006',
+        name: 'メガグレートマイテシ',
+        classification: 'フルメタルシャークポケモン',
+        types: ['water', 'electric'],
+        typeNames: ['みず', 'でんき'],
+        image: megaGreatmaiteshImg,
+        description: 'メガシンカにより、体内のナノマシンが暴走寸前まで活性化した姿。全身から高電圧のプラズマを放ちながら、音速を超えて海中を疾走する。',
+        ecology: '背ビレが赤く発光するのは、エネルギー出力が限界を超えている証拠。周囲の海水は瞬時に沸騰し、通り過ぎた後には巨大な蒸気の柱が立ち上る。制御装置が壊れると、自爆に近いエネルギー放出を行う危険性がある。',
+        abilityName: 'プラズマジェット',
+        abilityDesc: 'でんきタイプの技の威力が1.5倍になる。さらに、自分の素早さが1段階上がる。',
+        moveName: 'ギガボルト・クラッシュ',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：120 / 命中：85<br>全身を雷のようなエネルギー体に変えて突進する。30%の確率で相手をマヒさせる。',
+        extraInfo: 'あまりの速さに、レーダーですら「雷のようなノイズ」としか認識できないという。',
+        author: 'TEPPEI',
+        stats: { hp: 150, attack: 80, defense: 140, spAtk: 110, spDef: 140, speed: 100 },
+        evolutions: ['0005']
     }
 ];
 
@@ -205,6 +226,24 @@ function openModal(pokemon) {
 
     const statsHtml = renderStats(pokemon.stats);
 
+    // Evolution Links
+    let evoHtml = '';
+    if (pokemon.evolutions && pokemon.evolutions.length > 0) {
+        evoHtml = '<div class="stats-section"><div class="section-title">進化・関連ポケモン</div><div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px;">';
+        pokemon.evolutions.forEach(evoId => {
+            const evoPoke = pokemonData.find(p => p.id === evoId);
+            if (evoPoke) {
+                evoHtml += `
+                    <div style="cursor: pointer; text-align: center; min-width: 100px;" onclick="openModalById('${evoPoke.id}')">
+                        <img src="${evoPoke.image}" style="width: 80px; height: 80px; object-fit: contain; border-radius: 50%; background: #f0f0f0; padding: 5px;">
+                        <div style="font-size: 0.8rem; margin-top: 5px; font-weight: bold;">${evoPoke.name}</div>
+                    </div>
+                `;
+            }
+        });
+        evoHtml += '</div></div>';
+    }
+
     modalBody.innerHTML = `
         <div class="detail-image-section">
             <img src="${pokemon.image}" alt="${pokemon.name}" class="detail-img">
@@ -226,6 +265,8 @@ function openModal(pokemon) {
                 <h3>図鑑説明</h3>
                 <p>${pokemon.description}</p>
             </div>
+
+            ${evoHtml}
 
             <div class="stats-section">
                 <div class="section-title">種族値</div>
@@ -282,6 +323,12 @@ searchInput.addEventListener('input', (e) => {
     );
     renderGrid(filtered);
 });
+
+// Helper to open modal by ID (for evolution links)
+window.openModalById = function (id) {
+    const poke = pokemonData.find(p => p.id === id);
+    if (poke) openModal(poke);
+};
 
 // Initial Render
 renderGrid(pokemonData);
