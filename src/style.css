@@ -29,7 +29,9 @@ body {
   flex-direction: column;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 700;
   color: var(--primary-color);
 }
@@ -49,7 +51,8 @@ button {
   border-radius: var(--border-radius);
   font-size: 1.1rem;
   font-weight: bold;
-  box-shadow: 0 4px 0 #4834d4; /* 3D effect */
+  box-shadow: 0 4px 0 #4834d4;
+  /* 3D effect */
 }
 
 .btn-primary:active {
@@ -79,14 +82,22 @@ button {
 }
 
 /* Utilities */
-.text-center { text-align: center; }
-.mt-4 { margin-top: 1rem; }
-.hidden { display: none !important; }
+.text-center {
+  text-align: center;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.hidden {
+  display: none !important;
+}
 
 /* Grid for Portal */
 .game-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-top: 20px;
 }
