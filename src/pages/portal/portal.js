@@ -4,7 +4,8 @@ import { resolvePath } from '../../js/config.js';
 requireAuth();
 
 const player = getCurrentPlayer();
-document.getElementById('playerName').textContent = player.name;
+// Assuming player object now has avatar since we updated selectPlayer to store full object
+document.getElementById('playerName').innerHTML = `<span style="font-size: 1.5rem; margin-right: 5px;">${player.avatar || '👤'}</span> ${player.name}`;
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
