@@ -1,4 +1,4 @@
-import { getCurrentPlayer, logout, requireAuth } from '../../js/auth.js';
+import { getCurrentPlayer, logout, switchPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
 
 requireAuth();
@@ -6,6 +6,7 @@ requireAuth();
 const player = getCurrentPlayer();
 document.getElementById('playerName').textContent = player.name;
 document.getElementById('logoutBtn').addEventListener('click', logout);
+document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {

@@ -2,17 +2,12 @@ import { selectPlayer, requireAuth } from '../../js/auth.js';
 import { navigateTo } from '../../js/config.js';
 import { supabase } from '../../js/supabaseClient.js';
 
-// Ensure family auth
 requireAuth();
 
 const playerGrid = document.getElementById('playerGrid');
-const newPlayerBtn = document.getElementById('newPlayerBtn');
-
-// Emojis for random avatar
 const AVATARS = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙'];
 
 async function fetchPlayers() {
-    // Show loading state if needed, or just wait
     const { data, error } = await supabase
         .from('players')
         .select('*')
@@ -20,7 +15,6 @@ async function fetchPlayers() {
 
     if (error) {
         console.error('Error fetching players:', error);
-        alert('プレイヤーの読み込みに失敗しました');
         return [];
     }
     return data;
@@ -32,67 +26,61 @@ async function addPlayer(name) {
         .from('players')
         .insert([{ name, avatar }]);
 
-    if (error) {
-        console.error('Error adding player:', error);
-        alert('追加できませんでした');
-    } else {
-        renderPlayers();
-    }
+    if (error) alert('追加できませんでした');
+    else renderPlayers();
+}
+
+async function updatePlayer(id, name, avatar) {
+    const { error } = await supabase
+        .from('players')
+        .update({ name, avatar })
+        .eq('id', id);
+
+    if (error) alert('更新できませんでした');
+    else renderPlayers();
 }
 
 async function deletePlayer(id, event) {
-    event.stopPropagation(); // Prevent card click
+    event.stopPropagation();
     if (!confirm('本当に削除しますか？')) return;
 
-    const { error } = await supabase
-        .from('players')
-        .delete()
-        .eq('id', id);
-
-    if (error) {
-        console.error('Error deleting player:', error);
-        alert('削除できませんでした');
-    } else {
-        renderPlayers();
-    }
+    const { error } = await supabase.from('players').delete().eq('id', id);
+    if (error) alert('削除できませんでした');
+    else renderPlayers();
 }
 
 async function renderPlayers() {
-    // Keep the "Add" button, remove others
-    // Actually simpler to clear all and append "Add" button again or just clear logic
-
     const players = await fetchPlayers();
-
-    // Clear grid
     playerGrid.innerHTML = '';
 
-    // Render players
     players.forEach(p => {
         const card = document.createElement('div');
         card.className = 'player-card';
         card.innerHTML = `
-      <div class="delete-btn" title="削除">×</div>
+      <div class="action-btn delete-btn" title="削除">×</div>
+      <div class="action-btn edit-btn" title="編集">✏️</div>
       <div class="avatar">${p.avatar}</div>
       <div class="name">${p.name}</div>
     `;
 
-        // Click card to select
-        card.onclick = () => choosePlayer(p);
+        card.onclick = (e) => {
+            // Prevent click if clicking buttons
+            if (e.target.classList.contains('action-btn')) return;
+            choosePlayer(p);
+        };
 
-        // Delete button
         const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.onclick = (e) => deletePlayer(p.id, e);
+
+        const editBtn = card.querySelector('.edit-btn');
+        editBtn.onclick = (e) => openEditModal(p, e);
 
         playerGrid.appendChild(card);
     });
 
-    // Append "Add New" button at the end
     const addBtn = document.createElement('div');
     addBtn.className = 'player-card add-btn';
-    addBtn.innerHTML = `
-    <div class="avatar">➕</div>
-    <div class="name">あたらしくつくる</div>
-  `;
+    addBtn.innerHTML = `<div class="avatar">➕</div><div class="name">あたらしくつくる</div>`;
     addBtn.onclick = handleAddClick;
     playerGrid.appendChild(addBtn);
 }
@@ -104,10 +92,27 @@ function choosePlayer(player) {
 
 function handleAddClick() {
     const name = prompt('新しいプレイヤーのなまえをおしえてね！');
-    if (name) {
-        addPlayer(name);
+    if (name) addPlayer(name);
+}
+
+// Edit Modal Logic
+function openEditModal(player, event) {
+    event.stopPropagation();
+    const newName = prompt('名前を変更:', player.name);
+    if (newName === null) return; // Cancelled
+
+    // Simple avatar cycle for now or prompt? 
+    // Let's implement a simple "Keep or Randomize" prompt or just random for now to keep it simple as requested "change".
+    // Better: Prompt for emoji?
+
+    let newAvatar = player.avatar;
+    if (confirm('アイコンも変更しますか？ (OKでランダムに変更)')) {
+        newAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+    }
+
+    if (newName !== player.name || newAvatar !== player.avatar) {
+        updatePlayer(player.id, newName || player.name, newAvatar);
     }
 }
 
-// Initial render
 renderPlayers();

@@ -34,6 +34,11 @@ export function logout() {
     navigateTo('/pages/login/login.html');
 }
 
+export function switchPlayer() {
+    localStorage.removeItem(PLAYER_KEY);
+    navigateTo('/pages/select-player/select-player.html');
+}
+
 export function requireAuth() {
     const isLoginPage = window.location.pathname.includes('/login.html');
     const isSelectPage = window.location.pathname.includes('/select-player.html');

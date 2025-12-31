@@ -44,30 +44,43 @@
             border-color: var(--secondary-color);
         }
 
-        .delete-btn {
+        .action-btn {
             position: absolute;
-            top: 10px;
-            right: 10px;
             width: 24px;
             height: 24px;
-            background: #ff7675;
-            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 10;
         }
 
-        .player-card:hover .delete-btn {
+        .player-card:hover .action-btn {
             opacity: 1;
         }
 
-        .delete-btn:hover {
-            background: #d63031;
+        .delete-btn {
+            top: 10px;
+            right: 10px;
+            background: #ff7675;
+            color: white;
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        .edit-btn {
+            top: 10px;
+            left: 10px;
+            background: #74b9ff;
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
             transform: scale(1.1);
+            cursor: pointer;
         }
 
         .avatar {
