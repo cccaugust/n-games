@@ -1,13 +1,18 @@
 // Imports for assets
-// Note: Changed to absolute paths from server root for browser compatibility without bundler
-const kaikefupotoriImg = 'assets/kaikefupotori.png';
-const godangiruImg = 'assets/godangiru.png';
-const cameramanImg = 'assets/cameraman.png';
-const kamasaurusImg = 'assets/kamasaurus.png';
-const greatmaiteshImg = 'assets/greatmaitesh.png';
-const megaGreatmaiteshImg = 'assets/mega_greatmaitesh.png';
-const bottlemanImg = 'assets/bottleman.png';
-const hebikingImg = 'assets/hebiking.png';
+import kaikefupotoriImg from '../pages/pokedex/assets/kaikefupotori.png';
+import godangiruImg from '../pages/pokedex/assets/godangiru.png';
+import cameramanImg from '../pages/pokedex/assets/cameraman.png';
+import kamasaurusImg from '../pages/pokedex/assets/kamasaurus.png';
+import greatmaiteshImg from '../pages/pokedex/assets/greatmaitesh.png';
+import megaGreatmaiteshImg from '../pages/pokedex/assets/mega_greatmaitesh.png';
+import bottlemanImg from '../pages/pokedex/assets/bottleman.png';
+import hebikingImg from '../pages/pokedex/assets/hebiking.png';
+import kawaboImg from '../pages/pokedex/assets/kawabo.png';
+import tamausoImg from '../pages/pokedex/assets/tamauso.png';
+import raijuusoImg from '../pages/pokedex/assets/raijuuso.png';
+import picochargeImg from '../pages/pokedex/assets/picocharge.png';
+import megahubImg from '../pages/pokedex/assets/megahub.png';
+import gigaoutletImg from '../pages/pokedex/assets/gigaoutlet.png';
 
 // Pokemon Data
 export const pokemonData = [
@@ -163,7 +168,7 @@ export const pokemonData = [
         classification: 'わんぱくウソポケモン',
         types: ['water'],
         typeNames: ['みず'],
-        image: 'assets/kawabo.png',
+        image: kawaboImg,
         description: '澄んだ川の上流に生息する、好奇心旺盛なカワウソのポケモン。お気に入りの小石を常に持ち歩いており、寝る時も決して離さない。',
         ecology: '泳ぎが得意で、尻尾をスクリューのように回転させて水中を高速移動する。額と頬にある青い房は、水中の酸素を取り込むエラのような役割を果たしているという説もある。',
         abilityName: 'すいすい',
@@ -182,7 +187,7 @@ export const pokemonData = [
         classification: 'ほうじゅポケモン',
         types: ['water'],
         typeNames: ['みず'],
-        image: 'assets/tamauso.png',
+        image: tamausoImg,
         description: '大切にしていた小石が、自身の魔力によって美しい宝珠へと変化した姿。宝珠から放たれる光は、迷った旅人を川岸へ導くと言われている。',
         ecology: 'ヒゲがアンテナのように伸び、周囲の水の動きを敏感に察知する。宝珠を胸に抱えて瞑想することで、精神を統一し、水のエネルギーを練り上げている。',
         abilityName: 'しめりけ',
@@ -201,7 +206,7 @@ export const pokemonData = [
         classification: 'らいめいジュウポケモン',
         types: ['water', 'electric'],
         typeNames: ['みず', 'でんき'],
-        image: 'assets/raijuuso.png',
+        image: raijuusoImg,
         description: 'タマウソの宝珠が雷のエネルギーを帯びて巨大化した。ヒゲから激しいスパークを放ちながら、雷雲を呼んで嵐を起こすことができる。',
         ecology: '怒ると宝珠が青白く発光し、周囲に高圧電流を撒き散らす。普段は穏やかだが、縄張りを荒らす者には容赦なく雷撃を浴びせる。その咆哮は雷鳴のように轟く。',
         abilityName: 'ちくでん',
@@ -220,7 +225,7 @@ export const pokemonData = [
         classification: 'じゅうでんポケモン',
         types: ['electric'],
         typeNames: ['でんき'],
-        image: 'assets/picocharge.png',
+        image: picochargeImg,
         description: '生まれたばかりの電気ポケモン。2本の触手をコンセントに差し込んでエネルギーを摂取する。満タンになると体のランプが青く光る。',
         ecology: '家庭の電化製品の裏側に隠れて暮らすことが多い。夜中にスマホが勝手に充電されていたら、それはピコチャージの仕業かもしれない。',
         abilityName: 'プラス',
@@ -239,7 +244,7 @@ export const pokemonData = [
         classification: 'ハブポケモン',
         types: ['electric', 'steel'],
         typeNames: ['でんき', 'はがね'],
-        image: 'assets/megahub.png',
+        image: megahubImg,
         description: '複数のケーブルを自在に操り、電気エネルギーを他のポケモンに分け与えることができる。仲間思いの性格で、群れのエネルギー司令塔。',
         ecology: '体内には大容量のバッテリーを内蔵している。戦闘時はケーブルをムチのように振るい、高圧電流を流し込んで敵を麻痺させる。',
         abilityName: 'バッテリー',
@@ -258,7 +263,7 @@ export const pokemonData = [
         classification: 'かふかポケモン',
         types: ['electric', 'steel'],
         typeNames: ['でんき', 'はがね'],
-        image: 'assets/gigaoutlet.png',
+        image: gigaoutletImg,
         description: '過剰な電気エネルギーで装甲が鋭利に変形した。全身から常に放電しており、不用意に近づくと黒焦げになる。制御不能のエネルギーの塊。',
         ecology: 'あまりに強大な電力を持つため、常に周囲の空間が磁場で歪んでいる。怒りでリミッターが外れると、周囲一帯を停電させるほどの電磁パルスを放つ。',
         abilityName: 'エレキメイカー',
