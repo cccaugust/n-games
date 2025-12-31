@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>モンスターサバイバー</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div id="ui-layer">
+            <!-- Header: XP, Level, time -->
+            <div class="top-bar">
+                <div class="level-badge">LV <span id="level-display">1</span></div>
+                <div class="xp-bar-container">
+                    <div id="xp-bar-fill" class="xp-bar-fill" style="width: 0%;"></div>
+                </div>
+                <div class="timer" id="timer-display">00:00</div>
+            </div>
+
+            <!-- Health Bar (Bottom center) -->
+            <div class="health-container">
+                <div class="health-bar">
+                    <div id="hp-bar-fill" class="hp-bar-fill" style="width: 100%;"></div>
+                </div>
+                <div class="hp-text"><span id="current-hp">100</span> / <span id="max-hp">100</span></div>
+            </div>
+
+            <!-- Joystick Zone (Mobile) -->
+            <div id="joystick-zone"></div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <h1 class="game-title">モンスター<br>サバイバー</h1>
+            <p class="subtitle">大量のポケモンをなぎ倒せ！</p>
+            <button id="start-btn" class="main-btn">START</button>
+            <a href="../../pages/portal/portal.html" class="portal-link">ポータルへ戻る</a>
+        </div>
+
+        <!-- Upgrade Screen (Modal) -->
+        <div id="upgrade-screen" class="screen hidden">
+            <h2>LEVEL UP!</h2>
+            <div id="upgrade-options" class="upgrade-grid">
+                <!-- Upgrade options injected here -->
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen hidden">
+            <h2>GAME OVER</h2>
+            <p>生き残った時間: <span id="final-time">00:00</span></p>
+            <p>倒した敵: <span id="kill-count">0</span></p>
+            <button id="retry-btn" class="main-btn">RETRY</button>
+            <a href="../../pages/portal/portal.html" class="portal-link">ポータルへ戻る</a>
+        </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+</body>
+
+</html>
