@@ -23,9 +23,9 @@ export function getCurrentPlayer() {
     return json ? JSON.parse(json) : null;
 }
 
-export function selectPlayer(name) {
-    const player = { name, lastActive: new Date().toISOString() };
-    localStorage.setItem(PLAYER_KEY, JSON.stringify(player));
+export function selectPlayer(player) {
+    const session = { ...player, lastActive: new Date().toISOString() };
+    localStorage.setItem(PLAYER_KEY, JSON.stringify(session));
 }
 
 export function logout() {
