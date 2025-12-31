@@ -57,6 +57,14 @@ const games = [
     color: '#55efc4',
     icon: '✏️',
     link: '/games/math-quiz/'
+  },
+  {
+    id: 'slime-adventure',
+    title: 'スライムの大冒険',
+    desc: 'ゴールをめざせ！',
+    color: '#81ecec',
+    icon: '🛡️',
+    link: '/games/slime-adventure/'
   }
 ];
 

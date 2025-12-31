@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スライムの大冒険 | N-Games</title>
+    <link rel="stylesheet" href="../../style.css">
+    <style>
+        body {
+            overflow: hidden;
+            touch-action: none;
+            background: #81ecec;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            max-width: 800px;
+            max-height: 450px;
+            margin: 20px auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: #fff;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            padding: 20px;
+        }
+
+        .score-box {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: auto;
+            z-index: 50;
+        }
+
+        .btn-control {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            user-select: none;
+        }
+
+        .btn-control:active {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="../../pages/portal/portal.html"
+            style="position:fixed; top:10px; left:10px; color: white; text-decoration: none; z-index: 200; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 8px;">&larr;
+            もどる</a>
+
+        <div class="game-container">
+            <canvas id="gameCanvas"></canvas>
+
+            <div class="ui-layer">
+                <div class="score-box">💎: <span id="scoreEl">0</span></div>
+            </div>
+
+            <div class="overlay" id="startOverlay">
+                <h1>スライムの大冒険 🛡️</h1>
+                <p>ゴリラをよけてゴールをめざせ！</p>
+                <div style="display:flex; gap:10px; margin: 20px 0; align-items: center;">
+                    <img src="./assets/player.png" width="40" style="object-fit:contain;">
+                    <span>vs</span>
+                    <img src="./assets/enemy.png" width="40" style="object-fit:contain;">
+                </div>
+                <button class="btn-primary" id="startBtn">スタート！</button>
+            </div>
+
+            <div class="overlay hidden" id="gameOverOverlay">
+                <h1 id="resultTitle">ゲームオーバー...</h1>
+                <p style="font-size: 2rem;">SCORE: <span id="finalScore">0</span></p>
+
+                <div
+                    style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 12px; margin: 15px 0; width: 90%; max-width: 400px; text-align: left;">
+                    <h3 style="text-align: center; margin-bottom: 10px;">🏆 ランキング</h3>
+                    <div id="rankingList"></div>
+                </div>
+
+                <button class="btn-primary" id="restartBtn">もういっかい</button>
+            </div>
+
+            <div class="controls" id="mobileControls">
+                <div style="display:flex; gap:10px;">
+                    <div class="btn-control" id="leftBtn">←</div>
+                    <div class="btn-control" id="rightBtn">→</div>
+                </div>
+                <div class="btn-control" id="jumpBtn">🦘</div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./game.js"></script>
+</body>
+
+</html>
