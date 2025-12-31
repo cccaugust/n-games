@@ -224,6 +224,8 @@ function openModal(pokemon) {
         return `<span class="type-badge" style="background-color: ${getTypeColor(type)}; font-size: 1rem; padding: 5px 15px;">${pokemon.typeNames[index]}</span>`;
     }).join(' ');
 
+    const statsHtml = renderStats(pokemon.stats);
+
     // Evolution Links
     let evoHtml = '';
     if (pokemon.evolutions && pokemon.evolutions.length > 0) {
