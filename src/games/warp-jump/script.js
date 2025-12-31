@@ -77,18 +77,17 @@ function spawnObstacle() {
 function update() {
     if (isGameOver) return;
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear canvas & Draw Sky
+    ctx.fillStyle = '#87CEEB'; // Sky blue
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // --- Draw Ground ---
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = '#654321'; // Darker brown ground
     ctx.fillRect(0, player.groundY, canvas.width, canvas.height - player.groundY);
-    ctx.beginPath();
-    ctx.moveTo(0, player.groundY);
-    ctx.lineTo(canvas.width, player.groundY);
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+
+    // Green grass top
+    ctx.fillStyle = '#4CAF50';
+    ctx.fillRect(0, player.groundY, canvas.width, 20);
 
     // --- Update Player ---
     player.dy += player.gravity;
@@ -102,12 +101,16 @@ function update() {
     }
 
     // Draw Player
-    if (playerImg.complete) {
+    if (playerImg.complete && playerImg.naturalWidth > 0) {
         ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
     } else {
-        // Fallback
+        // Fallback or loading
         ctx.fillStyle = 'purple';
         ctx.fillRect(player.x, player.y, player.width, player.height);
+
+        ctx.fillStyle = 'white';
+        ctx.font = '10px Arial';
+        ctx.fillText('Loading...', player.x, player.y - 10);
     }
 
     // --- Update Obstacles ---
@@ -124,7 +127,7 @@ function update() {
         obs.x -= obs.speed;
 
         // Draw Obstacle
-        if (enemyImg.complete) {
+        if (enemyImg.complete && enemyImg.naturalWidth > 0) {
             ctx.drawImage(enemyImg, obs.x, obs.y, obs.width, obs.height);
         } else {
             ctx.fillStyle = 'green';
@@ -176,4 +179,6 @@ function resetGame() {
 }
 
 // Start game
+// Ensure DOM content is loaded? script is usually defer or at end of body.
+// But to be safe if images trigger load events.
 update();
