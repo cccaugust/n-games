@@ -2,6 +2,8 @@
 import kaikefupotoriImg from './assets/kaikefupotori.png';
 import godangiruImg from './assets/godangiru.png';
 import cameramanImg from './assets/cameraman.png';
+import kamasaurusImg from './assets/kamasaurus.png';
+import greatmaiteshImg from './assets/greatmaitesh.png';
 
 // Pokemon Data
 const pokemonData = [
@@ -58,6 +60,42 @@ const pokemonData = [
         extraInfo: '自然写真家たちの憧れの的。このポケモンのドローンが撮影した写真は、数億円の価値がつくと言われている。',
         author: 'TEPPEI',
         stats: { hp: 120, attack: 75, defense: 110, spAtk: 95, spDef: 100, speed: 60 }
+    },
+    {
+        id: '0004',
+        name: 'カマサウルス',
+        classification: 'さんみいったいポケモン',
+        types: ['water', 'dragon'],
+        typeNames: ['みず', 'ドラゴン'],
+        image: kamasaurusImg,
+        description: '青、黒、赤の３匹が絡み合うようにして泳ぐ珍しいポケモン。古代の海の支配者だったと言われており、非常に高い知能を持つ。チームワークは完璧だが、３匹の仲が悪くなると解散してしまうこともあるらしい。',
+        ecology: 'それぞれの個体が別々の役割を担当している。青い個体はナビ役、黒い個体は攻撃役、赤い個体は防御役と言われているが、目にも止まらぬ速さで位置を入れ替えるため、正確なところは分かっていない。',
+        abilityName: 'きれあじ',
+        abilityDesc: '相手を切る技（カッター、つばめがえし等）の威力が1.5倍になる。',
+        moveName: 'トリニティ・ダッシュ',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：30×3回 / 命中：95<br>3匹が高速回転しながら順番に突撃する。必ず3回攻撃する。',
+        extraInfo: '目撃例は非常に少ないが、嵐の夜に海面が3色に光ることがあれば、それはカマサウルスが狩りをしている合図かもしれない。',
+        author: 'TEPPEI',
+        stats: { hp: 90, attack: 115, defense: 85, spAtk: 105, spDef: 85, speed: 120 }
+    },
+    {
+        id: '0005',
+        name: 'グレートマイテシ',
+        classification: 'ナノマシンポケモン',
+        types: ['water', 'steel'],
+        typeNames: ['みず', 'はがね'],
+        image: greatmaiteshImg,
+        description: 'おもちゃのような愛らしい見た目をしているが、その体は数億個の超極小ナノマシンで構成されている。どんなに破壊されても、周囲の金属を取り込み数秒で再生する不死身のポケモン。',
+        ecology: '普段は深海の熱水噴出孔付近で金属を摂取しているが、時には宇宙ステーションに出現し、故障箇所を勝手に修理して去っていくこともある。体内のナノマシンは医療にも応用可能と言われている。',
+        abilityName: '自己メンテナンス',
+        abilityDesc: 'ターン終了時、HPが最大HPの1/16回復する。毒状態にならない。',
+        moveName: 'ナノ・スワーム',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：70 / 命中：100<br>体の一部を分解して相手にまとわりつかせる。与えたダメージの半分のHPを回復する。',
+        extraInfo: '「グレート」という名前は、その小さな体に秘められた無限の可能性に畏敬の念を込めて博士が名付けた。',
+        author: 'TEPPEI',
+        stats: { hp: 150, attack: 50, defense: 120, spAtk: 60, spDef: 120, speed: 30 }
     }
 ];
 
