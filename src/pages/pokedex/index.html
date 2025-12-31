@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オリジナルポケモン図鑑</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="pokedex-header">
+        <div class="header-content">
+            <h1>オリジナルポケモン図鑑</h1>
+            <a href="../../pages/portal/portal.html" class="home-btn">🏠 ポータルへ戻る</a>
+        </div>
+    </header>
+
+    <main class="pokedex-container">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="ポケモンをさがす...">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div id="pokedex-grid" class="pokedex-grid">
+            <!-- Pokemon cards will be injected here -->
+        </div>
+    </main>
+
+    <!-- Modal for details -->
+    <div id="pokemon-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="modal-body" class="modal-body">
+                <!-- Detailed info injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./script.js"></script>
+</body>
+
+</html>

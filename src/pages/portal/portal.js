@@ -73,6 +73,14 @@ const games = [
     color: '#a8edea',
     icon: '👾',
     link: '/games/warp-jump/'
+  },
+  {
+    id: 'pokedex',
+    title: 'オリジナルポケモン図鑑',
+    desc: 'キミだけの最強ポケモン！',
+    color: '#ff7675',
+    icon: '📖',
+    link: '/pages/pokedex/'
   }
 ];
 
