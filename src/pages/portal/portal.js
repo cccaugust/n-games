@@ -115,6 +115,14 @@ const games = [
     link: '/games/poke-drop/'
   },
   {
+    id: 'poke-quiz',
+    title: 'ポケモンクイズ',
+    desc: 'シルエットでポケモンをあてよう！',
+    color: '#ffeaa7',
+    icon: '❓',
+    link: '/games/poke-quiz/'
+  },
+  {
     id: 'poke-care',
     title: 'ポケモンのおせわ',
     desc: 'ポケモンをそだてよう！',
