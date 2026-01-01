@@ -13,6 +13,11 @@ import raijuusoImg from '../pages/pokedex/assets/raijuuso.png';
 import picochargeImg from '../pages/pokedex/assets/picocharge.png';
 import megahubImg from '../pages/pokedex/assets/megahub.png';
 import gigaoutletImg from '../pages/pokedex/assets/gigaoutlet.png';
+import gaiadriverImg from '../pages/pokedex/assets/gaiadriver.png';
+import prominessImg from '../pages/pokedex/assets/prominess.png';
+import abysswalkerImg from '../pages/pokedex/assets/abysswalker.png';
+import plasmakaiserImg from '../pages/pokedex/assets/plasmakaiser.png';
+
 
 // Pokemon Data
 export const pokemonData = [
@@ -275,5 +280,77 @@ export const pokemonData = [
         author: 'JUNPEI',
         stats: { hp: 80, attack: 95, defense: 110, spAtk: 130, spDef: 100, speed: 45 },
         evolutions: ['0013']
+    },
+    {
+        id: '0015',
+        name: 'ガイアドライバー',
+        classification: 'しんりんきしポケモン',
+        types: ['grass', 'fighting'],
+        typeNames: ['くさ', 'かくとう'],
+        image: gaiadriverImg,
+        description: '深い森の奥で、自然の掟を守る守護者。両腕に宿した植物のエネルギーは、鋼鉄をも容易く粉砕する威力を持つ。森を害する者には容赦しないが、小さな命には優しい。',
+        ecology: '光合成を行いながら、森じゅうの植物と意識をリンクさせている。森林火災などの危機を即座に察知し、蔦を操って消火活動を行う姿も目撃されている。',
+        abilityName: 'しんりょく',
+        abilityDesc: 'HPが1/3以下の時、草タイプの技の威力が1.5倍になる。',
+        moveName: 'フォレスト・バスター',
+        moveType: 'grass',
+        moveDesc: 'タイプ：くさ / 威力：95 / 命中：100<br>大地のエネルギーを拳に込めて殴りつける。相手の防御ランク変化を無視する。',
+        extraInfo: '彼の鎧は、数百年生き続けた巨木の外皮が硬質化したものと言われている。',
+        author: 'KENTO',
+        stats: { hp: 105, attack: 125, defense: 95, spAtk: 60, spDef: 85, speed: 70 }
+    },
+    {
+        id: '0016',
+        name: 'プロミネンス',
+        classification: 'ごうかきしポケモン',
+        types: ['fire', 'fighting'],
+        typeNames: ['ほのお', 'かくとう'],
+        image: prominessImg,
+        description: '地底のマグマから生まれた戦士。その拳は常に高熱を発しており、触れるものすべてを灰にする。正義感が強く、悪を滅ぼすまでは燃え尽きることがない。',
+        ecology: '火山の噴火口付近で鍛錬を行う。体温は常に1000度を超えており、感情が高ぶるとさらに上昇し、周囲の岩石を溶かし始める。',
+        abilityName: 'もうか',
+        abilityDesc: 'HPが1/3以下の時、炎タイプの技の威力が1.5倍になる。',
+        moveName: 'ブレイジング・ナックル',
+        moveType: 'fire',
+        moveDesc: 'タイプ：ほのお / 威力：90 / 命中：100<br>炎を纏った拳で連打を浴びせる。10%の確率で相手を「やけど」状態にする。',
+        extraInfo: '古代の鍛冶職人たちは、プロミネンスの炎を借りて伝説の武器を鍛え上げたと伝えられている。',
+        author: 'KENTO',
+        stats: { hp: 90, attack: 130, defense: 80, spAtk: 75, spDef: 70, speed: 95 }
+    },
+    {
+        id: '0017',
+        name: 'アビスウォーカー',
+        classification: 'しんかいきしポケモン',
+        types: ['water', 'fighting'],
+        typeNames: ['みず', 'かくとう'],
+        image: abysswalkerImg,
+        description: '光の届かない深海で、独自の進化を遂げた騎士。水圧を操り、空気の壁を作り出すことで地上でも活動できる。冷静沈着で、無駄な戦いは好まない。',
+        ecology: '深海の超高圧環境に耐えうる強靭な肉体と精神力を持つ。両手の水流ジェネレーターから圧縮された水を弾丸のように発射する。',
+        abilityName: 'げきりゅう',
+        abilityDesc: 'HPが1/3以下の時、水タイプの技の威力が1.5倍になる。',
+        moveName: 'アクア・インパクト',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：90 / 命中：100<br>高圧水流を一点に集中させて貫く。急所に当たりやすい。',
+        extraInfo: '沈没船の財宝を守っているという噂があるが、実際は海を汚す人間から海域を守っているだけである。',
+        author: 'KENTO',
+        stats: { hp: 100, attack: 110, defense: 100, spAtk: 70, spDef: 90, speed: 75 }
+    },
+    {
+        id: '0018',
+        name: 'プラズマカイザー',
+        classification: 'らいこうきしポケモン',
+        types: ['electric', 'fighting'],
+        typeNames: ['でんき', 'かくとう'],
+        image: plasmakaiserImg,
+        description: '稲妻と共に現れる、雷の化身。超高速で移動し、目に見えない速さで敵を討つ。その姿は「黄色い閃光」として恐れられている。',
+        ecology: '雷雲の中でエネルギーを蓄え、地上へ降臨する。全身から放たれる電気信号により、機械をハッキングすることも可能だと言われている。',
+        abilityName: 'エレキスキン',
+        abilityDesc: 'ノーマルタイプの技が電気タイプになり、威力が1.2倍になる。',
+        moveName: 'サンダー・ブレイク',
+        moveType: 'electric',
+        moveDesc: 'タイプ：でんき / 威力：95 / 命中：100<br>稲妻のような手刀で切り裂く。相手を「まひ」させることがある。',
+        extraInfo: '発電所を襲うこともあるが、それはエネルギー不足で苦しむ街に電力を分け与えるためだという義賊的な側面もある。',
+        author: 'KENTO',
+        stats: { hp: 80, attack: 115, defense: 70, spAtk: 115, spDef: 70, speed: 130 }
     }
 ];
