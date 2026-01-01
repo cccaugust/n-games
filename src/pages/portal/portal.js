@@ -121,6 +121,14 @@ const games = [
     color: '#ffeaa7',
     icon: '❓',
     link: '/games/poke-quiz/'
+  },
+  {
+    id: 'kama-surf',
+    title: 'カマ・サーフ',
+    desc: 'カマサウルスとなみにのろう！',
+    color: '#74b9ff',
+    icon: '🏄',
+    link: '/games/kama-surf/'
   }
 ];
 
