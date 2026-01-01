@@ -105,6 +105,14 @@ const games = [
     color: '#fab1a0',
     icon: '🎯',
     link: '/games/poke-shooter/'
+  },
+  {
+    id: 'poke-drop',
+    title: 'ポケ・ドロップ',
+    desc: 'ポケモンをくっつけて進化させよう！',
+    color: '#a29bfe',
+    icon: '🔮',
+    link: '/games/poke-drop/'
   }
 ];
 
