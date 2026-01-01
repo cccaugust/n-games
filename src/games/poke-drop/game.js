@@ -68,7 +68,16 @@ class MainScene extends Phaser.Scene {
         this.matter.world.setBounds(0, 0, CONFIG.width, CONFIG.height, 32, true, true, false, true);
 
         // UI
-        this.scoreText = this.add.text(20, 20, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+        this.scoreText = this.add.text(20, 20, 'Score: 0', { fontSize: '32px', fill: '#fff', fontFamily: 'Zen Maru Gothic' });
+
+        // NEXT Preview UI
+        this.add.text(CONFIG.width - 90, 20, 'NEXT', { fontSize: '20px', fill: '#aaa', fontFamily: 'Zen Maru Gothic' });
+        this.nextPreviewBg = this.add.circle(CONFIG.width - 50, 60, 30, 0xffffff, 0.1);
+
+        // Game Over Warning Line (Dotted)
+        this.warningLine = this.add.graphics();
+        this.warningLineY = 150; // Y position for game over check
+        this.drawWarningLine();
 
         // Input
         // Track pointer for moving the current ball
@@ -108,8 +117,25 @@ class MainScene extends Phaser.Scene {
         // Spawn first ball
         this.spawnNextBall();
 
-        // Update loop to draw guide line
-        this.events.on('update', this.updateGuideLine, this);
+        this.events.on('update', this.update, this);
+    }
+
+    drawWarningLine() {
+        this.warningLine.clear();
+        this.warningLine.lineStyle(2, 0xff5555, 0.5);
+        // Draw dotted line
+        for (let x = 0; x < CONFIG.width; x += 20) {
+            this.warningLine.moveTo(x, this.warningLineY);
+            this.warningLine.lineTo(x + 10, this.warningLineY);
+        }
+        this.warningLine.strokePath();
+    }
+
+    update() {
+        this.updateGuideLine();
+
+        // Simple game over check logic (if any body stays above line too long)
+        // For now, just visualizing the line is enough as per request
     }
 
     updateGuideLine() {
@@ -139,6 +165,22 @@ class MainScene extends Phaser.Scene {
         this.currentBall = this.add.image(CONFIG.width / 2, 50, pokemon.id);
         this.currentBall.setDisplaySize(radius * 2, radius * 2);
         this.currentBall.isDropped = false;
+
+        // Update NEXT preview for the NEXT turn (pre-calculate)
+        // Note: For now, let's just show what IS currently waiting if we don't have a queue system
+        // But better: Generate the NEXT one now
+        if (this.nextQueuedIndex === undefined) {
+            const maxSpawnIndex = Math.min(3, pokemonData.length - 1);
+            this.nextQueuedIndex = Phaser.Math.Between(0, maxSpawnIndex);
+        }
+
+        // Show the queued one in the UI
+        if (this.nextPreviewSprite) this.nextPreviewSprite.destroy();
+        const nextPoke = pokemonData[this.nextQueuedIndex];
+        this.nextPreviewSprite = this.add.image(CONFIG.width - 50, 60, nextPoke.id);
+        const nextScale = 50 / this.nextPreviewSprite.width; // Fit in 50px box
+        this.nextPreviewSprite.setScale(nextScale);
+
         this.canDrop = true;
     }
 
@@ -156,12 +198,24 @@ class MainScene extends Phaser.Scene {
         this.currentBall.destroy(); // Remove preview
 
         const ball = this.matter.add.image(x, y, pokemon.id);
-        ball.setCircle(radius);
-        ball.setBounce(0.2); // Less bounce for better stacking
-        ball.setFriction(0.05); // More friction to stop sliding
-        ball.setFrictionAir(0.01);
-        ball.setDensity(0.001); // Standard density
-        ball.setDisplaySize(radius * 2, radius * 2);
+
+        // Fix scaling issue:
+        // 1. Calculate the scale required to reach target size
+        const originalWidth = ball.width;
+        const scale = (radius * 2) / originalWidth;
+
+        // 2. Set the body to the simpler circle shape based on ORIGINAL texture size
+        // Use slightly smaller radius (0.95) to allow slight visual overlap/tight packing (avoid gaps)
+        ball.setCircle((originalWidth / 2) * 0.95);
+
+        // 3. Apply scale
+        ball.setScale(scale);
+
+        ball.setBounce(0.2);
+        ball.setFriction(0.005);
+        ball.setFrictionAir(0.005); // Reduced air friction slightly
+        ball.setDensity(0.005); // Increased density for stability
+
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
 
@@ -170,6 +224,13 @@ class MainScene extends Phaser.Scene {
 
         // Prepare next turn after a delay
         this.time.delayedCall(1000, () => {
+            // Use the queued index for the next spawn
+            this.nextPokemonIndex = this.nextQueuedIndex;
+
+            // Generate distinct next for the queue
+            const maxSpawnIndex = Math.min(3, pokemonData.length - 1);
+            this.nextQueuedIndex = Phaser.Math.Between(0, maxSpawnIndex);
+
             this.spawnNextBall();
         });
     }
@@ -207,8 +268,29 @@ class MainScene extends Phaser.Scene {
                 emitter.explode(15);
 
                 // Score update
-                this.score += (newIndex + 1) * 10;
+                const addScore = (newIndex + 1) * 10;
+                this.score += addScore;
                 this.scoreText.setText('Score: ' + this.score);
+
+                // Shake effect
+                this.cameras.main.shake(100, 0.005);
+
+                // Combo Pop-up Text
+                const popup = this.add.text(midX, midY, `+${addScore}`, {
+                    fontSize: '24px',
+                    fill: '#ffdd59',
+                    fontFamily: 'Zen Maru Gothic',
+                    stroke: '#000',
+                    strokeThickness: 2
+                }).setOrigin(0.5);
+
+                this.tweens.add({
+                    targets: popup,
+                    y: midY - 50,
+                    alpha: 0,
+                    duration: 800,
+                    onComplete: () => popup.destroy()
+                });
             }
         }
     }
@@ -218,22 +300,28 @@ class MainScene extends Phaser.Scene {
         const radius = this.sizes[index];
 
         const ball = this.matter.add.image(x, y, pokemon.id);
-        ball.setCircle(radius);
+
+        const originalWidth = ball.width;
+        const scale = (radius * 2) / originalWidth;
+
+        ball.setCircle((originalWidth / 2) * 0.95);
+        ball.setScale(scale);
+
         ball.setBounce(0.2);
-        ball.setFriction(0.05);
-        ball.setFrictionAir(0.01);
-        ball.setDensity(0.001);
-        ball.setDisplaySize(radius * 2, radius * 2);
+        ball.setFriction(0.005);
+        ball.setFrictionAir(0.005);
+        ball.setDensity(0.005);
+
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
 
-        // Add a little pop effect
+        // Add a little pop effect (using scale property since we are scaling)
         this.tweens.add({
             targets: ball,
-            scaleX: { from: 0, to: (radius * 2) / ball.width },
-            scaleY: { from: 0, to: (radius * 2) / ball.height },
+            scaleX: { from: 0, to: scale },
+            scaleY: { from: 0, to: scale },
             duration: 400,
-            ease: 'Elastic.out' // Bouncier easing
+            ease: 'Elastic.out'
         });
     }
 }
