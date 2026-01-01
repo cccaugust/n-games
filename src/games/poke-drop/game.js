@@ -5,6 +5,13 @@ const CONFIG = {
     width: 600,
     height: 800,
     backgroundColor: '#1a1a2e',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        parent: 'game-container',
+        width: 600,
+        height: 800
+    },
     physics: {
         default: 'matter',
         matter: {
@@ -21,7 +28,7 @@ class MainScene extends Phaser.Scene {
         this.canDrop = true;
         this.score = 0;
         this.gameOver = false;
-        
+
         // Define sizes for each evolution stage (radius)
         // Dynamically calculate based on index to support infinite lists
         // Starts small, gets bigger
@@ -43,7 +50,7 @@ class MainScene extends Phaser.Scene {
 
         // UI
         this.scoreText = this.add.text(20, 20, 'Score: 0', { fontSize: '32px', fill: '#fff' });
-        
+
         // Input
         this.input.on('pointermove', (pointer) => {
             if (this.currentBall && !this.currentBall.isDropped && !this.gameOver) {
@@ -81,7 +88,7 @@ class MainScene extends Phaser.Scene {
         // Limit to first 3 types to keep it playable
         const maxSpawnIndex = Math.min(3, pokemonData.length - 1);
         this.nextPokemonIndex = Phaser.Math.Between(0, maxSpawnIndex); // 0 to 3
-        
+
         const pokemon = pokemonData[this.nextPokemonIndex];
         const radius = this.sizes[this.nextPokemonIndex];
 
@@ -112,7 +119,7 @@ class MainScene extends Phaser.Scene {
         ball.setDisplaySize(radius * 2, radius * 2);
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
-        
+
         // Tag for collision
         ball.setData('type', 'pokemon');
 
@@ -124,10 +131,10 @@ class MainScene extends Phaser.Scene {
 
     handleCollision(objA, objB) {
         // Check if both are pokemon and same type
-        if (objA.pokemonIndex !== undefined && 
-            objB.pokemonIndex !== undefined && 
+        if (objA.pokemonIndex !== undefined &&
+            objB.pokemonIndex !== undefined &&
             objA.pokemonIndex === objB.pokemonIndex) {
-            
+
             // Allow merge only if not max level
             if (objA.pokemonIndex < pokemonData.length - 1) {
                 // Ensure we handle this pair only once
@@ -162,7 +169,7 @@ class MainScene extends Phaser.Scene {
         ball.setDisplaySize(radius * 2, radius * 2);
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
-        
+
         // Add a little pop effect
         this.tweens.add({
             targets: ball,
