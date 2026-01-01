@@ -113,6 +113,14 @@ const games = [
     color: '#a29bfe',
     icon: '🔮',
     link: '/games/poke-drop/'
+  },
+  {
+    id: 'poke-care',
+    title: 'ポケモンのおせわ',
+    desc: 'ポケモンをそだてよう！',
+    color: '#55efc4',
+    icon: '🥚',
+    link: '/games/poke-care/'
   }
 ];
 
