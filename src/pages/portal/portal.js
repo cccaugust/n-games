@@ -113,6 +113,14 @@ const games = [
     color: '#a29bfe',
     icon: '🔮',
     link: '/games/poke-drop/'
+  },
+  {
+    id: 'poke-quiz',
+    title: 'ポケモンクイズ',
+    desc: 'シルエットでポケモンをあてよう！',
+    color: '#ffeaa7',
+    icon: '❓',
+    link: '/games/poke-quiz/'
   }
 ];
 
