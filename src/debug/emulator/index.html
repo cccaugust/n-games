@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2D Sprite Emulator</title>
+    <link rel="stylesheet" href="../../../style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #222;
+            color: #eee;
+            display: flex;
+            flex-direction: row;
+            /* Fixed layout */
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Left Panel */
+        #settings-panel {
+            width: 450px;
+            /* Widened for frame picker */
+            background: #333;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        #settings-panel h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #555;
+            padding-bottom: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+            background: #3a3a3a;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .control-group input[type="file"],
+        .control-group input[type="number"],
+        .control-group input[type="text"] {
+            width: 100%;
+            padding: 6px;
+            background: #222;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        /* Source Frame Pool */
+        #source-frames-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: #222;
+            padding: 5px;
+            border-radius: 4px;
+            min-height: 50px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+        }
+
+        .frame-item {
+            display: inline-block;
+            border: 1px solid #666;
+            cursor: move;
+            background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAuSURBVHgBzYOxDQAgDML8/8/6G2lCqgQo2cyZ69M1FqG1+M1iN38wdyN+Y24GAzY1u/0TBNYAAAAASUVORK5CYII=") repeat;
+            /* Checkered pattern for transparency */
+            width: 64px;
+            height: 64px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+        }
+
+        .frame-item:hover {
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+
+        .frame-item[draggable="true"] {
+            opacity: 1;
+        }
+
+        /* Animation List */
+        #anim-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .anim-item {
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #777;
+        }
+
+        .anim-item.active {
+            border-left-color: #00d2d3;
+            background: #333;
+        }
+
+        .anim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .anim-title {
+            font-weight: bold;
+        }
+
+        /* Drop Zone */
+        .anim-timeline {
+            display: flex;
+            gap: 2px;
+            background: #1a1a1a;
+            padding: 5px;
+            min-height: 76px;
+            overflow-x: auto;
+            border: 1px dashed #555;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            align-items: center;
+        }
+
+        .anim-timeline.drag-over {
+            border-color: #00d2d3;
+            background: #222;
+        }
+
+        /* Items inside timeline */
+        .timeline-frame {
+            position: relative;
+            flex-shrink: 0;
+            width: 64px;
+            height: 64px;
+            border: 1px solid #444;
+            background-size: contain;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+        }
+
+        .timeline-frame .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            display: none;
+        }
+
+        .timeline-frame:hover .remove-btn {
+            display: flex;
+        }
+
+        button {
+            cursor: pointer;
+            background: #444;
+            border: 1px solid #555;
+            color: #ccc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        button.play-btn {
+            background: #0984e3;
+            border-color: #0984e3;
+            color: white;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        button.play-btn:hover {
+            background: #74b9ff;
+        }
+
+        /* Right Panel */
+        #preview-panel {
+            flex-grow: 1;
+            position: relative;
+            background: #111;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .back-link {
+            color: #aaa;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Left Settings Panel -->
+    <div id="settings-panel">
+        <a href="#" class="back-link">← Debug Menu</a>
+
+        <div class="control-group">
+            <label>1. Upload Sprite Sheet</label>
+            <input type="file" id="spriteUpload" accept="image/*">
+        </div>
+
+        <div class="control-group">
+            <label>2. Frame Size (px)</label>
+            <div class="row">
+                <div class="col">
+                    <label style="font-size:0.8em">Width</label>
+                    <input type="number" id="frameWidth" value="32" min="1">
+                </div>
+                <div class="col">
+                    <label style="font-size:0.8em">Height</label>
+                    <input type="number" id="frameHeight" value="32" min="1">
+                </div>
+            </div>
+            <button id="applyGridBtn" style="margin-top:10px; width:100%">Update / Slice Frames</button>
+        </div>
+
+        <div class="control-group">
+            <label>Source Frames (Drag these)</label>
+            <div id="source-frames-container">
+                <div style="padding:10px; color:#666; font-size:0.8em">Upload image and update grid to see frames.</div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>3. Actions (Drop frames here)</label>
+            <div id="anim-list">
+                <!-- Animation Items Injected Here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Preview Panel -->
+    <div id="preview-panel">
+        <div id="game-container"></div>
+    </div>
+
+    <script type="module" src="./js/emulator.js"></script>
+</body>
+
+</html>
