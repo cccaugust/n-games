@@ -32,8 +32,21 @@ class MainScene extends Phaser.Scene {
         // Define sizes for each evolution stage (radius)
         // Dynamically calculate based on index to support infinite lists
         // Starts small, gets bigger
+        // Define sizes for each evolution stage (radius)
+        // Dynamically calculate based on index to support infinite lists
+        // Starts small, gets bigger
         this.sizes = pokemonData.map((_, index) => {
-            return 25 + (index * 8); // 25, 33, 41, 49...
+            return 35 + (index * 10); // Check fit: Max index ~18 -> 215 radius (430 diam) > 400 width? 
+            // Wait, 18 * 10 = 180 + 35 = 215. 215 * 2 = 430. Too big for 400 width.
+            // Let's adjust slightly: 30 + (index * 9)
+            // Index 0: 30
+            // Index 10: 120
+            // Index 18: 192 (Diameter 384) -> Fits tight. Good.
+        });
+
+        // Re-calculate sizes to be safe but larger
+        this.sizes = pokemonData.map((_, index) => {
+            return 30 + (index * 9);
         });
     }
 
@@ -45,6 +58,12 @@ class MainScene extends Phaser.Scene {
     }
 
     create() {
+        // Create particle texture on the fly
+        const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(0xffffff, 1);
+        graphics.fillCircle(4, 4, 4);
+        graphics.generateTexture('particle', 8, 8);
+
         // Boundaries
         this.matter.world.setBounds(0, 0, CONFIG.width, CONFIG.height, 32, true, true, false, true);
 
@@ -177,6 +196,16 @@ class MainScene extends Phaser.Scene {
                 // Create new evolved body
                 this.createNewBall(midX, midY, newIndex);
 
+                // Particle explosion
+                const emitter = this.add.particles(midX, midY, 'particle', {
+                    speed: { min: 50, max: 150 },
+                    scale: { start: 1, end: 0 },
+                    blendMode: 'ADD',
+                    lifespan: 500,
+                    gravityY: 100
+                });
+                emitter.explode(15);
+
                 // Score update
                 this.score += (newIndex + 1) * 10;
                 this.scoreText.setText('Score: ' + this.score);
@@ -201,10 +230,10 @@ class MainScene extends Phaser.Scene {
         // Add a little pop effect
         this.tweens.add({
             targets: ball,
-            scaleX: { from: 0, to: (radius * 2) / ball.width }, // Adjust scale calculation
+            scaleX: { from: 0, to: (radius * 2) / ball.width },
             scaleY: { from: 0, to: (radius * 2) / ball.height },
-            duration: 200,
-            ease: 'Back.out'
+            duration: 400,
+            ease: 'Elastic.out' // Bouncier easing
         });
     }
 }
