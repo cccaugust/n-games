@@ -97,6 +97,14 @@ const games = [
     color: '#ff4757',
     icon: '⚔️',
     link: '/pages/mon-survivor/'
+  },
+  {
+    id: 'poke-shooter',
+    title: 'ポケモンシューター',
+    desc: 'モンスターボールでポケモンをつかまえろ！',
+    color: '#fab1a0',
+    icon: '🎯',
+    link: '/games/poke-shooter/'
   }
 ];
 
