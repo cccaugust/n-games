@@ -46,6 +46,8 @@ export default class BootScene extends Phaser.Scene {
 
         // Load Game Assets
         this.load.image('monster_ball', './assets/monster_ball.png');
+        this.load.image('background', './assets/background.png');
+        this.load.image('heart', './assets/heart.png');
     }
 
     create() {
