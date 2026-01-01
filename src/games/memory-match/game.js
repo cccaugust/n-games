@@ -1,11 +1,19 @@
+import { pokemonData } from '../../data/pokemonData.js';
+
 const grid = document.getElementById('grid');
 const startBtn = document.getElementById('startBtn');
 const overlay = document.getElementById('overlay');
 const winOverlay = document.getElementById('winOverlay');
 
-const emojis = ['👽', '🚀', '🪐', '🌟', '🌈', '🤖', '🛸', '☄️'];
-// Double up
-const deck = [...emojis, ...emojis];
+// Select 8 random pokemon
+let gameDeck = [];
+
+function initGameData() {
+    const shuffledPokemon = [...pokemonData].sort(() => 0.5 - Math.random());
+    const selected = shuffledPokemon.slice(0, 8);
+    // Create pairs
+    gameDeck = [...selected, ...selected];
+}
 
 let hasFlippedCard = false;
 let lockBoard = false;
@@ -21,18 +29,21 @@ function shuffle(array) {
 }
 
 function createBoard() {
-    shuffle(deck);
+    initGameData();
+    shuffle(gameDeck);
     grid.innerHTML = '';
-    deck.forEach(emoji => {
+    gameDeck.forEach(pokemon => {
         const slot = document.createElement('div');
         slot.className = 'card-slot';
 
         const card = document.createElement('div');
         card.className = 'memory-card';
-        card.dataset.emoji = emoji;
+        card.dataset.id = pokemon.id; // Use ID for matching
+
+        const frontApi = `<img src="${pokemon.image}" alt="${pokemon.name}" style="width: 100%; height: 100%; object-fit: contain;">`;
 
         card.innerHTML = `
-      <div class="face front">${emoji}</div>
+      <div class="face front" style="background: #1a1a2e; padding: 5px;">${frontApi}</div>
       <div class="face back">?</div>
     `;
 
@@ -62,7 +73,7 @@ function flipCard() {
 }
 
 function checkForMatch() {
-    let isMatch = firstCard.dataset.emoji === secondCard.dataset.emoji;
+    let isMatch = firstCard.dataset.id === secondCard.dataset.id;
 
     if (isMatch) {
         disableCards();
@@ -76,7 +87,7 @@ function disableCards() {
     secondCard.removeEventListener('click', flipCard);
 
     matchesFound++;
-    if (matchesFound === emojis.length) {
+    if (matchesFound === 8) { // Hardcoded 8 pairs for now
         setTimeout(() => {
             winOverlay.style.display = 'flex';
             // Fire confetti here if we had library!
