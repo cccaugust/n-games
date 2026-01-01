@@ -2,15 +2,15 @@ import Phaser from 'phaser';
 import { pokemonData } from '../../data/pokemonData.js';
 
 const CONFIG = {
-    width: 600,
-    height: 800,
+    width: 400,
+    height: 600,
     backgroundColor: '#1a1a2e',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: 600,
-        height: 800
+        width: 400,
+        height: 600
     },
     physics: {
         default: 'matter',
@@ -52,18 +52,27 @@ class MainScene extends Phaser.Scene {
         this.scoreText = this.add.text(20, 20, 'Score: 0', { fontSize: '32px', fill: '#fff' });
 
         // Input
+        // Track pointer for moving the current ball
         this.input.on('pointermove', (pointer) => {
             if (this.currentBall && !this.currentBall.isDropped && !this.gameOver) {
-                let x = Phaser.Math.Clamp(pointer.x, 50, CONFIG.width - 50);
-                this.currentBall.x = x;
+                // Ensure dragging works on touch same as mouse
+                if (pointer.isDown || !this.sys.game.device.os.desktop) {
+                    let x = Phaser.Math.Clamp(pointer.x, 30, CONFIG.width - 30);
+                    this.currentBall.x = x;
+                }
             }
         });
 
-        this.input.on('pointerdown', (pointer) => {
+        // Drop on pointer UP (release), not down (start)
+        this.input.on('pointerup', (pointer) => {
             if (this.canDrop && !this.gameOver) {
+                // Only drop if we were actually interacting
                 this.dropBall();
             }
         });
+
+        // Add visual guide line for dropping
+        this.guideLine = this.add.graphics();
 
         // Collision Handling
         this.matter.world.on('collisionstart', (event) => {
@@ -79,6 +88,21 @@ class MainScene extends Phaser.Scene {
 
         // Spawn first ball
         this.spawnNextBall();
+
+        // Update loop to draw guide line
+        this.events.on('update', this.updateGuideLine, this);
+    }
+
+    updateGuideLine() {
+        this.guideLine.clear();
+        if (this.currentBall && !this.currentBall.isDropped && !this.gameOver) {
+            this.guideLine.lineStyle(2, 0xffffff, 0.3);
+            this.guideLine.fillStyle(0xffffff, 0.1);
+            this.guideLine.beginPath();
+            this.guideLine.moveTo(this.currentBall.x, this.currentBall.y);
+            this.guideLine.lineTo(this.currentBall.x, CONFIG.height);
+            this.guideLine.strokePath();
+        }
     }
 
     spawnNextBall() {
@@ -114,8 +138,10 @@ class MainScene extends Phaser.Scene {
 
         const ball = this.matter.add.image(x, y, pokemon.id);
         ball.setCircle(radius);
-        ball.setBounce(0.3);
-        ball.setFriction(0.005);
+        ball.setBounce(0.2); // Less bounce for better stacking
+        ball.setFriction(0.05); // More friction to stop sliding
+        ball.setFrictionAir(0.01);
+        ball.setDensity(0.001); // Standard density
         ball.setDisplaySize(radius * 2, radius * 2);
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
@@ -164,8 +190,10 @@ class MainScene extends Phaser.Scene {
 
         const ball = this.matter.add.image(x, y, pokemon.id);
         ball.setCircle(radius);
-        ball.setBounce(0.3);
-        ball.setFriction(0.005);
+        ball.setBounce(0.2);
+        ball.setFriction(0.05);
+        ball.setFrictionAir(0.01);
+        ball.setDensity(0.001);
         ball.setDisplaySize(radius * 2, radius * 2);
         ball.pokemonIndex = index;
         ball.pokemonId = pokemon.id;
