@@ -123,6 +123,14 @@ const games = [
     link: '/games/poke-quiz/'
   },
   {
+    id: 'poke-care',
+    title: 'ポケモンのおせわ',
+    desc: 'ポケモンをそだてよう！',
+    color: '#55efc4',
+    icon: '🥚',
+    link: '/games/poke-care/'
+  },
+  {
     id: 'kama-surf',
     title: 'カマ・サーフ',
     desc: 'カマサウルスとなみにのろう！',
