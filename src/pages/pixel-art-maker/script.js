@@ -68,6 +68,9 @@ const duplicateBtn = document.getElementById('duplicateBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 const exportBtn = document.getElementById('exportBtn');
 
+const importImageBtn = document.getElementById('importImageBtn');
+const importImageInput = document.getElementById('importImageInput');
+
 const statusText = document.getElementById('statusText');
 
 // New asset modal
@@ -480,6 +483,98 @@ function applyToolAtEvent(e) {
   }
 }
 
+function drawImageToFit(ctx2d, img, dstW, dstH) {
+  const srcW = Number(img?.width ?? 0);
+  const srcH = Number(img?.height ?? 0);
+  if (!Number.isFinite(srcW) || !Number.isFinite(srcH) || srcW <= 0 || srcH <= 0) return;
+
+  ctx2d.clearRect(0, 0, dstW, dstH);
+  ctx2d.imageSmoothingEnabled = true;
+  // @ts-ignore - not all browsers type this prop
+  if ('imageSmoothingQuality' in ctx2d) ctx2d.imageSmoothingQuality = 'high';
+
+  const scale = Math.min(dstW / srcW, dstH / srcH);
+  const w = Math.max(1, Math.round(srcW * scale));
+  const h = Math.max(1, Math.round(srcH * scale));
+  const x = Math.round((dstW - w) / 2);
+  const y = Math.round((dstH - h) / 2);
+  ctx2d.drawImage(img, x, y, w, h);
+}
+
+function imageDataToPixels(imgData, { alphaThreshold = 16 } = {}) {
+  const data = imgData?.data;
+  if (!data) return new Uint32Array();
+  const out = new Uint32Array((data.length / 4) | 0);
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const r = data[i] & 255;
+    const g = data[i + 1] & 255;
+    const b = data[i + 2] & 255;
+    const a = data[i + 3] & 255;
+    if (a < alphaThreshold) {
+      out[p] = 0;
+    } else {
+      out[p] = (((a << 24) | (r << 16) | (g << 8) | b) >>> 0);
+    }
+  }
+  return out;
+}
+
+async function loadImageFromFile(file) {
+  if (!file) return null;
+  if (globalThis.createImageBitmap) {
+    try {
+      return await createImageBitmap(file);
+    } catch {
+      // fall through to <img> decode
+    }
+  }
+  return await new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = (e) => {
+      URL.revokeObjectURL(url);
+      reject(e);
+    };
+    img.src = url;
+  });
+}
+
+async function importImageToCurrentAsset(file) {
+  if (!currentAsset) {
+    alert('先に「新規作成」か、作品を開いてね！');
+    return;
+  }
+  if (!file) return;
+
+  if (dirty && !confirm('いまの変更は保存されていません。画像で上書きしますか？（もどすで戻せるよ）')) return;
+
+  const img = await loadImageFromFile(file);
+  if (!img) return;
+
+  const w = currentAsset.width;
+  const h = currentAsset.height;
+  const tmp = document.createElement('canvas');
+  tmp.width = w;
+  tmp.height = h;
+  const tctx = tmp.getContext('2d', { willReadFrequently: true });
+  if (!tctx) return;
+
+  drawImageToFit(tctx, img, w, h);
+  const imgData = tctx.getImageData(0, 0, w, h);
+  const nextPixels = imageDataToPixels(imgData, { alphaThreshold: 16 });
+
+  const snapshot = new Uint32Array(currentAsset.pixels);
+  currentAsset.pixels = nextPixels;
+  pushUndoSnapshot(snapshot);
+  setDirty(true);
+  scheduleRender();
+  updateStatus('画像を読み込んだ');
+}
+
 async function refreshGalleryList() {
   galleryList.innerHTML = '';
   if (gallerySummary) gallerySummary.textContent = '読み込み中…';
@@ -822,6 +917,28 @@ clearBtn.addEventListener('click', () => {
   updateStatus('全消し');
 });
 
+if (importImageBtn && importImageInput) {
+  importImageBtn.addEventListener('click', () => {
+    if (!currentAsset) {
+      alert('先に「新規作成」か、作品を開いてね！');
+      return;
+    }
+    importImageInput.click();
+  });
+
+  importImageInput.addEventListener('change', async () => {
+    const file = importImageInput.files?.[0] || null;
+    // 同じファイルを連続で選べるように、先にvalueをクリアする
+    importImageInput.value = '';
+    try {
+      await importImageToCurrentAsset(file);
+    } catch (e) {
+      console.warn('Image import failed:', e);
+      alert('画像の読み込みに失敗しました。別の画像で試してみてね。');
+    }
+  });
+}
+
 saveBtn.addEventListener('click', async () => {
   if (!currentAsset) return;
   const name = nameInput.value.trim();
@@ -830,6 +947,17 @@ saveBtn.addEventListener('click', async () => {
     return;
   }
   currentAsset.name = name;
+  // NOTE: current UI edits only `asset.pixels`. Keep frame0 in sync for saving.
+  if (Array.isArray(currentAsset.frames) && currentAsset.frames.length > 0) {
+    const f0 =
+      currentAsset.frames.find((f) => (f.index ?? 0) === 0) ||
+      currentAsset.frames[0];
+    if (f0) {
+      f0.width = currentAsset.width;
+      f0.height = currentAsset.height;
+      f0.pixels = new Uint32Array(currentAsset.pixels);
+    }
+  }
   const saved = await putPixelAsset(currentAsset);
   setAsset(saved, { persisted: true });
   await refreshGalleryList();
