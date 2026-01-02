@@ -4,10 +4,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100svh;
     background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 #game-container {
@@ -42,6 +46,40 @@ canvas {
     margin-top: 10px;
     font-weight: bold;
     color: #556270;
+}
+
+.hud-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 8px 0 14px 0;
+    flex-wrap: wrap;
+}
+
+.hud-left,
+.hud-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hud-chip {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(78, 205, 196, 0.5);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 900;
+    color: #556270;
+}
+
+.hud-btn {
+    margin: 0;
+    background: #6c5ce7;
+}
+
+.hud-btn:hover {
+    background: #5a4bd6;
 }
 
 .hidden {
@@ -92,37 +130,6 @@ button:hover,
 
 button:active {
     transform: scale(0.95);
-}
-
-/* Character bar (top) */
-.character-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 8px 0 14px 0;
-}
-
-.character-label {
-    font-weight: 900;
-    color: #556270;
-}
-
-.character-name {
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(78, 205, 196, 0.5);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-weight: 900;
-}
-
-.character-btn {
-    background: #6c5ce7;
-}
-
-.character-btn:hover {
-    background: #5a4bd6;
 }
 
 /* Modal */
@@ -178,6 +185,10 @@ button:active {
     padding: 14px;
     overflow: auto;
     max-height: calc(85svh - 58px);
+}
+
+.settings-card {
+    width: min(760px, 96vw);
 }
 
 .modal-actions {
@@ -250,6 +261,122 @@ button:active {
 
 .modal-note {
     margin-top: 12px;
+    color: #636e72;
+    font-size: 0.9rem;
+}
+
+/* Settings blocks */
+.settings-summary {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 2px dashed rgba(0, 0, 0, 0.15);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    margin-bottom: 12px;
+}
+
+.settings-summary-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.settings-summary-key {
+    font-weight: 900;
+    color: #556270;
+}
+
+.settings-summary-val {
+    font-weight: 900;
+}
+
+.settings-block {
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 10px;
+    margin: 10px 0;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.settings-block-title {
+    cursor: pointer;
+    font-weight: 900;
+    color: #ff6b6b;
+    list-style: none;
+}
+
+.settings-block summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0 12px 0;
+}
+
+.settings-subtitle {
+    font-weight: 900;
+    margin: 10px 0 8px 0;
+    color: #556270;
+}
+
+.settings-search {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    outline: none;
+    font-size: 1rem;
+}
+
+.settings-search:focus {
+    border-color: rgba(108, 92, 231, 0.55);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+.pokemon-pick-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.pokemon-pick-item {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 10px;
+    align-items: center;
+    border-radius: 16px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    background: white;
+    padding: 10px;
+    margin: 0;
+    text-align: left;
+}
+
+.pokemon-pick-item.selected {
+    border-color: rgba(108, 92, 231, 0.55);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+.pokemon-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.08);
+    background: #f7f7f7;
+    object-fit: contain;
+}
+
+.pokemon-item-name {
+    font-weight: 900;
+}
+
+.pokemon-item-meta {
     color: #636e72;
     font-size: 0.9rem;
 }

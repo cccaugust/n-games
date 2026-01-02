@@ -1,18 +1,20 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreEl = document.getElementById('score');
 const finalScoreEl = document.getElementById('final-score');
 const gameOverScreen = document.getElementById('game-over');
 const restartBtn = document.getElementById('restart-btn');
+const scoreEl = document.getElementById('score');
 
 import { getCurrentPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
 import { assetPreviewDataUrl, assetToPngDataUrl, getPixelAsset, listPixelAssets } from '../../js/pixelAssets.js';
+import { pokemonData } from '../../data/pokemonData.js';
 
 requireAuth();
 
 // Game state
 let isGameOver = false;
+let isPaused = false;
 let score = 0;
 let gameSpeed = 5;
 let animationId;
@@ -23,90 +25,269 @@ import enemyUrl from './assets/enemy.png';
 
 const playerImg = new Image();
 playerImg.src = playerUrl;
-const enemyImg = new Image();
-enemyImg.src = enemyUrl;
 
-// Character picker UI
-const selectedCharacterNameEl = document.getElementById('selectedCharacterName');
-const openCharacterBtn = document.getElementById('openCharacterBtn');
-const characterModal = document.getElementById('characterModal');
-const closeCharacterBtn = document.getElementById('closeCharacterBtn');
-const useDefaultBtn = document.getElementById('useDefaultBtn');
+// Enemy images (small / medium / large can differ)
+const enemySmallImg = new Image();
+enemySmallImg.src = enemyUrl;
+const enemyMediumImg = new Image();
+enemyMediumImg.src = enemyUrl;
+const enemyLargeImg = new Image();
+enemyLargeImg.src = enemyUrl;
+
+// Settings UI (separate screen)
+const openSettingsBtn = document.getElementById('openSettingsBtn');
+const settingsScreen = document.getElementById('settingsScreen');
+const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const goToMakerLink = document.getElementById('goToMakerLink');
-const characterList = document.getElementById('characterList');
+const goToPokedexLink = document.getElementById('goToPokedexLink');
+
+const playerCurrentNameEl = document.getElementById('playerCurrentName');
+const enemySmallCurrentNameEl = document.getElementById('enemySmallCurrentName');
+const enemyMediumCurrentNameEl = document.getElementById('enemyMediumCurrentName');
+const enemyLargeCurrentNameEl = document.getElementById('enemyLargeCurrentName');
+
+const playerUseDefaultBtn = document.getElementById('playerUseDefaultBtn');
+const enemySmallUseDefaultBtn = document.getElementById('enemySmallUseDefaultBtn');
+const enemyMediumUseDefaultBtn = document.getElementById('enemyMediumUseDefaultBtn');
+const enemyLargeUseDefaultBtn = document.getElementById('enemyLargeUseDefaultBtn');
+
+const playerPixelListEl = document.getElementById('playerPixelList');
+const enemySmallPixelListEl = document.getElementById('enemySmallPixelList');
+const enemyMediumPixelListEl = document.getElementById('enemyMediumPixelList');
+const enemyLargePixelListEl = document.getElementById('enemyLargePixelList');
+
+const playerPokemonSearchEl = document.getElementById('playerPokemonSearch');
+const enemySmallPokemonSearchEl = document.getElementById('enemySmallPokemonSearch');
+const enemyMediumPokemonSearchEl = document.getElementById('enemyMediumPokemonSearch');
+const enemyLargePokemonSearchEl = document.getElementById('enemyLargePokemonSearch');
+
+const playerPokemonListEl = document.getElementById('playerPokemonList');
+const enemySmallPokemonListEl = document.getElementById('enemySmallPokemonList');
+const enemyMediumPokemonListEl = document.getElementById('enemyMediumPokemonList');
+const enemyLargePokemonListEl = document.getElementById('enemyLargePokemonList');
 
 const playerSession = getCurrentPlayer();
 const ownerId = playerSession?.id != null ? String(playerSession.id) : 'unknown';
-const CHARACTER_SELECTION_KEY = `n-games-selected-character-${ownerId}`;
+const LEGACY_CHARACTER_SELECTION_KEY = `n-games-selected-character-${ownerId}`;
 
 goToMakerLink.href = resolvePath('/pages/pixel-art-maker/');
+goToPokedexLink.href = resolvePath('/pages/pokedex/');
 
-function openModal() {
-  characterModal.classList.remove('hidden');
-  characterModal.setAttribute('aria-hidden', 'false');
+function openSettings() {
+  settingsScreen.classList.remove('hidden');
+  settingsScreen.setAttribute('aria-hidden', 'false');
 }
 
-function closeModal() {
-  characterModal.classList.add('hidden');
-  characterModal.setAttribute('aria-hidden', 'true');
+function closeSettings() {
+  settingsScreen.classList.add('hidden');
+  settingsScreen.setAttribute('aria-hidden', 'true');
 }
 
-openCharacterBtn.addEventListener('click', async () => {
-  await renderCharacterList();
-  openModal();
-});
-closeCharacterBtn.addEventListener('click', closeModal);
-characterModal.addEventListener('click', (e) => {
-  if (e.target === characterModal) closeModal();
+settingsScreen.addEventListener('click', (e) => {
+  if (e.target === settingsScreen) {
+    resumeGame();
+    closeSettings();
+  }
 });
 
-useDefaultBtn.addEventListener('click', () => {
-  localStorage.removeItem(CHARACTER_SELECTION_KEY);
-  selectedCharacterNameEl.textContent = 'デフォルト';
-  playerImg.src = playerUrl;
-  closeModal();
-});
+function selectionKey(slot) {
+  return `n-games-warp-jump-sprite-${ownerId}-${slot}`;
+}
 
-async function applySelectedCharacterFromStorage() {
-  const assetId = localStorage.getItem(CHARACTER_SELECTION_KEY);
-  if (!assetId) {
-    selectedCharacterNameEl.textContent = 'デフォルト';
-    playerImg.src = playerUrl;
-    return;
+function getSelection(slot) {
+  const raw = localStorage.getItem(selectionKey(slot));
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && typeof parsed.source === 'string') return parsed;
+    } catch {
+      // ignore
+    }
   }
 
-  const asset = await getPixelAsset(assetId);
-  if (!asset || asset.ownerId !== ownerId || asset.kind !== 'character') {
-    localStorage.removeItem(CHARACTER_SELECTION_KEY);
-    selectedCharacterNameEl.textContent = 'デフォルト';
-    playerImg.src = playerUrl;
-    return;
+  // Migration (player only): old key from MVP
+  if (slot === 'player') {
+    const legacyAssetId = localStorage.getItem(LEGACY_CHARACTER_SELECTION_KEY);
+    if (legacyAssetId) return { source: 'pixel', assetId: legacyAssetId };
   }
 
-  selectedCharacterNameEl.textContent = asset.name || '（キャラ）';
-  playerImg.src = assetToPngDataUrl(asset);
+  return { source: 'default' };
 }
 
-async function renderCharacterList() {
-  const list = await listPixelAssets({ ownerId, kind: 'character' });
-  characterList.innerHTML = '';
+function setSelection(slot, selection) {
+  localStorage.setItem(selectionKey(slot), JSON.stringify(selection));
+  // Keep MVP behavior for other games: store pixel choice in legacy key as well (player only)
+  if (slot === 'player' && selection?.source === 'pixel' && selection.assetId) {
+    localStorage.setItem(LEGACY_CHARACTER_SELECTION_KEY, selection.assetId);
+  }
+}
 
+function getPokemonById(id) {
+  return pokemonData.find((p) => p.id === id) || null;
+}
+
+async function applySelectionToImage({ slot, img, defaultUrl, allowedPixelKinds }) {
+  const selection = getSelection(slot);
+  if (!selection || selection.source === 'default') {
+    img.src = defaultUrl;
+    return 'デフォルト';
+  }
+
+  if (selection.source === 'pokemon') {
+    const poke = getPokemonById(selection.pokemonId);
+    if (poke) {
+      img.src = poke.image;
+      return `${poke.name} (No.${poke.id})`;
+    }
+    img.src = defaultUrl;
+    return 'デフォルト';
+  }
+
+  if (selection.source === 'pixel') {
+    const asset = await getPixelAsset(selection.assetId);
+    const allowed = Array.isArray(allowedPixelKinds) && allowedPixelKinds.length > 0 ? allowedPixelKinds : null;
+    if (!asset || asset.ownerId !== ownerId || (allowed && !allowed.includes(asset.kind))) {
+      img.src = defaultUrl;
+      return 'デフォルト';
+    }
+    img.src = assetToPngDataUrl(asset);
+    return asset.name || '（ドット絵）';
+  }
+
+  img.src = defaultUrl;
+  return 'デフォルト';
+}
+
+async function applyAllSelections() {
+  const playerName = await applySelectionToImage({
+    slot: 'player',
+    img: playerImg,
+    defaultUrl: playerUrl,
+    allowedPixelKinds: ['character']
+  });
+  const enemySmallName = await applySelectionToImage({
+    slot: 'enemy-small',
+    img: enemySmallImg,
+    defaultUrl: enemyUrl,
+    allowedPixelKinds: ['character', 'object']
+  });
+  const enemyMediumName = await applySelectionToImage({
+    slot: 'enemy-medium',
+    img: enemyMediumImg,
+    defaultUrl: enemyUrl,
+    allowedPixelKinds: ['character', 'object']
+  });
+  const enemyLargeName = await applySelectionToImage({
+    slot: 'enemy-large',
+    img: enemyLargeImg,
+    defaultUrl: enemyUrl,
+    allowedPixelKinds: ['character', 'object']
+  });
+
+  playerCurrentNameEl.textContent = playerName;
+  enemySmallCurrentNameEl.textContent = enemySmallName;
+  enemyMediumCurrentNameEl.textContent = enemyMediumName;
+  enemyLargeCurrentNameEl.textContent = enemyLargeName;
+}
+
+function renderPokemonList({ containerEl, slot, term }) {
+  const selection = getSelection(slot);
+  const selectedId = selection?.source === 'pokemon' ? selection.pokemonId : null;
+
+  const t = String(term || '').trim().toLowerCase();
+  const filtered = t
+    ? pokemonData.filter(
+        (p) =>
+          p.name.toLowerCase().includes(t) ||
+          p.id.includes(t) ||
+          String(p.author || '').toLowerCase().includes(t)
+      )
+    : pokemonData;
+
+  const list = filtered.slice(0, 60);
+
+  containerEl.innerHTML = '';
   if (list.length === 0) {
     const empty = document.createElement('div');
     empty.style.color = '#636e72';
     empty.style.fontWeight = '700';
-    empty.textContent = 'まだキャラがないよ（「ドット絵メーカー」で作って保存してね）';
-    characterList.appendChild(empty);
+    empty.textContent = '見つからなかった…（検索ワードを変えてみてね）';
+    containerEl.appendChild(empty);
     return;
   }
 
-  const selectedId = localStorage.getItem(CHARACTER_SELECTION_KEY);
+  list.forEach((pokemon) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pokemon-pick-item';
+    btn.classList.toggle('selected', selectedId === pokemon.id);
 
-  list.forEach((asset) => {
+    const img = document.createElement('img');
+    img.className = 'pokemon-thumb';
+    img.alt = '';
+    img.src = pokemon.image;
+
+    const meta = document.createElement('div');
+    const name = document.createElement('div');
+    name.className = 'pokemon-item-name';
+    name.textContent = pokemon.name;
+
+    const info = document.createElement('div');
+    info.className = 'pokemon-item-meta';
+    info.textContent = `No.${pokemon.id} / 作者: ${pokemon.author || '-'}`;
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+
+    btn.appendChild(img);
+    btn.appendChild(meta);
+
+    btn.addEventListener('click', async () => {
+      setSelection(slot, { source: 'pokemon', pokemonId: pokemon.id });
+      await refreshSettingsUI({ reloadPixels: false });
+    });
+
+    containerEl.appendChild(btn);
+  });
+}
+
+let cachedPlayerPixelAssets = [];
+let cachedEnemyPixelAssets = [];
+let settingsWired = false;
+
+async function loadPixelCaches() {
+  const [playerChars, enemyChars, enemyObjects] = await Promise.all([
+    listPixelAssets({ ownerId, kind: 'character' }),
+    listPixelAssets({ ownerId, kind: 'character' }),
+    listPixelAssets({ ownerId, kind: 'object' })
+  ]);
+
+  cachedPlayerPixelAssets = Array.isArray(playerChars) ? playerChars : [];
+
+  const map = new Map();
+  [...(enemyChars || []), ...(enemyObjects || [])].forEach((a) => map.set(a.id, a));
+  cachedEnemyPixelAssets = Array.from(map.values());
+}
+
+function renderPixelPickers() {
+  const playerSel = getSelection('player');
+  const esSel = getSelection('enemy-small');
+  const emSel = getSelection('enemy-medium');
+  const elSel = getSelection('enemy-large');
+
+  playerPixelListEl.innerHTML = '';
+  if (!cachedPlayerPixelAssets.length) {
+    const empty = document.createElement('div');
+    empty.style.color = '#636e72';
+    empty.style.fontWeight = '700';
+    empty.textContent = 'まだキャラがないよ（「ドット絵メーカー」で種類を「キャラ」にして保存してね）';
+    playerPixelListEl.appendChild(empty);
+  }
+  cachedPlayerPixelAssets.forEach((asset) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'character-item';
-    btn.classList.toggle('selected', selectedId === asset.id);
+    btn.classList.toggle('selected', playerSel?.source === 'pixel' && playerSel.assetId === asset.id);
 
     const img = document.createElement('img');
     img.className = 'character-thumb';
@@ -124,19 +305,138 @@ async function renderCharacterList() {
 
     meta.appendChild(name);
     meta.appendChild(info);
-
     btn.appendChild(img);
     btn.appendChild(meta);
-
     btn.addEventListener('click', async () => {
-      localStorage.setItem(CHARACTER_SELECTION_KEY, asset.id);
-      await applySelectedCharacterFromStorage();
-      await renderCharacterList();
-      closeModal();
+      setSelection('player', { source: 'pixel', assetId: asset.id });
+      await refreshSettingsUI({ reloadPixels: false });
     });
-
-    characterList.appendChild(btn);
+    playerPixelListEl.appendChild(btn);
   });
+
+  function renderEnemyPixelSlot(containerEl, slot, slotSel) {
+    containerEl.innerHTML = '';
+    if (!cachedEnemyPixelAssets.length) {
+      const empty = document.createElement('div');
+      empty.style.color = '#636e72';
+      empty.style.fontWeight = '700';
+      empty.textContent = 'まだドット絵がないよ（「ドット絵メーカー」で保存してね）';
+      containerEl.appendChild(empty);
+      return;
+    }
+    cachedEnemyPixelAssets.forEach((asset) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'character-item';
+      btn.classList.toggle('selected', slotSel?.source === 'pixel' && slotSel.assetId === asset.id);
+
+      const img = document.createElement('img');
+      img.className = 'character-thumb';
+      img.alt = '';
+      img.src = assetPreviewDataUrl(asset, 56);
+
+      const meta = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'character-item-name';
+      name.textContent = asset.name || '(no name)';
+
+      const info = document.createElement('div');
+      info.className = 'character-item-meta';
+      info.textContent = `${asset.width}×${asset.height}${asset.kind ? ` / ${asset.kind}` : ''}`;
+
+      meta.appendChild(name);
+      meta.appendChild(info);
+
+      btn.appendChild(img);
+      btn.appendChild(meta);
+
+      btn.addEventListener('click', async () => {
+        setSelection(slot, { source: 'pixel', assetId: asset.id });
+        await refreshSettingsUI({ reloadPixels: false });
+      });
+
+      containerEl.appendChild(btn);
+    });
+  }
+
+  renderEnemyPixelSlot(enemySmallPixelListEl, 'enemy-small', esSel);
+  renderEnemyPixelSlot(enemyMediumPixelListEl, 'enemy-medium', emSel);
+  renderEnemyPixelSlot(enemyLargePixelListEl, 'enemy-large', elSel);
+}
+
+function renderPokemonPickers() {
+  renderPokemonList({ containerEl: playerPokemonListEl, slot: 'player', term: playerPokemonSearchEl.value });
+  renderPokemonList({
+    containerEl: enemySmallPokemonListEl,
+    slot: 'enemy-small',
+    term: enemySmallPokemonSearchEl.value
+  });
+  renderPokemonList({
+    containerEl: enemyMediumPokemonListEl,
+    slot: 'enemy-medium',
+    term: enemyMediumPokemonSearchEl.value
+  });
+  renderPokemonList({
+    containerEl: enemyLargePokemonListEl,
+    slot: 'enemy-large',
+    term: enemyLargePokemonSearchEl.value
+  });
+}
+
+async function refreshSettingsUI({ reloadPixels }) {
+  await applyAllSelections();
+  if (reloadPixels) await loadPixelCaches();
+  renderPixelPickers();
+  renderPokemonPickers();
+}
+
+function pauseGame() {
+  isPaused = true;
+  if (animationId) cancelAnimationFrame(animationId);
+  animationId = null;
+}
+
+function resumeGame() {
+  isPaused = false;
+  if (!isGameOver) update();
+}
+
+function wireSettingsEventsOnce() {
+  if (settingsWired) return;
+  settingsWired = true;
+
+  openSettingsBtn.addEventListener('click', async () => {
+    pauseGame();
+    await refreshSettingsUI({ reloadPixels: true });
+    openSettings();
+  });
+
+  closeSettingsBtn.addEventListener('click', () => {
+    closeSettings();
+    resumeGame();
+  });
+
+  playerUseDefaultBtn.addEventListener('click', async () => {
+    setSelection('player', { source: 'default' });
+    await refreshSettingsUI({ reloadPixels: false });
+  });
+  enemySmallUseDefaultBtn.addEventListener('click', async () => {
+    setSelection('enemy-small', { source: 'default' });
+    await refreshSettingsUI({ reloadPixels: false });
+  });
+  enemyMediumUseDefaultBtn.addEventListener('click', async () => {
+    setSelection('enemy-medium', { source: 'default' });
+    await refreshSettingsUI({ reloadPixels: false });
+  });
+  enemyLargeUseDefaultBtn.addEventListener('click', async () => {
+    setSelection('enemy-large', { source: 'default' });
+    await refreshSettingsUI({ reloadPixels: false });
+  });
+
+  playerPokemonSearchEl.addEventListener('input', () => renderPokemonPickers());
+  enemySmallPokemonSearchEl.addEventListener('input', () => renderPokemonPickers());
+  enemyMediumPokemonSearchEl.addEventListener('input', () => renderPokemonPickers());
+  enemyLargePokemonSearchEl.addEventListener('input', () => renderPokemonPickers());
 }
 
 // Player object
@@ -161,7 +461,7 @@ let obstacleTimer = 0;
 
 // Input handling
 function jump() {
-    if (player.grounded && !isGameOver) {
+    if (player.grounded && !isGameOver && !isPaused) {
         player.dy = -player.jumpForce;
         player.grounded = false;
     }
@@ -184,20 +484,24 @@ canvas.addEventListener('click', jump);
 restartBtn.addEventListener('click', resetGame);
 
 function spawnObstacle() {
-    // Random size variation
-    const size = 40 + Math.random() * 30;
+    // small / medium / large
+    const r = Math.random();
+    const type = r < 0.55 ? 'small' : r < 0.88 ? 'medium' : 'large';
+    const baseSize = type === 'small' ? 42 : type === 'medium' ? 56 : 72;
+    const size = baseSize + (Math.random() * 6 - 3);
 
     obstacles.push({
         x: canvas.width,
         y: player.groundY - size,
         width: size,
         height: size,
-        speed: gameSpeed
+        speed: gameSpeed,
+        type
     });
 }
 
 function update() {
-    if (isGameOver) return;
+    if (isGameOver || isPaused) return;
 
     // Clear canvas & Draw Sky
     ctx.fillStyle = '#87CEEB'; // Sky blue
@@ -249,8 +553,9 @@ function update() {
         obs.x -= obs.speed;
 
         // Draw Obstacle
-        if (enemyImg.complete && enemyImg.naturalWidth > 0) {
-            ctx.drawImage(enemyImg, obs.x, obs.y, obs.width, obs.height);
+        const img = obs.type === 'small' ? enemySmallImg : obs.type === 'medium' ? enemyMediumImg : enemyLargeImg;
+        if (img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(img, obs.x, obs.y, obs.width, obs.height);
         } else {
             ctx.fillStyle = 'green';
             ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
@@ -285,11 +590,13 @@ function gameOver() {
     isGameOver = true;
     finalScoreEl.textContent = score;
     gameOverScreen.classList.remove('hidden');
-    cancelAnimationFrame(animationId);
+    if (animationId) cancelAnimationFrame(animationId);
+    animationId = null;
 }
 
 function resetGame() {
     isGameOver = false;
+    isPaused = false;
     score = 0;
     gameSpeed = 5;
     scoreEl.textContent = '0';
@@ -304,6 +611,7 @@ function resetGame() {
 // Ensure DOM content is loaded? script is usually defer or at end of body.
 // But to be safe if images trigger load events.
 (async function init() {
-  await applySelectedCharacterFromStorage();
+  wireSettingsEventsOnce();
+  await applyAllSelections();
   update();
 })();
