@@ -75,6 +75,14 @@ const games = [
     link: '/games/warp-jump/'
   },
   {
+    id: 'invaders',
+    title: 'インベーダー',
+    desc: 'したからうってたおそう！',
+    color: '#00cec9',
+    icon: '🛸',
+    link: '/games/invaders/'
+  },
+  {
     id: 'berry-bounce',
     title: 'ベリーバウンス',
     desc: 'ベリーをキャッチ！💣はよけよう',

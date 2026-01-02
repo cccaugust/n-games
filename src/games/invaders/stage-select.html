@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ステージ選択 | インベーダー</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body class="iv-safe">
+  <div class="container">
+    <div class="iv-topbar">
+      <a class="iv-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+      <span class="iv-chip">ステージ選択</span>
+      <span class="iv-chip" id="stageCount">0こ</span>
+    </div>
+
+    <div class="iv-page" style="padding: 0;">
+      <div class="iv-panel" style="margin-top: 12px;">
+        <div class="iv-row">
+          <div class="left">
+            <button class="btn-primary" id="newBtn">新規作成</button>
+            <button class="iv-tool-btn" id="refreshBtn">更新</button>
+          </div>
+          <div class="right">
+            <span class="iv-chip">ステージを選んでスタート！</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div class="iv-grid" id="stageList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="iv-overlay" id="overlay">
+    <div class="iv-overlay-card">
+      <h2 class="iv-overlay-title" id="overlayTitle">インベーダー</h2>
+      <p class="iv-overlay-text" id="overlayText"></p>
+      <div class="iv-overlay-extra" id="overlayExtra"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <script type="module" src="./stage-select.js"></script>
+</body>
+
+</html>
+
