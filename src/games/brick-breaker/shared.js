@@ -101,6 +101,16 @@ export function upsertStageCache(stage) {
   return list;
 }
 
+function replaceStageCacheByName(oldName, stage) {
+  const s = normalizeStage(stage);
+  const list = loadAllStagesCache().filter(x => x.name !== oldName);
+  const idx = list.findIndex(x => x.name === s.name);
+  if (idx >= 0) list[idx] = s;
+  else list.unshift(s);
+  saveAllStagesCache(list);
+  return list;
+}
+
 export function getDefaultStages() {
   // 0: empty, 1: normal, 2: tough, 3: split, 4: soft, 5: wall
   const a = makeEmptyStage('はじめて');
@@ -165,7 +175,7 @@ export async function refreshStageCacheFromSupabase({ showError = false, onError
   }
 }
 
-export async function upsertStageToSupabase(stage) {
+export async function createStageToSupabase(stage) {
   const s = normalizeStage(stage);
   const p = getCurrentPlayer();
   const payload = {
@@ -175,12 +185,36 @@ export async function upsertStageToSupabase(stage) {
     updated_at: new Date().toISOString()
   };
 
-  const { error } = await supabase
-    .from(STAGES_TABLE)
-    .upsert(payload, { onConflict: 'name' });
+  const { error } = await supabase.from(STAGES_TABLE).insert(payload);
   if (error) throw error;
 
   upsertStageCache(s);
+  return s;
+}
+
+export async function updateStageToSupabaseByName(originalName, stage) {
+  const s = normalizeStage(stage);
+  const p = getCurrentPlayer();
+  const payload = {
+    name: s.name,
+    data: s,
+    created_by: p?.id ?? null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await supabase
+    .from(STAGES_TABLE)
+    .update(payload)
+    .eq('name', originalName)
+    .select('name');
+  if (error) throw error;
+  if (!Array.isArray(data) || data.length === 0) {
+    const notFound = new Error('stage not found');
+    notFound.code = 'STAGE_NOT_FOUND';
+    throw notFound;
+  }
+
+  replaceStageCacheByName(originalName, s);
   return s;
 }
 
