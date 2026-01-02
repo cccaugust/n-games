@@ -96,6 +96,12 @@ let streak = 0;
 let locked = false;
 let lastDragAt = 0;
 
+function hueForChar(ch) {
+  // stable "pop" color per character
+  const cp = ch.codePointAt(0) ?? 0;
+  return 30 + (cp * 37) % 330; // avoid too-red extremes
+}
+
 function uniq(arr) {
   return [...new Set(arr)];
 }
@@ -227,7 +233,10 @@ function renderSlots() {
     const tileId = slots[idx];
     btn.classList.toggle('filled', Boolean(tileId));
     btn.classList.remove('correct', 'wrong', 'over');
-    btn.textContent = tileId ? (tiles.find(t => t.id === tileId)?.ch ?? '') : '';
+    const ch = tileId ? (tiles.find(t => t.id === tileId)?.ch ?? '') : '';
+    btn.textContent = ch;
+    if (ch) btn.style.setProperty('--h', String(hueForChar(ch)));
+    else btn.style.removeProperty('--h');
   });
 }
 
@@ -244,6 +253,7 @@ function renderPool() {
     b.className = 'tile';
     b.textContent = t.ch;
     b.dataset.tileId = t.id;
+    b.style.setProperty('--h', String(hueForChar(t.ch)));
     b.setAttribute('aria-disabled', placed ? 'true' : 'false');
     b.disabled = placed || locked;
     if (t.id === selectedTileId && !placed && !locked) b.classList.add('selected');
@@ -272,15 +282,37 @@ function firstEmptySlotIndex() {
   return slots.findIndex(x => x == null);
 }
 
+function pulseSlot(slotIndex) {
+  const el = els.slots.querySelector(`.slot[data-slot="${slotIndex}"]`);
+  if (!el) return;
+  el.classList.remove('placed');
+  // reflow to restart animation
+  void el.offsetWidth;
+  el.classList.add('placed');
+}
+
 function placeTileIntoSlot(tileId, slotIndex) {
   if (locked) return;
   if (slotIndex < 0 || slotIndex > 3) return;
-  if (isTilePlaced(tileId)) return;
-  if (slots[slotIndex] != null) return;
+
+  const fromIdx = slots.indexOf(tileId);
+  const targetId = slots[slotIndex];
+
+  // dropping onto the same slot = no-op
+  if (fromIdx === slotIndex) return;
+
+  // If the tile was already in another slot, swap them.
+  // Otherwise, simply replace the target (target goes back to pool automatically).
+  if (fromIdx !== -1) {
+    slots[fromIdx] = targetId ?? null;
+  }
   slots[slotIndex] = tileId;
+
   clearSelection();
   renderSlots();
   renderPool();
+  pulseSlot(slotIndex);
+  if (fromIdx !== -1) pulseSlot(fromIdx);
   checkIfComplete();
 }
 
@@ -385,6 +417,7 @@ function setupDrag(tileEl, tileId) {
     const g = document.createElement('div');
     g.className = 'tile drag-ghost';
     g.textContent = ch;
+    g.style.setProperty('--h', String(hueForChar(ch)));
     g.style.width = `${tileEl.getBoundingClientRect().width}px`;
     g.style.height = `${tileEl.getBoundingClientRect().height}px`;
     document.body.appendChild(g);
@@ -430,6 +463,7 @@ function setupDrag(tileEl, tileId) {
       // drop anywhere else: convenience place into first empty slot
       const empty = firstEmptySlotIndex();
       if (empty !== -1) placeTileIntoSlot(tileId, empty);
+      else toast('マスがいっぱい！ うえにかさねると いれかえできるよ');
     }
   }
 
