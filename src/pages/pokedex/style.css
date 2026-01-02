@@ -100,6 +100,23 @@ body {
     color: var(--accent-blue);
 }
 
+.pick-avatar-btn {
+    appearance: none;
+    border: none;
+    background: var(--primary-color);
+    color: var(--bg-color);
+    font-weight: 900;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 12px var(--glow-color);
+    white-space: nowrap;
+}
+
+.pick-avatar-btn:active {
+    transform: translateY(1px);
+}
+
 .pokedex-container {
     max-width: 1000px;
     margin: 40px auto;

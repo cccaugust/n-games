@@ -44,6 +44,21 @@ button {
   transition: all 0.2s ease;
 }
 
+/* Avatar: emoji or image */
+.ng-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+img.ng-avatar {
+  border-radius: 10px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #fff;
+}
+
 .btn-primary {
   background-color: var(--primary-color);
   color: white;

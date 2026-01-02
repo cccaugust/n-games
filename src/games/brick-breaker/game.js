@@ -1,6 +1,7 @@
 import { getCurrentPlayer } from '../../js/auth.js';
 import { saveScore, getRankings } from '../../js/score.js';
 import { supabase } from '../../js/supabaseClient.js';
+import { avatarToHtml } from '../../js/avatar.js';
 
 // =========================================================
 // ブロックくずし（ステージ選択 / ブロック種類 / コンティニュー / ステージエディタ）
@@ -984,7 +985,7 @@ async function finishRunAndShowRanking() {
     <div style="display: flex; justify-content: space-between; width: 100%; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.15);">
       <div style="display: flex; align-items: center; gap: 8px; min-width:0;">
         <span style="font-weight: 900; width: 26px;">${i + 1}.</span>
-        <span style="font-size: 1.5rem;">${escapeHtml(r.avatar)}</span>
+        <span style="display:inline-flex; align-items:center;">${avatarToHtml(r.avatar || '👤', { size: 24, className: 'ng-avatar', alt: '' })}</span>
         <span style="overflow: hidden; text-overflow: ellipsis; max-width: 160px; white-space: nowrap;">${escapeHtml(r.name)}</span>
       </div>
       <span style="font-weight: 900;">${escapeHtml(r.score)}</span>

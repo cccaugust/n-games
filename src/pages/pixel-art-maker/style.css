@@ -73,6 +73,21 @@ body.modal-open {
   font-size: 0.9rem;
 }
 
+.pm-pill-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6px;
+  line-height: 1;
+}
+
+img.pm-pill-avatar {
+  border-radius: 6px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: #fff;
+}
+
 .btn-link {
   text-decoration: none;
   background: #ecf0f1;
