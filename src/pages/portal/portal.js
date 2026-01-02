@@ -99,6 +99,14 @@ const games = [
     link: '/pages/mon-paint/'
   },
   {
+    id: 'pixel-art-maker',
+    title: 'ドット絵メーカー',
+    desc: 'ドットでキャラやタイルをつくろう！',
+    color: '#dfe6ff',
+    icon: '🧩',
+    link: '/pages/pixel-art-maker/'
+  },
+  {
     id: 'mon-survivor',
     title: 'モンスターサバイバー',
     desc: '大量の敵をなぎ倒せ！',

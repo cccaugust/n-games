@@ -5,6 +5,12 @@ const finalScoreEl = document.getElementById('final-score');
 const gameOverScreen = document.getElementById('game-over');
 const restartBtn = document.getElementById('restart-btn');
 
+import { getCurrentPlayer, requireAuth } from '../../js/auth.js';
+import { resolvePath } from '../../js/config.js';
+import { assetPreviewDataUrl, assetToPngDataUrl, getPixelAsset, listPixelAssets } from '../../js/pixelAssets.js';
+
+requireAuth();
+
 // Game state
 let isGameOver = false;
 let score = 0;
@@ -19,6 +25,119 @@ const playerImg = new Image();
 playerImg.src = playerUrl;
 const enemyImg = new Image();
 enemyImg.src = enemyUrl;
+
+// Character picker UI
+const selectedCharacterNameEl = document.getElementById('selectedCharacterName');
+const openCharacterBtn = document.getElementById('openCharacterBtn');
+const characterModal = document.getElementById('characterModal');
+const closeCharacterBtn = document.getElementById('closeCharacterBtn');
+const useDefaultBtn = document.getElementById('useDefaultBtn');
+const goToMakerLink = document.getElementById('goToMakerLink');
+const characterList = document.getElementById('characterList');
+
+const playerSession = getCurrentPlayer();
+const ownerId = playerSession?.id != null ? String(playerSession.id) : 'unknown';
+const CHARACTER_SELECTION_KEY = `n-games-selected-character-${ownerId}`;
+
+goToMakerLink.href = resolvePath('/pages/pixel-art-maker/');
+
+function openModal() {
+  characterModal.classList.remove('hidden');
+  characterModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeModal() {
+  characterModal.classList.add('hidden');
+  characterModal.setAttribute('aria-hidden', 'true');
+}
+
+openCharacterBtn.addEventListener('click', async () => {
+  await renderCharacterList();
+  openModal();
+});
+closeCharacterBtn.addEventListener('click', closeModal);
+characterModal.addEventListener('click', (e) => {
+  if (e.target === characterModal) closeModal();
+});
+
+useDefaultBtn.addEventListener('click', () => {
+  localStorage.removeItem(CHARACTER_SELECTION_KEY);
+  selectedCharacterNameEl.textContent = 'デフォルト';
+  playerImg.src = playerUrl;
+  closeModal();
+});
+
+async function applySelectedCharacterFromStorage() {
+  const assetId = localStorage.getItem(CHARACTER_SELECTION_KEY);
+  if (!assetId) {
+    selectedCharacterNameEl.textContent = 'デフォルト';
+    playerImg.src = playerUrl;
+    return;
+  }
+
+  const asset = await getPixelAsset(assetId);
+  if (!asset || asset.ownerId !== ownerId || asset.kind !== 'character') {
+    localStorage.removeItem(CHARACTER_SELECTION_KEY);
+    selectedCharacterNameEl.textContent = 'デフォルト';
+    playerImg.src = playerUrl;
+    return;
+  }
+
+  selectedCharacterNameEl.textContent = asset.name || '（キャラ）';
+  playerImg.src = assetToPngDataUrl(asset);
+}
+
+async function renderCharacterList() {
+  const list = await listPixelAssets({ ownerId, kind: 'character' });
+  characterList.innerHTML = '';
+
+  if (list.length === 0) {
+    const empty = document.createElement('div');
+    empty.style.color = '#636e72';
+    empty.style.fontWeight = '700';
+    empty.textContent = 'まだキャラがないよ（「ドット絵メーカー」で作って保存してね）';
+    characterList.appendChild(empty);
+    return;
+  }
+
+  const selectedId = localStorage.getItem(CHARACTER_SELECTION_KEY);
+
+  list.forEach((asset) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'character-item';
+    btn.classList.toggle('selected', selectedId === asset.id);
+
+    const img = document.createElement('img');
+    img.className = 'character-thumb';
+    img.alt = '';
+    img.src = assetPreviewDataUrl(asset, 56);
+
+    const meta = document.createElement('div');
+    const name = document.createElement('div');
+    name.className = 'character-item-name';
+    name.textContent = asset.name || '(no name)';
+
+    const info = document.createElement('div');
+    info.className = 'character-item-meta';
+    info.textContent = `${asset.width}×${asset.height}`;
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+
+    btn.appendChild(img);
+    btn.appendChild(meta);
+
+    btn.addEventListener('click', async () => {
+      localStorage.setItem(CHARACTER_SELECTION_KEY, asset.id);
+      await applySelectedCharacterFromStorage();
+      await renderCharacterList();
+      closeModal();
+    });
+
+    characterList.appendChild(btn);
+  });
+}
 
 // Player object
 const player = {
@@ -184,4 +303,7 @@ function resetGame() {
 // Start game
 // Ensure DOM content is loaded? script is usually defer or at end of body.
 // But to be safe if images trigger load events.
-update();
+(async function init() {
+  await applySelectedCharacterFromStorage();
+  update();
+})();

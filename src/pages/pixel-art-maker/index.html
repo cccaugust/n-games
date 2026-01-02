@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ドット絵メーカー | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-title">ドット絵メーカー</div>
+          <div class="brand-sub">つくる → ためる → ゲームでつかう（準備中）</div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="player-pill" id="playerPill">Player</div>
+          <a class="btn-link" id="backToPortal" href="#">ポータルへ</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="container app">
+      <div class="workspace">
+        <section class="card canvas-panel">
+          <div class="canvas-head">
+            <div class="canvas-head-left">
+              <div class="small-label">キャンバス</div>
+              <div class="canvas-meta" id="canvasMeta">-</div>
+            </div>
+
+            <div class="canvas-head-right">
+              <label class="inline">
+                <span>ズーム</span>
+                <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" />
+              </label>
+              <label class="inline">
+                <input id="gridToggle" type="checkbox" checked />
+                <span>グリッド</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="canvas-scroll" id="canvasScroll">
+            <div class="canvas-frame grid" id="canvasFrame">
+              <canvas id="pixelCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="hint">
+            PC: クリック/ドラッグで描く（右のツール切り替え） / スマホ: 指で描く（スクロール暴発しないように調整済み）
+          </div>
+        </section>
+
+        <aside class="sidebar">
+          <section class="card controls">
+            <div class="section-title">作品</div>
+
+            <div class="row">
+              <label class="field">
+                <span>なまえ</span>
+                <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
+              </label>
+            </div>
+
+            <div class="row row-2">
+              <label class="field">
+                <span>種類</span>
+                <select id="kindSelect">
+                  <option value="character">キャラ</option>
+                  <option value="object">モノ</option>
+                  <option value="tile">地形</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>サイズ</span>
+                <select id="sizeSelect">
+                  <option value="16x16">16×16</option>
+                  <option value="32x16">32×16</option>
+                  <option value="16x32">16×32</option>
+                  <option value="32x32">32×32</option>
+                  <option value="64x64">64×64</option>
+                  <option value="128x128">128×128</option>
+                  <option value="256x256">256×256</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="row">
+              <div class="tool-group">
+                <button class="tool-btn active" id="toolPen" type="button">ペン</button>
+                <button class="tool-btn" id="toolEraser" type="button">消しゴム</button>
+                <button class="tool-btn" id="toolPicker" type="button">スポイト</button>
+              </div>
+            </div>
+
+            <div class="row row-2">
+              <label class="field">
+                <span>色</span>
+                <input id="colorInput" type="color" value="#333333" />
+              </label>
+              <button class="btn-sub" id="undoBtn" type="button">もどす</button>
+              <button class="btn-sub" id="redoBtn" type="button">やりなおし</button>
+            </div>
+
+            <div class="row actions">
+              <button class="btn-primary-solid" id="newBtn" type="button">＋ 新規</button>
+              <button class="btn-primary-solid" id="saveBtn" type="button">保存</button>
+              <button class="btn-sub" id="duplicateBtn" type="button">複製</button>
+              <button class="btn-danger" id="deleteBtn" type="button">削除</button>
+            </div>
+
+            <div class="row">
+              <button class="btn-sub" id="exportBtn" type="button">PNGを書き出す</button>
+            </div>
+
+            <div class="tiny-note" id="statusText">-</div>
+          </section>
+
+          <section class="card assets">
+            <div class="section-title">保存した作品</div>
+            <div class="assets-list" id="assetsList"></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <script type="module" src="./script.js"></script>
+  </body>
+</html>
+

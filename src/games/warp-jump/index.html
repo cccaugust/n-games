@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Warp Monster Jump</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,6 +12,11 @@
     <div id="game-container">
         <h1>Warp Monster Jump!</h1>
         <p>TAP or SPACE to Jump!</p>
+        <div class="character-bar">
+            <div class="character-label">キャラ：</div>
+            <div class="character-name" id="selectedCharacterName">デフォルト</div>
+            <button class="character-btn" id="openCharacterBtn" type="button">えらぶ</button>
+        </div>
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         <div id="score-board">Score: <span id="score">0</span></div>
         <div id="game-over" class="hidden">
@@ -19,6 +24,24 @@
             <p>Score: <span id="final-score">0</span></p>
             <button id="restart-btn">Try Again</button>
             <a href="../../pages/portal/portal.html" class="home-btn">🏠 Back to Portal</a>
+        </div>
+    </div>
+
+    <!-- Character Picker Modal -->
+    <div class="modal hidden" id="characterModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="characterModalTitle">
+            <div class="modal-head">
+                <div class="modal-title" id="characterModalTitle">キャラをえらぶ</div>
+                <button class="modal-close" id="closeCharacterBtn" type="button">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-actions">
+                    <button class="modal-btn" id="useDefaultBtn" type="button">デフォルトにする</button>
+                    <a class="modal-link" id="goToMakerLink" href="#">ドット絵メーカーへ</a>
+                </div>
+                <div class="character-list" id="characterList"></div>
+                <div class="modal-note" id="characterNote">※「ドット絵メーカー」で種類を「キャラ」にして保存するとここに出るよ</div>
+            </div>
         </div>
     </div>
     <script type="module" src="./script.js"></script>
