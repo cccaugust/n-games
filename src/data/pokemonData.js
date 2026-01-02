@@ -17,9 +17,9 @@ import gaiadriverImg from '../pages/pokedex/assets/gaiadriver.png';
 import prominessImg from '../pages/pokedex/assets/prominess.png';
 import abysswalkerImg from '../pages/pokedex/assets/abysswalker.png';
 import plasmakaiserImg from '../pages/pokedex/assets/plasmakaiser.png';
-import cupslimeImg from '../pages/pokedex/assets/cupslime.svg';
-import strawcupslimeImg from '../pages/pokedex/assets/strawcupslime.svg';
-import blenderslimeImg from '../pages/pokedex/assets/blenderslime.svg';
+import cupslimeImg from '../pages/pokedex/assets/cupslime.png';
+import strawcupslimeImg from '../pages/pokedex/assets/strawcupslime.png';
+import blenderslimeImg from '../pages/pokedex/assets/blenderslime.png';
 
 
 // Pokemon Data
