@@ -7,11 +7,10 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
-        // Background (fit to current game size, and keep fitting on resize)
-        this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
+        // Background (always match viewport)
+        this.bg = this.add.image(0, 0, 'background');
+        this.bg.setOrigin(0.5, 0.5);
         this.bg.setScrollFactor(0);
-        this.fitBackgroundToScreen();
-        this.scale.on('resize', this.fitBackgroundToScreen, this);
 
         // Groups
         this.balls = this.physics.add.group();
@@ -34,25 +33,44 @@ export default class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.balls, this.pokemons, this.hitPokemon, null, this);
 
         // Player Position Visual (Launcher)
-        const width = this.scale.width;
-        const height = this.scale.height;
-        this.playerPos = new Phaser.Math.Vector2(width / 2, height - 70);
-        this.add.circle(this.playerPos.x, this.playerPos.y, 10, 0xffffff);
+        this.playerPos = new Phaser.Math.Vector2(0, 0);
+        this.launcherDot = this.add.circle(0, 0, 10, 0xffffff);
+
+        // Initial responsive layout + follow-up on resize
+        this.applyResponsiveLayout({ width: this.scale.width, height: this.scale.height });
+        this.scale.on('resize', this.applyResponsiveLayout, this);
     }
 
-    fitBackgroundToScreen(gameSize) {
-        if (!this.bg || !this.bg.active) return;
+    applyResponsiveLayout(gameSize) {
+        if (!gameSize) return;
 
-        const width = gameSize?.width ?? this.scale.width;
-        const height = gameSize?.height ?? this.scale.height;
+        const width = gameSize.width ?? this.scale.width;
+        const height = gameSize.height ?? this.scale.height;
 
-        this.bg.setPosition(width / 2, height / 2);
+        // Update physics world bounds to match the resized viewport
+        if (this.physics?.world) {
+            this.physics.world.setBounds(0, 0, width, height);
+        }
 
-        // Cover the whole screen (no gaps). Keeps aspect ratio; may crop edges slightly.
-        const scaleX = width / this.bg.width;
-        const scaleY = height / this.bg.height;
-        const scale = Math.max(scaleX, scaleY);
-        this.bg.setScale(scale);
+        // Background: stretch to fill (no letterboxing, no gaps)
+        if (this.bg && this.bg.active) {
+            this.bg.setPosition(width / 2, height / 2);
+            this.bg.setDisplaySize(width, height);
+        }
+
+        // Responsive sizes (tuned for mobile readability)
+        // - Ball: clearly visible but not too large
+        // - Heart: readable above pokemon, with spacing that scales with size
+        this.ballSize = Phaser.Math.Clamp(width * 0.085, 44, 84);
+        this.heartSize = Phaser.Math.Clamp(width * 0.045, 20, 42);
+        this.heartGap = this.heartSize + Phaser.Math.Clamp(width * 0.01, 6, 12);
+        this.heartYOffset = Phaser.Math.Clamp(height * 0.05, 44, 74);
+
+        // Launcher position
+        this.playerPos.set(width / 2, height - Phaser.Math.Clamp(height * 0.055, 60, 86));
+        if (this.launcherDot && this.launcherDot.active) {
+            this.launcherDot.setPosition(this.playerPos.x, this.playerPos.y);
+        }
     }
 
     update() {
@@ -70,13 +88,13 @@ export default class MainScene extends Phaser.Scene {
 
             // Keep UI hearts following the pokemon sprite
             if (poke.hearts) {
-                const gap = 20;
+                const gap = this.heartGap ?? 20;
                 const startXHeart = -((poke.maxHp - 1) * gap) / 2;
                 for (let i = 0; i < poke.hearts.length; i++) {
                     const heart = poke.hearts[i];
                     if (!heart || !heart.active) continue;
                     heart.x = poke.x + startXHeart + (i * gap);
-                    heart.y = poke.y - 60;
+                    heart.y = poke.y - (this.heartYOffset ?? 60);
                 }
             }
 
@@ -88,7 +106,12 @@ export default class MainScene extends Phaser.Scene {
 
     shootBall(pointer) {
         const ball = this.balls.create(this.playerPos.x, this.playerPos.y, 'monster_ball');
-        ball.setScale(0.1);
+        const size = this.ballSize ?? 64;
+        ball.setDisplaySize(size, size);
+        // Make the physics body match the displayed size
+        if (ball.body) {
+            ball.body.setSize(size, size, true);
+        }
 
         // Calculate velocity
         const angle = Phaser.Math.Angle.Between(this.playerPos.x, this.playerPos.y, pointer.x, pointer.y);
@@ -125,8 +148,9 @@ export default class MainScene extends Phaser.Scene {
 
         // Hearts (non-physics, follow in update)
         for (let i = 0; i < maxHp; i++) {
-            const heart = this.add.image(poke.x, poke.y - 60, 'heart');
-            heart.setScale(0.04);
+            const heart = this.add.image(poke.x, poke.y - (this.heartYOffset ?? 60), 'heart');
+            const h = this.heartSize ?? 28;
+            heart.setDisplaySize(h, h);
             heart.setDepth(10);
             poke.hearts.push(heart);
         }
@@ -176,10 +200,16 @@ export default class MainScene extends Phaser.Scene {
 
     catchPokemon(poke) {
         // Particles - One shot
+        const size = this.ballSize ?? 64;
+        const tex = this.textures.get('monster_ball');
+        const source = tex?.getSourceImage?.();
+        const baseW = source?.width || 1024;
+        const startScale = Phaser.Math.Clamp((size / baseW) * 1.25, 0.22, 0.75);
+
         const particles = this.add.particles(poke.x, poke.y, 'monster_ball', {
             speed: { min: 160, max: 480 },
             // Make the effect clearly visible on mobile/high-DPI screens
-            scale: { start: 0.28, end: 0 },
+            scale: { start: startScale, end: 0 },
             alpha: { start: 1, end: 0 },
             lifespan: 700,
             quantity: 28,

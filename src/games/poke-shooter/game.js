@@ -7,7 +7,9 @@ import HudScene from './scenes/HudScene.js';
 const config = {
     type: Phaser.AUTO,
     scale: {
-        mode: Phaser.Scale.FIT,
+        // Match the actual viewport size to avoid letterboxing issues on mobile.
+        // (We handle responsive positioning/sizing inside scenes on resize.)
+        mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 720,
         height: 1280
