@@ -115,7 +115,22 @@ class MainScene extends Phaser.Scene {
         // Star (Coin)
         const starG = this.make.graphics({ x: 0, y: 0, add: false });
         starG.fillStyle(0xffdd59, 1);
-        starG.fillStar(15, 15, 5, 8, 15);
+        // Phaser.Graphics には fillStar() が無いので、星形ポリゴンを自前で描く
+        const cx = 15;
+        const cy = 15;
+        const spikes = 5;
+        const outerRadius = 14;
+        const innerRadius = 6;
+        const points = [];
+        let rot = (Math.PI / 2) * 3;
+        const step = Math.PI / spikes;
+        for (let i = 0; i < spikes; i++) {
+            points.push({ x: cx + Math.cos(rot) * outerRadius, y: cy + Math.sin(rot) * outerRadius });
+            rot += step;
+            points.push({ x: cx + Math.cos(rot) * innerRadius, y: cy + Math.sin(rot) * innerRadius });
+            rot += step;
+        }
+        starG.fillPoints(points, true);
         starG.generateTexture('star', 30, 30);
 
         // Obstacles (generate once)
@@ -148,7 +163,9 @@ class MainScene extends Phaser.Scene {
 
         // Input Handling
         this.input.on('pointerdown', this.handleInput, this);
-        this.input.keyboard.on('keydown-SPACE', this.handleInput, this);
+        if (this.input.keyboard) {
+            this.input.keyboard.on('keydown-SPACE', this.handleInput, this);
+        }
 
         // Game Groups
         this.obstacles = this.physics.add.group();
