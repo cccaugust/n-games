@@ -4,8 +4,10 @@
 
 import { getCurrentPlayer } from '../../js/auth.js';
 import { saveScore, getRankings } from '../../js/score.js';
+import { supabase } from '../../js/supabaseClient.js';
 
 const SIZE = 64;
+// Supabase保存のローカルキャッシュ（オフライン/初回表示用）
 const STORAGE_KEY = 'ngames.mazes.v1';
 const BEST_TIME_KEY = 'ngames.mazes.bestTime.v1';
 
@@ -86,7 +88,7 @@ function normalizeMaze(maze) {
   return safe;
 }
 
-function loadAllMazes() {
+function loadAllMazesCache() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
@@ -98,18 +100,74 @@ function loadAllMazes() {
   }
 }
 
-function saveAllMazes(list) {
+function saveAllMazesCache(list) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-function upsertMaze(maze) {
-  const list = loadAllMazes();
+function upsertMazeCache(maze) {
+  const list = loadAllMazesCache();
   const m = normalizeMaze(maze);
   const idx = list.findIndex(x => x.name === m.name);
   if (idx >= 0) list[idx] = m;
   else list.unshift(m);
-  saveAllMazes(list);
+  saveAllMazesCache(list);
   return list;
+}
+
+async function fetchAllMazesFromSupabase() {
+  const { data, error } = await supabase
+    .from('mazes')
+    .select('name,data,updated_at')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw error;
+  const rows = Array.isArray(data) ? data : [];
+  return rows.map(row => normalizeMaze({ ...(row.data || {}), name: row.name }));
+}
+
+async function refreshMazeCacheFromSupabase({ showError = false } = {}) {
+  try {
+    const list = await fetchAllMazesFromSupabase();
+    saveAllMazesCache(list);
+    return list;
+  } catch (e) {
+    console.error('Failed to fetch mazes from Supabase:', e);
+    if (showError) showOverlay('通信エラー', 'Supabaseから迷路を読みこめなかったよ。ネットワークを確認してね。');
+    return loadAllMazesCache();
+  }
+}
+
+async function upsertMazeToSupabase(maze) {
+  const m = normalizeMaze(maze);
+  const p = getCurrentPlayer();
+
+  const payload = {
+    name: m.name,
+    data: m,
+    created_by: p?.id ?? null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await supabase
+    .from('mazes')
+    .upsert(payload, { onConflict: 'name' });
+
+  if (error) throw error;
+  // cache update (optimistic)
+  upsertMazeCache(m);
+  return m;
+}
+
+async function deleteMazeFromSupabaseByName(name) {
+  const { error } = await supabase
+    .from('mazes')
+    .delete()
+    .eq('name', name);
+  if (error) throw error;
+
+  const after = loadAllMazesCache().filter(x => x.name !== name);
+  saveAllMazesCache(after);
+  return after;
 }
 
 function getDefaultMazes() {
@@ -324,20 +382,35 @@ toolButtons.forEach(btn => {
 });
 
 saveBtn.addEventListener('click', () => {
-  const name = (mazeNameEl.value || '').trim();
-  if (!name) {
-    showOverlay('名前がいるよ', '「名前」を入れてから保存してね。');
-    return;
-  }
-  currentMaze.name = name;
-  upsertMaze(currentMaze);
-  showOverlay('保存したよ', `「${currentMaze.name}」を保存しました。`);
-  syncMazeSelect(currentMaze.name);
+  void (async () => {
+    const name = (mazeNameEl.value || '').trim();
+    if (!name) {
+      showOverlay('名前がいるよ', '「名前」を入れてから保存してね。');
+      return;
+    }
+    const prevDisabled = saveBtn.disabled;
+    saveBtn.disabled = true;
+    try {
+      currentMaze.name = name;
+      showOverlay('保存中…', 'Supabaseに保存しているよ。');
+      await upsertMazeToSupabase(currentMaze);
+      await refreshMazeCacheFromSupabase();
+      showOverlay('保存したよ', `「${currentMaze.name}」を保存しました。`);
+      syncMazeSelect(currentMaze.name);
+    } catch (e) {
+      console.error(e);
+      showOverlay('保存できなかった…', 'Supabaseに保存できなかったよ。');
+    } finally {
+      saveBtn.disabled = prevDisabled;
+    }
+  })();
 });
 
 loadBtn.addEventListener('click', () => {
-  ensureMazes();
-  openLibrary();
+  void (async () => {
+    await refreshMazeCacheFromSupabase({ showError: true });
+    openLibrary();
+  })();
 });
 
 clearBtn.addEventListener('click', () => {
@@ -348,10 +421,11 @@ clearBtn.addEventListener('click', () => {
 });
 
 function ensureMazes() {
-  let list = loadAllMazes();
+  // Supabaseが主。ここは「キャッシュが空ならサンプルを入れる」だけ（即時表示用）。
+  let list = loadAllMazesCache();
   if (list.length === 0) {
     list = getDefaultMazes();
-    saveAllMazes(list);
+    saveAllMazesCache(list);
   }
   return list;
 }
@@ -481,12 +555,19 @@ function renderLibrary() {
     btnDelete.className = 'mini-btn danger';
     btnDelete.textContent = '削除';
     btnDelete.addEventListener('click', () => {
-      if (!confirm(`「${m.name}」を削除する？（元に戻せないよ）`)) return;
-      const after = loadAllMazes().filter(x => x.name !== m.name);
-      saveAllMazes(after);
-      syncMazeSelect();
-      renderLibrary();
-      showOverlay('削除したよ', `「${m.name}」を削除しました。`);
+      void (async () => {
+        if (!confirm(`「${m.name}」を削除する？（元に戻せないよ）`)) return;
+        try {
+          await deleteMazeFromSupabaseByName(m.name);
+          await refreshMazeCacheFromSupabase();
+          syncMazeSelect();
+          renderLibrary();
+          showOverlay('削除したよ', `「${m.name}」を削除しました。`);
+        } catch (e) {
+          console.error(e);
+          showOverlay('削除できなかった…', 'Supabaseから削除できなかったよ。');
+        }
+      })();
     });
 
     actions.appendChild(btnLoad);
@@ -533,20 +614,26 @@ async function importFromFile(file) {
   const incoming = Array.isArray(parsed) ? parsed : [parsed];
   const normalized = incoming.map(normalizeMaze);
 
-  const existing = loadAllMazes();
+  const existing = ensureMazes();
   const names = new Set(existing.map(m => m.name));
-  const merged = [...existing];
 
+  // Supabaseへ保存（同名は自動リネームして upsert）
+  let ok = 0;
   for (const m of normalized) {
     const name = uniqueName(m.name, names);
     names.add(name);
-    merged.unshift({ ...m, name });
+    try {
+      await upsertMazeToSupabase({ ...m, name });
+      ok++;
+    } catch (e) {
+      console.error('Import upsert failed:', e);
+    }
   }
 
-  saveAllMazes(merged);
+  await refreshMazeCacheFromSupabase();
   syncMazeSelect();
   renderLibrary();
-  showOverlay('インポートOK', `${normalized.length}こ取りこんだよ。`);
+  showOverlay('インポートOK', `${ok}こ取りこんだよ。`);
 }
 
 libraryClose?.addEventListener('click', closeLibrary);
@@ -1023,6 +1110,11 @@ function init() {
   drawEditor();
   syncMazeSelect();
   resizePlayCanvas();
+  // Supabaseから最新を取り込み（失敗してもキャッシュで動く）
+  void (async () => {
+    await refreshMazeCacheFromSupabase();
+    syncMazeSelect();
+  })();
 
   window.addEventListener('resize', () => {
     resizeEditorCanvas();

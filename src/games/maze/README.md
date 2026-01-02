@@ -23,9 +23,10 @@
 - `game.js`: エディタ（64×64ペイント）と3Dプレイ（レイキャスト）
 
 ## 状態/データ
-- 迷路データは `localStorage` に保存します。
-  - key: `ngames.mazes.v1`
-  - 形式: 配列（各要素が `{ name, w, h, grid, start, goal }`）
+- 迷路データは **Supabase（`mazes` テーブル）** に保存します（端末を変えても共有できます）。
+  - テーブル: `mazes`
+  - 主な列: `name`（ユニーク）, `data`（JSON）, `created_by`, `updated_at`
+- `localStorage` の `ngames.mazes.v1` は **キャッシュ**（オフライン/初回表示用）として使います。
 - 自己ベストタイム（端末内）は `localStorage` に保存します。
   - key: `ngames.mazes.bestTime.v1`
   - 形式: `{ "<mazeName>": <ms> }`
