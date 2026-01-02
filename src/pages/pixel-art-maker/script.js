@@ -30,6 +30,13 @@ const appRoot = document.getElementById('appRoot');
 const galleryView = document.getElementById('galleryView');
 const galleryNewBtn = document.getElementById('galleryNewBtn');
 const galleryList = document.getElementById('galleryList');
+const gallerySummary = document.getElementById('gallerySummary');
+const gallerySearchInput = document.getElementById('gallerySearchInput');
+const gallerySortSelect = document.getElementById('gallerySortSelect');
+const filterKindAll = document.getElementById('filterKindAll');
+const filterKindCharacter = document.getElementById('filterKindCharacter');
+const filterKindObject = document.getElementById('filterKindObject');
+const filterKindTile = document.getElementById('filterKindTile');
 const editorView = document.getElementById('editorView');
 const backToGalleryBtn = document.getElementById('backToGalleryBtn');
 
@@ -180,6 +187,13 @@ const FIXED_PALETTE_64 = [
   '#333c57'
 ];
 
+// Gallery UI state
+/** @type {'all'|'character'|'object'|'tile'} */
+let galleryKindFilter = 'all';
+let gallerySearchText = '';
+/** @type {'updated_desc'|'updated_asc'|'name_asc'|'name_desc'|'size_desc'|'size_asc'} */
+let gallerySortMode = 'updated_desc';
+
 function parseSizeValue(v) {
   const [w, h] = String(v).split('x').map((n) => parseInt(n, 10));
   if (!Number.isFinite(w) || !Number.isFinite(h)) return { width: 16, height: 16 };
@@ -205,6 +219,7 @@ function updateStatus(message) {
   if (!dirty && isPersisted) parts.push('保存済み');
   if (!dirty && !isPersisted) parts.push('新規（未保存）');
   statusText.textContent = parts.join(' / ') || '-';
+  statusText.classList.add('status-pill');
 }
 
 function setTool(tool) {
@@ -245,6 +260,72 @@ function kindLabel(kind) {
   if (kind === 'tile') return '地形';
   if (kind === 'object') return 'モノ';
   return 'キャラ';
+}
+
+function formatDateShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}/${m}/${day}`;
+}
+
+function setGalleryKindFilter(kind) {
+  galleryKindFilter = kind;
+  const allButtons = [filterKindAll, filterKindCharacter, filterKindObject, filterKindTile].filter(Boolean);
+  allButtons.forEach((btn) => {
+    const k = btn.dataset.kind;
+    const active = k === kind;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  refreshGalleryList();
+}
+
+function setGallerySummary({ total, shown }) {
+  if (!gallerySummary) return;
+  if (total === 0) {
+    gallerySummary.textContent = '';
+    return;
+  }
+  if (shown === total) {
+    gallerySummary.textContent = `全${total}件`;
+    return;
+  }
+  gallerySummary.textContent = `${total}件中 ${shown}件を表示`;
+}
+
+function applyGalleryFiltersAndSort(list) {
+  let out = Array.isArray(list) ? list.slice() : [];
+
+  // kind filter
+  if (galleryKindFilter !== 'all') {
+    out = out.filter((a) => a.kind === galleryKindFilter);
+  }
+
+  // name search (simple contains)
+  const q = String(gallerySearchText || '').trim().toLowerCase();
+  if (q) {
+    out = out.filter((a) => String(a.name || '').toLowerCase().includes(q));
+  }
+
+  const nameKey = (a) => String(a.name || '').toLowerCase();
+  const timeKey = (a) => String(a.updatedAt || a.createdAt || '');
+  const sizeKey = (a) => (Number(a.width) || 0) * (Number(a.height) || 0);
+
+  out.sort((a, b) => {
+    if (gallerySortMode === 'updated_asc') return timeKey(a) < timeKey(b) ? -1 : 1;
+    if (gallerySortMode === 'name_asc') return nameKey(a) < nameKey(b) ? -1 : 1;
+    if (gallerySortMode === 'name_desc') return nameKey(a) < nameKey(b) ? 1 : -1;
+    if (gallerySortMode === 'size_desc') return sizeKey(b) - sizeKey(a);
+    if (gallerySortMode === 'size_asc') return sizeKey(a) - sizeKey(b);
+    // default updated_desc
+    return timeKey(a) < timeKey(b) ? 1 : -1;
+  });
+
+  return out;
 }
 
 function scheduleRender() {
@@ -400,7 +481,12 @@ function applyToolAtEvent(e) {
 }
 
 async function refreshGalleryList() {
+  galleryList.innerHTML = '';
+  if (gallerySummary) gallerySummary.textContent = '読み込み中…';
+
   const list = await listPixelAssets({ ownerId });
+  const filtered = applyGalleryFiltersAndSort(list);
+
   galleryList.innerHTML = '';
 
   if (list.length === 0) {
@@ -408,10 +494,21 @@ async function refreshGalleryList() {
     empty.className = 'tiny-note';
     empty.textContent = 'まだ作品がないよ。右上の「新規作成」から作ってみよう！';
     galleryList.appendChild(empty);
+    setGallerySummary({ total: 0, shown: 0 });
     return;
   }
 
-  list.forEach((asset) => {
+  setGallerySummary({ total: list.length, shown: filtered.length });
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'tiny-note';
+    empty.textContent = '見つからなかったよ。検索やフィルタを変えてみてね。';
+    galleryList.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach((asset) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'gallery-item';
@@ -429,10 +526,19 @@ async function refreshGalleryList() {
 
     const info = document.createElement('div');
     info.className = 'asset-meta';
-    info.textContent = `${kindLabel(asset.kind)} / ${asset.width}×${asset.height}`;
+    const date = formatDateShort(asset.updatedAt || asset.createdAt);
+    info.textContent = `${asset.width}×${asset.height}${date ? ` / 更新 ${date}` : ''}`;
+
+    const tags = document.createElement('div');
+    tags.className = 'asset-tags';
+    const kind = document.createElement('span');
+    kind.className = `tag kind-${asset.kind || 'character'}`;
+    kind.textContent = kindLabel(asset.kind);
+    tags.appendChild(kind);
 
     meta.appendChild(name);
     meta.appendChild(info);
+    meta.appendChild(tags);
 
     btn.appendChild(img);
     btn.appendChild(meta);
@@ -548,6 +654,25 @@ function updatePaletteSelection() {
 }
 
 // UI events
+if (gallerySearchInput) {
+  gallerySearchInput.addEventListener('input', () => {
+    gallerySearchText = String(gallerySearchInput.value || '');
+    refreshGalleryList();
+  });
+}
+
+if (gallerySortSelect) {
+  gallerySortSelect.addEventListener('change', () => {
+    gallerySortMode = /** @type {any} */ (gallerySortSelect.value || 'updated_desc');
+    refreshGalleryList();
+  });
+}
+
+if (filterKindAll) filterKindAll.addEventListener('click', () => setGalleryKindFilter('all'));
+if (filterKindCharacter) filterKindCharacter.addEventListener('click', () => setGalleryKindFilter('character'));
+if (filterKindObject) filterKindObject.addEventListener('click', () => setGalleryKindFilter('object'));
+if (filterKindTile) filterKindTile.addEventListener('click', () => setGalleryKindFilter('tile'));
+
 zoomRange.addEventListener('input', () => {
   zoom = Number(zoomRange.value);
   updateCanvasLayout();
@@ -636,6 +761,30 @@ newNameInput.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (!newAssetModal.hidden) closeNewAssetModal();
+});
+
+// Small usability helpers (keyboard shortcuts)
+document.addEventListener('keydown', (e) => {
+  const tag = String(document.activeElement?.tagName || '').toLowerCase();
+  const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
+  if (typing) return;
+
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    saveBtn.click();
+    return;
+  }
+
+  if (e.key.toLowerCase() === 'g') {
+    gridToggle.checked = !gridToggle.checked;
+    canvasFrame.classList.toggle('grid', gridToggle.checked);
+    return;
+  }
+
+  if (e.key.toLowerCase() === 'p') setTool('pen');
+  if (e.key.toLowerCase() === 'e') setTool('eraser');
+  if (e.key.toLowerCase() === 'f') setTool('fill');
+  if (e.key.toLowerCase() === 'i') setTool('picker');
 });
 
 undoBtn.addEventListener('click', () => {
@@ -794,7 +943,11 @@ canvas.addEventListener('pointerleave', () => {
   canvasFrame.classList.toggle('grid', gridToggle.checked);
   renderPalette();
 
+  // Safety: make sure modal is closed on first paint (and also after bfcache restores).
+  closeNewAssetModal();
+
   setView('gallery');
+  setGalleryKindFilter('all');
   await refreshGalleryList();
   updateStatus('準備OK');
 })();

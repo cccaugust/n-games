@@ -31,6 +31,38 @@
           </div>
           <button class="btn-primary-solid" id="galleryNewBtn" type="button">＋ 新規作成</button>
         </div>
+        <div class="gallery-controls" aria-label="ギャラリー操作">
+          <div class="gallery-filters" role="tablist" aria-label="種類フィルタ">
+            <button class="chip active" id="filterKindAll" type="button" role="tab" aria-selected="true" data-kind="all">
+              すべて
+            </button>
+            <button class="chip" id="filterKindCharacter" type="button" role="tab" aria-selected="false" data-kind="character">
+              キャラ
+            </button>
+            <button class="chip" id="filterKindObject" type="button" role="tab" aria-selected="false" data-kind="object">
+              モノ
+            </button>
+            <button class="chip" id="filterKindTile" type="button" role="tab" aria-selected="false" data-kind="tile">
+              地形
+            </button>
+          </div>
+
+          <div class="gallery-search">
+            <label class="sr-only" for="gallerySearchInput">検索</label>
+            <input id="gallerySearchInput" type="search" inputmode="search" placeholder="なまえで検索…" />
+
+            <label class="sr-only" for="gallerySortSelect">並び替え</label>
+            <select id="gallerySortSelect">
+              <option value="updated_desc">新しい順</option>
+              <option value="updated_asc">古い順</option>
+              <option value="name_asc">名前（A→Z）</option>
+              <option value="name_desc">名前（Z→A）</option>
+              <option value="size_desc">サイズ（大きい順）</option>
+              <option value="size_asc">サイズ（小さい順）</option>
+            </select>
+          </div>
+        </div>
+        <div class="gallery-summary" id="gallerySummary" aria-live="polite"></div>
         <div class="gallery-grid" id="galleryList"></div>
       </section>
 
