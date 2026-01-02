@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>プレイ | ブロックくずし</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="bb-full">
+    <div class="bb-header">
+      <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+        <a class="bb-back" href="./stage-select.html">&larr; ステージ選択</a>
+        <span class="bb-chip" id="stageLabel">ステージ</span>
+      </div>
+      <div class="bb-actions">
+        <button class="bb-tool-btn" id="pauseBtn">一時停止</button>
+        <button class="bb-tool-btn" id="resetBtn">最初から</button>
+      </div>
+    </div>
+
+    <div class="bb-canvas-wrap">
+      <canvas id="gameCanvas" class="bb-canvas" width="600" height="500"></canvas>
+      <div class="bb-hud" aria-hidden="true">
+        <div class="bb-hud-pill">SCORE: <span id="score">0</span></div>
+        <div class="bb-hud-pill">LIFE: <span id="lives">3</span></div>
+        <div class="bb-hud-pill">BALL: <span id="balls">1</span></div>
+        <div class="bb-hud-pill">CONTINUE: <span id="continues">0</span></div>
+      </div>
+    </div>
+
+    <div class="bb-chip" style="align-self:flex-start;">
+      操作：マウス/指でバーを動かす（ドラッグOK）
+    </div>
+  </div>
+
+  <div class="bb-overlay" id="overlay">
+    <div class="bb-overlay-card" style="text-align:center;">
+      <h2 class="bb-overlay-title" id="overlayTitle">ブロックくずし</h2>
+      <p class="bb-overlay-text" id="overlayText"></p>
+      <div class="bb-overlay-extra" id="overlayExtra"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <script type="module" src="./play.js"></script>
+</body>
+
+</html>
+

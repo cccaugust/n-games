@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ステージ編集 | ブロックくずし</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="bb-full">
+    <div class="bb-header">
+      <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+        <a class="bb-back" href="./index.html">&larr; もどる</a>
+        <span class="bb-chip" id="editorStatus">14×10</span>
+      </div>
+      <div class="bb-actions">
+        <a class="bb-tool-btn" href="./stage-select.html" style="text-decoration:none; display:inline-flex; align-items:center;">ステージ選択</a>
+      </div>
+    </div>
+
+    <div class="bb-panel">
+      <div class="bb-row">
+        <div class="left">
+          <button class="bb-tool-btn" data-tool="empty">⬜ けす</button>
+          <button class="bb-tool-btn" data-tool="normal">🧱 ふつう</button>
+          <button class="bb-tool-btn" data-tool="tough">🪨 かたい</button>
+          <button class="bb-tool-btn" data-tool="split">✨ ぶんれつ</button>
+        </div>
+        <div class="right">
+          <label class="bb-chip" style="display:inline-flex; gap: 8px; align-items:center;">
+            名前:
+            <input id="stageName" maxlength="24" placeholder="たとえば：うちのステージ"
+              style="border:none; background:transparent; outline:none; width: 220px;" />
+          </label>
+          <button class="btn-primary" id="saveBtn">保存</button>
+          <button class="bb-tool-btn" id="loadBtn">読みこみ</button>
+          <button class="bb-tool-btn" id="clearBtn">ぜんぶ消す</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bb-canvas-wrap">
+      <canvas id="editorCanvas" class="bb-canvas bb-grid-canvas" width="800" height="420"></canvas>
+    </div>
+
+    <div class="bb-hint">
+      ぬり方：ブロックを選んでドラッグでぬれるよ（スマホは指でなぞる）。
+    </div>
+  </div>
+
+  <div class="bb-overlay" id="overlay">
+    <div class="bb-overlay-card" style="text-align:center;">
+      <h2 class="bb-overlay-title" id="overlayTitle">ブロックくずし</h2>
+      <p class="bb-overlay-text" id="overlayText"></p>
+      <div class="bb-overlay-extra" id="overlayExtra"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <div class="bb-overlay" id="libraryOverlay" aria-hidden="true">
+    <div class="bb-overlay-card" style="max-width: 760px; text-align:left;">
+      <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+        <h2 style="color:white; margin:0;">📚 ステージライブラリ</h2>
+        <button class="bb-mini-btn" id="libraryClose">とじる</button>
+      </div>
+
+      <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
+        保存したステージをロード/削除したり、エクスポート/インポートできます。
+      </p>
+
+      <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 10px;">
+        <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+          <button class="bb-mini-btn" id="libraryNew">新しく作る</button>
+          <button class="bb-mini-btn" id="libraryExportAll">ぜんぶエクスポート</button>
+          <button class="bb-mini-btn" id="libraryImportBtn">インポート</button>
+          <input id="libraryImportFile" type="file" accept="application/json" style="display:none;" />
+        </div>
+        <div class="bb-chip" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
+      </div>
+
+      <div id="libraryList" style="display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./editor.js"></script>
+</body>
+
+</html>
+

@@ -2,321 +2,41 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ブロックくずし | N-Games</title>
-    <link rel="stylesheet" href="../../style.css">
-    <style>
-        body {
-            overflow: hidden;
-            touch-action: none;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-        }
-
-        .wrap {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            max-width: 980px;
-            margin: 14px auto;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: white;
-            color: var(--text-dark);
-            padding: 10px 14px;
-            border-radius: 999px;
-            box-shadow: var(--shadow);
-            font-weight: 700;
-        }
-
-        .tab-btn[aria-selected="true"] {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            padding: 14px;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .row .left,
-        .row .right {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .pill {
-            background: #f1f2f6;
-            padding: 8px 10px;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-        }
-
-        .tool-btn {
-            padding: 10px 12px;
-            border-radius: 12px;
-            background: #f1f2f6;
-            font-weight: 700;
-            min-width: 72px;
-        }
-
-        .tool-btn[data-active="true"] {
-            background: var(--secondary-color);
-            color: #003d3b;
-        }
-
-        canvas {
-            width: 100%;
-            display: block;
-            border-radius: 12px;
-            background: #2d3436;
-            touch-action: none;
-        }
-
-        .grid-canvas {
-            background: #f8f9ff;
-        }
-
-        .play-wrap {
-            position: relative;
-            width: 100%;
-        }
-
-        .hud {
-            position: absolute;
-            left: 10px;
-            top: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            pointer-events: none;
-        }
-
-        .hud .hud-pill {
-            background: rgba(17, 24, 39, 0.65);
-            color: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            padding: 8px 10px;
-            border-radius: 999px;
-            font-weight: 900;
-            backdrop-filter: blur(6px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
-        }
-
-        .hint {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-top: 8px;
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 18px;
-            z-index: 50;
-        }
-
-        .overlay .card {
-            max-width: 520px;
-            width: 100%;
-            background: rgba(17, 24, 39, 0.82);
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            border-radius: 16px;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-            padding: 18px 16px;
-        }
-
-        .library-card {
-            max-width: 760px !important;
-            text-align: left !important;
-        }
-
-        .library-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .library-row {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 10px;
-            align-items: center;
-            padding: 12px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .library-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .mini-btn {
-            padding: 10px 12px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: white;
-            font-weight: 800;
-            min-width: 80px;
-        }
-
-        .mini-btn.danger {
-            background: rgba(255, 118, 117, 0.18);
-            border-color: rgba(255, 118, 117, 0.35);
-        }
-
-        .library-toolbar {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-
-        .file-input {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ブロックくずし | N-Games</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body>
-    <div class="container">
-        <a href="../../pages/portal/portal.html"
-            style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
-            もどる</a>
-
-        <div class="wrap">
-            <div class="tabs">
-                <button class="tab-btn" id="tabPlay" aria-selected="true">🕹️ あそぶ</button>
-                <button class="tab-btn" id="tabEditor" aria-selected="false">✏️ つくる</button>
-                <span class="pill" id="stageStatus">ステージ</span>
-            </div>
-
-            <!-- Play -->
-            <section class="panel" id="panelPlay">
-                <div class="row">
-                    <div class="left">
-                        <label class="pill">
-                            ステージ:
-                            <select id="stageSelect" style="border:none; background:transparent; outline:none;"></select>
-                        </label>
-                        <button class="btn-primary" id="playBtn">スタート</button>
-                        <button class="tool-btn" id="pauseBtn">一時停止</button>
-                        <button class="tool-btn" id="resetBtn">最初から</button>
-                    </div>
-                    <div class="right">
-                        <span class="pill">操作：マウス/指でバーを動かす（ドラッグOK）</span>
-                    </div>
-                </div>
-
-                <div class="play-wrap">
-                    <canvas id="gameCanvas" width="600" height="500"></canvas>
-                    <div class="hud" aria-hidden="true">
-                        <div class="hud-pill">SCORE: <span id="score">0</span></div>
-                        <div class="hud-pill">LIFE: <span id="lives">3</span></div>
-                        <div class="hud-pill">BALL: <span id="balls">1</span></div>
-                        <div class="hud-pill">CONTINUE: <span id="continues">0</span></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Editor -->
-            <section class="panel hidden" id="panelEditor">
-                <div class="row">
-                    <div class="left">
-                        <button class="tool-btn" data-tool="empty">⬜ けす</button>
-                        <button class="tool-btn" data-tool="normal">🧱 ふつう</button>
-                        <button class="tool-btn" data-tool="tough">🪨 かたい</button>
-                        <button class="tool-btn" data-tool="split">✨ ぶんれつ</button>
-                    </div>
-                    <div class="right">
-                        <label class="pill">
-                            名前:
-                            <input id="stageName" maxlength="24" placeholder="たとえば：うちのステージ"
-                                style="border:none; background:transparent; outline:none; width: 200px;">
-                        </label>
-                        <button class="btn-primary" id="saveBtn">保存</button>
-                        <button class="tool-btn" id="loadBtn">読みこみ</button>
-                        <button class="tool-btn" id="clearBtn">ぜんぶ消す</button>
-                    </div>
-                </div>
-
-                <canvas id="editorCanvas" class="grid-canvas" width="800" height="420"></canvas>
-                <div class="hint">
-                    ぬり方：ブロックを選んでドラッグでぬれるよ（スマホは指でなぞる）。
-                </div>
-            </section>
-        </div>
+<body class="bb-safe">
+  <div class="container">
+    <div class="bb-topbar">
+      <a class="bb-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+      <span class="bb-chip">ブロックくずし</span>
+      <span class="bb-chip" id="stageSize">14×10</span>
     </div>
 
-    <div class="overlay" id="overlay">
-        <div class="card" style="color: white; text-align:center;">
-            <h2 id="overlayTitle" style="color:white;">ブロックくずし</h2>
-            <p id="overlayText" style="color: rgba(255,255,255,0.9); margin-top: 10px;"></p>
-            <div id="overlayExtra" style="margin-top: 12px;"></div>
-            <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    <div class="bb-page" style="padding: 0;">
+      <div class="bb-panel" style="margin-top: 12px;">
+        <h2 style="margin: 0; color: var(--primary-color);">モードをえらぼう</h2>
+        <p style="margin-top: 8px; color: var(--text-light);">
+          「あそぶ」はプレイ画面を最大化、「つくる」はステージ編集にいきます。
+        </p>
+
+        <div style="display:flex; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
+          <button class="btn-primary" id="goPlay" style="border-radius: 999px; padding: 14px 18px;">🕹️ あそぶ</button>
+          <button class="bb-tool-btn" id="goEdit" style="border-radius: 999px; padding: 14px 18px;">✏️ つくる</button>
         </div>
-    </div>
 
-    <div class="overlay" id="libraryOverlay" aria-hidden="true">
-        <div class="card library-card" style="color: white;">
-            <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
-                <h2 style="color:white; margin:0;">📚 ステージライブラリ</h2>
-                <button class="mini-btn" id="libraryClose">とじる</button>
-            </div>
-
-            <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
-                保存したステージをロード/削除したり、エクスポート/インポートできます。
-            </p>
-
-            <div class="library-toolbar">
-                <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
-                    <button class="mini-btn" id="libraryNew">新しく作る</button>
-                    <button class="mini-btn" id="libraryExportAll">ぜんぶエクスポート</button>
-                    <button class="mini-btn" id="libraryImportBtn">インポート</button>
-                    <input class="file-input" id="libraryImportFile" type="file" accept="application/json">
-                </div>
-                <div class="pill" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
-            </div>
-
-            <div class="library-grid" id="libraryList"></div>
+        <div class="bb-hint">
+          ※ 画面を広く使うため、ステージ選択/プレイ/編集は別ページになりました。
         </div>
+      </div>
     </div>
+  </div>
 
-    <script type="module" src="./game.js"></script>
+  <script type="module" src="./mode.js"></script>
 </body>
 
 </html>
