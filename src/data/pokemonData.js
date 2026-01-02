@@ -369,7 +369,7 @@ export const pokemonData = [
         moveType: 'water',
         moveDesc: 'タイプ：みず / 威力：75 / 命中：100<br>とびはねるように体当たりする。30%の確率で相手を「どく」状態にする。',
         extraInfo: 'コップの中身をのぞくと、ちいさな光の粒が見えることがある。これが活力のもとらしい。',
-        author: 'USER',
+        author: 'JUNPEI',
         stats: { hp: 75, attack: 55, defense: 70, spAtk: 85, spDef: 80, speed: 60 }
     }
 ];
