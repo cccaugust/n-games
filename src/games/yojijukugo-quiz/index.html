@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>四字熟語クイズ | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <a class="back-link" href="../../pages/portal/portal.html">&larr; もどる</a>
+
+      <main class="game-shell" aria-label="四字熟語クイズ">
+        <header class="topbar">
+          <div class="title-wrap">
+            <div class="title">四字熟語クイズ</div>
+            <div class="subtitle">かんじを ひっぱって 4つのマスに いれよう！</div>
+          </div>
+
+          <div class="hud" aria-label="スコア">
+            <div class="hud-chip"><span class="hud-label">せいかい</span><span id="score" class="hud-value">0</span></div>
+            <div class="hud-chip"><span class="hud-label">れんぞく</span><span id="streak" class="hud-value">0</span></div>
+          </div>
+        </header>
+
+        <section class="panel">
+          <div class="mode-row" aria-label="出題形式">
+            <div class="mode-title">もんだいの だしかた</div>
+            <div class="segmented" role="radiogroup" aria-label="出題形式">
+              <label class="seg">
+                <input type="radio" name="mode" value="yomi" />
+                <span>よみ</span>
+              </label>
+              <label class="seg">
+                <input type="radio" name="mode" value="meaning" />
+                <span>いみ</span>
+              </label>
+              <label class="seg">
+                <input type="radio" name="mode" value="both" checked />
+                <span>よみ+いみ</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="question-card" aria-live="polite">
+            <div class="question-label">もんだい</div>
+            <div id="question" class="question-text">Loading...</div>
+            <div class="question-hint">ドラッグできないときは、かんじをタップ → マスをタップでもOK</div>
+          </div>
+
+          <div class="answer-area" aria-label="こたえのマス">
+            <div class="slots" id="slots">
+              <button class="slot" data-slot="0" aria-label="1つめのマス"></button>
+              <button class="slot" data-slot="1" aria-label="2つめのマス"></button>
+              <button class="slot" data-slot="2" aria-label="3つめのマス"></button>
+              <button class="slot" data-slot="3" aria-label="4つめのマス"></button>
+            </div>
+
+            <div class="actions">
+              <button class="btn-secondary" id="resetBtn" type="button">リセット</button>
+              <button class="btn-secondary" id="skipBtn" type="button">つぎへ</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="pool-head">
+            <div class="pool-title">かんじパネル</div>
+            <div class="pool-sub">ひっぱる / タップでえらぶ</div>
+          </div>
+          <div id="pool" class="pool" aria-label="かんじパネル一覧"></div>
+        </section>
+
+        <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+      </main>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

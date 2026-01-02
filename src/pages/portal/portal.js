@@ -59,6 +59,14 @@ const games = [
     link: '/games/math-quiz/'
   },
   {
+    id: 'yojijukugo-quiz',
+    title: '四字熟語クイズ',
+    desc: 'よみ/いみで たのしく学ぼう！',
+    color: '#fdcb6e',
+    icon: '📚',
+    link: '/games/yojijukugo-quiz/'
+  },
+  {
     id: 'slime-adventure',
     title: 'スライムの大冒険',
     desc: 'ゴールをめざせ！',
