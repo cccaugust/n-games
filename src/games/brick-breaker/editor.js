@@ -112,6 +112,8 @@ function toolToTile(tool) {
   if (tool === 'empty') return TILE.EMPTY;
   if (tool === 'tough') return TILE.TOUGH;
   if (tool === 'split') return TILE.SPLIT;
+  if (tool === 'soft') return TILE.SOFT;
+  if (tool === 'wall') return TILE.WALL;
   return TILE.NORMAL;
 }
 
@@ -124,6 +126,8 @@ function tileColor(t) {
   if (t === TILE.NORMAL) return '#74b9ff';
   if (t === TILE.TOUGH) return '#a29bfe';
   if (t === TILE.SPLIT) return '#00cec9';
+  if (t === TILE.SOFT) return '#ffeaa7';
+  if (t === TILE.WALL) return '#636e72';
   return '#ffffff';
 }
 
@@ -156,6 +160,8 @@ function drawEditor() {
       ectx.textBaseline = 'middle';
       if (t === TILE.TOUGH) ectx.fillText('2', px + cellW / 2, py + cellH / 2);
       if (t === TILE.SPLIT) ectx.fillText('✶', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.SOFT) ectx.fillText('≈', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.WALL) ectx.fillText('■', px + cellW / 2, py + cellH / 2);
     }
   }
 

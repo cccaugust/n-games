@@ -40,7 +40,9 @@ export const TILE = {
   EMPTY: 0,
   NORMAL: 1,
   TOUGH: 2,
-  SPLIT: 3
+  SPLIT: 3,
+  SOFT: 4, // 壊れるが反射しない
+  WALL: 5 // 壊れない
 };
 
 export function makeEmptyStage(name = '新しいステージ') {
@@ -60,7 +62,14 @@ export function normalizeStage(stage) {
   const grid = new Array(cols * rows);
   for (let i = 0; i < grid.length; i++) {
     const v = raw[i];
-    grid[i] = v === TILE.NORMAL || v === TILE.TOUGH || v === TILE.SPLIT ? v : TILE.EMPTY;
+    grid[i] =
+      v === TILE.NORMAL ||
+      v === TILE.TOUGH ||
+      v === TILE.SPLIT ||
+      v === TILE.SOFT ||
+      v === TILE.WALL
+        ? v
+        : TILE.EMPTY;
   }
   const name = typeof stage?.name === 'string' && stage.name.trim() ? stage.name.trim() : 'ななしのステージ';
   return { version: 1, name, cols, rows, grid };
@@ -93,7 +102,7 @@ export function upsertStageCache(stage) {
 }
 
 export function getDefaultStages() {
-  // 0: empty, 1: normal, 2: tough, 3: split
+  // 0: empty, 1: normal, 2: tough, 3: split, 4: soft, 5: wall
   const a = makeEmptyStage('はじめて');
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < STAGE_COLS; c++) {
@@ -115,7 +124,14 @@ export function getDefaultStages() {
       else c.grid[r * STAGE_COLS + col] = TILE.NORMAL;
     }
   }
-  return [normalizeStage(a), normalizeStage(b), normalizeStage(c)];
+
+  const d = makeEmptyStage('やわらか&かべ');
+  // 上段: かべ、中央: やわらか、残り: ふつう
+  for (let col = 0; col < STAGE_COLS; col++) d.grid[0 * STAGE_COLS + col] = TILE.WALL;
+  for (let col = 0; col < STAGE_COLS; col++) d.grid[2 * STAGE_COLS + col] = TILE.SOFT;
+  for (let col = 0; col < STAGE_COLS; col++) d.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
+
+  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d)];
 }
 
 export function ensureStages() {
