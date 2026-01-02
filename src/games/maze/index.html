@@ -98,6 +98,25 @@
       background: #f8f9ff;
     }
 
+    .play-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .mini-map {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 160px;
+      height: 160px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(17, 24, 39, 0.45);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
     .hint {
       color: var(--text-light);
       font-size: 0.9rem;
@@ -255,13 +274,18 @@
             </label>
             <button class="btn-primary" id="playBtn">プレイ開始</button>
             <button class="tool-btn" id="resetBtn">最初にもどる</button>
+            <span class="pill" id="timeLabel">⏱️ 0.00</span>
+            <span class="pill" id="bestLabel">🏆 --</span>
           </div>
           <div class="right">
             <span class="pill">操作：WASD / ←→ で向き、タッチはボタン</span>
           </div>
         </div>
 
-        <canvas id="playCanvas" width="800" height="450"></canvas>
+        <div class="play-wrap">
+          <canvas id="playCanvas" width="800" height="450"></canvas>
+          <canvas id="minimapCanvas" class="mini-map" width="160" height="160"></canvas>
+        </div>
         <div class="mobile-controls" id="mobileControls">
           <button class="m-btn" data-act="turnL">⟲</button>
           <button class="m-btn" data-act="left">◀</button>
@@ -278,6 +302,7 @@
     <div class="card" style="color: white; text-align:center;">
       <h2 id="overlayTitle" style="color:white;">おめでとう！</h2>
       <p id="overlayText" style="color: rgba(255,255,255,0.9); margin-top: 10px;"></p>
+      <div id="overlayExtra" style="margin-top: 12px;"></div>
       <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
     </div>
   </div>

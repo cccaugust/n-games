@@ -2,8 +2,12 @@
 // - 作成モード: 64x64 グリッドをペイント
 // - プレイモード: レイキャストで簡易3D表示
 
+import { getCurrentPlayer } from '../../js/auth.js';
+import { saveScore, getRankings } from '../../js/score.js';
+
 const SIZE = 64;
 const STORAGE_KEY = 'ngames.mazes.v1';
+const BEST_TIME_KEY = 'ngames.mazes.bestTime.v1';
 
 // Tile types
 const TILE = {
@@ -129,6 +133,8 @@ const editorCanvas = document.getElementById('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
 const playCanvas = document.getElementById('playCanvas');
 const pctx = playCanvas.getContext('2d');
+const minimapCanvas = document.getElementById('minimapCanvas');
+const mctx = minimapCanvas?.getContext('2d');
 
 const toolButtons = Array.from(document.querySelectorAll('.tool-btn[data-tool]'));
 const mazeNameEl = document.getElementById('mazeName');
@@ -140,10 +146,13 @@ const mazeSelect = document.getElementById('mazeSelect');
 const playBtn = document.getElementById('playBtn');
 const resetBtn = document.getElementById('resetBtn');
 const mobileControls = document.getElementById('mobileControls');
+const timeLabel = document.getElementById('timeLabel');
+const bestLabel = document.getElementById('bestLabel');
 
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlayTitle');
 const overlayText = document.getElementById('overlayText');
+const overlayExtra = document.getElementById('overlayExtra');
 const overlayClose = document.getElementById('overlayClose');
 
 // Library modal
@@ -363,6 +372,14 @@ function syncMazeSelect(selectName) {
 function showOverlay(title, text) {
   overlayTitle.textContent = title;
   overlayText.textContent = text;
+  if (overlayExtra) overlayExtra.innerHTML = '';
+  overlay.style.display = 'flex';
+}
+
+function showOverlayWithHtml(title, text, html) {
+  overlayTitle.textContent = title;
+  overlayText.textContent = text;
+  if (overlayExtra) overlayExtra.innerHTML = html || '';
   overlay.style.display = 'flex';
 }
 overlayClose.addEventListener('click', () => {
@@ -601,6 +618,10 @@ let player = {
 };
 let isPlaying = false;
 let lastT = 0;
+let runStartMs = 0;
+let runBestMs = null;
+let lastShownMs = 0;
+let isFinishing = false;
 
 function resizePlayCanvas() {
   const maxW = Math.min(980, window.innerWidth - 40);
@@ -631,6 +652,50 @@ function canMove(nx, ny) {
   return samples.every(([sx, sy]) => mazeAt(sx, sy) !== TILE.WALL);
 }
 
+function formatTime(ms) {
+  const s = ms / 1000;
+  if (s < 60) return `${s.toFixed(2)}s`;
+  const m = Math.floor(s / 60);
+  const rest = (s - m * 60).toFixed(2).padStart(5, '0');
+  return `${m}:${rest}`;
+}
+
+function getMazeScoreId(mazeName) {
+  // Supabaseのgame_idはテキストなので、迷路ごとに分ける
+  return `maze:${String(mazeName || 'unknown').slice(0, 48)}`;
+}
+
+function loadBestTimeMap() {
+  try {
+    const raw = localStorage.getItem(BEST_TIME_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveBestTimeMap(map) {
+  localStorage.setItem(BEST_TIME_KEY, JSON.stringify(map));
+}
+
+function updateBestLabel() {
+  if (!bestLabel) return;
+  if (!playingMaze) {
+    bestLabel.textContent = '🏆 --';
+    return;
+  }
+  const map = loadBestTimeMap();
+  const best = map[playingMaze.name];
+  if (typeof best === 'number') bestLabel.textContent = `🏆 ${formatTime(best)}`;
+  else bestLabel.textContent = '🏆 --';
+}
+
+function updateTimeLabel(ms) {
+  if (!timeLabel) return;
+  timeLabel.textContent = `⏱️ ${formatTime(ms)}`;
+}
+
 function startPlay() {
   const list = ensureMazes();
   const name = mazeSelect.value || list[0]?.name;
@@ -639,7 +704,12 @@ function startPlay() {
   player.y = playingMaze.start.y + 0.5;
   player.a = (playingMaze.start.dir ?? 0) * (Math.PI / 2);
   isPlaying = true;
+  isFinishing = false;
   lastT = performance.now();
+  runStartMs = lastT;
+  lastShownMs = 0;
+  updateBestLabel();
+  updateTimeLabel(0);
   requestAnimationFrame(loop);
 }
 
@@ -649,14 +719,25 @@ resetBtn.addEventListener('click', () => {
   player.x = playingMaze.start.x + 0.5;
   player.y = playingMaze.start.y + 0.5;
   player.a = (playingMaze.start.dir ?? 0) * (Math.PI / 2);
+  isFinishing = false;
+  runStartMs = performance.now();
+  lastShownMs = 0;
+  updateTimeLabel(0);
 });
 
 function loop(t) {
   if (!isPlaying) return;
   const dt = Math.min(0.05, (t - lastT) / 1000);
   lastT = t;
+  const elapsed = t - runStartMs;
+  // label update throttled (every ~50ms)
+  if (elapsed - lastShownMs > 50) {
+    lastShownMs = elapsed;
+    updateTimeLabel(elapsed);
+  }
   updatePlayer(dt);
   draw3D();
+  drawMiniMap();
   checkGoal();
   requestAnimationFrame(loop);
 }
@@ -805,14 +886,133 @@ function draw3D() {
   pctx.fillText('🏁 にむかってね', 12, 28);
 }
 
+function drawMiniMap() {
+  if (!mctx || !minimapCanvas || !playingMaze) return;
+  const W = minimapCanvas.width;
+  const H = minimapCanvas.height;
+  mctx.clearRect(0, 0, W, H);
+
+  // Background
+  mctx.fillStyle = 'rgba(17, 24, 39, 0.55)';
+  mctx.fillRect(0, 0, W, H);
+
+  const view = 11; // odd number
+  const half = Math.floor(view / 2);
+  const cell = Math.floor(W / view);
+
+  const px = Math.floor(player.x);
+  const py = Math.floor(player.y);
+
+  for (let dy = -half; dy <= half; dy++) {
+    for (let dx = -half; dx <= half; dx++) {
+      const gx = px + dx;
+      const gy = py + dy;
+      const sx = (dx + half) * cell;
+      const sy = (dy + half) * cell;
+
+      let t = TILE.WALL;
+      if (gx >= 0 && gy >= 0 && gx < SIZE && gy < SIZE) {
+        t = playingMaze.grid[gridIndex(gx, gy)] === TILE.WALL ? TILE.WALL : TILE.PATH;
+      }
+      if (t === TILE.WALL) {
+        mctx.fillStyle = 'rgba(255,255,255,0.16)';
+      } else {
+        mctx.fillStyle = 'rgba(255,255,255,0.04)';
+      }
+      mctx.fillRect(sx, sy, cell, cell);
+
+      if (gx === playingMaze.goal.x && gy === playingMaze.goal.y) {
+        mctx.fillStyle = 'rgba(255, 234, 167, 0.85)';
+        mctx.fillRect(sx + 2, sy + 2, cell - 4, cell - 4);
+      }
+    }
+  }
+
+  // Player marker at center
+  const cx = half * cell + cell / 2;
+  const cy = half * cell + cell / 2;
+  mctx.fillStyle = 'rgba(0, 206, 201, 0.95)';
+  mctx.beginPath();
+  mctx.arc(cx, cy, Math.max(3, cell * 0.28), 0, Math.PI * 2);
+  mctx.fill();
+
+  // Direction line
+  mctx.strokeStyle = 'rgba(0, 206, 201, 0.9)';
+  mctx.lineWidth = 2;
+  mctx.beginPath();
+  mctx.moveTo(cx, cy);
+  mctx.lineTo(cx + Math.cos(player.a) * cell * 0.7, cy + Math.sin(player.a) * cell * 0.7);
+  mctx.stroke();
+
+  // Border
+  mctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  mctx.lineWidth = 1;
+  mctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+}
+
+async function showMazeRanking(mazeName) {
+  const gameId = getMazeScoreId(mazeName);
+  const rankings = await getRankings(gameId, 5);
+  if (!rankings || rankings.length === 0) {
+    return `<div style="opacity:0.9;">ランキングはまだないよ</div>`;
+  }
+  const rows = rankings.map((r, i) => {
+    const ms = -Number(r.score);
+    const time = Number.isFinite(ms) ? formatTime(ms) : `${r.score}`;
+    return `
+      <div style="display:flex; justify-content: space-between; align-items:center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); margin-top: 8px;">
+        <div style="display:flex; align-items:center; gap: 10px; min-width: 0;">
+          <div style="font-weight: 900; width: 28px;">${i + 1}.</div>
+          <div style="font-size: 1.4rem;">${escapeHtml(r.avatar || '❓')}</div>
+          <div style="min-width:0; overflow:hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(r.name || '???')}</div>
+        </div>
+        <div style="font-weight: 900;">${escapeHtml(time)}</div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div style="text-align:left; margin-top: 10px;">
+      <div style="font-weight: 900; margin-bottom: 6px;">🏁 ランキング（上位5）</div>
+      ${rows}
+      <div style="opacity: 0.75; margin-top: 10px; font-size: 0.85rem;">※ タイムは小さいほど強い（内部は -ミリ秒で保存）</div>
+    </div>
+  `;
+}
+
 function checkGoal() {
   if (!playingMaze) return;
+  if (isFinishing) return;
   const px = Math.floor(player.x);
   const py = Math.floor(player.y);
   if (px === playingMaze.goal.x && py === playingMaze.goal.y) {
     isPlaying = false;
-    showOverlay('ゴール！', `「${playingMaze.name}」クリア！`);
+    isFinishing = true;
+    void handleGoalReached();
   }
+}
+
+async function handleGoalReached() {
+  if (!playingMaze) return;
+  const elapsed = performance.now() - runStartMs;
+  const timeText = formatTime(elapsed);
+
+  // Local best
+  const map = loadBestTimeMap();
+  const prev = map[playingMaze.name];
+  if (typeof prev !== 'number' || elapsed < prev) {
+    map[playingMaze.name] = Math.round(elapsed);
+    saveBestTimeMap(map);
+  }
+  updateBestLabel();
+
+  // Supabase ranking save (score: -ms)
+  const p = getCurrentPlayer();
+  if (p?.id) {
+    await saveScore(getMazeScoreId(playingMaze.name), p.id, -Math.round(elapsed));
+  }
+
+  const html = await showMazeRanking(playingMaze.name);
+  showOverlayWithHtml('ゴール！', `「${playingMaze.name}」 クリア！ ⏱️ ${timeText}`, html);
 }
 
 // init
