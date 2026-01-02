@@ -85,11 +85,14 @@
 
               <label class="field">
                 <span>サイズ</span>
-                <select id="sizeSelect">
+                <div class="size-picker" id="sizePicker"></div>
+                <select id="sizeSelect" class="hidden">
                   <option value="16x16">16×16</option>
                   <option value="32x16">32×16</option>
                   <option value="16x32">16×32</option>
                   <option value="32x32">32×32</option>
+                  <option value="64x32">64×32</option>
+                  <option value="32x64">32×64</option>
                   <option value="64x64">64×64</option>
                   <option value="128x128">128×128</option>
                   <option value="256x256">256×256</option>
@@ -123,6 +126,10 @@
               </label>
               <button class="btn-sub" id="undoBtn" type="button">もどす</button>
               <button class="btn-sub" id="redoBtn" type="button">やりなおし</button>
+            </div>
+
+            <div class="row">
+              <button class="btn-sub" id="clearBtn" type="button">全消し</button>
             </div>
 
             <div class="row actions">

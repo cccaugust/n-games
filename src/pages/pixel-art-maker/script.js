@@ -55,6 +55,8 @@ const colorInput = document.getElementById('colorInput');
 const paletteGrid = document.getElementById('paletteGrid');
 const undoBtn = document.getElementById('undoBtn');
 const redoBtn = document.getElementById('redoBtn');
+const clearBtn = document.getElementById('clearBtn');
+const sizePicker = document.getElementById('sizePicker');
 
 const newBtn = document.getElementById('newBtn');
 const saveBtn = document.getElementById('saveBtn');
@@ -85,6 +87,19 @@ let zoom = Number(zoomRange.value);
 let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
+
+const UNIT = 16;
+const SIZE_PRESETS = [
+  { w: 1, h: 1 },
+  { w: 2, h: 1 },
+  { w: 1, h: 2 },
+  { w: 2, h: 2 },
+  { w: 4, h: 2 },
+  { w: 2, h: 4 },
+  { w: 4, h: 4 },
+  { w: 8, h: 8 },
+  { w: 16, h: 16 }
+];
 
 const FIXED_PALETTE_64 = [
   // DawnBringer 64 (DB64) palette (curated 64 colors)
@@ -245,7 +260,9 @@ function setAsset(asset, { persisted }) {
   nameInput.value = asset.name || '';
   kindSelect.value = asset.kind;
   sizeSelect.value = `${asset.width}x${asset.height}`;
-  sizeSelect.disabled = true; // MVP: resize later
+  sizeSelect.disabled = Boolean(persisted); // 保存済みは固定 / 新規は変更OK
+  updateSizePickerDisabled();
+  updateSizePickerSelection();
 
   // Canvas internal size
   canvas.width = asset.width;
@@ -261,6 +278,20 @@ function setAsset(asset, { persisted }) {
   scheduleRender();
   updateUndoRedoButtons();
   updateStatus();
+}
+
+function updateSizePickerDisabled() {
+  if (!sizePicker) return;
+  sizePicker.classList.toggle('disabled', Boolean(sizeSelect.disabled));
+}
+
+function updateSizePickerSelection() {
+  if (!sizePicker) return;
+  const current = String(sizeSelect.value || '');
+  sizePicker.querySelectorAll('.size-btn').forEach((el) => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
+    btn.classList.toggle('selected', btn.dataset.sizeValue === current);
+  });
 }
 
 function updateUndoRedoButtons() {
@@ -493,6 +524,91 @@ function createNewAssetFromUI() {
   return next;
 }
 
+function renderSizePicker() {
+  if (!sizePicker) return;
+  sizePicker.innerHTML = '';
+
+  SIZE_PRESETS.forEach((p) => {
+    const pxW = p.w * UNIT;
+    const pxH = p.h * UNIT;
+    const sizeValue = `${pxW}x${pxH}`;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'size-btn';
+    btn.dataset.sizeValue = sizeValue;
+    btn.setAttribute('aria-label', `サイズ 横${p.w} 縦${p.h}（${pxW}×${pxH}）`);
+
+    const visual = document.createElement('div');
+    visual.className = 'size-visual';
+
+    const grid = document.createElement('div');
+    grid.className = 'size-visual-grid';
+    const cols = Math.min(8, p.w);
+    const rows = Math.min(8, p.h);
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    for (let i = 0; i < cols * rows; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'size-cell';
+      grid.appendChild(cell);
+    }
+    visual.appendChild(grid);
+
+    const meta = document.createElement('div');
+    const label = document.createElement('div');
+    label.className = 'size-label';
+    label.textContent = `横${p.w} × 縦${p.h}`;
+
+    const sub = document.createElement('div');
+    sub.className = 'size-sub';
+    sub.textContent = `${pxW}×${pxH}px`;
+
+    meta.appendChild(label);
+    meta.appendChild(sub);
+
+    btn.appendChild(visual);
+    btn.appendChild(meta);
+
+    btn.addEventListener('click', () => {
+      if (sizeSelect.disabled) return;
+      sizeSelect.value = sizeValue;
+      updateSizePickerSelection();
+      maybeResizeNewAsset();
+    });
+
+    sizePicker.appendChild(btn);
+  });
+
+  updateSizePickerDisabled();
+  updateSizePickerSelection();
+}
+
+function maybeResizeNewAsset() {
+  if (!currentAsset) return;
+  if (isPersisted) return;
+
+  const nextSize = parseSizeValue(sizeSelect.value);
+  if (currentAsset.width === nextSize.width && currentAsset.height === nextSize.height) return;
+
+  if (dirty && !confirm('いまの絵は消えます。サイズを変えますか？')) {
+    // Revert selection
+    sizeSelect.value = `${currentAsset.width}x${currentAsset.height}`;
+    updateSizePickerSelection();
+    return;
+  }
+
+  const next = createEmptyAsset({
+    ownerId,
+    kind: currentAsset.kind,
+    width: nextSize.width,
+    height: nextSize.height,
+    name: currentAsset.name || 'あたらしいドット'
+  });
+  setAsset(next, { persisted: false });
+  updateStatus('サイズ変更');
+}
+
 function renderPalette() {
   paletteGrid.innerHTML = '';
   FIXED_PALETTE_64.forEach((hex) => {
@@ -561,11 +677,9 @@ backToGalleryBtn.addEventListener('click', async () => {
 
 galleryNewBtn.addEventListener('click', async () => {
   if (dirty && !confirm('いまの変更は保存されていません。新規作成しますか？')) return;
-  sizeSelect.disabled = false;
   isPersisted = false;
   const next = createNewAssetFromUI();
   setAsset(next, { persisted: false });
-  sizeSelect.disabled = false;
   setTool('pen');
   setView('editor');
   await refreshAssetsList();
@@ -596,13 +710,22 @@ redoBtn.addEventListener('click', () => {
   updateStatus('やりなおした');
 });
 
+clearBtn.addEventListener('click', () => {
+  if (!currentAsset) return;
+  if (!confirm('ぜんぶ消しますか？（もどすで元に戻せるよ）')) return;
+  const snapshot = new Uint32Array(currentAsset.pixels);
+  currentAsset.pixels.fill(0);
+  pushUndoSnapshot(snapshot);
+  setDirty(true);
+  scheduleRender();
+  updateStatus('全消し');
+});
+
 newBtn.addEventListener('click', async () => {
   if (dirty && !confirm('いまの変更は保存されていません。新規にしますか？')) return;
-  sizeSelect.disabled = false;
   isPersisted = false;
   const next = createNewAssetFromUI();
   setAsset(next, { persisted: false });
-  sizeSelect.disabled = false;
   updateStatus('新規');
   await refreshAssetsList();
 });
@@ -639,20 +762,16 @@ deleteBtn.addEventListener('click', async () => {
 
   if (!isPersisted) {
     if (!confirm('この新規作品はまだ保存されていません。消して新規にしますか？')) return;
-    sizeSelect.disabled = false;
     const next = createNewAssetFromUI();
     setAsset(next, { persisted: false });
-    sizeSelect.disabled = false;
     updateStatus('新規');
     return;
   }
 
   if (!confirm('本当に削除しますか？')) return;
   await deletePixelAsset(currentAsset.id);
-  sizeSelect.disabled = false;
   const next = createNewAssetFromUI();
   setAsset(next, { persisted: false });
-  sizeSelect.disabled = false;
   await refreshAssetsList();
   updateStatus('削除した');
 });
@@ -731,14 +850,13 @@ canvas.addEventListener('pointerleave', () => {
 (async function init() {
   setTool('pen');
   canvasFrame.classList.toggle('grid', gridToggle.checked);
+  renderSizePicker();
   renderPalette();
 
   const list = await listPixelAssets({ ownerId });
   if (list.length === 0) {
-    sizeSelect.disabled = false;
     const next = createNewAssetFromUI();
     setAsset(next, { persisted: false });
-    sizeSelect.disabled = false;
     setView('editor');
   } else {
     setView('gallery');
