@@ -12,13 +12,17 @@
     <div id="game-container">
         <h1>Warp Monster Jump!</h1>
         <p>TAP or SPACE to Jump!</p>
-        <div class="character-bar">
-            <div class="character-label">キャラ：</div>
-            <div class="character-name" id="selectedCharacterName">デフォルト</div>
-            <button class="character-btn" id="openCharacterBtn" type="button">えらぶ</button>
+        <div class="hud-bar" aria-label="HUD">
+            <div class="hud-left">
+                <div class="hud-chip">
+                    Score: <span id="score">0</span>
+                </div>
+            </div>
+            <div class="hud-right">
+                <button class="hud-btn" id="openSettingsBtn" type="button">設定</button>
+            </div>
         </div>
         <canvas id="gameCanvas" width="800" height="400"></canvas>
-        <div id="score-board">Score: <span id="score">0</span></div>
         <div id="game-over" class="hidden">
             <h2>GAME OVER</h2>
             <p>Score: <span id="final-score">0</span></p>
@@ -27,20 +31,93 @@
         </div>
     </div>
 
-    <!-- Character Picker Modal -->
-    <div class="modal hidden" id="characterModal" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="characterModalTitle">
+    <!-- Settings Screen (separate from gameplay) -->
+    <div class="modal hidden" id="settingsScreen" aria-hidden="true">
+        <div class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
             <div class="modal-head">
-                <div class="modal-title" id="characterModalTitle">キャラをえらぶ</div>
-                <button class="modal-close" id="closeCharacterBtn" type="button">×</button>
+                <div class="modal-title" id="settingsTitle">設定（キャラ変更）</div>
+                <button class="modal-close" id="closeSettingsBtn" type="button">×</button>
             </div>
             <div class="modal-body">
-                <div class="modal-actions">
-                    <button class="modal-btn" id="useDefaultBtn" type="button">デフォルトにする</button>
-                    <a class="modal-link" id="goToMakerLink" href="#">ドット絵メーカーへ</a>
+                <div class="settings-summary">
+                    <div class="settings-summary-row">
+                        <div class="settings-summary-key">プレイヤー</div>
+                        <div class="settings-summary-val" id="playerCurrentName">デフォルト</div>
+                    </div>
+                    <div class="settings-summary-row">
+                        <div class="settings-summary-key">敵（小）</div>
+                        <div class="settings-summary-val" id="enemySmallCurrentName">デフォルト</div>
+                    </div>
+                    <div class="settings-summary-row">
+                        <div class="settings-summary-key">敵（中）</div>
+                        <div class="settings-summary-val" id="enemyMediumCurrentName">デフォルト</div>
+                    </div>
+                    <div class="settings-summary-row">
+                        <div class="settings-summary-key">敵（大）</div>
+                        <div class="settings-summary-val" id="enemyLargeCurrentName">デフォルト</div>
+                    </div>
                 </div>
-                <div class="character-list" id="characterList"></div>
-                <div class="modal-note" id="characterNote">※「ドット絵メーカー」で種類を「キャラ」にして保存するとここに出るよ</div>
+
+                <div class="modal-actions">
+                    <a class="modal-link" id="goToMakerLink" href="#">ドット絵メーカーへ</a>
+                    <a class="modal-link" id="goToPokedexLink" href="#">ポケモン図鑑へ</a>
+                </div>
+
+                <details class="settings-block" open>
+                    <summary class="settings-block-title">プレイヤー</summary>
+                    <div class="settings-actions">
+                        <button class="modal-btn" id="playerUseDefaultBtn" type="button">デフォルトにする</button>
+                    </div>
+                    <div class="settings-subtitle">ドット絵メーカー（種類：キャラ）</div>
+                    <div class="character-list" id="playerPixelList"></div>
+
+                    <div class="settings-subtitle">ポケモン図鑑</div>
+                    <input class="settings-search" id="playerPokemonSearch" placeholder="なまえ / No. / 作者 で検索" />
+                    <div class="pokemon-pick-list" id="playerPokemonList"></div>
+                </details>
+
+                <details class="settings-block">
+                    <summary class="settings-block-title">敵（小）</summary>
+                    <div class="settings-actions">
+                        <button class="modal-btn" id="enemySmallUseDefaultBtn" type="button">デフォルトにする</button>
+                    </div>
+                    <div class="settings-subtitle">ドット絵メーカー（種類：キャラ/もの）</div>
+                    <div class="character-list" id="enemySmallPixelList"></div>
+
+                    <div class="settings-subtitle">ポケモン図鑑</div>
+                    <input class="settings-search" id="enemySmallPokemonSearch" placeholder="なまえ / No. / 作者 で検索" />
+                    <div class="pokemon-pick-list" id="enemySmallPokemonList"></div>
+                </details>
+
+                <details class="settings-block">
+                    <summary class="settings-block-title">敵（中）</summary>
+                    <div class="settings-actions">
+                        <button class="modal-btn" id="enemyMediumUseDefaultBtn" type="button">デフォルトにする</button>
+                    </div>
+                    <div class="settings-subtitle">ドット絵メーカー（種類：キャラ/もの）</div>
+                    <div class="character-list" id="enemyMediumPixelList"></div>
+
+                    <div class="settings-subtitle">ポケモン図鑑</div>
+                    <input class="settings-search" id="enemyMediumPokemonSearch" placeholder="なまえ / No. / 作者 で検索" />
+                    <div class="pokemon-pick-list" id="enemyMediumPokemonList"></div>
+                </details>
+
+                <details class="settings-block">
+                    <summary class="settings-block-title">敵（大）</summary>
+                    <div class="settings-actions">
+                        <button class="modal-btn" id="enemyLargeUseDefaultBtn" type="button">デフォルトにする</button>
+                    </div>
+                    <div class="settings-subtitle">ドット絵メーカー（種類：キャラ/もの）</div>
+                    <div class="character-list" id="enemyLargePixelList"></div>
+
+                    <div class="settings-subtitle">ポケモン図鑑</div>
+                    <input class="settings-search" id="enemyLargePokemonSearch" placeholder="なまえ / No. / 作者 で検索" />
+                    <div class="pokemon-pick-list" id="enemyLargePokemonList"></div>
+                </details>
+
+                <div class="modal-note">
+                    ※ 敵は「小/中/大」で別々に見た目を選べるよ（デフォルト・ドット絵・ポケモン）
+                </div>
             </div>
         </div>
     </div>
