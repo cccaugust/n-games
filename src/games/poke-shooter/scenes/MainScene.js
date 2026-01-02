@@ -17,11 +17,9 @@ export default class MainScene extends Phaser.Scene {
 
         // Groups
         this.balls = this.physics.add.group();
-        this.pokemons = this.physics.add.group(); // This will now hold containers or sprites? 
-        // Physics with containers is tricky in Phaser.
-        // Better: Keep pokemons as the physics group of sprites. Add visual hearts separately?
-        // Or: Use Containers and enable physics on them. 
-        // Let's try Containers with Physics.
+        // NOTE: Arcade Physics + Container is fragile across Phaser versions/builds.
+        // Keep pokemons as Arcade Sprites, and render hearts as separate images that follow.
+        this.pokemons = this.physics.add.group();
 
         // Input
         this.input.on('pointerdown', this.shootBall, this);
@@ -53,10 +51,22 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.pokemons.children.each(poke => {
+            // Keep UI hearts following the pokemon sprite
+            if (poke && poke.hearts && poke.active) {
+                const gap = 20;
+                const startXHeart = -((poke.maxHp - 1) * gap) / 2;
+                for (let i = 0; i < poke.hearts.length; i++) {
+                    const heart = poke.hearts[i];
+                    if (!heart || !heart.active) continue;
+                    heart.x = poke.x + startXHeart + (i * gap);
+                    heart.y = poke.y - 60;
+                }
+            }
+
             if (poke.y > this.scale.height + 50 || poke.x < -150 || poke.x > this.scale.width + 150) {
                 poke.destroy();
             }
-        });
+        }, this);
     }
 
     shootBall(pointer) {
@@ -78,43 +88,44 @@ export default class MainScene extends Phaser.Scene {
         const direction = Math.random() > 0.5 ? 1 : -1;
         const startX = direction === 1 ? -100 : this.scale.width + 100;
 
-        // Container Setup
-        const container = this.add.container(startX, startY);
-        container.setSize(100, 100);
-        this.physics.world.enable(container);
-        container.body.setVelocityX(Phaser.Math.Between(100, 250) * direction);
-
-        // Pokemon Sprite
-        const pokeSprite = this.add.image(0, 0, randomKey);
-        pokeSprite.setScale(0.2); // Relative to container
-        pokeSprite.setOrigin(0.5);
-        container.add(pokeSprite);
+        // Pokemon Physics Sprite
+        const poke = this.pokemons.create(startX, startY, randomKey);
+        // Scale + body for reliable overlaps
+        poke.setScale(0.2);
+        poke.setCircle(Math.min(poke.width, poke.height) * 0.25);
+        poke.setOffset(poke.width * 0.25, poke.height * 0.25);
+        poke.setVelocityX(Phaser.Math.Between(100, 250) * direction);
+        poke.setImmovable(true);
 
         // Stores ID for capture
-        container.pokemonId = randomKey;
+        poke.pokemonId = randomKey;
 
         // Health System
         const maxHp = Phaser.Math.Between(1, 5);
-        container.hp = maxHp;
-        container.hearts = [];
+        poke.maxHp = maxHp;
+        poke.hp = maxHp;
+        poke.hearts = [];
 
-        // Add Hearts
-        const gap = 20;
-        const startXHeart = -((maxHp - 1) * gap) / 2;
-
+        // Hearts (non-physics, follow in update)
         for (let i = 0; i < maxHp; i++) {
-            const heart = this.add.image(startXHeart + (i * gap), -60, 'heart');
-            heart.setScale(0.04); // Small heart
-            container.add(heart);
-            container.hearts.push(heart);
+            const heart = this.add.image(poke.x, poke.y - 60, 'heart');
+            heart.setScale(0.04);
+            heart.setDepth(10);
+            poke.hearts.push(heart);
         }
 
-        this.pokemons.add(container);
+        // Cleanup hearts when pokemon is destroyed
+        poke.once(Phaser.GameObjects.Events.DESTROY, () => {
+            if (poke.hearts) {
+                poke.hearts.forEach(h => h && h.destroy());
+                poke.hearts = [];
+            }
+        });
 
-        // Sine wave movement (apply to body)
+        // Sine wave movement for the sprite
         this.tweens.add({
-            targets: container,
-            y: container.y + 50,
+            targets: poke,
+            y: poke.y + 50,
             duration: 1000,
             yoyo: true,
             repeat: -1,
@@ -122,33 +133,33 @@ export default class MainScene extends Phaser.Scene {
         });
     }
 
-    hitPokemon(ball, container) {
+    hitPokemon(ball, poke) {
         ball.destroy();
 
-        container.hp--;
+        poke.hp--;
 
-        if (container.hearts.length > 0) {
-            const heart = container.hearts.pop();
+        if (poke.hearts && poke.hearts.length > 0) {
+            const heart = poke.hearts.pop();
             heart.destroy();
         }
 
         // Flash effect
         this.tweens.add({
-            targets: container,
+            targets: poke,
             alpha: 0.5,
             duration: 50,
             yoyo: true,
             repeat: 1
         });
 
-        if (container.hp <= 0) {
-            this.catchPokemon(container);
+        if (poke.hp <= 0) {
+            this.catchPokemon(poke);
         }
     }
 
-    catchPokemon(container) {
+    catchPokemon(poke) {
         // Particles - One shot
-        const particles = this.add.particles(container.x, container.y, 'monster_ball', {
+        const particles = this.add.particles(poke.x, poke.y, 'monster_ball', {
             speed: { min: 100, max: 300 },
             scale: { start: 0.1, end: 0 },
             alpha: { start: 1, end: 0 },
@@ -161,9 +172,9 @@ export default class MainScene extends Phaser.Scene {
         particles.explode(20);
 
         // Score & Collection
-        this.events.emit('pokemonCaught', container.pokemonId);
+        this.events.emit('pokemonCaught', poke.pokemonId);
 
         // Destroy
-        container.destroy();
+        poke.destroy();
     }
 }
