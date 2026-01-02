@@ -30,33 +30,106 @@ const VIEW_ROWS = 15;
 const LOGICAL_W = VIEW_COLS * TILE;
 const LOGICAL_H = VIEW_ROWS * TILE;
 
-// 日本のシルエット（ざっくり：楕円を重ねる）
-const LAND_BLOBS = [
-  // Hokkaido
-  { cx: 76, cy: 12, rx: 12, ry: 9 },
-  // Tohoku
-  { cx: 70, cy: 26, rx: 14, ry: 10 },
-  // Kanto/Chubu
-  { cx: 68, cy: 42, rx: 18, ry: 11 },
-  // Kansai/Chugoku
-  { cx: 56, cy: 50, rx: 18, ry: 9 },
-  // Shikoku
-  { cx: 58, cy: 60, rx: 10, ry: 4 },
-  // Kyushu
-  { cx: 42, cy: 64, rx: 12, ry: 10 },
-  // Okinawa
-  { cx: 26, cy: 76, rx: 4, ry: 2 }
+// 日本のシルエット（ミニマップで日本列島に見えるように：多角形で近似）
+// 0..1 の正規化座標（x: 西→東, y: 北→南）で定義する
+const JAPAN_POLYS_NORM = [
+  // 北海道
+  [
+    [0.68, 0.06],
+    [0.78, 0.04],
+    [0.90, 0.10],
+    [0.93, 0.18],
+    [0.84, 0.26],
+    [0.72, 0.23],
+    [0.64, 0.14]
+  ],
+  // 本州（ざっくり輪郭）
+  [
+    [0.66, 0.22],
+    [0.76, 0.22],
+    [0.84, 0.30],
+    [0.86, 0.40],
+    [0.82, 0.55],
+    [0.76, 0.70],
+    [0.68, 0.78],
+    [0.60, 0.76],
+    [0.58, 0.68],
+    [0.54, 0.62],
+    [0.50, 0.64],
+    [0.46, 0.68],
+    [0.40, 0.70],
+    // 中国地方（西端を少し伸ばす）
+    [0.32, 0.74],
+    [0.26, 0.72],
+    [0.24, 0.64],
+    [0.27, 0.58],
+    [0.33, 0.60],
+    [0.38, 0.56],
+    [0.46, 0.54],
+    [0.52, 0.50],
+    [0.58, 0.46],
+    [0.62, 0.38],
+    [0.64, 0.30]
+  ],
+  // 四国
+  [
+    [0.52, 0.72],
+    [0.62, 0.72],
+    [0.66, 0.76],
+    [0.60, 0.82],
+    [0.50, 0.79]
+  ],
+  // 九州
+  [
+    [0.33, 0.72],
+    [0.46, 0.70],
+    [0.54, 0.78],
+    [0.52, 0.92],
+    [0.40, 0.96],
+    [0.30, 0.89],
+    [0.30, 0.78]
+  ],
+  // 沖縄
+  [
+    [0.18, 0.92],
+    [0.24, 0.91],
+    [0.28, 0.94],
+    [0.22, 0.97]
+  ]
 ];
 
-function inEllipse(x, y, b) {
-  const dx = (x - b.cx) / b.rx;
-  const dy = (y - b.cy) / b.ry;
-  return dx * dx + dy * dy <= 1;
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function pointInPolyNorm(nx, ny, poly) {
+  // Ray casting
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0];
+    const yi = poly[i][1];
+    const xj = poly[j][0];
+    const yj = poly[j][1];
+    const intersect =
+      (yi > ny) !== (yj > ny) &&
+      nx < ((xj - xi) * (ny - yi)) / (yj - yi + 1e-12) + xi;
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function isLandNorm(nx, ny) {
+  const x = clamp01(nx);
+  const y = clamp01(ny);
+  return JAPAN_POLYS_NORM.some(poly => pointInPolyNorm(x, y, poly));
 }
 
 function isLand(x, y) {
   if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return false;
-  return LAND_BLOBS.some(b => inEllipse(x, y, b));
+  // タイル中心をサンプル
+  const nx = (x + 0.5) / MAP_W;
+  const ny = (y + 0.5) / MAP_H;
+  return isLandNorm(nx, ny);
 }
 
 // 県判定（ざっくり：バウンディングボックス）
@@ -161,6 +234,21 @@ function buildRepresentativeTiles() {
         break;
       }
     }
+
+    // 形状更新でズレたときの保険：全体スキャンで該当県を拾う
+    if (!found) {
+      for (let yy = 0; yy < MAP_H && !found; yy++) {
+        for (let xx = 0; xx < MAP_W; xx++) {
+          if (isLand(xx, yy) && getPrefectureAt(xx, yy) === z.name) {
+            found = { x: xx, y: yy };
+            break;
+          }
+        }
+      }
+    }
+
+    // 最後の保険（県が見つからない場合もゲームが止まらないように）
+    if (!found) found = { x: z.cx, y: z.cy };
     if (found) prefRepTile.set(z.name, found);
   }
 }
@@ -215,29 +303,104 @@ function resetToTokyo() {
 // ---- 描画（ミニマップはベースをキャッシュ）----
 const miniBase = document.createElement('canvas');
 const miniBaseCtx = miniBase.getContext('2d');
-const MINI_W = 200;
-const MINI_H = 160;
+// 256x256 のドット解像度（縮小表示しても日本列島に見えるように）
+const MINI_W = 256;
+const MINI_H = 256;
+
+function hslToRgb(h, s, l) {
+  // h: 0..360, s/l: 0..100
+  const _h = ((h % 360) + 360) % 360;
+  const _s = clamp01(s / 100);
+  const _l = clamp01(l / 100);
+  const c = (1 - Math.abs(2 * _l - 1)) * _s;
+  const hp = _h / 60;
+  const x = c * (1 - Math.abs((hp % 2) - 1));
+  let r1 = 0, g1 = 0, b1 = 0;
+  if (0 <= hp && hp < 1) [r1, g1, b1] = [c, x, 0];
+  else if (1 <= hp && hp < 2) [r1, g1, b1] = [x, c, 0];
+  else if (2 <= hp && hp < 3) [r1, g1, b1] = [0, c, x];
+  else if (3 <= hp && hp < 4) [r1, g1, b1] = [0, x, c];
+  else if (4 <= hp && hp < 5) [r1, g1, b1] = [x, 0, c];
+  else if (5 <= hp && hp < 6) [r1, g1, b1] = [c, 0, x];
+  const m = _l - c / 2;
+  return [
+    Math.round((r1 + m) * 255),
+    Math.round((g1 + m) * 255),
+    Math.round((b1 + m) * 255)
+  ];
+}
 
 function renderMiniBase() {
   miniBase.width = MINI_W;
   miniBase.height = MINI_H;
-  miniBaseCtx.clearRect(0, 0, MINI_W, MINI_H);
+  const img = miniBaseCtx.createImageData(MINI_W, MINI_H);
+  const d = img.data;
 
-  // 背景（海）
-  miniBaseCtx.fillStyle = '#0b4f6c';
-  miniBaseCtx.fillRect(0, 0, MINI_W, MINI_H);
+  // 海（背景）
+  const sea = [0x0b, 0x4f, 0x6c];
+  for (let i = 0; i < d.length; i += 4) {
+    d[i + 0] = sea[0];
+    d[i + 1] = sea[1];
+    d[i + 2] = sea[2];
+    d[i + 3] = 255;
+  }
 
-  for (let y = 0; y < MAP_H; y++) {
-    for (let x = 0; x < MAP_W; x++) {
-      if (!isLand(x, y)) continue;
-      const pref = getPrefectureAt(x, y) ?? '？？県';
-      miniBaseCtx.fillStyle = colorForPref(pref);
-      const px = Math.floor((x / MAP_W) * MINI_W);
-      const py = Math.floor((y / MAP_H) * MINI_H);
-      // 1pxだと見えにくいので 2px 最低確保
-      miniBaseCtx.fillRect(px, py, 2, 2);
+  // 県色をRGBにキャッシュ（HSL→RGBにしてImageDataへ）
+  const prefRgb = new Map();
+  function rgbForPref(prefName) {
+    if (prefRgb.has(prefName)) return prefRgb.get(prefName);
+    const hue = hashToHue(prefName);
+    const rgb = hslToRgb(hue, 65, 62);
+    prefRgb.set(prefName, rgb);
+    return rgb;
+  }
+
+  // まず landMask を作って塗る（1px単位）
+  const landMask = new Uint8Array(MINI_W * MINI_H);
+  for (let y = 0; y < MINI_H; y++) {
+    for (let x = 0; x < MINI_W; x++) {
+      const nx = (x + 0.5) / MINI_W;
+      const ny = (y + 0.5) / MINI_H;
+      if (!isLandNorm(nx, ny)) continue;
+      landMask[y * MINI_W + x] = 1;
+
+      // 県の色は「現行のざっくり判定」を流用（タイル座標へ落とす）
+      const tx = Math.floor(nx * MAP_W);
+      const ty = Math.floor(ny * MAP_H);
+      const pref = getPrefectureAt(tx, ty) ?? '？？県';
+      const [r, g, b] = rgbForPref(pref);
+      const idx = (y * MINI_W + x) * 4;
+      d[idx + 0] = r;
+      d[idx + 1] = g;
+      d[idx + 2] = b;
+      d[idx + 3] = 255;
     }
   }
+
+  // 海岸線（境界）を 1px で強調して、縮小しても日本列島に見えるようにする
+  const outline = [18, 28, 34]; // 濃いめ（黒すぎない）
+  function isSeaAt(px, py) {
+    if (px < 0 || py < 0 || px >= MINI_W || py >= MINI_H) return true;
+    return landMask[py * MINI_W + px] === 0;
+  }
+  for (let y = 0; y < MINI_H; y++) {
+    for (let x = 0; x < MINI_W; x++) {
+      if (landMask[y * MINI_W + x] === 0) continue;
+      const nearSea =
+        isSeaAt(x + 1, y) ||
+        isSeaAt(x - 1, y) ||
+        isSeaAt(x, y + 1) ||
+        isSeaAt(x, y - 1);
+      if (!nearSea) continue;
+      const idx = (y * MINI_W + x) * 4;
+      d[idx + 0] = outline[0];
+      d[idx + 1] = outline[1];
+      d[idx + 2] = outline[2];
+      d[idx + 3] = 255;
+    }
+  }
+
+  miniBaseCtx.putImageData(img, 0, 0);
 }
 
 function drawMini() {
