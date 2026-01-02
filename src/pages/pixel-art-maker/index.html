@@ -73,33 +73,6 @@
               </label>
             </div>
 
-            <div class="row row-2">
-              <label class="field">
-                <span>種類</span>
-                <select id="kindSelect">
-                  <option value="character">キャラ</option>
-                  <option value="object">モノ</option>
-                  <option value="tile">地形</option>
-                </select>
-              </label>
-
-              <label class="field">
-                <span>サイズ</span>
-                <div class="size-picker" id="sizePicker"></div>
-                <select id="sizeSelect" class="hidden">
-                  <option value="16x16">16×16</option>
-                  <option value="32x16">32×16</option>
-                  <option value="16x32">16×32</option>
-                  <option value="32x32">32×32</option>
-                  <option value="64x32">64×32</option>
-                  <option value="32x64">32×64</option>
-                  <option value="64x64">64×64</option>
-                  <option value="128x128">128×128</option>
-                  <option value="256x256">256×256</option>
-                </select>
-              </label>
-            </div>
-
             <div class="row">
               <div class="tool-group">
                 <button class="tool-btn active" id="toolPen" type="button">ペン</button>
@@ -145,12 +118,48 @@
 
             <div class="tiny-note" id="statusText">-</div>
           </section>
-
-          <section class="card assets">
-            <div class="section-title">保存した作品</div>
-            <div class="assets-list" id="assetsList"></div>
-          </section>
         </aside>
+      </div>
+
+      <div class="modal-backdrop" id="newAssetModal" hidden>
+        <div class="card modal">
+          <div class="modal-head">
+            <div>
+              <div class="section-title">新規作成</div>
+              <div class="tiny-note">種類とサイズをえらんでから編集をはじめよう</div>
+            </div>
+            <button class="btn-sub" id="newAssetCloseBtn" type="button">× 閉じる</button>
+          </div>
+
+          <div class="row">
+            <label class="field">
+              <span>なまえ</span>
+              <input id="newNameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
+            </label>
+          </div>
+
+          <div class="row row-2">
+            <label class="field">
+              <span>種類</span>
+              <select id="newKindSelect">
+                <option value="character">キャラ</option>
+                <option value="object">モノ</option>
+                <option value="tile">地形</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="row">
+            <label class="field">
+              <span>サイズ</span>
+              <div class="size-picker" id="newSizePicker"></div>
+            </label>
+          </div>
+
+          <div class="row actions">
+            <button class="btn-primary-solid" id="newAssetCreateBtn" type="button">作成して編集</button>
+          </div>
+        </div>
       </div>
     </main>
 

@@ -9,6 +9,10 @@ body {
   background: var(--pm-bg);
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .topbar {
   background: white;
   position: sticky;
@@ -124,7 +128,7 @@ body {
 
 .workspace {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
   gap: 16px;
   align-items: start;
 }
@@ -152,6 +156,7 @@ body {
   flex-direction: column;
   gap: 10px;
   min-height: 420px;
+  min-width: 0;
 }
 
 .canvas-head {
@@ -196,6 +201,11 @@ body {
   font-size: 0.9rem;
 }
 
+#zoomRange {
+  width: 160px;
+  max-width: 45vw;
+}
+
 .canvas-scroll {
   flex: 1;
   min-height: 280px;
@@ -204,6 +214,7 @@ body {
   border: 1px solid var(--pm-border);
   border-radius: 14px;
   padding: 14px;
+  min-width: 0;
 }
 
 .canvas-frame {
@@ -221,15 +232,14 @@ body {
   inset: 0;
   pointer-events: none;
   border-radius: 12px;
-  background-size: 24px 24px;
+  background-size: 18px 18px;
   background-position: 0 0;
   background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%),
     linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%);
-  mix-blend-mode: multiply;
-  opacity: 0.9;
-  animation: pm-checker-shift 2.6s ease-in-out infinite;
+  opacity: 0.7;
+  animation: none;
   z-index: 1;
 }
 
@@ -239,21 +249,18 @@ body {
   inset: 0;
   border-radius: 12px;
   pointer-events: none;
-  background: linear-gradient(120deg, transparent 0%, rgba(108, 92, 231, 0.08) 30%, transparent 60%);
-  background-size: 240px 240px;
-  background-position: -240px -240px;
-  opacity: 0.8;
-  animation: pm-shimmer 3.2s linear infinite;
+  display: none;
   z-index: 1;
 }
 
 .canvas-frame.grid::after {
+  display: block;
   background-image: linear-gradient(to right, rgba(0, 0, 0, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.12) 1px, transparent 1px),
-    linear-gradient(120deg, transparent 0%, rgba(108, 92, 231, 0.08) 30%, transparent 60%);
-  background-size: var(--cell) var(--cell), var(--cell) var(--cell), 240px 240px;
-  background-position: 0 0, 0 0, -240px -240px;
-  animation: pm-grid-shimmer 3.2s linear infinite;
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.12) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell), var(--cell) var(--cell);
+  background-position: 0 0, 0 0;
+  opacity: 0.85;
+  animation: none;
 }
 
 @keyframes pm-checker-shift {
@@ -304,6 +311,7 @@ body {
   flex-direction: column;
   gap: 16px;
   padding-bottom: env(safe-area-inset-bottom);
+  min-width: 0;
 }
 
 .controls,
@@ -418,7 +426,16 @@ input[type='color'] {
   width: 100%;
   height: 100%;
   display: grid;
-  gap: 2px;
+  --cols: 1;
+  --rows: 1;
+  --n: 1;
+  --gap: 2px;
+  --cell: calc((100% - (var(--n) - 1) * var(--gap)) / var(--n));
+  gap: var(--gap);
+  grid-template-columns: repeat(var(--cols), var(--cell));
+  grid-auto-rows: var(--cell);
+  justify-content: center;
+  align-content: center;
 }
 
 .size-cell {
@@ -594,7 +611,35 @@ input[type='color'] {
     linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%),
     linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%);
-  animation: pm-checker-shift 2.6s ease-in-out infinite;
+  animation: none;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(18, 18, 24, 0.35);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal {
+  width: min(760px, 100%);
+  max-height: min(84vh, 760px);
+  overflow: auto;
+  padding: 16px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
 .asset-name {
@@ -632,6 +677,9 @@ input[type='color'] {
   }
   .size-picker {
     grid-template-columns: 1fr 1fr;
+  }
+  .modal {
+    padding: 14px;
   }
 }
 
