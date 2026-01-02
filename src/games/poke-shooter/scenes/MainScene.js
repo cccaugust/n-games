@@ -9,11 +9,13 @@ export default class MainScene extends Phaser.Scene {
     create() {
         // Background
         const bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
-        // Scale background to cover screen
+        // Scale background to FIT (show whole image, no cropping)
         const scaleX = this.scale.width / bg.width;
         const scaleY = this.scale.height / bg.height;
-        const scale = Math.max(scaleX, scaleY);
+        const scale = Math.min(scaleX, scaleY);
         bg.setScale(scale).setScrollFactor(0);
+        // Ensure background is always behind everything
+        bg.setDepth(-100);
 
         // Groups
         this.balls = this.physics.add.group();
@@ -72,6 +74,7 @@ export default class MainScene extends Phaser.Scene {
     shootBall(pointer) {
         const ball = this.balls.create(this.playerPos.x, this.playerPos.y, 'monster_ball');
         ball.setScale(0.1);
+        ball.setDepth(5);
 
         // Calculate velocity
         const angle = Phaser.Math.Angle.Between(this.playerPos.x, this.playerPos.y, pointer.x, pointer.y);
@@ -96,6 +99,7 @@ export default class MainScene extends Phaser.Scene {
         poke.setOffset(poke.width * 0.25, poke.height * 0.25);
         poke.setVelocityX(Phaser.Math.Between(100, 250) * direction);
         poke.setImmovable(true);
+        poke.setDepth(5);
 
         // Stores ID for capture
         poke.pokemonId = randomKey;
@@ -158,18 +162,20 @@ export default class MainScene extends Phaser.Scene {
     }
 
     catchPokemon(poke) {
-        // Particles - One shot
-        const particles = this.add.particles(poke.x, poke.y, 'monster_ball', {
-            speed: { min: 100, max: 300 },
-            scale: { start: 0.1, end: 0 },
+        // Hit/Catch effect (ensure it renders above everything)
+        // Phaser 3.90: make a manager + emitter explicitly for reliability.
+        const pm = this.add.particles(0, 0, 'monster_ball');
+        pm.setDepth(1000);
+        const emitter = pm.createEmitter({
+            speed: { min: 120, max: 360 },
+            scale: { start: 0.12, end: 0 },
             alpha: { start: 1, end: 0 },
-            lifespan: 600,
+            lifespan: 650,
             quantity: 20,
-            blendMode: 'ADD',
-            emitting: false
+            blendMode: 'ADD'
         });
-
-        particles.explode(20);
+        emitter.explode(20, poke.x, poke.y);
+        this.time.delayedCall(800, () => pm.destroy());
 
         // Score & Collection
         this.events.emit('pokemonCaught', poke.pokemonId);
