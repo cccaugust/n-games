@@ -22,8 +22,19 @@
       </div>
     </header>
 
-    <main class="container app">
-      <div class="workspace">
+    <main class="container app" id="appRoot" data-view="gallery">
+      <section class="card gallery" id="galleryView">
+        <div class="gallery-head">
+          <div>
+            <div class="section-title">ギャラリー</div>
+            <div class="tiny-note">作品をえらんで編集 / もしくは新規作成</div>
+          </div>
+          <button class="btn-primary-solid" id="galleryNewBtn" type="button">＋ 新規作成</button>
+        </div>
+        <div class="gallery-grid" id="galleryList"></div>
+      </section>
+
+      <div class="workspace" id="editorView" hidden>
         <section class="card canvas-panel">
           <div class="canvas-head">
             <div class="canvas-head-left">
@@ -32,6 +43,7 @@
             </div>
 
             <div class="canvas-head-right">
+              <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
               <label class="inline">
                 <span>ズーム</span>
                 <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" />
@@ -47,10 +59,6 @@
             <div class="canvas-frame grid" id="canvasFrame">
               <canvas id="pixelCanvas"></canvas>
             </div>
-          </div>
-
-          <div class="hint">
-            PC: クリック/ドラッグで描く（右のツール切り替え） / スマホ: 指で描く（スクロール暴発しないように調整済み）
           </div>
         </section>
 
@@ -77,11 +85,14 @@
 
               <label class="field">
                 <span>サイズ</span>
-                <select id="sizeSelect">
+                <div class="size-picker" id="sizePicker"></div>
+                <select id="sizeSelect" class="hidden">
                   <option value="16x16">16×16</option>
                   <option value="32x16">32×16</option>
                   <option value="16x32">16×32</option>
                   <option value="32x32">32×32</option>
+                  <option value="64x32">64×32</option>
+                  <option value="32x64">32×64</option>
                   <option value="64x64">64×64</option>
                   <option value="128x128">128×128</option>
                   <option value="256x256">256×256</option>
@@ -93,17 +104,32 @@
               <div class="tool-group">
                 <button class="tool-btn active" id="toolPen" type="button">ペン</button>
                 <button class="tool-btn" id="toolEraser" type="button">消しゴム</button>
+                <button class="tool-btn" id="toolFill" type="button">ベタ塗り</button>
                 <button class="tool-btn" id="toolPicker" type="button">スポイト</button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="palette">
+                <div class="palette-head">
+                  <div class="palette-title">パレット（64色）</div>
+                  <div class="palette-sub">フルカラーは下でも選べるよ</div>
+                </div>
+                <div class="palette-grid" id="paletteGrid"></div>
               </div>
             </div>
 
             <div class="row row-2">
               <label class="field">
-                <span>色</span>
+                <span>フルカラー</span>
                 <input id="colorInput" type="color" value="#333333" />
               </label>
               <button class="btn-sub" id="undoBtn" type="button">もどす</button>
               <button class="btn-sub" id="redoBtn" type="button">やりなおし</button>
+            </div>
+
+            <div class="row">
+              <button class="btn-sub" id="clearBtn" type="button">全消し</button>
             </div>
 
             <div class="row actions">

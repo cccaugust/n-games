@@ -26,6 +26,13 @@ const backToPortal = document.getElementById('backToPortal');
 backToPortal.href = resolvePath('/pages/portal/portal.html');
 
 // DOM
+const appRoot = document.getElementById('appRoot');
+const galleryView = document.getElementById('galleryView');
+const galleryNewBtn = document.getElementById('galleryNewBtn');
+const galleryList = document.getElementById('galleryList');
+const editorView = document.getElementById('editorView');
+const backToGalleryBtn = document.getElementById('backToGalleryBtn');
+
 const canvasMeta = document.getElementById('canvasMeta');
 const canvasScroll = document.getElementById('canvasScroll');
 const canvasFrame = document.getElementById('canvasFrame');
@@ -41,11 +48,15 @@ const sizeSelect = document.getElementById('sizeSelect');
 
 const toolPen = document.getElementById('toolPen');
 const toolEraser = document.getElementById('toolEraser');
+const toolFill = document.getElementById('toolFill');
 const toolPicker = document.getElementById('toolPicker');
 
 const colorInput = document.getElementById('colorInput');
+const paletteGrid = document.getElementById('paletteGrid');
 const undoBtn = document.getElementById('undoBtn');
 const redoBtn = document.getElementById('redoBtn');
+const clearBtn = document.getElementById('clearBtn');
+const sizePicker = document.getElementById('sizePicker');
 
 const newBtn = document.getElementById('newBtn');
 const saveBtn = document.getElementById('saveBtn');
@@ -57,7 +68,7 @@ const statusText = document.getElementById('statusText');
 const assetsList = document.getElementById('assetsList');
 
 // State
-/** @type {'pen'|'eraser'|'picker'} */
+/** @type {'pen'|'eraser'|'fill'|'picker'} */
 let currentTool = 'pen';
 let currentColor = hexToRgbaInt(colorInput.value);
 
@@ -76,6 +87,87 @@ let zoom = Number(zoomRange.value);
 let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
+
+const UNIT = 16;
+const SIZE_PRESETS = [
+  { w: 1, h: 1 },
+  { w: 2, h: 1 },
+  { w: 1, h: 2 },
+  { w: 2, h: 2 },
+  { w: 4, h: 2 },
+  { w: 2, h: 4 },
+  { w: 4, h: 4 },
+  { w: 8, h: 8 },
+  { w: 16, h: 16 }
+];
+
+const FIXED_PALETTE_64 = [
+  // DawnBringer 64 (DB64) palette (curated 64 colors)
+  '#140c1c',
+  '#442434',
+  '#30346d',
+  '#4e4a4e',
+  '#854c30',
+  '#346524',
+  '#d04648',
+  '#757161',
+  '#597dce',
+  '#d27d2c',
+  '#8595a1',
+  '#6daa2c',
+  '#d2aa99',
+  '#6dc2ca',
+  '#dad45e',
+  '#deeed6',
+  '#000000',
+  '#222034',
+  '#45283c',
+  '#663931',
+  '#8f563b',
+  '#df7126',
+  '#d9a066',
+  '#eec39a',
+  '#fbf236',
+  '#99e550',
+  '#6abe30',
+  '#37946e',
+  '#4b692f',
+  '#524b24',
+  '#323c39',
+  '#3f3f74',
+  '#306082',
+  '#5b6ee1',
+  '#639bff',
+  '#5fcde4',
+  '#cbdbfc',
+  '#ffffff',
+  '#9badb7',
+  '#847e87',
+  '#696a6a',
+  '#595652',
+  '#76428a',
+  '#ac3232',
+  '#d95763',
+  '#d77bba',
+  '#8f974a',
+  '#8a6f30',
+  '#c2c3c7',
+  '#5d275d',
+  '#b13e53',
+  '#ef7d57',
+  '#ffcd75',
+  '#a7f070',
+  '#38b764',
+  '#257179',
+  '#29366f',
+  '#3b5dc9',
+  '#41a6f6',
+  '#73eff7',
+  '#f4f4f4',
+  '#94b0c2',
+  '#566c86',
+  '#333c57'
+];
 
 function parseSizeValue(v) {
   const [w, h] = String(v).split('x').map((n) => parseInt(n, 10));
@@ -108,8 +200,17 @@ function setTool(tool) {
   currentTool = tool;
   toolPen.classList.toggle('active', tool === 'pen');
   toolEraser.classList.toggle('active', tool === 'eraser');
+  toolFill.classList.toggle('active', tool === 'fill');
   toolPicker.classList.toggle('active', tool === 'picker');
   canvas.style.cursor = tool === 'picker' ? 'copy' : 'crosshair';
+}
+
+function setView(view) {
+  const v = view === 'editor' ? 'editor' : 'gallery';
+  appRoot.dataset.view = v;
+  const showEditor = v === 'editor';
+  editorView.hidden = !showEditor;
+  galleryView.hidden = showEditor;
 }
 
 function updateCanvasLayout() {
@@ -159,7 +260,9 @@ function setAsset(asset, { persisted }) {
   nameInput.value = asset.name || '';
   kindSelect.value = asset.kind;
   sizeSelect.value = `${asset.width}x${asset.height}`;
-  sizeSelect.disabled = true; // MVP: resize later
+  sizeSelect.disabled = Boolean(persisted); // 保存済みは固定 / 新規は変更OK
+  updateSizePickerDisabled();
+  updateSizePickerSelection();
 
   // Canvas internal size
   canvas.width = asset.width;
@@ -175,6 +278,20 @@ function setAsset(asset, { persisted }) {
   scheduleRender();
   updateUndoRedoButtons();
   updateStatus();
+}
+
+function updateSizePickerDisabled() {
+  if (!sizePicker) return;
+  sizePicker.classList.toggle('disabled', Boolean(sizeSelect.disabled));
+}
+
+function updateSizePickerSelection() {
+  if (!sizePicker) return;
+  const current = String(sizeSelect.value || '');
+  sizePicker.querySelectorAll('.size-btn').forEach((el) => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
+    btn.classList.toggle('selected', btn.dataset.sizeValue === current);
+  });
 }
 
 function updateUndoRedoButtons() {
@@ -216,6 +333,37 @@ function setPixelAtIndex(index, rgba) {
   return true;
 }
 
+function floodFillAtIndex(startIndex, replacementRgba) {
+  if (!currentAsset) return 0;
+  const w = currentAsset.width;
+  const h = currentAsset.height;
+  const pixels = currentAsset.pixels;
+  const target = pixels[startIndex] >>> 0;
+  const replacement = replacementRgba >>> 0;
+  if (startIndex < 0 || startIndex >= pixels.length) return 0;
+  if (target === replacement) return 0;
+
+  let changed = 0;
+  const stack = [startIndex];
+
+  while (stack.length) {
+    const idx = stack.pop();
+    if (idx == null) continue;
+    if ((pixels[idx] >>> 0) !== target) continue;
+    pixels[idx] = replacement;
+    changed++;
+
+    const x = idx % w;
+    const y = (idx / w) | 0;
+    if (x > 0) stack.push(idx - 1);
+    if (x < w - 1) stack.push(idx + 1);
+    if (y > 0) stack.push(idx - w);
+    if (y < h - 1) stack.push(idx + w);
+  }
+
+  return changed;
+}
+
 function applyToolAtEvent(e) {
   if (!currentAsset) return;
   const { index } = eventToPixel(e);
@@ -228,9 +376,22 @@ function applyToolAtEvent(e) {
     if (v !== 0) {
       colorInput.value = rgbaIntToHex(v);
       currentColor = hexToRgbaInt(colorInput.value);
+      updatePaletteSelection();
       updateStatus('色をひろった');
     } else {
       updateStatus('透明（色なし）');
+    }
+    return;
+  }
+
+  if (currentTool === 'fill') {
+    const snapshot = new Uint32Array(currentAsset.pixels);
+    const changedCount = floodFillAtIndex(index, currentColor);
+    if (changedCount > 0) {
+      pushUndoSnapshot(snapshot);
+      setDirty(true);
+      scheduleRender();
+      updateStatus('ベタ塗り');
     }
     return;
   }
@@ -291,10 +452,62 @@ async function refreshAssetsList() {
       const loaded = await getPixelAsset(asset.id);
       if (!loaded) return;
       setAsset(loaded, { persisted: true });
+      setView('editor');
       await refreshAssetsList();
     });
 
     assetsList.appendChild(btn);
+  });
+}
+
+async function refreshGalleryList() {
+  const list = await listPixelAssets({ ownerId });
+  galleryList.innerHTML = '';
+
+  if (list.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'tiny-note';
+    empty.textContent = 'まだ作品がないよ。右上の「新規作成」から作ってみよう！';
+    galleryList.appendChild(empty);
+    return;
+  }
+
+  list.forEach((asset) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'gallery-item';
+
+    const img = document.createElement('img');
+    img.className = 'gallery-thumb';
+    img.alt = '';
+    img.src = assetPreviewDataUrl(asset, 72);
+
+    const meta = document.createElement('div');
+
+    const name = document.createElement('div');
+    name.className = 'asset-name';
+    name.textContent = asset.name || '(no name)';
+
+    const info = document.createElement('div');
+    info.className = 'asset-meta';
+    info.textContent = `${kindLabel(asset.kind)} / ${asset.width}×${asset.height}`;
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+
+    btn.appendChild(img);
+    btn.appendChild(meta);
+
+    btn.addEventListener('click', async () => {
+      const loaded = await getPixelAsset(asset.id);
+      if (!loaded) return;
+      setAsset(loaded, { persisted: true });
+      setView('editor');
+      await refreshAssetsList();
+      updateStatus('読み込んだ');
+    });
+
+    galleryList.appendChild(btn);
   });
 }
 
@@ -311,6 +524,118 @@ function createNewAssetFromUI() {
   return next;
 }
 
+function renderSizePicker() {
+  if (!sizePicker) return;
+  sizePicker.innerHTML = '';
+
+  SIZE_PRESETS.forEach((p) => {
+    const pxW = p.w * UNIT;
+    const pxH = p.h * UNIT;
+    const sizeValue = `${pxW}x${pxH}`;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'size-btn';
+    btn.dataset.sizeValue = sizeValue;
+    btn.setAttribute('aria-label', `サイズ 横${p.w} 縦${p.h}（${pxW}×${pxH}）`);
+
+    const visual = document.createElement('div');
+    visual.className = 'size-visual';
+
+    const grid = document.createElement('div');
+    grid.className = 'size-visual-grid';
+    const cols = Math.min(8, p.w);
+    const rows = Math.min(8, p.h);
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    for (let i = 0; i < cols * rows; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'size-cell';
+      grid.appendChild(cell);
+    }
+    visual.appendChild(grid);
+
+    const meta = document.createElement('div');
+    const label = document.createElement('div');
+    label.className = 'size-label';
+    label.textContent = `横${p.w} × 縦${p.h}`;
+
+    const sub = document.createElement('div');
+    sub.className = 'size-sub';
+    sub.textContent = `${pxW}×${pxH}px`;
+
+    meta.appendChild(label);
+    meta.appendChild(sub);
+
+    btn.appendChild(visual);
+    btn.appendChild(meta);
+
+    btn.addEventListener('click', () => {
+      if (sizeSelect.disabled) return;
+      sizeSelect.value = sizeValue;
+      updateSizePickerSelection();
+      maybeResizeNewAsset();
+    });
+
+    sizePicker.appendChild(btn);
+  });
+
+  updateSizePickerDisabled();
+  updateSizePickerSelection();
+}
+
+function maybeResizeNewAsset() {
+  if (!currentAsset) return;
+  if (isPersisted) return;
+
+  const nextSize = parseSizeValue(sizeSelect.value);
+  if (currentAsset.width === nextSize.width && currentAsset.height === nextSize.height) return;
+
+  if (dirty && !confirm('いまの絵は消えます。サイズを変えますか？')) {
+    // Revert selection
+    sizeSelect.value = `${currentAsset.width}x${currentAsset.height}`;
+    updateSizePickerSelection();
+    return;
+  }
+
+  const next = createEmptyAsset({
+    ownerId,
+    kind: currentAsset.kind,
+    width: nextSize.width,
+    height: nextSize.height,
+    name: currentAsset.name || 'あたらしいドット'
+  });
+  setAsset(next, { persisted: false });
+  updateStatus('サイズ変更');
+}
+
+function renderPalette() {
+  paletteGrid.innerHTML = '';
+  FIXED_PALETTE_64.forEach((hex) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'swatch';
+    btn.style.background = hex;
+    btn.dataset.hex = hex.toLowerCase();
+    btn.setAttribute('aria-label', `色 ${hex}`);
+    btn.addEventListener('click', () => {
+      colorInput.value = hex;
+      currentColor = hexToRgbaInt(colorInput.value);
+      updatePaletteSelection();
+    });
+    paletteGrid.appendChild(btn);
+  });
+  updatePaletteSelection();
+}
+
+function updatePaletteSelection() {
+  const currentHex = String(colorInput.value || '').toLowerCase();
+  paletteGrid.querySelectorAll('.swatch').forEach((el) => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
+    btn.classList.toggle('selected', btn.dataset.hex === currentHex);
+  });
+}
+
 // UI events
 zoomRange.addEventListener('input', () => {
   zoom = Number(zoomRange.value);
@@ -323,6 +648,7 @@ gridToggle.addEventListener('change', () => {
 
 colorInput.addEventListener('input', () => {
   currentColor = hexToRgbaInt(colorInput.value);
+  updatePaletteSelection();
 });
 
 nameInput.addEventListener('input', () => {
@@ -340,7 +666,25 @@ kindSelect.addEventListener('change', () => {
 
 toolPen.addEventListener('click', () => setTool('pen'));
 toolEraser.addEventListener('click', () => setTool('eraser'));
+toolFill.addEventListener('click', () => setTool('fill'));
 toolPicker.addEventListener('click', () => setTool('picker'));
+
+backToGalleryBtn.addEventListener('click', async () => {
+  if (dirty && !confirm('いまの変更は保存されていません。ギャラリーに戻りますか？')) return;
+  setView('gallery');
+  await refreshGalleryList();
+});
+
+galleryNewBtn.addEventListener('click', async () => {
+  if (dirty && !confirm('いまの変更は保存されていません。新規作成しますか？')) return;
+  isPersisted = false;
+  const next = createNewAssetFromUI();
+  setAsset(next, { persisted: false });
+  setTool('pen');
+  setView('editor');
+  await refreshAssetsList();
+  updateStatus('新規');
+});
 
 undoBtn.addEventListener('click', () => {
   if (!currentAsset) return;
@@ -366,13 +710,22 @@ redoBtn.addEventListener('click', () => {
   updateStatus('やりなおした');
 });
 
+clearBtn.addEventListener('click', () => {
+  if (!currentAsset) return;
+  if (!confirm('ぜんぶ消しますか？（もどすで元に戻せるよ）')) return;
+  const snapshot = new Uint32Array(currentAsset.pixels);
+  currentAsset.pixels.fill(0);
+  pushUndoSnapshot(snapshot);
+  setDirty(true);
+  scheduleRender();
+  updateStatus('全消し');
+});
+
 newBtn.addEventListener('click', async () => {
   if (dirty && !confirm('いまの変更は保存されていません。新規にしますか？')) return;
-  sizeSelect.disabled = false;
   isPersisted = false;
   const next = createNewAssetFromUI();
   setAsset(next, { persisted: false });
-  sizeSelect.disabled = false;
   updateStatus('新規');
   await refreshAssetsList();
 });
@@ -409,20 +762,16 @@ deleteBtn.addEventListener('click', async () => {
 
   if (!isPersisted) {
     if (!confirm('この新規作品はまだ保存されていません。消して新規にしますか？')) return;
-    sizeSelect.disabled = false;
     const next = createNewAssetFromUI();
     setAsset(next, { persisted: false });
-    sizeSelect.disabled = false;
     updateStatus('新規');
     return;
   }
 
   if (!confirm('本当に削除しますか？')) return;
   await deletePixelAsset(currentAsset.id);
-  sizeSelect.disabled = false;
   const next = createNewAssetFromUI();
   setAsset(next, { persisted: false });
-  sizeSelect.disabled = false;
   await refreshAssetsList();
   updateStatus('削除した');
 });
@@ -455,6 +804,13 @@ exportBtn.addEventListener('click', async () => {
 // Pointer drawing
 canvas.addEventListener('pointerdown', (e) => {
   if (!currentAsset) return;
+
+  if (currentTool === 'fill') {
+    lastPaintedIndex = -1;
+    applyToolAtEvent(e);
+    return;
+  }
+
   isPointerDown = true;
   canvas.setPointerCapture(e.pointerId);
   lastPaintedIndex = -1;
@@ -494,19 +850,19 @@ canvas.addEventListener('pointerleave', () => {
 (async function init() {
   setTool('pen');
   canvasFrame.classList.toggle('grid', gridToggle.checked);
+  renderSizePicker();
+  renderPalette();
 
   const list = await listPixelAssets({ ownerId });
-  if (list.length > 0) {
-    const loaded = await getPixelAsset(list[0].id);
-    if (loaded) setAsset(loaded, { persisted: true });
-  }
-  if (!currentAsset) {
-    sizeSelect.disabled = false;
+  if (list.length === 0) {
     const next = createNewAssetFromUI();
     setAsset(next, { persisted: false });
-    sizeSelect.disabled = false;
+    setView('editor');
+  } else {
+    setView('gallery');
   }
 
+  await refreshGalleryList();
   await refreshAssetsList();
   updateStatus('準備OK');
 })();
