@@ -12,13 +12,15 @@ body {
     background: #2f3542;
     font-family: var(--font-main);
     user-select: none;
-    touch-action: none;
+    touch-action: auto;
 }
 
 #game-container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 100svh;
+    touch-action: none; /* ゲーム画面内だけスクロール等を抑制 */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 canvas {
@@ -95,8 +97,7 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-    /* Let clicks pass through to canvas */
+    pointer-events: auto;
 }
 
 /* Top Bar */
@@ -106,6 +107,7 @@ canvas {
     padding: 15px;
     gap: 15px;
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), transparent);
+    pointer-events: none;
 }
 
 .level-badge {
@@ -153,6 +155,7 @@ canvas {
     transform: translateX(-50%);
     width: 300px;
     text-align: center;
+    pointer-events: none;
 }
 
 .health-bar {
@@ -176,6 +179,49 @@ canvas {
     font-weight: bold;
     margin-top: 5px;
     text-shadow: 1px 1px 0 #000;
+}
+
+/* Touch Controls (Virtual Joystick) */
+#joystick-zone {
+    position: absolute;
+    left: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    width: 180px;
+    height: 180px;
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 50;
+    display: none; /* 端末判定で表示 */
+}
+
+.joystick-base {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.35));
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    position: relative;
+}
+
+.joystick-stick {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.25));
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* 端末がタッチ中心のときだけ表示 */
+@media (hover: none) and (pointer: coarse) {
+    #joystick-zone {
+        display: block;
+    }
 }
 
 /* Upgrade Screen */
@@ -251,5 +297,16 @@ canvas {
 
     .health-container {
         width: 80%;
+    }
+
+    #joystick-zone {
+        width: 160px;
+        height: 160px;
+        left: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .timer {
+        font-size: 1.6rem;
     }
 }
