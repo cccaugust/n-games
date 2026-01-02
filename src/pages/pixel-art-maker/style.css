@@ -223,6 +223,12 @@ body.modal-open {
   align-items: start;
 }
 
+/* `hidden` 属性が `.workspace { display: grid; }` に負けてしまうのを防ぐ */
+#editorView[hidden],
+.workspace[hidden] {
+  display: none !important;
+}
+
 /* エディターはホバーで動かない（作業しやすさ優先） */
 #editorView .card {
   transition: box-shadow 0.2s ease;
