@@ -51,8 +51,12 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.pokemons.children.each(poke => {
+            // Group iteration can include destroyed/null entries depending on timing;
+            // guard before accessing position/properties.
+            if (!poke || !poke.active) return;
+
             // Keep UI hearts following the pokemon sprite
-            if (poke && poke.hearts && poke.active) {
+            if (poke.hearts) {
                 const gap = 20;
                 const startXHeart = -((poke.maxHp - 1) * gap) / 2;
                 for (let i = 0; i < poke.hearts.length; i++) {
