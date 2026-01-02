@@ -14,7 +14,7 @@
 - ライフが 0 で終了（スコア保存 & ランキング表示）
 
 ## 素材（重要）
-- プレイヤー画像は `src/games/berry-bounce/assets/player.png` を読み込みます
+- プレイヤー画像は `assets/player.png`（= `public/games/berry-bounce/assets/player.png`）を読み込みます
   - このファイルが無い/読めない場合は、ゲーム内で簡易キャラ（丸いフォールバック）が表示されます
 
 ## 構成
