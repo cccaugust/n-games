@@ -16,6 +16,8 @@ preloadImages();
 // --- Game State ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const gameContainer = document.getElementById('game-container');
+const joystickZone = document.getElementById('joystick-zone');
 
 // UI Elements
 const uiLayer = {
@@ -52,19 +54,127 @@ let gameTime = 0;
 // Input State
 const input = {
     keys: {},
-    mouse: { x: 0, y: 0, down: false }
+    mouse: { x: 0, y: 0, down: false },
+    joystick: { x: 0, y: 0, active: false }
 };
 
 window.addEventListener('keydown', e => input.keys[e.key] = true);
 window.addEventListener('keyup', e => input.keys[e.key] = false);
 
+function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+}
+
+// --- Touch Controls (Virtual Joystick) ---
+const joystick = {
+    pointerId: null,
+    centerX: 0,
+    centerY: 0,
+    maxRadius: 70, // px (見た目/操作感のバランス)
+    deadZone: 0.12,
+    stickEl: null
+};
+
+function resetJoystick() {
+    input.joystick.x = 0;
+    input.joystick.y = 0;
+    input.joystick.active = false;
+    joystick.pointerId = null;
+    if (joystick.stickEl) {
+        joystick.stickEl.style.transform = 'translate(-50%, -50%)';
+    }
+}
+
+function updateJoystickFromPointer(clientX, clientY) {
+    const dx = clientX - joystick.centerX;
+    const dy = clientY - joystick.centerY;
+
+    const dist = Math.hypot(dx, dy);
+    const clamped = Math.min(joystick.maxRadius, dist);
+    const angle = Math.atan2(dy, dx);
+
+    const px = Math.cos(angle) * (dist === 0 ? 0 : clamped);
+    const py = Math.sin(angle) * (dist === 0 ? 0 : clamped);
+
+    // スティック見た目更新
+    if (joystick.stickEl) {
+        joystick.stickEl.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+    }
+
+    // 入力値（-1..1）
+    let nx = px / joystick.maxRadius;
+    let ny = py / joystick.maxRadius;
+
+    // 斜めを一定速度に
+    const nLen = Math.hypot(nx, ny);
+    if (nLen > 1) {
+        nx /= nLen;
+        ny /= nLen;
+    }
+
+    // デッドゾーン
+    if (nLen < joystick.deadZone) {
+        nx = 0;
+        ny = 0;
+    }
+
+    input.joystick.x = clamp(nx, -1, 1);
+    input.joystick.y = clamp(ny, -1, 1);
+}
+
+function setupJoystick() {
+    if (!joystickZone) return;
+    if (joystickZone.dataset.ready === '1') return;
+    joystickZone.dataset.ready = '1';
+
+    joystickZone.innerHTML = `
+        <div class="joystick-base" aria-hidden="true">
+            <div class="joystick-stick" aria-hidden="true"></div>
+        </div>
+    `;
+    joystick.stickEl = joystickZone.querySelector('.joystick-stick');
+
+    joystickZone.addEventListener('pointerdown', (e) => {
+        // iOS/Androidのスクロールやズーム暴発を抑制
+        e.preventDefault();
+
+        if (joystick.pointerId !== null) return; // 既に操作中
+        joystick.pointerId = e.pointerId;
+        input.joystick.active = true;
+
+        const rect = joystickZone.getBoundingClientRect();
+        joystick.centerX = rect.left + rect.width / 2;
+        joystick.centerY = rect.top + rect.height / 2;
+
+        updateJoystickFromPointer(e.clientX, e.clientY);
+        joystickZone.setPointerCapture(e.pointerId);
+    });
+
+    joystickZone.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== joystick.pointerId) return;
+        e.preventDefault();
+        updateJoystickFromPointer(e.clientX, e.clientY);
+    });
+
+    function onEnd(e) {
+        if (e.pointerId !== joystick.pointerId) return;
+        e.preventDefault();
+        resetJoystick();
+    }
+    joystickZone.addEventListener('pointerup', onEnd);
+    joystickZone.addEventListener('pointercancel', onEnd);
+}
+
 // Resize handling
 function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // CSS表示サイズと内部解像度を揃える（レイアウト崩れ防止）
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.floor(rect.width));
+    canvas.height = Math.max(1, Math.floor(rect.height));
 }
 window.addEventListener('resize', resize);
 resize();
+setupJoystick();
 
 // --- Game Functions ---
 
@@ -84,6 +194,7 @@ function initGame() {
     isGameOver = false;
     isPaused = false;
     startTime = Date.now();
+    resetJoystick();
 
     // UI Reset
     uiLayer.startScreen.classList.add('hidden');
@@ -297,6 +408,7 @@ function gameOver() {
     uiLayer.gameOverScreen.classList.remove('hidden');
     uiLayer.finalTime.textContent = gameTime;
     uiLayer.killCount.textContent = score;
+    resetJoystick();
 }
 
 // Stats Loop
