@@ -1,0 +1,316 @@
+/* Invaders pages: shared UI */
+
+.iv-safe {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.iv-page {
+  max-width: 980px;
+  margin: 14px auto;
+  padding: 0 14px;
+}
+
+.iv-topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.iv-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 700;
+  padding: 10px 6px;
+}
+
+.iv-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.iv-chip {
+  background: #f1f2f6;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.iv-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iv-row .left,
+.iv-row .right {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.iv-tool-btn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f2f6;
+  font-weight: 700;
+  min-width: 72px;
+}
+
+.iv-tool-btn[data-active='true'] {
+  background: var(--secondary-color);
+  color: #003d3b;
+}
+
+.iv-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.iv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.iv-stage-preview-wrap {
+  width: 100%;
+  aspect-ratio: 14 / 10;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  margin-bottom: 10px;
+}
+
+.iv-stage-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Fullscreen game/editor pages */
+.iv-full {
+  height: 100svh;
+  padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right))
+    calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.iv-full .iv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.iv-full .iv-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.iv-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.iv-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 12px;
+  background: #0b1020;
+  touch-action: none;
+}
+
+.iv-grid-canvas {
+  background: #f8f9ff;
+}
+
+.iv-hud {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.iv-hud .iv-hud-pill {
+  background: rgba(17, 24, 39, 0.65);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.iv-touch {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px;
+  pointer-events: none; /* buttons themselves override */
+}
+
+.iv-touch .iv-touch-left,
+.iv-touch .iv-touch-right {
+  display: flex;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.iv-touch-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 900;
+  backdrop-filter: blur(6px);
+  user-select: none;
+  touch-action: none;
+}
+
+.iv-touch-btn.fire {
+  width: 92px;
+  height: 92px;
+  border-radius: 22px;
+  background: rgba(108, 92, 231, 0.28);
+  border-color: rgba(108, 92, 231, 0.6);
+}
+
+@media (max-width: 768px) {
+  .iv-touch {
+    display: flex;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .iv-touch {
+    display: flex;
+  }
+}
+
+.iv-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 18px;
+  z-index: 50;
+}
+
+.iv-overlay .iv-overlay-card {
+  max-width: 540px;
+  width: 100%;
+  background: rgba(17, 24, 39, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  padding: 18px 16px;
+  color: white;
+}
+
+.iv-overlay .iv-overlay-title {
+  color: white;
+  margin: 0;
+}
+
+.iv-overlay .iv-overlay-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 10px;
+}
+
+.iv-overlay .iv-overlay-extra {
+  margin-top: 12px;
+}
+
+.iv-hint {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.iv-asset-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 6px;
+  border-radius: 14px;
+  background: #f8f9ff;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.iv-asset-btn {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  border: 2px solid transparent;
+}
+
+.iv-asset-btn[data-active='true'] {
+  border-color: rgba(108, 92, 231, 0.55);
+}
+
+.iv-asset-btn img {
+  width: 52px;
+  height: 52px;
+  image-rendering: pixelated;
+  border-radius: 12px;
+  background: rgba(17, 24, 39, 0.06);
+}
+
+.iv-asset-name {
+  font-weight: 900;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.iv-asset-meta {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ステージ作成 | インベーダー</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="iv-full">
+    <div class="iv-header">
+      <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+        <a class="iv-back" href="./stage-select.html">&larr; ステージ選択</a>
+        <span class="iv-chip" id="editorStatus">14×10</span>
+      </div>
+      <div class="iv-actions">
+        <a class="iv-tool-btn" href="./stage-select.html"
+          style="text-decoration:none; display:inline-flex; align-items:center;">ステージ選択</a>
+      </div>
+    </div>
+
+    <div class="iv-panel">
+      <div class="iv-row">
+        <div class="left">
+          <button class="iv-tool-btn" id="toolErase" data-tool="erase">⬜ けす</button>
+          <button class="iv-tool-btn" id="toolDefault" data-tool="default">👾 デフォルト</button>
+          <span class="iv-chip" id="assetStatus">敵キャラを選んでぬろう</span>
+        </div>
+        <div class="right">
+          <label class="iv-chip" style="display:inline-flex; gap: 8px; align-items:center;">
+            名前:
+            <input id="stageName" maxlength="24" placeholder="たとえば：うちのステージ"
+              style="border:none; background:transparent; outline:none; width: 220px;" />
+          </label>
+          <button class="btn-primary" id="saveBtn">保存</button>
+          <button class="iv-tool-btn" id="loadBtn">読みこみ</button>
+          <button class="iv-tool-btn" id="clearBtn">ぜんぶ消す</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <div class="iv-asset-strip" id="assetStrip" aria-label="敵キャラえらび"></div>
+      </div>
+    </div>
+
+    <div class="iv-canvas-wrap">
+      <canvas id="editorCanvas" class="iv-canvas iv-grid-canvas" width="800" height="520"></canvas>
+    </div>
+
+    <div class="iv-hint">
+      ぬり方：敵キャラをえらんで、ドラッグで配置（スマホは指でなぞる）。<br />
+      ヒント：ドット絵メーカーで作った「キャラ」を敵として使えるよ。
+    </div>
+  </div>
+
+  <div class="iv-overlay" id="overlay">
+    <div class="iv-overlay-card" style="text-align:center;">
+      <h2 class="iv-overlay-title" id="overlayTitle">インベーダー</h2>
+      <p class="iv-overlay-text" id="overlayText"></p>
+      <div class="iv-overlay-extra" id="overlayExtra"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <div class="iv-overlay" id="libraryOverlay" aria-hidden="true">
+    <div class="iv-overlay-card" style="max-width: 820px; text-align:left;">
+      <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+        <h2 style="color:white; margin:0;">📚 ステージライブラリ</h2>
+        <button class="iv-tool-btn" id="libraryClose" style="background: rgba(255,255,255,0.14); color: white;">とじる</button>
+      </div>
+
+      <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
+        ステージをロード/削除できます。デフォルトは削除できないよ。
+      </p>
+
+      <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 10px;">
+        <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+          <button class="iv-tool-btn" id="libraryNew" style="background: rgba(255,255,255,0.14); color: white;">新しく作る</button>
+        </div>
+        <div class="iv-chip" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
+      </div>
+
+      <div id="libraryList" style="display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./editor.js"></script>
+</body>
+
+</html>
+

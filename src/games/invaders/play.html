@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>プレイ | インベーダー</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="iv-full">
+    <div class="iv-header">
+      <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+        <a class="iv-back" href="./stage-select.html">&larr; ステージ選択</a>
+        <span class="iv-chip" id="stageLabel">ステージ</span>
+      </div>
+      <div class="iv-actions">
+        <button class="iv-tool-btn" id="pauseBtn">一時停止</button>
+        <button class="iv-tool-btn" id="resetBtn">最初から</button>
+      </div>
+    </div>
+
+    <div class="iv-canvas-wrap">
+      <canvas id="gameCanvas" class="iv-canvas" width="600" height="520"></canvas>
+      <div class="iv-hud" aria-hidden="true">
+        <div class="iv-hud-pill">SCORE: <span id="score">0</span></div>
+        <div class="iv-hud-pill">LIFE: <span id="lives">3</span></div>
+        <div class="iv-hud-pill">ENEMY: <span id="enemies">0</span></div>
+      </div>
+
+      <div class="iv-touch" aria-hidden="true">
+        <div class="iv-touch-left">
+          <button class="iv-touch-btn" id="btnLeft">◀</button>
+          <button class="iv-touch-btn" id="btnRight">▶</button>
+        </div>
+        <div class="iv-touch-right">
+          <button class="iv-touch-btn fire" id="btnFire">FIRE</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="iv-chip" style="align-self:flex-start;">
+      操作：←→ / A D（移動）・スペース（発射） / スマホは下のボタン
+    </div>
+  </div>
+
+  <div class="iv-overlay" id="overlay">
+    <div class="iv-overlay-card" style="text-align:center;">
+      <h2 class="iv-overlay-title" id="overlayTitle">インベーダー</h2>
+      <p class="iv-overlay-text" id="overlayText"></p>
+      <div class="iv-overlay-extra" id="overlayExtra"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <script type="module" src="./play.js"></script>
+</body>
+
+</html>
+
