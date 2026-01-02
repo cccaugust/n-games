@@ -103,6 +103,42 @@
       width: 100%;
     }
 
+    /* Touch Controls (Virtual Joystick) */
+    #joystick-zone {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      width: 170px;
+      height: 170px;
+      pointer-events: auto;
+      touch-action: none;
+      z-index: 20;
+      display: none; /* 端末判定で表示 */
+    }
+
+    .joystick-base {
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.35));
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      position: relative;
+    }
+
+    .joystick-stick {
+      width: 70px;
+      height: 70px;
+      border-radius: 999px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.22));
+      border: 2px solid rgba(255, 255, 255, 0.32);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+    }
+
     .mini-map {
       position: absolute;
       top: 10px;
@@ -223,22 +259,16 @@
 
     /* スマホ幅は常に表示 */
     @media (max-width: 768px) {
-      .mobile-controls {
-        display: flex;
-      }
+      #joystick-zone { display: block; }
     }
 
     /* タブレット等（タッチ操作が主な端末）でも表示 */
     @media (hover: none) and (pointer: coarse) {
-      .mobile-controls {
-        display: flex;
-      }
+      #joystick-zone { display: block; }
     }
 
     /* JSで付与するフォールバック（古いブラウザ対策） */
-    html.touch-device .mobile-controls {
-      display: flex;
-    }
+    html.touch-device #joystick-zone { display: block; }
   </style>
 </head>
 
@@ -293,21 +323,14 @@
             <span class="pill" id="bestLabel">🏆 --</span>
           </div>
           <div class="right">
-            <span class="pill">操作：WASD / ←→ で向き、タッチはボタン＋画面ドラッグで向き</span>
+            <span class="pill">操作：WASD（移動/横移動）＋←→（回転）。タッチは左下スティックで移動＋画面ドラッグで向き</span>
           </div>
         </div>
 
         <div class="play-wrap">
           <canvas id="playCanvas" width="800" height="450"></canvas>
           <canvas id="minimapCanvas" class="mini-map" width="160" height="160"></canvas>
-        </div>
-        <div class="mobile-controls" id="mobileControls">
-          <button class="m-btn" data-act="turnL">⟲</button>
-          <button class="m-btn" data-act="left">◀</button>
-          <button class="m-btn" data-act="fwd">▲</button>
-          <button class="m-btn" data-act="right">▶</button>
-          <button class="m-btn" data-act="back">▼</button>
-          <button class="m-btn" data-act="turnR">⟳</button>
+          <div id="joystick-zone" aria-label="移動スティック"></div>
         </div>
       </section>
     </div>

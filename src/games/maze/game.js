@@ -25,6 +25,107 @@ function isTouchDevice() {
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 }
 
+// --- Touch Controls (Virtual Joystick) ---
+const joystickZone = document.getElementById('joystick-zone');
+const input = {
+  joystick: { x: 0, y: 0, active: false }
+};
+
+const joystick = {
+  pointerId: null,
+  centerX: 0,
+  centerY: 0,
+  maxRadius: 68,
+  deadZone: 0.12,
+  stickEl: null
+};
+
+function resetJoystick() {
+  input.joystick.x = 0;
+  input.joystick.y = 0;
+  input.joystick.active = false;
+  joystick.pointerId = null;
+  if (joystick.stickEl) {
+    joystick.stickEl.style.transform = 'translate(-50%, -50%)';
+  }
+}
+
+function updateJoystickFromPointer(clientX, clientY) {
+  const dx = clientX - joystick.centerX;
+  const dy = clientY - joystick.centerY;
+
+  const dist = Math.hypot(dx, dy);
+  const clamped = Math.min(joystick.maxRadius, dist);
+  const angle = Math.atan2(dy, dx);
+
+  const px = Math.cos(angle) * (dist === 0 ? 0 : clamped);
+  const py = Math.sin(angle) * (dist === 0 ? 0 : clamped);
+
+  if (joystick.stickEl) {
+    joystick.stickEl.style.transform = `translate(calc(-50% + ${px}px), calc(-50% + ${py}px))`;
+  }
+
+  let nx = px / joystick.maxRadius;
+  let ny = py / joystick.maxRadius;
+
+  const nLen = Math.hypot(nx, ny);
+  if (nLen > 1) {
+    nx /= nLen;
+    ny /= nLen;
+  }
+  if (nLen < joystick.deadZone) {
+    nx = 0;
+    ny = 0;
+  }
+
+  input.joystick.x = clamp(nx, -1, 1);
+  input.joystick.y = clamp(ny, -1, 1);
+}
+
+function setupJoystick() {
+  if (!joystickZone) return;
+  if (!isTouchDevice()) return;
+  if (joystickZone.dataset.ready === '1') return;
+  joystickZone.dataset.ready = '1';
+
+  joystickZone.innerHTML = `
+    <div class="joystick-base" aria-hidden="true">
+      <div class="joystick-stick" aria-hidden="true"></div>
+    </div>
+  `;
+  joystick.stickEl = joystickZone.querySelector('.joystick-stick');
+
+  joystickZone.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    if (!isPlaying) return;
+    if (joystick.pointerId !== null) return;
+
+    joystick.pointerId = e.pointerId;
+    input.joystick.active = true;
+
+    const rect = joystickZone.getBoundingClientRect();
+    joystick.centerX = rect.left + rect.width / 2;
+    joystick.centerY = rect.top + rect.height / 2;
+
+    updateJoystickFromPointer(e.clientX, e.clientY);
+    joystickZone.setPointerCapture?.(e.pointerId);
+  });
+
+  joystickZone.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== joystick.pointerId) return;
+    e.preventDefault();
+    updateJoystickFromPointer(e.clientX, e.clientY);
+  });
+
+  function onEnd(e) {
+    if (e.pointerId !== joystick.pointerId) return;
+    e.preventDefault();
+    resetJoystick();
+  }
+  joystickZone.addEventListener('pointerup', onEnd);
+  joystickZone.addEventListener('pointercancel', onEnd);
+}
+
 // タッチ端末用のCSSフラグ（タブレットでボタンが隠れないようにする）
 if (isTouchDevice()) {
   document.documentElement.classList.add('touch-device');
@@ -208,7 +309,6 @@ const clearBtn = document.getElementById('clearBtn');
 const mazeSelect = document.getElementById('mazeSelect');
 const playBtn = document.getElementById('playBtn');
 const resetBtn = document.getElementById('resetBtn');
-const mobileControls = document.getElementById('mobileControls');
 const timeLabel = document.getElementById('timeLabel');
 const bestLabel = document.getElementById('bestLabel');
 
@@ -685,21 +785,6 @@ document.addEventListener('keydown', (e) => {
 });
 document.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 
-const mobileAct = new Set();
-if (mobileControls && isTouchDevice()) {
-  mobileControls.querySelectorAll('button[data-act]').forEach(btn => {
-    const act = btn.dataset.act;
-    btn.addEventListener('pointerdown', (e) => {
-      mobileAct.add(act);
-      btn.setPointerCapture?.(e.pointerId);
-      e.preventDefault();
-    });
-    btn.addEventListener('pointerup', () => mobileAct.delete(act));
-    btn.addEventListener('pointercancel', () => mobileAct.delete(act));
-    btn.addEventListener('pointerleave', () => mobileAct.delete(act));
-  });
-}
-
 // タッチ端末: 画面ドラッグで向きを変える（横ドラッグ = 回転）
 let lookPointerId = null;
 let lastLookX = 0;
@@ -707,6 +792,8 @@ const LOOK_SENSITIVITY = 0.006; // rad / px（大きいほど速く回る）
 
 playCanvas?.addEventListener('pointerdown', (e) => {
   if (!isTouchDevice()) return;
+  if (!isPlaying) return;
+  if (lookPointerId != null) return;
   // ボタン操作と干渉しないよう、キャンバス上のみ対象
   lookPointerId = e.pointerId;
   lastLookX = e.clientX;
@@ -833,6 +920,7 @@ function startPlay() {
   player.a = (playingMaze.start.dir ?? 0) * (Math.PI / 2);
   isPlaying = true;
   isFinishing = false;
+  resetJoystick();
   lastT = performance.now();
   runStartMs = lastT;
   lastShownMs = 0;
@@ -848,6 +936,7 @@ resetBtn.addEventListener('click', () => {
   player.y = playingMaze.start.y + 0.5;
   player.a = (playingMaze.start.dir ?? 0) * (Math.PI / 2);
   isFinishing = false;
+  resetJoystick();
   runStartMs = performance.now();
   lastShownMs = 0;
   updateTimeLabel(0);
@@ -871,16 +960,25 @@ function loop(t) {
 }
 
 function updatePlayer(dt) {
-  const fwd = keys.has('w') || keys.has('arrowup') || mobileAct.has('fwd');
-  const back = keys.has('s') || keys.has('arrowdown') || mobileAct.has('back');
-  const left = keys.has('a') || mobileAct.has('left');
-  const right = keys.has('d') || mobileAct.has('right');
-  const turnL = keys.has('arrowleft') || mobileAct.has('turnL');
-  const turnR = keys.has('arrowright') || mobileAct.has('turnR');
+  // Keyboard (PC)
+  const kbFwd = keys.has('w') || keys.has('arrowup');
+  const kbBack = keys.has('s') || keys.has('arrowdown');
+  const kbLeft = keys.has('a');
+  const kbRight = keys.has('d');
+  const turnL = keys.has('arrowleft');
+  const turnR = keys.has('arrowright');
 
-  const move = (Number(fwd) - Number(back)) * player.speed * dt;
-  const strafe = (Number(right) - Number(left)) * player.speed * dt;
+  // Virtual joystick (Touch)
+  // y: down is +, so forward is -y
+  const joyMove = -input.joystick.y;
+  const joyStrafe = input.joystick.x;
+
+  const moveAxis = (Number(kbFwd) - Number(kbBack)) + joyMove;
+  const strafeAxis = (Number(kbRight) - Number(kbLeft)) + joyStrafe;
   const turn = (Number(turnR) - Number(turnL)) * player.turnSpeed * dt;
+
+  const move = clamp(moveAxis, -1, 1) * player.speed * dt;
+  const strafe = clamp(strafeAxis, -1, 1) * player.speed * dt;
 
   player.a += turn;
   const ca = Math.cos(player.a);
@@ -1151,6 +1249,7 @@ function init() {
   drawEditor();
   syncMazeSelect();
   resizePlayCanvas();
+  setupJoystick();
   // Supabaseから最新を取り込み（失敗してもキャッシュで動く）
   void (async () => {
     await refreshMazeCacheFromSupabase();
