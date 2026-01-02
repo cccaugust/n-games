@@ -7,13 +7,11 @@ export default class MainScene extends Phaser.Scene {
     }
 
     create() {
-        // Background
-        const bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
-        // Scale background to cover screen
-        const scaleX = this.scale.width / bg.width;
-        const scaleY = this.scale.height / bg.height;
-        const scale = Math.max(scaleX, scaleY);
-        bg.setScale(scale).setScrollFactor(0);
+        // Background (fit to current game size, and keep fitting on resize)
+        this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
+        this.bg.setScrollFactor(0);
+        this.fitBackgroundToScreen();
+        this.scale.on('resize', this.fitBackgroundToScreen, this);
 
         // Groups
         this.balls = this.physics.add.group();
@@ -40,6 +38,21 @@ export default class MainScene extends Phaser.Scene {
         const height = this.scale.height;
         this.playerPos = new Phaser.Math.Vector2(width / 2, height - 70);
         this.add.circle(this.playerPos.x, this.playerPos.y, 10, 0xffffff);
+    }
+
+    fitBackgroundToScreen(gameSize) {
+        if (!this.bg || !this.bg.active) return;
+
+        const width = gameSize?.width ?? this.scale.width;
+        const height = gameSize?.height ?? this.scale.height;
+
+        this.bg.setPosition(width / 2, height / 2);
+
+        // Cover the whole screen (no gaps). Keeps aspect ratio; may crop edges slightly.
+        const scaleX = width / this.bg.width;
+        const scaleY = height / this.bg.height;
+        const scale = Math.max(scaleX, scaleY);
+        this.bg.setScale(scale);
     }
 
     update() {
@@ -164,16 +177,17 @@ export default class MainScene extends Phaser.Scene {
     catchPokemon(poke) {
         // Particles - One shot
         const particles = this.add.particles(poke.x, poke.y, 'monster_ball', {
-            speed: { min: 100, max: 300 },
-            scale: { start: 0.1, end: 0 },
+            speed: { min: 160, max: 480 },
+            // Make the effect clearly visible on mobile/high-DPI screens
+            scale: { start: 0.28, end: 0 },
             alpha: { start: 1, end: 0 },
-            lifespan: 600,
-            quantity: 20,
+            lifespan: 700,
+            quantity: 28,
             blendMode: 'ADD',
             emitting: false
         });
 
-        particles.explode(20);
+        particles.explode(28);
 
         // Score & Collection
         this.events.emit('pokemonCaught', poke.pokemonId);
