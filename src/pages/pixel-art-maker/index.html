@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>ドット絵メーカー | N-Games</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      referrerpolicy="no-referrer"
+    />
     <link rel="stylesheet" href="../../style.css" />
     <link rel="stylesheet" href="./style.css" />
   </head>
@@ -32,21 +37,6 @@
           <button class="btn-primary-solid" id="galleryNewBtn" type="button">＋ 新規作成</button>
         </div>
         <div class="gallery-controls" aria-label="ギャラリー操作">
-          <div class="gallery-filters" role="tablist" aria-label="種類フィルタ">
-            <button class="chip active" id="filterKindAll" type="button" role="tab" aria-selected="true" data-kind="all">
-              すべて
-            </button>
-            <button class="chip" id="filterKindCharacter" type="button" role="tab" aria-selected="false" data-kind="character">
-              キャラ
-            </button>
-            <button class="chip" id="filterKindObject" type="button" role="tab" aria-selected="false" data-kind="object">
-              モノ
-            </button>
-            <button class="chip" id="filterKindTile" type="button" role="tab" aria-selected="false" data-kind="tile">
-              地形
-            </button>
-          </div>
-
           <div class="gallery-search">
             <label class="sr-only" for="gallerySearchInput">検索</label>
             <input id="gallerySearchInput" type="search" inputmode="search" placeholder="なまえで検索…" />
@@ -76,15 +66,14 @@
 
             <div class="canvas-head-right">
               <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
-              <label class="inline">
-                <span>ズーム</span>
-                <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" />
-              </label>
-              <label class="inline">
-                <input id="gridToggle" type="checkbox" checked />
-                <span>グリッド</span>
-              </label>
             </div>
+          </div>
+
+          <div class="canvas-subhead">
+            <label class="field field-inline">
+              <span>なまえ</span>
+              <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
+            </label>
           </div>
 
           <div class="canvas-scroll" id="canvasScroll">
@@ -94,69 +83,107 @@
           </div>
         </section>
 
-        <aside class="sidebar">
-          <section class="card controls">
-            <div class="section-title">作品</div>
-
-            <div class="row">
-              <label class="field">
-                <span>なまえ</span>
-                <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
-              </label>
+        <footer class="editor-toolbar" id="editorToolbar" aria-label="編集ツール">
+          <div class="toolbar-row">
+            <div class="toolbar-group" aria-label="ツール">
+              <button class="tool-icon active" id="toolPen" type="button" aria-label="ペン">
+                <i class="fa-solid fa-pen"></i><span>ペン</span>
+              </button>
+              <button class="tool-icon" id="toolEraser" type="button" aria-label="消しゴム">
+                <i class="fa-solid fa-eraser"></i><span>消し</span>
+              </button>
+              <button class="tool-icon" id="toolFill" type="button" aria-label="ベタ塗り">
+                <i class="fa-solid fa-fill-drip"></i><span>塗り</span>
+              </button>
+              <button class="tool-icon" id="toolPicker" type="button" aria-label="スポイト">
+                <i class="fa-solid fa-eye-dropper"></i><span>色</span>
+              </button>
             </div>
 
-            <div class="row">
-              <div class="tool-group">
-                <button class="tool-btn active" id="toolPen" type="button">ペン</button>
-                <button class="tool-btn" id="toolEraser" type="button">消しゴム</button>
-                <button class="tool-btn" id="toolFill" type="button">ベタ塗り</button>
-                <button class="tool-btn" id="toolPicker" type="button">スポイト</button>
-              </div>
-            </div>
+            <div class="toolbar-group" aria-label="色">
+              <button class="tool-icon color-btn" id="colorBtn" type="button" aria-label="色をえらぶ">
+                <span class="color-dot" id="colorDot" aria-hidden="true"></span><span>色</span>
+              </button>
 
-            <div class="row">
-              <div class="palette">
-                <div class="palette-head">
-                  <div class="palette-title">パレット（64色）</div>
-                  <div class="palette-sub">フルカラーは下でも選べるよ</div>
+              <div class="color-popover card" id="colorPopover" hidden>
+                <div class="color-popover-head">
+                  <div class="color-popover-title">色をえらぶ</div>
+                  <button class="btn-sub btn-icon" id="colorPopoverCloseBtn" type="button" aria-label="閉じる">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
                 </div>
                 <div class="palette-grid" id="paletteGrid"></div>
+                <div class="color-popover-foot">
+                  <label class="field">
+                    <span>フルカラー</span>
+                    <input id="colorInput" type="color" value="#333333" />
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div class="row row-2">
-              <label class="field">
-                <span>フルカラー</span>
-                <input id="colorInput" type="color" value="#333333" />
-              </label>
-              <button class="btn-sub" id="undoBtn" type="button">もどす</button>
-              <button class="btn-sub" id="redoBtn" type="button">やりなおし</button>
+            <div class="toolbar-group" aria-label="もどす・やりなおし">
+              <button class="tool-icon" id="undoBtn" type="button" aria-label="もどす">
+                <i class="fa-solid fa-rotate-left"></i><span>もどす</span>
+              </button>
+              <button class="tool-icon" id="redoBtn" type="button" aria-label="やりなおし">
+                <i class="fa-solid fa-rotate-right"></i><span>やり直</span>
+              </button>
             </div>
 
-            <div class="row">
-              <button class="btn-sub" id="clearBtn" type="button">全消し</button>
+            <div class="toolbar-group" aria-label="キャンバス">
+              <button class="tool-icon" id="expandWidthBtn" type="button" aria-label="横にひろげる（+16）">
+                <i class="fa-solid fa-arrows-left-right"></i><span>横+16</span>
+              </button>
+              <button class="tool-icon" id="expandHeightBtn" type="button" aria-label="縦にひろげる（+16）">
+                <i class="fa-solid fa-arrows-up-down"></i><span>縦+16</span>
+              </button>
+              <button class="tool-icon" id="gridToggleBtn" type="button" aria-label="グリッドON/OFF">
+                <i class="fa-solid fa-border-all"></i><span>線</span>
+              </button>
+              <div class="zoom-mini" aria-label="ズーム">
+                <button class="tool-icon" id="zoomOutBtn" type="button" aria-label="ズームアウト">
+                  <i class="fa-solid fa-magnifying-glass-minus"></i><span>-</span>
+                </button>
+                <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" aria-label="ズーム" />
+                <button class="tool-icon" id="zoomInBtn" type="button" aria-label="ズームイン">
+                  <i class="fa-solid fa-magnifying-glass-plus"></i><span>+</span>
+                </button>
+              </div>
+              <input class="sr-only" id="gridToggle" type="checkbox" checked />
             </div>
 
-            <div class="row">
-              <button class="btn-sub" id="importImageBtn" type="button">画像を読み込む</button>
+            <div class="toolbar-group" aria-label="操作">
+              <button class="tool-icon" id="clearBtn" type="button" aria-label="全消し">
+                <i class="fa-solid fa-trash-can"></i><span>全消</span>
+              </button>
+              <button class="tool-icon" id="importImageBtn" type="button" aria-label="画像を読み込む">
+                <i class="fa-solid fa-image"></i><span>画像</span>
+              </button>
               <input class="sr-only" id="importImageInput" type="file" accept="image/*" />
-              <div class="tiny-note">画像をキャンバスサイズに合わせてドット化して反映するよ</div>
+              <button class="tool-icon" id="exportBtn" type="button" aria-label="PNGを書き出す">
+                <i class="fa-solid fa-file-arrow-down"></i><span>PNG</span>
+              </button>
             </div>
 
-            <div class="row actions">
-              <button class="btn-primary-solid" id="newBtn" type="button">＋ 新規</button>
-              <button class="btn-primary-solid" id="saveBtn" type="button">保存</button>
-              <button class="btn-sub" id="duplicateBtn" type="button">複製</button>
-              <button class="btn-danger" id="deleteBtn" type="button">削除</button>
+            <div class="toolbar-group" aria-label="保存など">
+              <button class="tool-icon primary" id="saveBtn" type="button" aria-label="保存">
+                <i class="fa-solid fa-floppy-disk"></i><span>保存</span>
+              </button>
+              <button class="tool-icon" id="newBtn" type="button" aria-label="新規">
+                <i class="fa-solid fa-file-circle-plus"></i><span>新規</span>
+              </button>
+              <button class="tool-icon" id="duplicateBtn" type="button" aria-label="複製">
+                <i class="fa-solid fa-clone"></i><span>複製</span>
+              </button>
+              <button class="tool-icon danger" id="deleteBtn" type="button" aria-label="削除">
+                <i class="fa-solid fa-circle-xmark"></i><span>削除</span>
+              </button>
             </div>
+          </div>
 
-            <div class="row">
-              <button class="btn-sub" id="exportBtn" type="button">PNGを書き出す</button>
-            </div>
-
-            <div class="tiny-note" id="statusText">-</div>
-          </section>
-        </aside>
+          <div class="toolbar-status" id="statusText" aria-live="polite">-</div>
+        </footer>
       </div>
 
       <div class="modal-backdrop" id="newAssetModal" hidden>
@@ -164,7 +191,7 @@
           <div class="modal-head">
             <div>
               <div class="section-title">新規作成</div>
-              <div class="tiny-note">種類とサイズをえらんでから編集をはじめよう</div>
+              <div class="tiny-note">最初は 16×16。あとから横/縦にひろげられるよ（最大256）</div>
             </div>
             <button class="btn-sub" id="newAssetCloseBtn" type="button">× 閉じる</button>
           </div>
@@ -173,24 +200,6 @@
             <label class="field">
               <span>なまえ</span>
               <input id="newNameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
-            </label>
-          </div>
-
-          <div class="row row-2">
-            <label class="field">
-              <span>種類</span>
-              <select id="newKindSelect">
-                <option value="character">キャラ</option>
-                <option value="object">モノ</option>
-                <option value="tile">地形</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="row">
-            <label class="field">
-              <span>サイズ</span>
-              <div class="size-picker" id="newSizePicker"></div>
             </label>
           </div>
 
