@@ -19,6 +19,41 @@ alwaysApply: false
 - ゲームは `src/games/<game-name>/` 配下に `index.html` + `game.js`（または `script.js`）の形を基本とし、関連アセットは近くにまとめる。
 - 既存ゲームのパターンに合わせて、相対パス・読み込み順（CSS→JS）・canvas サイズ等を崩さない。
 
+## レスポンシブ（PC/タブレット/スマホ最適化・必須）
+「スマホで見たらズレてる」を防ぐために、最初から次を守る。
+
+### HTML（viewport）
+- すべてのゲーム/ページで viewport を入れる（入ってないとスマホで拡大縮小やズレが起きやすい）。
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+```
+
+### レイアウト（CSSの基本）
+- `body { margin: 0; }` / `* { box-sizing: border-box; }` は基本。
+- 画面高は `100vh` ではなく `100svh` / `100dvh` を優先（スマホのアドレスバーでズレやすい）。
+- 固定pxで組みすぎない：`rem` / `%` / `vw` / `clamp()` を使い、幅が狭い時に自然に詰まる設計にする。
+- ボタン/タップ領域は大きめ（目安: 最低 44px 四方、余白込みで確保）。
+
+### Canvas系ゲーム（ズレ/ぼやけ対策）
+- 「描画解像度（canvas.width/height）」と「見た目サイズ（CSSのwidth/height）」を分けて扱う。
+- 画面サイズ変更（リサイズ/回転）で **必ず再計算**する（`resize` イベント、必要なら `ResizeObserver`）。
+- ぼやけ対策に `devicePixelRatio` を考慮して内部解像度を上げる（上げすぎは重いので上限を決める）。
+- UI（スコア、ボタン等）は canvas に直描きより、可能なら DOM で重ねるとレスポンシブが楽。
+
+### タッチ/ポインター操作（スクロール暴発を防ぐ）
+- クリック専用ではなく Pointer Events を基本にする（`pointerdown/move/up`）。
+- スクロール抑制は「必要な要素だけ」に限定する：
+  - 例：ゲームエリアに `touch-action: none;`（ページ全体に乱用しない）
+  - `preventDefault()` は必要なイベントだけ（`touchmove` で使うなら `passive: false` を忘れない）
+- iOSのノッチ/ホームバーのセーフエリアを考慮し、外枠に余白を入れる：
+  - 例：`padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);`
+
+### 最低限の確認（新規ゲーム追加時のチェック）
+- スマホ幅（例: 360×640 前後）で、はみ出し/重なり/読めない文字がない
+- タブレット幅（例: 768×1024 前後）で、中央寄せ/余白/ボタンサイズが不自然でない
+- 縦→横回転でレイアウト/当たり判定が崩れない（canvasは特に）
+
 ## UI/UX（子どもと遊ぶ前提）
 - タップ/クリックの当たり判定を大きめにする（ボタン最小サイズ、余白）。
 - スマホ/タブレットでの誤スクロールを抑制（必要なら `touch-action`、`preventDefault` を適切に）。
