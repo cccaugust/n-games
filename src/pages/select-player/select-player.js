@@ -1,6 +1,9 @@
 import { selectPlayer, requireAuth } from '../../js/auth.js';
 import { navigateTo } from '../../js/config.js';
 import { supabase } from '../../js/supabaseClient.js';
+import { pokemonData } from '../../data/pokemonData.js';
+import { listPixelAssets, assetPreviewDataUrl } from '../../js/pixelAssets.js';
+import { avatarToHtml, parseAvatar } from '../../js/avatar.js';
 
 requireAuth();
 
@@ -9,6 +12,8 @@ const modal = document.getElementById('playerModal');
 const modalTitle = document.getElementById('modalTitle');
 const nameInput = document.getElementById('playerNameInput');
 const avatarGrid = document.getElementById('avatarGrid');
+const avatarTabs = document.getElementById('avatarTabs');
+const avatarHint = document.getElementById('avatarHint');
 const cancelBtn = document.getElementById('cancelBtn');
 const saveBtn = document.getElementById('saveBtn');
 
@@ -20,32 +25,115 @@ const AVATARS = [
 
 let editingPlayerId = null; // null means creating new
 let selectedAvatar = AVATARS[0];
+let selectedTab = 'emoji';
 
-// Initialize Avatar Grid
-function initAvatarGrid() {
+function setAvatarTab(tab) {
+    selectedTab = tab;
+    if (avatarTabs) {
+        avatarTabs.querySelectorAll('.avatar-tab').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+    }
+}
+
+function clearAvatarGrid() {
     avatarGrid.innerHTML = '';
-    AVATARS.forEach(emoji => {
-        const div = document.createElement('div');
-        div.className = 'avatar-option';
-        div.textContent = emoji;
-        div.onclick = () => selectAvatar(emoji);
-        avatarGrid.appendChild(div);
+}
+
+function renderAvatarOption({ value, html, title }) {
+    const div = document.createElement('div');
+    div.className = 'avatar-option';
+    div.dataset.avatarValue = value;
+    if (title) div.title = title;
+    div.innerHTML = html;
+    div.onclick = () => selectAvatar(value);
+    avatarGrid.appendChild(div);
+}
+
+function selectAvatar(value) {
+    selectedAvatar = value;
+    // Update UI selection
+    avatarGrid.querySelectorAll('.avatar-option').forEach((el) => {
+        el.classList.toggle('selected', el.dataset.avatarValue === value);
     });
 }
 
-function selectAvatar(emoji) {
-    selectedAvatar = emoji;
-    // Update UI
-    const options = avatarGrid.children;
-    for (let bg of options) {
-        if (bg.textContent === emoji) bg.classList.add('selected');
-        else bg.classList.remove('selected');
+function getTabForAvatar(avatar) {
+    const parsed = parseAvatar(avatar);
+    if (parsed.type === 'pokedex') return 'pokedex';
+    if (parsed.type === 'image') return 'dot';
+    return 'emoji';
+}
+
+function initEmojiGrid() {
+    clearAvatarGrid();
+    AVATARS.forEach(emoji => {
+        renderAvatarOption({
+            value: emoji,
+            html: avatarToHtml(emoji, { sizePx: 32 }),
+            title: 'えもじ'
+        });
+    });
+    avatarHint.textContent = 'えもじからえらべるよ';
+    selectAvatar(selectedAvatar);
+}
+
+function initPokedexGrid() {
+    clearAvatarGrid();
+    pokemonData.forEach((p) => {
+        const value = `pokedex:${p.id}`;
+        renderAvatarOption({
+            value,
+            html: avatarToHtml(value, { sizePx: 40, title: p.name }),
+            title: `${p.name}（No.${p.id}）`
+        });
+    });
+    avatarHint.textContent = 'ポケモンずかんの かおからえらべるよ';
+    selectAvatar(selectedAvatar);
+}
+
+async function initDotGrid() {
+    clearAvatarGrid();
+
+    if (!editingPlayerId) {
+        avatarHint.textContent = '※ まずプレイヤーを作ってから「ドット絵メーカー」で作品を作ると、ここからえらべるよ';
+        const note = document.createElement('div');
+        note.className = 'avatar-hint';
+        note.textContent = '（いまは まだ えらべないよ）';
+        avatarGrid.appendChild(note);
+        return;
     }
+
+    avatarHint.textContent = 'ドット絵メーカーの作品からえらべるよ';
+    const ownerId = String(editingPlayerId);
+    let list = [];
+    try {
+        list = await listPixelAssets({ ownerId });
+    } catch (e) {
+        console.warn('Failed to load pixel assets:', e);
+    }
+
+    if (!list.length) {
+        const note = document.createElement('div');
+        note.className = 'avatar-hint';
+        note.textContent = 'まだ作品がないよ。ドット絵メーカーで作ってから来てね！';
+        avatarGrid.appendChild(note);
+        return;
+    }
+
+    list.forEach((asset) => {
+        const dataUrl = assetPreviewDataUrl(asset, 64);
+        renderAvatarOption({
+            value: dataUrl,
+            html: avatarToHtml(dataUrl, { sizePx: 40, title: asset.name }),
+            title: asset.name
+        });
+    });
+    selectAvatar(selectedAvatar);
 }
 
 // Modal Control
 function openModal(player = null) {
-    initAvatarGrid(); // Reset grid selection UI
     modal.style.display = 'flex';
     nameInput.value = '';
 
@@ -54,16 +142,33 @@ function openModal(player = null) {
         editingPlayerId = player.id;
         modalTitle.textContent = 'なおす';
         nameInput.value = player.name;
-        selectAvatar(player.avatar);
+        selectedAvatar = player.avatar;
     } else {
         // Create mode
         editingPlayerId = null;
         modalTitle.textContent = 'あたらしくつくる';
         // Random default avatar
-        selectAvatar(AVATARS[Math.floor(Math.random() * AVATARS.length)]);
+        selectedAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
     }
 
+    // pick tab by current avatar and render
+    const tab = getTabForAvatar(selectedAvatar);
+    setAvatarTab(tab);
+    void renderAvatarGridForTab(tab);
+
     nameInput.focus();
+}
+
+async function renderAvatarGridForTab(tab) {
+    if (tab === 'pokedex') {
+        initPokedexGrid();
+        return;
+    }
+    if (tab === 'dot') {
+        await initDotGrid();
+        return;
+    }
+    initEmojiGrid();
 }
 
 function closeModal() {
@@ -97,6 +202,18 @@ saveBtn.onclick = async () => {
     saveBtn.textContent = 'これにする！';
     closeModal();
 };
+
+// Tabs
+if (avatarTabs) {
+    avatarTabs.addEventListener('click', (e) => {
+        const btn = e.target.closest('.avatar-tab');
+        if (!btn) return;
+        const tab = btn.dataset.tab;
+        if (!tab) return;
+        setAvatarTab(tab);
+        void renderAvatarGridForTab(tab);
+    });
+}
 
 
 /* ================= API Logic ================= */
@@ -149,22 +266,36 @@ async function renderPlayers() {
     players.forEach(p => {
         const card = document.createElement('div');
         card.className = 'player-card';
-        card.innerHTML = `
-      <div class="action-btn delete-btn" title="削除">×</div>
-      <div class="action-btn edit-btn" title="編集">✏️</div>
-      <div class="avatar">${p.avatar}</div>
-      <div class="name">${p.name}</div>
-    `;
+        const deleteBtn = document.createElement('div');
+        deleteBtn.className = 'action-btn delete-btn';
+        deleteBtn.title = '削除';
+        deleteBtn.textContent = '×';
+
+        const editBtn = document.createElement('div');
+        editBtn.className = 'action-btn edit-btn';
+        editBtn.title = '編集';
+        editBtn.textContent = '✏️';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.innerHTML = avatarToHtml(p.avatar || '👤', { sizePx: 64, title: p.name });
+
+        const name = document.createElement('div');
+        name.className = 'name';
+        name.textContent = p.name;
+
+        card.appendChild(deleteBtn);
+        card.appendChild(editBtn);
+        card.appendChild(avatar);
+        card.appendChild(name);
 
         card.onclick = (e) => {
-            if (e.target.classList.contains('action-btn')) return;
+            if (e.target && e.target.classList && e.target.classList.contains('action-btn')) return;
             choosePlayer(p);
         };
 
-        const deleteBtn = card.querySelector('.delete-btn');
         deleteBtn.onclick = (e) => deletePlayer(p.id, e);
 
-        const editBtn = card.querySelector('.edit-btn');
         editBtn.onclick = (e) => {
             e.stopPropagation();
             openModal(p);

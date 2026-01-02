@@ -1,11 +1,24 @@
 import { getCurrentPlayer, logout, switchPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
+import { avatarToHtml } from '../../js/avatar.js';
 
 requireAuth();
 
 const player = getCurrentPlayer();
-// Assuming player object now has avatar since we updated selectPlayer to store full object
-document.getElementById('playerName').innerHTML = `<span style="font-size: 1.5rem; margin-right: 5px;">${player.avatar || '👤'}</span> ${player.name}`;
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+const playerNameEl = document.getElementById('playerName');
+playerNameEl.innerHTML = `
+  <span style="margin-right: 6px;">${avatarToHtml(player?.avatar || '👤', { sizePx: 24, title: player?.name || '' })}</span>
+  <span>${escapeHtml(player?.name || '')}</span>
+`;
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 

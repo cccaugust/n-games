@@ -72,8 +72,21 @@
         }
 
         .avatar {
-            font-size: 4rem;
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 10px;
+            font-size: 4rem;
+        }
+
+        .avatar img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            border-radius: 12px;
         }
 
         .name {
@@ -170,12 +183,45 @@
             padding: 5px;
         }
 
+        .avatar-tabs {
+            display: flex;
+            gap: 8px;
+            margin: 8px 0 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .avatar-tab {
+            border: 2px solid #dfe6e9;
+            background: white;
+            color: var(--text-dark);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .avatar-tab.active {
+            border-color: var(--primary-color);
+            background: var(--secondary-color);
+        }
+
+        .avatar-hint {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 6px 0 10px;
+        }
+
         .avatar-option {
             font-size: 2rem;
             cursor: pointer;
             padding: 5px;
             border-radius: 8px;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
         }
 
         .avatar-option:hover {
@@ -186,6 +232,14 @@
             background: var(--secondary-color);
             box-shadow: 0 0 0 2px var(--primary-color);
             transform: scale(1.1);
+        }
+
+        .avatar-option img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            border-radius: 8px;
         }
 
         .modal-actions {
@@ -238,6 +292,12 @@
 
             <div class="input-group">
                 <label>アイコンをえらんでね</label>
+                <div class="avatar-tabs" id="avatarTabs">
+                    <button type="button" class="avatar-tab" data-tab="emoji">えもじ</button>
+                    <button type="button" class="avatar-tab" data-tab="pokedex">ずかん</button>
+                    <button type="button" class="avatar-tab" data-tab="dot">ドットえ</button>
+                </div>
+                <div class="avatar-hint" id="avatarHint"></div>
                 <div class="avatar-grid" id="avatarGrid">
                     <!-- Avatars injected here -->
                 </div>

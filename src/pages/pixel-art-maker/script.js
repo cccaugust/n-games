@@ -1,5 +1,6 @@
 import { getCurrentPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
+import { avatarToHtml } from '../../js/avatar.js';
 import {
   assetPreviewDataUrl,
   createEmptyAsset,
@@ -20,7 +21,17 @@ const ownerId = player?.id != null ? String(player.id) : 'unknown';
 
 // Header
 const playerPill = document.getElementById('playerPill');
-playerPill.textContent = `${player?.avatar || '👤'} ${player?.name || 'Player'}`;
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+playerPill.innerHTML = `${avatarToHtml(player?.avatar || '👤', { sizePx: 18, title: player?.name || '' })} ${escapeHtml(
+  player?.name || 'Player'
+)}`;
 
 const backToPortal = document.getElementById('backToPortal');
 backToPortal.href = resolvePath('/pages/portal/portal.html');
