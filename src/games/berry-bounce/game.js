@@ -32,7 +32,8 @@ const input = {
 };
 
 const playerImg = new Image();
-playerImg.src = './assets/player.png';
+// Assets are served from /public (Vite). Keep absolute to avoid relative path issues.
+playerImg.src = '/games/berry-bounce/assets/player.png';
 
 const player = {
   x: BASE_W / 2,
