@@ -218,3 +218,13 @@ export function assetPreviewDataUrl(asset, size = 64) {
   return dst.toDataURL('image/png');
 }
 
+/**
+ * Original size PNG data URL (no scaling).
+ * Useful for games to load as an <img>.
+ */
+export function assetToPngDataUrl(asset) {
+  const c = document.createElement('canvas');
+  renderPixelsToCanvas(c, asset.pixels, asset.width, asset.height);
+  return c.toDataURL('image/png');
+}
+
