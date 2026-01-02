@@ -1,5 +1,6 @@
 import { getCurrentPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
+import { avatarToHtml, escapeHtml, makeImageAvatar } from '../../js/avatar.js';
 import {
   assetPreviewDataUrl,
   createEmptyAsset,
@@ -18,9 +19,23 @@ requireAuth();
 const player = getCurrentPlayer();
 const ownerId = player?.id != null ? String(player.id) : 'unknown';
 
+const AVATAR_PICK_KEY = 'ngames.avatar.pick.v1';
+const AVATAR_CTX_KEY = 'ngames.avatar.ctx.v1';
+
+function readJson(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 // Header
 const playerPill = document.getElementById('playerPill');
-playerPill.textContent = `${player?.avatar || '👤'} ${player?.name || 'Player'}`;
+playerPill.innerHTML = `${avatarToHtml(player?.avatar, { size: 18, className: 'pm-pill-avatar', alt: '' })} ${escapeHtml(
+  player?.name || 'Player'
+)}`;
 
 const backToPortal = document.getElementById('backToPortal');
 backToPortal.href = resolvePath('/pages/portal/portal.html');
@@ -72,6 +87,7 @@ const saveBtn = document.getElementById('saveBtn');
 const duplicateBtn = document.getElementById('duplicateBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 const exportBtn = document.getElementById('exportBtn');
+const avatarPickBtn = document.getElementById('avatarPickBtn');
 
 const importImageBtn = document.getElementById('importImageBtn');
 const importImageInput = document.getElementById('importImageInput');
@@ -108,6 +124,9 @@ let zoom = Number(zoomRange.value);
 let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
+
+const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
+if (avatarPickBtn) avatarPickBtn.hidden = !pickAvatarMode;
 
 const CANVAS_STEP = 16;
 const CANVAS_MAX = 256;
@@ -1023,6 +1042,34 @@ exportBtn.addEventListener('click', async () => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, 'image/png');
 });
+
+if (avatarPickBtn) {
+  avatarPickBtn.addEventListener('click', () => {
+    if (!currentAsset) {
+      alert('先に作品をひらくか、作ってね！');
+      return;
+    }
+    const dataUrl = assetPreviewDataUrl(currentAsset, 96);
+    try {
+      localStorage.setItem(
+        AVATAR_PICK_KEY,
+        JSON.stringify({
+          avatar: makeImageAvatar(dataUrl),
+          source: 'pixel',
+          assetId: currentAsset.id,
+          at: new Date().toISOString()
+        })
+      );
+    } catch {
+      alert('保存に失敗しました。もう一度ためしてね。');
+      return;
+    }
+
+    const ctx = readJson(AVATAR_CTX_KEY);
+    const returnTo = typeof ctx?.returnTo === 'string' ? ctx.returnTo : '/pages/select-player/select-player.html';
+    window.location.href = resolvePath(returnTo);
+  });
+}
 
 // Pointer drawing
 canvas.addEventListener('pointerdown', (e) => {

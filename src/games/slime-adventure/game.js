@@ -1,5 +1,6 @@
 import { getCurrentPlayer } from '../../js/auth.js';
 import { saveScore, getRankings } from '../../js/score.js';
+import { avatarToHtml } from '../../js/avatar.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -257,7 +258,7 @@ async function gameOver(win) {
         <div style="display: flex; justify-content: space-between; width: 100%; padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.2);">
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-weight: bold; width: 20px;">${i + 1}.</span>
-                <span style="font-size: 1.5rem;">${r.avatar}</span>
+                <span style="display:inline-flex; align-items:center;">${avatarToHtml(r.avatar, { size: 24, className: 'ng-avatar', alt: '' })}</span>
                 <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">${r.name}</span>
             </div>
             <span>${r.score}</span>

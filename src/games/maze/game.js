@@ -6,6 +6,7 @@ import { getCurrentPlayer } from '../../js/auth.js';
 import { saveScore, getRankings } from '../../js/score.js';
 import { supabase } from '../../js/supabaseClient.js';
 import { assetPreviewDataUrl, getPixelAsset, listPixelAssets, renderPixelsToCanvas } from '../../js/pixelAssets.js';
+import { avatarToHtml } from '../../js/avatar.js';
 
 const SIZE = 32;
 // Supabase保存のローカルキャッシュ（オフライン/初回表示用）
@@ -1334,7 +1335,7 @@ async function showMazeRanking(mazeName) {
       <div style="display:flex; justify-content: space-between; align-items:center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); margin-top: 8px;">
         <div style="display:flex; align-items:center; gap: 10px; min-width: 0;">
           <div style="font-weight: 900; width: 28px;">${i + 1}.</div>
-          <div style="font-size: 1.4rem;">${escapeHtml(r.avatar || '❓')}</div>
+          <div style="display:inline-flex; align-items:center;">${avatarToHtml(r.avatar || '👤', { size: 22, className: 'ng-avatar', alt: '' })}</div>
           <div style="min-width:0; overflow:hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(r.name || '???')}</div>
         </div>
         <div style="font-weight: 900;">${escapeHtml(time)}</div>

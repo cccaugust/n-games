@@ -72,8 +72,25 @@
         }
 
         .avatar {
-            font-size: 4rem;
+            width: 84px;
+            height: 84px;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-visual {
+            font-size: 4rem;
+            line-height: 1;
+        }
+
+        img.avatar-visual {
+            border-radius: 16px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
         }
 
         .name {
@@ -170,6 +187,91 @@
             padding: 5px;
         }
 
+        .avatar-tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            border: 2px solid #dfe6e9;
+            background: #fff;
+            border-radius: 12px;
+            padding: 10px 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.15);
+        }
+
+        .avatar-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar-preview-visual {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            line-height: 1;
+        }
+
+        img.avatar-preview-visual {
+            border-radius: 16px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+        }
+
+        .avatar-panel {
+            margin-bottom: 16px;
+        }
+
+        .avatar-panel[hidden] {
+            display: none !important;
+        }
+
+        .tiny-help {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 10px 0 12px;
+        }
+
+        .picker-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: #dfe6e9;
+            color: var(--text-dark);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .avatar-option {
             font-size: 2rem;
             cursor: pointer;
@@ -238,8 +340,34 @@
 
             <div class="input-group">
                 <label>アイコンをえらんでね</label>
-                <div class="avatar-grid" id="avatarGrid">
-                    <!-- Avatars injected here -->
+                <div class="avatar-preview" id="avatarPreview"></div>
+
+                <div class="avatar-tabs" role="tablist" aria-label="アイコンのえらびかた">
+                    <button class="tab-btn active" id="tabEmoji" type="button" role="tab" aria-selected="true">絵文字</button>
+                    <button class="tab-btn" id="tabDot" type="button" role="tab" aria-selected="false">ドット絵</button>
+                    <button class="tab-btn" id="tabPokedex" type="button" role="tab" aria-selected="false">ポケモン</button>
+                </div>
+
+                <div class="avatar-panel" id="panelEmoji">
+                    <div class="avatar-grid" id="avatarGrid">
+                        <!-- Avatars injected here -->
+                    </div>
+                </div>
+
+                <div class="avatar-panel" id="panelDot" hidden>
+                    <div class="tiny-help">ドット絵メーカーで「アバターにする」を押すと、ここに戻ってくるよ。</div>
+                    <div class="picker-actions">
+                        <button class="btn-primary" id="openPixelArtMakerBtn" type="button">ドット絵メーカーをひらく</button>
+                        <button class="btn-secondary" id="useUploadedImageBtn" type="button">画像をアップロードしてつかう</button>
+                        <input class="sr-only" id="uploadAvatarInput" type="file" accept="image/*" />
+                    </div>
+                </div>
+
+                <div class="avatar-panel" id="panelPokedex" hidden>
+                    <div class="tiny-help">ポケモン図鑑で「アイコンにする」を押すと、ここに戻ってくるよ。</div>
+                    <div class="picker-actions">
+                        <button class="btn-primary" id="openPokedexBtn" type="button">ポケモン図鑑をひらく</button>
+                    </div>
                 </div>
             </div>
 

@@ -1,5 +1,20 @@
 // Import Shared Data
 import { pokemonData } from '../../data/pokemonData.js';
+import { resolvePath } from '../../js/config.js';
+import { makeImageAvatar } from '../../js/avatar.js';
+
+const AVATAR_PICK_KEY = 'ngames.avatar.pick.v1';
+const AVATAR_CTX_KEY = 'ngames.avatar.ctx.v1';
+const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
+
+function readJson(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+    } catch {
+        return null;
+    }
+}
 
 // DOM Elements
 const viewGrid = document.getElementById('view-grid');
@@ -202,6 +217,7 @@ function showDetail(pokemon) {
                     <div class="types">
                         ${typesHtml}
                     </div>
+                    ${pickAvatarMode ? `<div style="margin-top: 10px; text-align: right;"><button class="pick-avatar-btn" id="pickAvatarBtn" type="button">アイコンにする</button></div>` : ''}
                     <div style="margin-top: 5px; text-align: right; font-size: 0.8rem; color: #888;">
                         作者: <strong>${pokemon.author}</strong>
                     </div>
@@ -257,6 +273,31 @@ function showDetail(pokemon) {
     viewGrid.classList.add('hidden');
     viewDetail.classList.remove('hidden');
     window.scrollTo(0, 0);
+
+    if (pickAvatarMode) {
+        const btn = document.getElementById('pickAvatarBtn');
+        if (btn) {
+            btn.onclick = () => {
+                try {
+                    localStorage.setItem(
+                        AVATAR_PICK_KEY,
+                        JSON.stringify({
+                            avatar: makeImageAvatar(pokemon.image),
+                            source: 'pokedex',
+                            pokemonId: pokemon.id,
+                            at: new Date().toISOString()
+                        })
+                    );
+                } catch {
+                    alert('保存に失敗しました。もう一度ためしてね。');
+                    return;
+                }
+                const ctx = readJson(AVATAR_CTX_KEY);
+                const returnTo = typeof ctx?.returnTo === 'string' ? ctx.returnTo : '/pages/select-player/select-player.html';
+                window.location.href = resolvePath(returnTo);
+            };
+        }
+    }
 }
 
 // Go Back to Grid
