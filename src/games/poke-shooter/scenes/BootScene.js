@@ -45,9 +45,12 @@ export default class BootScene extends Phaser.Scene {
         });
 
         // Load Game Assets
-        this.load.image('monster_ball', './assets/monster_ball.png');
-        this.load.image('background', './assets/background.png');
-        this.load.image('heart', './assets/heart.png');
+        // NOTE:
+        // Use import.meta.url so Vite bundles/copies these assets correctly for production.
+        // (Plain './assets/...' can break on GitHub Pages build output.)
+        this.load.image('monster_ball', new URL('../assets/monster_ball.png', import.meta.url).href);
+        this.load.image('background', new URL('../assets/background.png', import.meta.url).href);
+        this.load.image('heart', new URL('../assets/heart.png', import.meta.url).href);
     }
 
     create() {

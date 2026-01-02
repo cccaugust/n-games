@@ -10,6 +10,7 @@ export default class MainScene extends Phaser.Scene {
         // Background (fit to current game size, and keep fitting on resize)
         this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'background');
         this.bg.setScrollFactor(0);
+        this.bg.setDepth(-100);
         this.fitBackgroundToScreen();
         this.scale.on('resize', this.fitBackgroundToScreen, this);
 
@@ -38,6 +39,9 @@ export default class MainScene extends Phaser.Scene {
         const height = this.scale.height;
         this.playerPos = new Phaser.Math.Vector2(width / 2, height - 70);
         this.add.circle(this.playerPos.x, this.playerPos.y, 10, 0xffffff);
+
+        // Keep ball size readable on mobile (world-space size)
+        this.ballDisplaySize = Math.round(Phaser.Math.Clamp(width * 0.09, 56, 96));
     }
 
     fitBackgroundToScreen(gameSize) {
@@ -48,11 +52,9 @@ export default class MainScene extends Phaser.Scene {
 
         this.bg.setPosition(width / 2, height / 2);
 
-        // Cover the whole screen (no gaps). Keeps aspect ratio; may crop edges slightly.
-        const scaleX = width / this.bg.width;
-        const scaleY = height / this.bg.height;
-        const scale = Math.max(scaleX, scaleY);
-        this.bg.setScale(scale);
+        // Fit exactly to the game view (no cropping, no letterbox).
+        // This may stretch slightly, but guarantees "サイズが合う" 見た目になります。
+        this.bg.setDisplaySize(width, height);
     }
 
     update() {
@@ -88,7 +90,8 @@ export default class MainScene extends Phaser.Scene {
 
     shootBall(pointer) {
         const ball = this.balls.create(this.playerPos.x, this.playerPos.y, 'monster_ball');
-        ball.setScale(0.1);
+        // setDisplaySize makes it consistent across different texture sizes / DPR
+        ball.setDisplaySize(this.ballDisplaySize, this.ballDisplaySize);
 
         // Calculate velocity
         const angle = Phaser.Math.Angle.Between(this.playerPos.x, this.playerPos.y, pointer.x, pointer.y);
@@ -175,19 +178,24 @@ export default class MainScene extends Phaser.Scene {
     }
 
     catchPokemon(poke) {
+        const tex = this.textures.get('monster_ball');
+        const src = tex?.getSourceImage?.();
+        const texW = src?.width || 1024;
+        const ballScale = this.ballDisplaySize / texW;
+
         // Particles - One shot
         const particles = this.add.particles(poke.x, poke.y, 'monster_ball', {
             speed: { min: 160, max: 480 },
-            // Make the effect clearly visible on mobile/high-DPI screens
-            scale: { start: 0.28, end: 0 },
+            // Make the effect clearly visible (relative to the actual ball size)
+            scale: { start: ballScale * 2.4, end: 0 },
             alpha: { start: 1, end: 0 },
             lifespan: 700,
-            quantity: 28,
+            quantity: 32,
             blendMode: 'ADD',
             emitting: false
         });
 
-        particles.explode(28);
+        particles.explode(32);
 
         // Score & Collection
         this.events.emit('pokemonCaught', poke.pokemonId);
