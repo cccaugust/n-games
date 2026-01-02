@@ -1,5 +1,5 @@
 import { initOverlay } from './overlay.js';
-import { countEnemies, ensureStages, escapeHtml, stageHref, STAGE_COLS, STAGE_ROWS, normalizeStage } from './shared.js';
+import { countEnemies, ensureStages, escapeHtml, stageHref, STAGE_COLS, STAGE_ROWS, WALL_CELL, WALL_ROWS, normalizeStage } from './shared.js';
 
 function qs(id) {
   return document.getElementById(id);
@@ -41,13 +41,20 @@ function drawStagePreview(canvasEl, stage) {
 
   const cols = s.cols || STAGE_COLS;
   const rows = s.rows || STAGE_ROWS;
+  const wallRows = s.wallRows || WALL_ROWS;
 
   const pad = Math.max(6, Math.round(Math.min(W, H) * 0.06));
   const innerW = Math.max(1, W - pad * 2);
   const innerH = Math.max(1, H - pad * 2);
   const cellW = innerW / cols;
-  const cellH = innerH / rows;
-  const gap = clamp(Math.min(cellW, cellH) * 0.12, 0.6, 2.2);
+
+  // Split: top=enemies, bottom=walls
+  const splitGap = clamp(innerH * 0.03, 2, 6);
+  const wallZoneH = innerH * 0.28;
+  const enemyZoneH = Math.max(1, innerH - wallZoneH - splitGap);
+  const enemyCellH = enemyZoneH / rows;
+  const wallCellH = wallZoneH / wallRows;
+  const gap = clamp(Math.min(cellW, enemyCellH) * 0.12, 0.6, 2.2);
 
   // Enemies as pixels
   for (let y = 0; y < rows; y++) {
@@ -56,9 +63,24 @@ function drawStagePreview(canvasEl, stage) {
       const v = s.grid[idx];
       if (v == null) continue;
       const px = pad + x * cellW;
-      const py = pad + y * cellH;
+      const py = pad + y * enemyCellH;
       ctx.fillStyle = 'rgba(0, 206, 201, 0.95)';
-      ctx.fillRect(px + gap, py + gap, Math.max(1, cellW - gap * 2), Math.max(1, cellH - gap * 2));
+      ctx.fillRect(px + gap, py + gap, Math.max(1, cellW - gap * 2), Math.max(1, enemyCellH - gap * 2));
+    }
+  }
+
+  // Walls
+  const wallY0 = pad + enemyZoneH + splitGap;
+  for (let y = 0; y < wallRows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const idx = y * cols + x;
+      const v = s.walls?.[idx];
+      if (v !== WALL_CELL) continue;
+      const px = pad + x * cellW;
+      const py = wallY0 + y * wallCellH;
+      const g2 = clamp(Math.min(cellW, wallCellH) * 0.10, 0.6, 2.2);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.fillRect(px + g2, py + g2, Math.max(1, cellW - g2 * 2), Math.max(1, wallCellH - g2 * 2));
     }
   }
 

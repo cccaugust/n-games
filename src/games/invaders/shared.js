@@ -4,10 +4,12 @@ import { assetPreviewDataUrl, assetToPngDataUrl, getPixelAsset, listPixelAssets 
 export const GAME_ID = 'invaders';
 export const STAGE_COLS = 14;
 export const STAGE_ROWS = 10;
+export const WALL_ROWS = 4;
 export const STORAGE_KEY = 'ngames.invaders.stages.v1';
 
 // Enemy token: null = empty, 'default' = built-in invader sprite, otherwise PixelAsset.id
 export const ENEMY_DEFAULT = 'default';
+export const WALL_CELL = 1; // walls[] cell marker
 
 export function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
@@ -34,11 +36,13 @@ export function uniqueName(baseName, existingNames) {
 
 export function makeEmptyStage(name = '新しいステージ') {
   return {
-    version: 1,
+    version: 2,
     name,
     cols: STAGE_COLS,
     rows: STAGE_ROWS,
-    grid: Array.from({ length: STAGE_COLS * STAGE_ROWS }, () => null)
+    grid: Array.from({ length: STAGE_COLS * STAGE_ROWS }, () => null),
+    wallRows: WALL_ROWS,
+    walls: Array.from({ length: STAGE_COLS * WALL_ROWS }, () => 0)
   };
 }
 
@@ -54,12 +58,23 @@ export function normalizeStage(stage) {
     // PixelAsset id (string)
     return typeof v === 'string' && v.trim() ? v : null;
   });
+  const wallRows = s.wallRows === WALL_ROWS ? WALL_ROWS : WALL_ROWS;
+  const rawWalls = Array.isArray(s.walls) ? s.walls : [];
+  const walls = Array.from({ length: cols * wallRows }, (_, i) => {
+    const v = rawWalls[i];
+    if (v === WALL_CELL) return WALL_CELL;
+    if (v === true) return WALL_CELL;
+    if (typeof v === 'number' && v > 0) return WALL_CELL;
+    return 0;
+  });
   return {
-    version: 1,
+    version: 2,
     name: typeof s.name === 'string' && s.name.trim() ? s.name.trim() : 'ななしのステージ',
     cols,
     rows,
-    grid
+    grid,
+    wallRows,
+    walls
   };
 }
 
@@ -109,12 +124,19 @@ export function getDefaultStages() {
       if ((x + y) % 2 === 0) s1.grid[y * STAGE_COLS + x] = ENEMY_DEFAULT;
     }
   }
+  // Simple walls (bottom area)
+  for (let x = 2; x < STAGE_COLS - 2; x++) {
+    if (x % 2 === 0) s1.walls[1 * STAGE_COLS + x] = WALL_CELL;
+  }
 
   const s2 = makeEmptyStage('ジグザグ');
   for (let y = 0; y < 5; y++) {
     for (let x = 1; x < STAGE_COLS - 1; x++) {
       if (y % 2 === 0 ? x % 2 === 0 : x % 2 === 1) s2.grid[y * STAGE_COLS + x] = ENEMY_DEFAULT;
     }
+  }
+  for (let x = 1; x < STAGE_COLS - 1; x++) {
+    if (x % 3 !== 0) s2.walls[2 * STAGE_COLS + x] = WALL_CELL;
   }
 
   const s3 = makeEmptyStage('ウォール');
@@ -128,6 +150,10 @@ export function getDefaultStages() {
         if (x % 2 === 1) s3.grid[y * STAGE_COLS + x] = ENEMY_DEFAULT;
       }
     }
+  }
+  for (let x = 0; x < STAGE_COLS; x++) {
+    if (x % 2 === 1) s3.walls[0 * STAGE_COLS + x] = WALL_CELL;
+    if (x % 3 !== 0) s3.walls[3 * STAGE_COLS + x] = WALL_CELL;
   }
 
   return [s1, s2, s3].map(normalizeStage);
