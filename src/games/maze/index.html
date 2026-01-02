@@ -281,7 +281,7 @@
       <div class="tabs">
         <button class="tab-btn" id="tabEditor" aria-selected="true">✏️ 作成モード</button>
         <button class="tab-btn" id="tabPlay" aria-selected="false">🕹️ プレイモード</button>
-        <span class="pill" id="mazeStatus">64×64</span>
+        <span class="pill" id="mazeStatus">32×32</span>
       </div>
 
       <!-- Editor -->
@@ -323,6 +323,22 @@
             <span class="pill" id="bestLabel">🏆 --</span>
           </div>
           <div class="right">
+            <label class="pill">
+              壁:
+              <select id="wallStyleSelect" style="border:none; background:transparent; outline:none;">
+                <option value="solid">単色</option>
+                <option value="pixel">ドット絵</option>
+              </select>
+            </label>
+            <label class="pill" id="wallColorPill">
+              色: <input id="wallColorInput" type="color" value="#2d3436" style="border:none; background:transparent; outline:none; width: 40px; height: 24px; padding: 0;">
+            </label>
+            <label class="pill" id="wallAssetPill" style="display:none;">
+              ドット:
+              <img id="wallAssetPreview" alt="" style="width: 22px; height: 22px; border-radius: 6px; image-rendering: pixelated; display:none;">
+              <select id="wallAssetSelect" style="border:none; background:transparent; outline:none; max-width: 180px;"></select>
+            </label>
+            <a class="pill" href="../../pages/pixel-art-maker/" style="text-decoration:none;">🧩 ドット絵メーカーへ</a>
             <span class="pill">操作：WASD（移動/横移動）＋←→（回転）。タッチは左下スティックで移動＋画面ドラッグで向き</span>
           </div>
         </div>
