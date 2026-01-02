@@ -1,0 +1,108 @@
+.back-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--text-light);
+  text-decoration: none;
+}
+
+body {
+  touch-action: none;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  margin-top: 12px;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-shell {
+  margin-top: 16px;
+  padding: 16px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--primary-color);
+}
+
+.hint {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+canvas {
+  width: min(92vw, 420px);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #b3e5ff 0%, #f0f3f8 45%, #d7f8d2 100%);
+  border-radius: 18px;
+  box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.5);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+  color: white;
+}
+
+.overlay-card {
+  width: min(92vw, 520px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.overlay-card h1 {
+  color: white;
+  margin-bottom: 6px;
+}
+
+.overlay-card p {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.overlay-card .small {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.overlay-card code {
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+

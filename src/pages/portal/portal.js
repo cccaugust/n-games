@@ -75,6 +75,14 @@ const games = [
     link: '/games/warp-jump/'
   },
   {
+    id: 'berry-bounce',
+    title: 'ベリーバウンス',
+    desc: 'ベリーをキャッチ！💣はよけよう',
+    color: '#a29bfe',
+    icon: '🫐',
+    link: '/games/berry-bounce/'
+  },
+  {
     id: 'pokedex',
     title: 'オリジナルポケモン図鑑',
     desc: 'キミだけの最強ポケモン！',
