@@ -12,7 +12,8 @@ import {
   STAGE_ROWS,
   TILE,
   uniqueName,
-  upsertStageToSupabase,
+  createStageToSupabase,
+  updateStageToSupabaseByName,
   deleteStageFromSupabaseByName
 } from './shared.js';
 
@@ -86,6 +87,14 @@ window.addEventListener('resize', () => {
 // --------------------
 let currentTool = 'normal';
 let currentStage = makeEmptyStage('新しいステージ');
+let loadedStageName = null; // 既存ステージをロードして編集しているときの「元の名前」
+
+function isUniqueViolation(e) {
+  // Postgres unique_violation: 23505
+  if (e?.code === '23505') return true;
+  const msg = String(e?.message || e?.details || '');
+  return msg.includes('duplicate key') || msg.includes('unique') || msg.includes('23505');
+}
 
 function setTool(tool) {
   currentTool = tool;
@@ -240,6 +249,7 @@ libraryNew?.addEventListener('click', () => {
   closeLibrary();
   currentStage = makeEmptyStage('新しいステージ');
   stageNameEl.value = currentStage.name;
+  loadedStageName = null;
   drawEditor();
 });
 
@@ -274,7 +284,7 @@ async function importFromFile(file) {
     const name = uniqueName(s.name, names);
     names.add(name);
     try {
-      await upsertStageToSupabase({ ...s, name });
+      await createStageToSupabase({ ...s, name });
       ok++;
     } catch (e) {
       console.error('Import upsert failed:', e);
@@ -343,6 +353,7 @@ function renderLibrary() {
     btnLoadStage.addEventListener('click', () => {
       currentStage = normalizeStage(s);
       stageNameEl.value = currentStage.name;
+      loadedStageName = currentStage.name;
       closeLibrary();
       drawEditor();
       showOverlay('ロードしたよ', `「${currentStage.name}」を読みこみました。`);
@@ -398,13 +409,24 @@ saveBtn.addEventListener('click', () => {
     try {
       currentStage.name = name;
       showOverlay('保存中…', 'Supabaseに保存しているよ。', '', { closable: false });
-      await upsertStageToSupabase(currentStage);
+      if (loadedStageName) {
+        await updateStageToSupabaseByName(loadedStageName, currentStage);
+      } else {
+        await createStageToSupabase(currentStage);
+      }
+      loadedStageName = currentStage.name;
       await refreshStageCacheFromSupabase();
       showOverlay('保存したよ', `「${currentStage.name}」を保存しました。`);
       renderLibrary();
     } catch (e) {
       console.error(e);
-      showOverlay('保存できなかった…', 'Supabaseに保存できなかったよ。');
+      if (e?.code === 'STAGE_NOT_FOUND') {
+        showOverlay('保存できなかった…', 'このステージが見つからなかったよ。いちど読みこみ直してね。');
+      } else if (isUniqueViolation(e)) {
+        showOverlay('同じ名前があるよ', '同名のステージがすでにあるので、別の名前にして保存してね。');
+      } else {
+        showOverlay('保存できなかった…', 'Supabaseに保存できなかったよ。');
+      }
     } finally {
       saveBtn.disabled = prevDisabled;
     }
@@ -446,6 +468,7 @@ async function init() {
     if (found) {
       currentStage = normalizeStage(found);
       stageNameEl.value = currentStage.name;
+      loadedStageName = currentStage.name;
     }
   }
 
@@ -464,6 +487,7 @@ async function init() {
     if (found) {
       currentStage = normalizeStage(found);
       stageNameEl.value = currentStage.name;
+      loadedStageName = currentStage.name;
       drawEditor();
     }
   }
