@@ -217,12 +217,27 @@
       font-size: 1.2rem;
       font-weight: 800;
       backdrop-filter: blur(6px);
+      touch-action: none;
+      user-select: none;
     }
 
+    /* スマホ幅は常に表示 */
     @media (max-width: 768px) {
       .mobile-controls {
         display: flex;
       }
+    }
+
+    /* タブレット等（タッチ操作が主な端末）でも表示 */
+    @media (hover: none) and (pointer: coarse) {
+      .mobile-controls {
+        display: flex;
+      }
+    }
+
+    /* JSで付与するフォールバック（古いブラウザ対策） */
+    html.touch-device .mobile-controls {
+      display: flex;
     }
   </style>
 </head>
@@ -278,7 +293,7 @@
             <span class="pill" id="bestLabel">🏆 --</span>
           </div>
           <div class="right">
-            <span class="pill">操作：WASD / ←→ で向き、タッチはボタン</span>
+            <span class="pill">操作：WASD / ←→ で向き、タッチはボタン＋画面ドラッグで向き</span>
           </div>
         </div>
 
