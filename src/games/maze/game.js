@@ -1,21 +1,44 @@
 // 3D迷路メーカー（最小版）
-// - 作成モード: 64x64 グリッドをペイント
+// - 作成モード: 32x32 グリッドをペイント（大きすぎると作るのが大変なので上限を縮小）
 // - プレイモード: レイキャストで簡易3D表示
 
 import { getCurrentPlayer } from '../../js/auth.js';
 import { saveScore, getRankings } from '../../js/score.js';
 import { supabase } from '../../js/supabaseClient.js';
+import { assetPreviewDataUrl, getPixelAsset, listPixelAssets, renderPixelsToCanvas } from '../../js/pixelAssets.js';
 
-const SIZE = 64;
+const SIZE = 32;
 // Supabase保存のローカルキャッシュ（オフライン/初回表示用）
 const STORAGE_KEY = 'ngames.mazes.v1';
 const BEST_TIME_KEY = 'ngames.mazes.bestTime.v1';
+const WALL_PREF_KEY = 'ngames.mazes.wallPref.v1';
 
 // Tile types
 const TILE = {
   PATH: 0,
   WALL: 1
 };
+
+function loadWallPref() {
+  try {
+    const raw = localStorage.getItem(WALL_PREF_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    const style = parsed?.style === 'pixel' ? 'pixel' : 'solid';
+    const color = typeof parsed?.color === 'string' && parsed.color ? parsed.color : '#2d3436';
+    const assetId = typeof parsed?.assetId === 'string' ? parsed.assetId : '';
+    return { style, color, assetId };
+  } catch {
+    return { style: 'solid', color: '#2d3436', assetId: '' };
+  }
+}
+
+function saveWallPref(pref) {
+  try {
+    localStorage.setItem(WALL_PREF_KEY, JSON.stringify(pref));
+  } catch {
+    // ignore
+  }
+}
 
 function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
@@ -152,12 +175,29 @@ function makeEmptyMaze(name = '新しい迷路') {
 }
 
 function normalizeMaze(maze) {
-  const w = maze?.w === SIZE ? SIZE : SIZE;
-  const h = maze?.h === SIZE ? SIZE : SIZE;
+  const w = SIZE;
+  const h = SIZE;
 
   const raw = Array.isArray(maze?.grid) ? maze.grid : [];
+  const srcW = clamp(Math.floor(Number(maze?.w ?? SIZE) || SIZE), 1, 256);
+  const srcH = clamp(Math.floor(Number(maze?.h ?? SIZE) || SIZE), 1, 256);
+
   const grid = new Uint8Array(SIZE * SIZE);
-  for (let i = 0; i < grid.length; i++) grid[i] = raw[i] === TILE.WALL ? TILE.WALL : TILE.PATH;
+  // 既存の迷路（例: 64×64）を読み込んだ時は、中央をSIZE×SIZEで切り出す
+  const copyW = Math.min(SIZE, srcW);
+  const copyH = Math.min(SIZE, srcH);
+  const srcOffX = Math.max(0, Math.floor((srcW - copyW) / 2));
+  const srcOffY = Math.max(0, Math.floor((srcH - copyH) / 2));
+  const dstOffX = Math.max(0, Math.floor((SIZE - copyW) / 2));
+  const dstOffY = Math.max(0, Math.floor((SIZE - copyH) / 2));
+
+  for (let y = 0; y < copyH; y++) {
+    for (let x = 0; x < copyW; x++) {
+      const si = (srcOffY + y) * srcW + (srcOffX + x);
+      const di = (dstOffY + y) * SIZE + (dstOffX + x);
+      grid[di] = raw[si] === TILE.WALL ? TILE.WALL : TILE.PATH;
+    }
+  }
 
   // ensure border wall
   for (let y = 0; y < SIZE; y++) {
@@ -279,8 +319,8 @@ async function deleteMazeFromSupabaseByName(name) {
 function getDefaultMazes() {
   const m = makeEmptyMaze('サンプル');
   // add some simple walls
-  for (let x = 2; x < SIZE - 2; x++) m.grid[10 * SIZE + x] = TILE.WALL;
-  for (let y = 12; y < SIZE - 6; y++) m.grid[y * SIZE + 20] = TILE.WALL;
+  for (let x = 2; x < SIZE - 2; x++) m.grid[6 * SIZE + x] = TILE.WALL;
+  for (let y = 8; y < SIZE - 4; y++) m.grid[y * SIZE + Math.min(14, SIZE - 3)] = TILE.WALL;
   m.start = { x: 2, y: 2, dir: 0 };
   m.goal = { x: SIZE - 3, y: SIZE - 3 };
   return [normalizeMaze(m)];
@@ -312,6 +352,14 @@ const resetBtn = document.getElementById('resetBtn');
 const timeLabel = document.getElementById('timeLabel');
 const bestLabel = document.getElementById('bestLabel');
 
+// Wall style controls
+const wallStyleSelect = document.getElementById('wallStyleSelect');
+const wallColorInput = document.getElementById('wallColorInput');
+const wallColorPill = document.getElementById('wallColorPill');
+const wallAssetPill = document.getElementById('wallAssetPill');
+const wallAssetSelect = document.getElementById('wallAssetSelect');
+const wallAssetPreview = document.getElementById('wallAssetPreview');
+
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlayTitle');
 const overlayText = document.getElementById('overlayText');
@@ -331,6 +379,76 @@ const libraryCountEl = document.getElementById('libraryCount');
 // State (Editor)
 let currentTool = 'wall';
 let currentMaze = makeEmptyMaze('新しい迷路');
+
+// Wall texture state
+let wallPref = loadWallPref();
+/** @type {'solid'|'pixel'} */
+let wallStyle = wallPref.style;
+let wallColor = wallPref.color;
+let wallAssetId = wallPref.assetId;
+/** @type {HTMLCanvasElement|null} */
+let wallTextureCanvas = null;
+
+function applyWallUiVisibility() {
+  const isPixel = wallStyle === 'pixel';
+  if (wallColorPill) wallColorPill.style.display = isPixel ? 'none' : '';
+  if (wallAssetPill) wallAssetPill.style.display = isPixel ? '' : 'none';
+}
+
+function syncWallPrefToStorage() {
+  saveWallPref({ style: wallStyle, color: wallColor, assetId: wallAssetId });
+}
+
+async function refreshWallAssetList() {
+  if (!wallAssetSelect) return;
+  const p = getCurrentPlayer();
+  const ownerId = p?.id != null ? String(p.id) : 'unknown';
+
+  wallAssetSelect.innerHTML = '';
+  const optNone = document.createElement('option');
+  optNone.value = '';
+  optNone.textContent = '（えらんでね）';
+  wallAssetSelect.appendChild(optNone);
+
+  try {
+    const list = await listPixelAssets({ ownerId, kind: 'tile' });
+    list.forEach((a) => {
+      const opt = document.createElement('option');
+      opt.value = a.id;
+      opt.textContent = `${a.name || 'ドット'}（${a.width}×${a.height}）`;
+      wallAssetSelect.appendChild(opt);
+    });
+    if (wallAssetId && list.some((a) => a.id === wallAssetId)) {
+      wallAssetSelect.value = wallAssetId;
+    }
+  } catch (e) {
+    console.warn('Failed to list pixel assets:', e);
+  }
+}
+
+async function loadWallTextureByAssetId(id) {
+  wallTextureCanvas = null;
+  if (!id) {
+    if (wallAssetPreview) wallAssetPreview.style.display = 'none';
+    return;
+  }
+  try {
+    const asset = await getPixelAsset(id);
+    if (!asset) return;
+    const c = document.createElement('canvas');
+    renderPixelsToCanvas(c, asset.pixels, asset.width, asset.height);
+    wallTextureCanvas = c;
+
+    if (wallAssetPreview) {
+      wallAssetPreview.src = assetPreviewDataUrl(asset, 44);
+      wallAssetPreview.style.display = '';
+    }
+  } catch (e) {
+    console.warn('Failed to load wall texture:', e);
+    wallTextureCanvas = null;
+    if (wallAssetPreview) wallAssetPreview.style.display = 'none';
+  }
+}
 
 function setTool(tool) {
   currentTool = tool;
@@ -415,7 +533,7 @@ function drawEditor() {
     for (let x = 0; x < SIZE; x++) {
       const t = currentMaze.grid[gridIndex(x, y)] === TILE.WALL ? TILE.WALL : TILE.PATH;
       if (t === TILE.WALL) {
-        ectx.fillStyle = '#2d3436';
+        ectx.fillStyle = wallStyle === 'solid' ? wallColor : '#2d3436';
         ectx.fillRect(x * cell, y * cell, cell, cell);
       }
     }
@@ -1054,7 +1172,13 @@ function castRay(angle) {
     perpWallDist = (mapY - player.y + (1 - stepY) / 2) / (dy || 1e-6);
   }
 
-  return { dist: Math.max(0.001, perpWallDist), side };
+  // texture coordinate (0..1)
+  let wallX;
+  if (side === 0) wallX = player.y + perpWallDist * dy;
+  else wallX = player.x + perpWallDist * dx;
+  wallX -= Math.floor(wallX);
+
+  return { dist: Math.max(0.001, perpWallDist), side, wallX, dx, dy };
 }
 
 function draw3D() {
@@ -1065,6 +1189,7 @@ function draw3D() {
 
   const W = playCanvas.width;
   const H = playCanvas.height;
+  pctx.imageSmoothingEnabled = false;
 
   // ceiling & floor
   pctx.fillStyle = '#111827';
@@ -1078,7 +1203,7 @@ function draw3D() {
   for (let x = 0; x < W; x++) {
     const camX = (x / W) * 2 - 1;
     const angle = player.a + camX * half;
-    const { dist, side } = castRay(angle);
+    const { dist, side, wallX, dx, dy } = castRay(angle);
 
     // fish-eye correction
     const corrected = dist * Math.cos(angle - player.a);
@@ -1088,9 +1213,29 @@ function draw3D() {
     const shadeBase = side === 1 ? 0.65 : 0.85;
     const fog = clamp(1 / (1 + corrected * 0.25), 0.2, 1);
     const shade = shadeBase * fog;
-    const c = Math.floor(255 * shade);
-    pctx.fillStyle = `rgb(${c}, ${c}, ${c})`;
-    pctx.fillRect(x, y0, 1, lineH);
+    const usePixel = wallStyle === 'pixel' && wallTextureCanvas && wallTextureCanvas.width > 0 && wallTextureCanvas.height > 0;
+    if (!usePixel) {
+      const c = Math.floor(255 * shade);
+      pctx.fillStyle = `rgb(${c}, ${c}, ${c})`;
+      pctx.fillRect(x, y0, 1, lineH);
+    } else {
+      const texW = wallTextureCanvas.width;
+      const texH = wallTextureCanvas.height;
+      let texX = clamp(Math.floor(wallX * texW), 0, texW - 1);
+      // flip for correct orientation
+      if (side === 0 && dx > 0) texX = texW - texX - 1;
+      if (side === 1 && dy < 0) texX = texW - texX - 1;
+
+      // draw texture slice
+      pctx.drawImage(wallTextureCanvas, texX, 0, 1, texH, x, y0, 1, lineH);
+
+      // shading/fog (simple overlay)
+      const overlayAlpha = clamp(1 - shade, 0, 0.88);
+      if (overlayAlpha > 0.001) {
+        pctx.fillStyle = `rgba(0,0,0,${overlayAlpha})`;
+        pctx.fillRect(x, y0, 1, lineH);
+      }
+    }
   }
 
   // Goal indicator (top mini hint)
@@ -1250,6 +1395,43 @@ function init() {
   syncMazeSelect();
   resizePlayCanvas();
   setupJoystick();
+
+  // wall prefs init
+  if (wallStyleSelect) wallStyleSelect.value = wallStyle;
+  if (wallColorInput) wallColorInput.value = wallColor;
+  applyWallUiVisibility();
+  void (async () => {
+    await refreshWallAssetList();
+    if (wallAssetSelect) wallAssetSelect.value = wallAssetId || '';
+    await loadWallTextureByAssetId(wallAssetId);
+    if (panelEditor.classList.contains('hidden')) draw3D();
+    else drawEditor();
+  })();
+
+  wallStyleSelect?.addEventListener('change', () => {
+    wallStyle = wallStyleSelect.value === 'pixel' ? 'pixel' : 'solid';
+    applyWallUiVisibility();
+    syncWallPrefToStorage();
+    if (panelEditor.classList.contains('hidden')) draw3D();
+    else drawEditor();
+  });
+
+  wallColorInput?.addEventListener('input', () => {
+    wallColor = wallColorInput.value || '#2d3436';
+    syncWallPrefToStorage();
+    if (panelEditor.classList.contains('hidden')) draw3D();
+    else drawEditor();
+  });
+
+  wallAssetSelect?.addEventListener('change', () => {
+    wallAssetId = wallAssetSelect.value || '';
+    syncWallPrefToStorage();
+    void (async () => {
+      await loadWallTextureByAssetId(wallAssetId);
+      if (panelEditor.classList.contains('hidden')) draw3D();
+    })();
+  });
+
   // Supabaseから最新を取り込み（失敗してもキャッシュで動く）
   void (async () => {
     await refreshMazeCacheFromSupabase();
