@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D迷路メーカー | N-Games</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    body {
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .maze-wrap {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      max-width: 980px;
+      margin: 14px auto;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: white;
+      color: var(--text-dark);
+      padding: 10px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      font-weight: 700;
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .row .left,
+    .row .right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      background: #f1f2f6;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
+
+    .tool-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f1f2f6;
+      font-weight: 700;
+      min-width: 72px;
+    }
+
+    .tool-btn[data-active="true"] {
+      background: var(--secondary-color);
+      color: #003d3b;
+    }
+
+    canvas {
+      width: 100%;
+      display: block;
+      border-radius: 12px;
+      background: #111;
+      touch-action: none;
+    }
+
+    .grid-canvas {
+      background: #f8f9ff;
+    }
+
+    .play-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .mini-map {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 160px;
+      height: 160px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(17, 24, 39, 0.45);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .hint {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 18px;
+      z-index: 50;
+    }
+
+    .overlay .card {
+      max-width: 520px;
+      width: 100%;
+      background: rgba(17, 24, 39, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .library-card {
+      max-width: 760px !important;
+      text-align: left !important;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .library-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .library-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mini-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: white;
+      font-weight: 800;
+      min-width: 80px;
+    }
+
+    .mini-btn.danger {
+      background: rgba(255, 118, 117, 0.18);
+      border-color: rgba(255, 118, 117, 0.35);
+    }
+
+    .library-toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .mobile-controls {
+      display: none;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .m-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 800;
+      backdrop-filter: blur(6px);
+    }
+
+    @media (max-width: 768px) {
+      .mobile-controls {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="../../pages/portal/portal.html"
+      style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr; もどる</a>
+
+    <div class="maze-wrap">
+      <div class="tabs">
+        <button class="tab-btn" id="tabEditor" aria-selected="true">✏️ 作成モード</button>
+        <button class="tab-btn" id="tabPlay" aria-selected="false">🕹️ プレイモード</button>
+        <span class="pill" id="mazeStatus">64×64</span>
+      </div>
+
+      <!-- Editor -->
+      <section class="panel" id="panelEditor">
+        <div class="row">
+          <div class="left">
+            <button class="tool-btn" data-tool="wall" id="toolWall">🧱 壁</button>
+            <button class="tool-btn" data-tool="path" id="toolPath">⬜ 通路</button>
+            <button class="tool-btn" data-tool="start" id="toolStart">🟢 スタート</button>
+            <button class="tool-btn" data-tool="goal" id="toolGoal">🏁 ゴール</button>
+          </div>
+          <div class="right">
+            <label class="pill">
+              名前: <input id="mazeName" maxlength="24" placeholder="たとえば：うちの迷路"
+                style="border:none; background:transparent; outline:none; width: 180px;">
+            </label>
+            <button class="btn-primary" id="saveBtn">保存</button>
+            <button class="tool-btn" id="loadBtn">読みこみ</button>
+            <button class="tool-btn" id="clearBtn">ぜんぶ消す</button>
+          </div>
+        </div>
+
+        <canvas id="editorCanvas" class="grid-canvas" width="640" height="640"></canvas>
+        <div class="hint">
+          ぬり方：ドラッグでぬれるよ（スマホは指でなぞる）。スタート/ゴールは1つずつ。
+        </div>
+      </section>
+
+      <!-- Play -->
+      <section class="panel hidden" id="panelPlay">
+        <div class="row">
+          <div class="left">
+            <label class="pill">
+              迷路: <select id="mazeSelect" style="border:none; background:transparent; outline:none;"></select>
+            </label>
+            <button class="btn-primary" id="playBtn">プレイ開始</button>
+            <button class="tool-btn" id="resetBtn">最初にもどる</button>
+            <span class="pill" id="timeLabel">⏱️ 0.00</span>
+            <span class="pill" id="bestLabel">🏆 --</span>
+          </div>
+          <div class="right">
+            <span class="pill">操作：WASD / ←→ で向き、タッチはボタン</span>
+          </div>
+        </div>
+
+        <div class="play-wrap">
+          <canvas id="playCanvas" width="800" height="450"></canvas>
+          <canvas id="minimapCanvas" class="mini-map" width="160" height="160"></canvas>
+        </div>
+        <div class="mobile-controls" id="mobileControls">
+          <button class="m-btn" data-act="turnL">⟲</button>
+          <button class="m-btn" data-act="left">◀</button>
+          <button class="m-btn" data-act="fwd">▲</button>
+          <button class="m-btn" data-act="right">▶</button>
+          <button class="m-btn" data-act="back">▼</button>
+          <button class="m-btn" data-act="turnR">⟳</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="card" style="color: white; text-align:center;">
+      <h2 id="overlayTitle" style="color:white;">おめでとう！</h2>
+      <p id="overlayText" style="color: rgba(255,255,255,0.9); margin-top: 10px;"></p>
+      <div id="overlayExtra" style="margin-top: 12px;"></div>
+      <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="libraryOverlay" aria-hidden="true">
+    <div class="card library-card" style="color: white;">
+      <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+        <h2 style="color:white; margin:0;">📚 迷路ライブラリ</h2>
+        <button class="mini-btn" id="libraryClose">とじる</button>
+      </div>
+
+      <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
+        保存した迷路をロード/削除したり、エクスポート/インポートできます。
+      </p>
+
+      <div class="library-toolbar">
+        <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+          <button class="mini-btn" id="libraryNew">新しく作る</button>
+          <button class="mini-btn" id="libraryExportAll">ぜんぶエクスポート</button>
+          <button class="mini-btn" id="libraryImportBtn">インポート</button>
+          <input class="file-input" id="libraryImportFile" type="file" accept="application/json">
+        </div>
+        <div class="pill" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
+      </div>
+
+      <div class="library-grid" id="libraryList"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
+

@@ -137,6 +137,14 @@ const games = [
     color: '#74b9ff',
     icon: '🏄',
     link: '/games/kama-surf/'
+  },
+  {
+    id: 'maze',
+    title: '3D迷路メーカー',
+    desc: 'つくって！3Dであそべる！',
+    color: '#00cec9',
+    icon: '🧩',
+    link: '/games/maze/'
   }
 ];
 
