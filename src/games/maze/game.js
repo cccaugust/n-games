@@ -146,6 +146,16 @@ const overlayTitle = document.getElementById('overlayTitle');
 const overlayText = document.getElementById('overlayText');
 const overlayClose = document.getElementById('overlayClose');
 
+// Library modal
+const libraryOverlay = document.getElementById('libraryOverlay');
+const libraryClose = document.getElementById('libraryClose');
+const libraryNew = document.getElementById('libraryNew');
+const libraryExportAll = document.getElementById('libraryExportAll');
+const libraryImportBtn = document.getElementById('libraryImportBtn');
+const libraryImportFile = document.getElementById('libraryImportFile');
+const libraryListEl = document.getElementById('libraryList');
+const libraryCountEl = document.getElementById('libraryCount');
+
 // State (Editor)
 let currentTool = 'wall';
 let currentMaze = makeEmptyMaze('新しい迷路');
@@ -317,23 +327,8 @@ saveBtn.addEventListener('click', () => {
 });
 
 loadBtn.addEventListener('click', () => {
-  const list = ensureMazes();
-  if (list.length === 0) {
-    showOverlay('まだないよ', '保存した迷路がないみたい。まず作って保存してね。');
-    return;
-  }
-  // Simple prompt selection
-  const names = list.map(m => m.name).join('\n');
-  const pick = prompt(`読みこみたい迷路の名前を入力してね:\n\n${names}`, list[0].name);
-  if (!pick) return;
-  const found = list.find(m => m.name === pick);
-  if (!found) {
-    showOverlay('みつからない…', 'その名前の迷路が見つからなかったよ。');
-    return;
-  }
-  currentMaze = normalizeMaze(found);
-  mazeNameEl.value = currentMaze.name;
-  drawEditor();
+  ensureMazes();
+  openLibrary();
 });
 
 clearBtn.addEventListener('click', () => {
@@ -375,6 +370,196 @@ overlayClose.addEventListener('click', () => {
 });
 overlay.addEventListener('click', (e) => {
   if (e.target === overlay) overlay.style.display = 'none';
+});
+
+// Library helpers
+function openLibrary() {
+  renderLibrary();
+  libraryOverlay.style.display = 'flex';
+  libraryOverlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeLibrary() {
+  libraryOverlay.style.display = 'none';
+  libraryOverlay.setAttribute('aria-hidden', 'true');
+}
+
+function countWalls(maze) {
+  let n = 0;
+  for (let i = 0; i < maze.grid.length; i++) if (maze.grid[i] === TILE.WALL) n++;
+  return n;
+}
+
+function uniqueName(baseName, existingNames) {
+  const base = (baseName || 'ななしの迷路').trim() || 'ななしの迷路';
+  if (!existingNames.has(base)) return base;
+  for (let i = 2; i < 1000; i++) {
+    const candidate = `${base} (${i})`;
+    if (!existingNames.has(candidate)) return candidate;
+  }
+  return `${base} (${Date.now()})`;
+}
+
+function renderLibrary() {
+  const list = ensureMazes();
+  libraryCountEl.textContent = `${list.length}こ`;
+  libraryListEl.innerHTML = '';
+
+  if (list.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'library-row';
+    empty.innerHTML = `
+      <div>
+        <div style="font-weight: 900;">まだ迷路がないよ</div>
+        <div style="opacity: 0.9; margin-top: 4px; font-size: 0.95rem;">作って「保存」するとここに出てくるよ。</div>
+      </div>
+      <div></div>
+    `;
+    libraryListEl.appendChild(empty);
+    return;
+  }
+
+  list.forEach((m) => {
+    const row = document.createElement('div');
+    row.className = 'library-row';
+
+    const walls = countWalls(m);
+    const total = SIZE * SIZE;
+    const density = Math.round((walls / total) * 100);
+
+    const info = document.createElement('div');
+    info.innerHTML = `
+      <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: baseline;">
+        <div style="font-weight: 900; font-size: 1.1rem;">${escapeHtml(m.name)}</div>
+        <div style="opacity: 0.9; font-size: 0.9rem;">壁 ${walls} / ${total}（${density}%）</div>
+      </div>
+      <div style="opacity: 0.85; margin-top: 4px; font-size: 0.9rem;">S(${m.start.x},${m.start.y}) → G(${m.goal.x},${m.goal.y})</div>
+    `;
+
+    const actions = document.createElement('div');
+    actions.className = 'library-actions';
+
+    const btnLoad = document.createElement('button');
+    btnLoad.className = 'mini-btn';
+    btnLoad.textContent = 'ロード';
+    btnLoad.addEventListener('click', () => {
+      currentMaze = normalizeMaze(m);
+      mazeNameEl.value = currentMaze.name;
+      closeLibrary();
+      setTab('editor');
+      drawEditor();
+      syncMazeSelect(currentMaze.name);
+      showOverlay('ロードしたよ', `「${currentMaze.name}」を読みこみました。`);
+    });
+
+    const btnExport = document.createElement('button');
+    btnExport.className = 'mini-btn';
+    btnExport.textContent = '書き出し';
+    btnExport.addEventListener('click', () => {
+      downloadJson(`${m.name}.maze.json`, m);
+      showOverlay('書き出したよ', `「${m.name}」をファイルにしました。`);
+    });
+
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'mini-btn danger';
+    btnDelete.textContent = '削除';
+    btnDelete.addEventListener('click', () => {
+      if (!confirm(`「${m.name}」を削除する？（元に戻せないよ）`)) return;
+      const after = loadAllMazes().filter(x => x.name !== m.name);
+      saveAllMazes(after);
+      syncMazeSelect();
+      renderLibrary();
+      showOverlay('削除したよ', `「${m.name}」を削除しました。`);
+    });
+
+    actions.appendChild(btnLoad);
+    actions.appendChild(btnExport);
+    actions.appendChild(btnDelete);
+
+    row.appendChild(info);
+    row.appendChild(actions);
+    libraryListEl.appendChild(row);
+  });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function downloadJson(filename, obj) {
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function importFromFile(file) {
+  const text = await file.text();
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    showOverlay('インポート失敗', 'JSONファイルじゃないみたい。');
+    return;
+  }
+
+  const incoming = Array.isArray(parsed) ? parsed : [parsed];
+  const normalized = incoming.map(normalizeMaze);
+
+  const existing = loadAllMazes();
+  const names = new Set(existing.map(m => m.name));
+  const merged = [...existing];
+
+  for (const m of normalized) {
+    const name = uniqueName(m.name, names);
+    names.add(name);
+    merged.unshift({ ...m, name });
+  }
+
+  saveAllMazes(merged);
+  syncMazeSelect();
+  renderLibrary();
+  showOverlay('インポートOK', `${normalized.length}こ取りこんだよ。`);
+}
+
+libraryClose?.addEventListener('click', closeLibrary);
+libraryOverlay?.addEventListener('click', (e) => {
+  if (e.target === libraryOverlay) closeLibrary();
+});
+
+libraryNew?.addEventListener('click', () => {
+  closeLibrary();
+  const name = '新しい迷路';
+  currentMaze = makeEmptyMaze(name);
+  mazeNameEl.value = currentMaze.name;
+  setTab('editor');
+  drawEditor();
+});
+
+libraryExportAll?.addEventListener('click', () => {
+  const list = ensureMazes();
+  downloadJson('n-games-mazes.json', list);
+  showOverlay('書き出したよ', '全部の迷路を1つのファイルにしたよ。');
+});
+
+libraryImportBtn?.addEventListener('click', () => {
+  libraryImportFile.value = '';
+  libraryImportFile.click();
+});
+libraryImportFile?.addEventListener('change', async () => {
+  const f = libraryImportFile.files?.[0];
+  if (!f) return;
+  await importFromFile(f);
 });
 
 // ==========================

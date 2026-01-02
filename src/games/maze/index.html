@@ -122,6 +122,64 @@
       border: 1px solid rgba(255, 255, 255, 0.16);
     }
 
+    .library-card {
+      max-width: 760px !important;
+      text-align: left !important;
+    }
+
+    .library-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .library-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .library-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mini-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: white;
+      font-weight: 800;
+      min-width: 80px;
+    }
+
+    .mini-btn.danger {
+      background: rgba(255, 118, 117, 0.18);
+      border-color: rgba(255, 118, 117, 0.35);
+    }
+
+    .library-toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
     .mobile-controls {
       display: none;
       gap: 10px;
@@ -221,6 +279,31 @@
       <h2 id="overlayTitle" style="color:white;">おめでとう！</h2>
       <p id="overlayText" style="color: rgba(255,255,255,0.9); margin-top: 10px;"></p>
       <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="libraryOverlay" aria-hidden="true">
+    <div class="card library-card" style="color: white;">
+      <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+        <h2 style="color:white; margin:0;">📚 迷路ライブラリ</h2>
+        <button class="mini-btn" id="libraryClose">とじる</button>
+      </div>
+
+      <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
+        保存した迷路をロード/削除したり、エクスポート/インポートできます。
+      </p>
+
+      <div class="library-toolbar">
+        <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+          <button class="mini-btn" id="libraryNew">新しく作る</button>
+          <button class="mini-btn" id="libraryExportAll">ぜんぶエクスポート</button>
+          <button class="mini-btn" id="libraryImportBtn">インポート</button>
+          <input class="file-input" id="libraryImportFile" type="file" accept="application/json">
+        </div>
+        <div class="pill" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
+      </div>
+
+      <div class="library-grid" id="libraryList"></div>
     </div>
   </div>
 
