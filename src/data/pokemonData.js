@@ -18,6 +18,8 @@ import prominessImg from '../pages/pokedex/assets/prominess.png';
 import abysswalkerImg from '../pages/pokedex/assets/abysswalker.png';
 import plasmakaiserImg from '../pages/pokedex/assets/plasmakaiser.png';
 import cupslimeImg from '../pages/pokedex/assets/cupslime.svg';
+import strawcupslimeImg from '../pages/pokedex/assets/strawcupslime.svg';
+import blenderslimeImg from '../pages/pokedex/assets/blenderslime.svg';
 
 
 // Pokemon Data
@@ -370,6 +372,45 @@ export const pokemonData = [
         moveDesc: 'タイプ：みず / 威力：75 / 命中：100<br>とびはねるように体当たりする。30%の確率で相手を「どく」状態にする。',
         extraInfo: 'コップの中身をのぞくと、ちいさな光の粒が見えることがある。これが活力のもとらしい。',
         author: 'JUNPEI',
-        stats: { hp: 75, attack: 55, defense: 70, spAtk: 85, spDef: 80, speed: 60 }
+        stats: { hp: 75, attack: 55, defense: 70, spAtk: 85, spDef: 80, speed: 60 },
+        evolutions: ['0020']
+    },
+    {
+        id: '0020',
+        name: 'ストロースライム',
+        classification: 'しゅわしゅわポケモン',
+        types: ['water', 'poison'],
+        typeNames: ['みず', 'どく'],
+        image: strawcupslimeImg,
+        description: 'フタとストローを手に入れて、外の空気も少しだけ吸えるようになった。ストローを振ると、しゅわしゅわの泡が増えて元気になる。',
+        ecology: '頭のストローは体の一部で、のびたり曲がったりする。水分と一緒に空気中のミネラルも取り込み、体内で小さな泡エネルギーに変えているらしい。',
+        abilityName: 'あわポンプ',
+        abilityDesc: '場に出た時、自分のとくこうが1段階上がる。',
+        moveName: 'バブルミスト',
+        moveType: 'poison',
+        moveDesc: 'タイプ：どく / 威力：70 / 命中：100<br>あわの霧を吹きかける。30%の確率で相手を「どく」状態にする。',
+        extraInfo: 'ストローの先から出る泡の形で、きげんが分かると言われている。',
+        author: 'JUNPEI',
+        stats: { hp: 90, attack: 60, defense: 85, spAtk: 105, spDef: 95, speed: 70 },
+        evolutions: ['0019', '0021']
+    },
+    {
+        id: '0021',
+        name: 'ミキサースライム',
+        classification: 'かくはんポケモン',
+        types: ['water', 'steel'],
+        typeNames: ['みず', 'はがね'],
+        image: blenderslimeImg,
+        description: '体の中で高速かくはんをはじめた最終進化。きれいな泡と圧力をまとい、どんな材料でもなめらかに混ぜてしまう。',
+        ecology: 'ガラスのジャーは硬く、落としても割れにくい。取っ手を使って自分で向きを変え、体内の流れをコントロールする。怒ると回転が速まり、周囲に水の刃のような風を起こす。',
+        abilityName: 'ターボかくはん',
+        abilityDesc: '自分の技の追加効果が発動しやすくなる（確率が2倍）。',
+        moveName: 'ミキシングカッター',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：95 / 命中：100<br>高速回転の渦で切り裂く。20%の確率で相手のぼうぎょを1段階下げる。',
+        extraInfo: 'ミキサースライムの近くでは、コップの水が勝手にうずを巻くことがある。',
+        author: 'JUNPEI',
+        stats: { hp: 105, attack: 80, defense: 105, spAtk: 125, spDef: 105, speed: 85 },
+        evolutions: ['0020']
     }
 ];
