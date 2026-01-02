@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { pokemonData } from '../../../data/pokemonData.js';
+import monsterBallImg from '../assets/monster_ball.png';
+import backgroundImg from '../assets/background.png';
+import heartImg from '../assets/heart.png';
 
 export default class BootScene extends Phaser.Scene {
     constructor() {
@@ -45,9 +48,10 @@ export default class BootScene extends Phaser.Scene {
         });
 
         // Load Game Assets
-        this.load.image('monster_ball', './assets/monster_ball.png');
-        this.load.image('background', './assets/background.png');
-        this.load.image('heart', './assets/heart.png');
+        // Use Vite-processed URLs so assets are included in build output.
+        this.load.image('monster_ball', monsterBallImg);
+        this.load.image('background', backgroundImg);
+        this.load.image('heart', heartImg);
     }
 
     create() {
