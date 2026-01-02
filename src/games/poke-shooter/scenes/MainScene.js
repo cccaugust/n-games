@@ -82,6 +82,15 @@ export default class MainScene extends Phaser.Scene {
                 }
             }
 
+            // Keep HP bar following the pokemon sprite
+            if (poke.hpBarBg && poke.hpBarFill) {
+                const barWidth = poke.hpBarWidth ?? 80;
+                const barY = poke.y - 82;
+                const barLeftX = poke.x - barWidth / 2;
+                poke.hpBarBg.setPosition(barLeftX, barY);
+                poke.hpBarFill.setPosition(barLeftX, barY);
+            }
+
             if (poke.y > this.scale.height + 50 || poke.x < -150 || poke.x > this.scale.width + 150) {
                 poke.destroy();
             }
@@ -126,10 +135,26 @@ export default class MainScene extends Phaser.Scene {
         poke.hp = maxHp;
         poke.hearts = [];
 
+        // HP Bar (always visible, works well on mobile)
+        const barWidth = Math.round(Phaser.Math.Clamp(this.scale.width * 0.14, 72, 120));
+        const barHeight = 10;
+        const barY = poke.y - 82;
+        const barLeftX = poke.x - barWidth / 2;
+        poke.hpBarWidth = barWidth;
+        poke.hpBarBg = this.add
+            .rectangle(barLeftX, barY, barWidth, barHeight, 0x000000, 0.55)
+            .setOrigin(0, 0.5)
+            .setDepth(11);
+        poke.hpBarFill = this.add
+            .rectangle(barLeftX, barY, barWidth, barHeight, 0x00ff00, 0.9)
+            .setOrigin(0, 0.5)
+            .setDepth(12);
+        this.updateHpBar(poke);
+
         // Hearts (non-physics, follow in update)
         for (let i = 0; i < maxHp; i++) {
             const heart = this.add.image(poke.x, poke.y - 60, 'heart');
-            heart.setScale(0.04);
+            heart.setScale(0.07);
             heart.setDepth(10);
             poke.hearts.push(heart);
         }
@@ -140,6 +165,10 @@ export default class MainScene extends Phaser.Scene {
                 poke.hearts.forEach(h => h && h.destroy());
                 poke.hearts = [];
             }
+            if (poke.hpBarBg) poke.hpBarBg.destroy();
+            if (poke.hpBarFill) poke.hpBarFill.destroy();
+            poke.hpBarBg = null;
+            poke.hpBarFill = null;
         });
 
         // Sine wave movement for the sprite
@@ -157,6 +186,7 @@ export default class MainScene extends Phaser.Scene {
         ball.destroy();
 
         poke.hp--;
+        this.updateHpBar(poke);
 
         if (poke.hearts && poke.hearts.length > 0) {
             const heart = poke.hearts.pop();
@@ -175,6 +205,26 @@ export default class MainScene extends Phaser.Scene {
         if (poke.hp <= 0) {
             this.catchPokemon(poke);
         }
+    }
+
+    updateHpBar(poke) {
+        if (!poke || !poke.hpBarFill || !poke.hpBarBg) return;
+
+        const maxHp = Math.max(1, poke.maxHp ?? 1);
+        const hp = Phaser.Math.Clamp(poke.hp ?? 0, 0, maxHp);
+        const ratio = hp / maxHp;
+
+        const barWidth = poke.hpBarWidth ?? 80;
+        const barHeight = 10;
+        const fillWidth = Math.max(0, Math.round(barWidth * ratio));
+
+        // Resize fill to current HP
+        poke.hpBarFill.width = fillWidth;
+        poke.hpBarFill.height = barHeight;
+
+        // Color shift: green -> yellow -> red
+        const color = ratio > 0.6 ? 0x2ecc71 : ratio > 0.3 ? 0xf1c40f : 0xe74c3c;
+        poke.hpBarFill.fillColor = color;
     }
 
     catchPokemon(poke) {
