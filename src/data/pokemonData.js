@@ -17,6 +17,7 @@ import gaiadriverImg from '../pages/pokedex/assets/gaiadriver.png';
 import prominessImg from '../pages/pokedex/assets/prominess.png';
 import abysswalkerImg from '../pages/pokedex/assets/abysswalker.png';
 import plasmakaiserImg from '../pages/pokedex/assets/plasmakaiser.png';
+import cupslimeImg from '../pages/pokedex/assets/cupslime.svg';
 
 
 // Pokemon Data
@@ -352,5 +353,23 @@ export const pokemonData = [
         extraInfo: '発電所を襲うこともあるが、それはエネルギー不足で苦しむ街に電力を分け与えるためだという義賊的な側面もある。',
         author: 'KENTO',
         stats: { hp: 80, attack: 115, defense: 70, spAtk: 115, spDef: 70, speed: 130 }
+    },
+    {
+        id: '0019',
+        name: 'コップスライム',
+        classification: 'ようえきポケモン',
+        types: ['water', 'poison'],
+        typeNames: ['みず', 'どく'],
+        image: cupslimeImg,
+        description: '透明なコップの中で暮らす不思議なスライム。揺れるほど元気になり、うれしいと小さな泡をぷくぷく出す。',
+        ecology: '体はとてもやわらかく、コップの形に合わせて自在に変形する。外の世界が気になると、縁ぎりぎりまでせり上がって周囲を観察するが、乾くのが苦手なので長くは出られない。',
+        abilityName: 'ぬるぬるコート',
+        abilityDesc: '直接攻撃を受けると、相手のすばやさを1段階下げる。',
+        moveName: 'スライムスプラッシュ',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：75 / 命中：100<br>とびはねるように体当たりする。30%の確率で相手を「どく」状態にする。',
+        extraInfo: 'コップの中身をのぞくと、ちいさな光の粒が見えることがある。これが活力のもとらしい。',
+        author: 'USER',
+        stats: { hp: 75, attack: 55, defense: 70, spAtk: 85, spDef: 80, speed: 60 }
     }
 ];
