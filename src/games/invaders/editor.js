@@ -3,6 +3,8 @@ import {
   ENEMY_DEFAULT,
   STAGE_COLS,
   STAGE_ROWS,
+  WALL_CELL,
+  WALL_ROWS,
   clamp,
   ensureStages,
   escapeHtml,
@@ -26,6 +28,7 @@ const editorCanvas = qs('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
 const toolErase = qs('toolErase');
 const toolDefault = qs('toolDefault');
+const toolWall = qs('toolWall');
 const assetStrip = qs('assetStrip');
 const assetStatus = qs('assetStatus');
 const stageNameEl = qs('stageName');
@@ -73,46 +76,101 @@ let currentStage = makeEmptyStage('新しいステージ');
 let loadedStageName = null;
 
 /** @type {null | string} */
-let selectedEnemyToken = ENEMY_DEFAULT; // null=erase, 'default', or assetId
+let selectedEnemyToken = ENEMY_DEFAULT; // 'default' or assetId (enemy mode)
+/** @type {'enemy' | 'wall' | 'erase'} */
+let selectedMode = 'enemy';
 
 // Asset preview cache (token -> HTMLImageElement)
 const enemyThumbImg = new Map();
 
-function setSelectedEnemyToken(token) {
-  selectedEnemyToken = token;
-  toolErase.dataset.active = token == null ? 'true' : 'false';
-  toolDefault.dataset.active = token === ENEMY_DEFAULT ? 'true' : 'false';
+function setMode(mode) {
+  selectedMode = mode;
+  toolErase.dataset.active = mode === 'erase' ? 'true' : 'false';
+  toolWall.dataset.active = mode === 'wall' ? 'true' : 'false';
 
+  // Enemy selection buttons are active only in enemy mode
+  toolDefault.dataset.active = mode === 'enemy' && selectedEnemyToken === ENEMY_DEFAULT ? 'true' : 'false';
   assetStrip?.querySelectorAll('button[data-asset-id]').forEach((el) => {
     const btn = /** @type {HTMLButtonElement} */ (el);
-    btn.dataset.active = btn.dataset.assetId === token ? 'true' : 'false';
+    btn.dataset.active = mode === 'enemy' && btn.dataset.assetId === selectedEnemyToken ? 'true' : 'false';
   });
 
   const label =
-    token == null
+    mode === 'erase'
       ? 'けす'
-      : token === ENEMY_DEFAULT
-        ? 'デフォルト（👾）'
-        : 'ドット絵（選択中）';
+      : mode === 'wall'
+        ? '壁（🧱）'
+        : selectedEnemyToken === ENEMY_DEFAULT
+          ? 'デフォルト（👾）'
+          : 'ドット絵（選択中）';
   if (assetStatus) assetStatus.textContent = `いま：${label}`;
+}
+
+function setSelectedEnemyToken(token) {
+  selectedEnemyToken = token;
+  setMode('enemy');
 }
 
 function gridIndex(x, y) {
   return y * STAGE_COLS + x;
 }
 
+function wallIndex(x, y) {
+  return y * STAGE_COLS + x;
+}
+
+function computeZones(W, H) {
+  // Top area: enemies (STAGE_ROWS). Bottom area: walls (WALL_ROWS).
+  const gap = Math.max(10, Math.round(H * 0.02));
+  let enemyH = Math.round(H * 0.72);
+  let wallH = H - enemyH - gap;
+  if (wallH < 110) {
+    wallH = 110;
+    enemyH = Math.max(140, H - wallH - gap);
+  }
+  const enemyY0 = 0;
+  const wallY0 = enemyY0 + enemyH + gap;
+  return { gap, enemyY0, enemyH, wallY0, wallH };
+}
+
 function getCellFromPointer(evt) {
   const rect = editorCanvas.getBoundingClientRect();
   const nx = (evt.clientX - rect.left) / rect.width;
   const ny = (evt.clientY - rect.top) / rect.height;
+  const { gap, enemyY0, enemyH, wallY0, wallH } = computeZones(eViewW, eViewH);
   const cx = clamp(Math.floor(nx * STAGE_COLS), 0, STAGE_COLS - 1);
-  const cy = clamp(Math.floor(ny * STAGE_ROWS), 0, STAGE_ROWS - 1);
-  return { x: cx, y: cy };
+  const py = ny * eViewH;
+
+  // Separator gap: ignore
+  if (py >= enemyY0 + enemyH && py < enemyY0 + enemyH + gap) return null;
+
+  if (py < enemyY0 + enemyH) {
+    const ry = clamp(Math.floor((py - enemyY0) / enemyH * STAGE_ROWS), 0, STAGE_ROWS - 1);
+    return { layer: 'enemy', x: cx, y: ry };
+  }
+  const ry = clamp(Math.floor((py - wallY0) / wallH * WALL_ROWS), 0, WALL_ROWS - 1);
+  return { layer: 'wall', x: cx, y: ry };
 }
 
 function applyToolAt(x, y) {
+  // Back-compat: ensure fields exist (loaded old data)
+  if (!Array.isArray(currentStage.walls)) currentStage.walls = Array.from({ length: STAGE_COLS * WALL_ROWS }, () => 0);
+  if (currentStage.wallRows !== WALL_ROWS) currentStage.wallRows = WALL_ROWS;
+
+  if (selectedMode === 'enemy') {
+    const idx = gridIndex(x, y);
+    currentStage.grid[idx] = selectedEnemyToken;
+    return;
+  }
+  if (selectedMode === 'wall') {
+    // Walls are placed only in wall layer (y is wall-row index)
+    const idx = wallIndex(x, y);
+    currentStage.walls[idx] = WALL_CELL;
+    return;
+  }
+  // erase
   const idx = gridIndex(x, y);
-  currentStage.grid[idx] = selectedEnemyToken == null ? null : selectedEnemyToken;
+  currentStage.grid[idx] = null;
 }
 
 function drawDefaultInvader(ctx, x, y, w, h) {
@@ -150,8 +208,25 @@ function drawEditor() {
   ectx.fillStyle = '#f8f9ff';
   ectx.fillRect(0, 0, W, H);
 
-  const cellW = W / STAGE_COLS;
-  const cellH = H / STAGE_ROWS;
+  const zones = computeZones(W, H);
+  const enemyCellW = W / STAGE_COLS;
+  const enemyCellH = zones.enemyH / STAGE_ROWS;
+  const wallCellW = W / STAGE_COLS;
+  const wallCellH = zones.wallH / WALL_ROWS;
+
+  // Zone backgrounds
+  ectx.fillStyle = 'rgba(108, 92, 231, 0.04)';
+  ectx.fillRect(0, zones.enemyY0, W, zones.enemyH);
+  ectx.fillStyle = 'rgba(17, 24, 39, 0.04)';
+  ectx.fillRect(0, zones.wallY0, W, zones.wallH);
+
+  // Zone labels
+  ectx.fillStyle = 'rgba(17,24,39,0.55)';
+  ectx.font = `${Math.max(11, Math.floor(Math.min(W, H) * 0.02))}px Outfit, sans-serif`;
+  ectx.textAlign = 'left';
+  ectx.textBaseline = 'top';
+  ectx.fillText('上：敵', 10, 10);
+  ectx.fillText('下：壁（弾でこわれる）', 10, zones.wallY0 + 10);
 
   // Cells
   for (let y = 0; y < STAGE_ROWS; y++) {
@@ -159,11 +234,11 @@ function drawEditor() {
       const t = currentStage.grid[gridIndex(x, y)];
       if (t == null) continue;
 
-      const px = x * cellW;
-      const py = y * cellH;
-      const pad = Math.max(2, Math.floor(Math.min(cellW, cellH) * 0.08));
-      const rw = Math.max(1, cellW - pad * 2);
-      const rh = Math.max(1, cellH - pad * 2);
+      const px = x * enemyCellW;
+      const py = zones.enemyY0 + y * enemyCellH;
+      const pad = Math.max(2, Math.floor(Math.min(enemyCellW, enemyCellH) * 0.08));
+      const rw = Math.max(1, enemyCellW - pad * 2);
+      const rh = Math.max(1, enemyCellH - pad * 2);
 
       // Cell background
       ectx.fillStyle = 'rgba(108, 92, 231, 0.10)';
@@ -182,33 +257,59 @@ function drawEditor() {
         ectx.fillStyle = 'rgba(0, 206, 201, 0.95)';
         ectx.fillRect(px + pad, py + pad, rw, rh);
         ectx.fillStyle = 'rgba(0,0,0,0.6)';
-        ectx.font = `${Math.max(10, Math.floor(Math.min(cellW, cellH) * 0.34))}px Outfit, sans-serif`;
+        ectx.font = `${Math.max(10, Math.floor(Math.min(enemyCellW, enemyCellH) * 0.34))}px Outfit, sans-serif`;
         ectx.textAlign = 'center';
         ectx.textBaseline = 'middle';
-        ectx.fillText('?', px + cellW / 2, py + cellH / 2);
+        ectx.fillText('?', px + enemyCellW / 2, py + enemyCellH / 2);
       }
     }
   }
 
-  // Grid lines
+  // Walls
+  if (!Array.isArray(currentStage.walls)) currentStage.walls = Array.from({ length: STAGE_COLS * WALL_ROWS }, () => 0);
+  for (let y = 0; y < WALL_ROWS; y++) {
+    for (let x = 0; x < STAGE_COLS; x++) {
+      const v = currentStage.walls[wallIndex(x, y)];
+      if (!v) continue;
+      const px = x * wallCellW;
+      const py = zones.wallY0 + y * wallCellH;
+      const pad = Math.max(2, Math.floor(Math.min(wallCellW, wallCellH) * 0.10));
+      const rw = Math.max(1, wallCellW - pad * 2);
+      const rh = Math.max(1, wallCellH - pad * 2);
+      ectx.fillStyle = 'rgba(17, 24, 39, 0.20)';
+      ectx.fillRect(px + pad, py + pad, rw, rh);
+      ectx.strokeStyle = 'rgba(17, 24, 39, 0.25)';
+      ectx.lineWidth = 1;
+      ectx.strokeRect(px + pad + 0.5, py + pad + 0.5, rw - 1, rh - 1);
+    }
+  }
+
+  // Grid lines (enemy + wall)
   ectx.strokeStyle = 'rgba(0,0,0,0.06)';
   ectx.lineWidth = 1;
   for (let x = 0; x <= STAGE_COLS; x++) {
-    const p = Math.round(x * cellW) + 0.5;
+    const p = Math.round(x * enemyCellW) + 0.5;
     ectx.beginPath();
     ectx.moveTo(p, 0);
     ectx.lineTo(p, H);
     ectx.stroke();
   }
   for (let y = 0; y <= STAGE_ROWS; y++) {
-    const p = Math.round(y * cellH) + 0.5;
+    const p = Math.round(zones.enemyY0 + y * enemyCellH) + 0.5;
+    ectx.beginPath();
+    ectx.moveTo(0, p);
+    ectx.lineTo(W, p);
+    ectx.stroke();
+  }
+  for (let y = 0; y <= WALL_ROWS; y++) {
+    const p = Math.round(zones.wallY0 + y * wallCellH) + 0.5;
     ectx.beginPath();
     ectx.moveTo(0, p);
     ectx.lineTo(W, p);
     ectx.stroke();
   }
 
-  if (editorStatus) editorStatus.textContent = `${STAGE_COLS}×${STAGE_ROWS}`;
+  if (editorStatus) editorStatus.textContent = `${STAGE_COLS}×${STAGE_ROWS}（敵） + ${STAGE_COLS}×${WALL_ROWS}（壁）`;
 }
 
 // Paint
@@ -218,17 +319,55 @@ editorCanvas.addEventListener('pointerdown', (e) => {
   editorCanvas.setPointerCapture?.(e.pointerId);
   isPainting = true;
   const c = getCellFromPointer(e);
+  if (!c) {
+    isPainting = false;
+    return;
+  }
   lastPaint = c;
-  applyToolAt(c.x, c.y);
+  if (selectedMode === 'wall') {
+    if (c.layer !== 'wall') {
+      isPainting = false;
+      lastPaint = null;
+      return;
+    }
+    applyToolAt(c.x, c.y);
+  } else if (selectedMode === 'enemy') {
+    if (c.layer !== 'enemy') {
+      isPainting = false;
+      lastPaint = null;
+      return;
+    }
+    applyToolAt(c.x, c.y);
+  } else {
+    // erase: erase in the active layer
+    if (c.layer === 'enemy') {
+      currentStage.grid[gridIndex(c.x, c.y)] = null;
+    } else {
+      currentStage.walls[wallIndex(c.x, c.y)] = 0;
+    }
+  }
   drawEditor();
   e.preventDefault();
 });
 editorCanvas.addEventListener('pointermove', (e) => {
   if (!isPainting) return;
   const c = getCellFromPointer(e);
+  if (!c) return;
   if (lastPaint && c.x === lastPaint.x && c.y === lastPaint.y) return;
   lastPaint = c;
-  applyToolAt(c.x, c.y);
+  if (selectedMode === 'wall') {
+    if (c.layer !== 'wall') return;
+    applyToolAt(c.x, c.y);
+  } else if (selectedMode === 'enemy') {
+    if (c.layer !== 'enemy') return;
+    applyToolAt(c.x, c.y);
+  } else {
+    if (c.layer === 'enemy') {
+      currentStage.grid[gridIndex(c.x, c.y)] = null;
+    } else {
+      currentStage.walls[wallIndex(c.x, c.y)] = 0;
+    }
+  }
   drawEditor();
   e.preventDefault();
 });
@@ -348,8 +487,9 @@ function renderLibrary() {
 }
 
 // Buttons
-toolErase?.addEventListener('click', () => setSelectedEnemyToken(null));
+toolErase?.addEventListener('click', () => setMode('erase'));
 toolDefault?.addEventListener('click', () => setSelectedEnemyToken(ENEMY_DEFAULT));
+toolWall?.addEventListener('click', () => setMode('wall'));
 
 saveBtn.addEventListener('click', () => {
   const name = (stageNameEl.value || '').trim();

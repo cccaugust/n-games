@@ -6,6 +6,8 @@ import {
   GAME_ID,
   STAGE_COLS,
   STAGE_ROWS,
+  WALL_CELL,
+  WALL_ROWS,
   clamp,
   ensureStages,
   escapeHtml,
@@ -146,9 +148,12 @@ const player = {
   cool: 0
 };
 
+const WALL_HP = 3;
+
 let enemies = [];
 let bullets = []; // player bullets
 let enemyBullets = [];
+let walls = [];
 
 const formation = {
   offX: 0,
@@ -234,6 +239,41 @@ function buildEnemiesFromStage(s) {
   return list;
 }
 
+function buildWallsFromStage(s) {
+  const cols = s.cols || STAGE_COLS;
+  const wallRows = s.wallRows || WALL_ROWS;
+  const rawWalls = Array.isArray(s.walls) ? s.walls : [];
+
+  const padX = Math.max(16, Math.round(viewW * 0.06));
+  const innerW = Math.max(1, viewW - padX * 2);
+  const cellW = innerW / cols;
+  const blockW = cellW * 0.92;
+  const gapX = cellW - blockW;
+
+  const blockH = clamp(viewH * 0.035, 14, 22);
+  const gapY = Math.max(2, Math.round(blockH * 0.25));
+  const zoneH = wallRows * blockH + (wallRows - 1) * gapY;
+  const bottom = player.y - 18;
+  const top = bottom - zoneH;
+
+  const list = [];
+  for (let row = 0; row < wallRows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const v = rawWalls[row * cols + col];
+      if (v !== WALL_CELL) continue;
+      list.push({
+        x: padX + col * cellW + gapX / 2,
+        y: top + row * (blockH + gapY),
+        w: blockW,
+        h: blockH,
+        hp: WALL_HP,
+        maxHp: WALL_HP
+      });
+    }
+  }
+  return list;
+}
+
 async function startStage(stageName, { resetStats = true } = {}) {
   const list = ensureStages();
   const found = list.find((x) => x.name === stageName) ?? list[0];
@@ -263,6 +303,7 @@ async function startStage(stageName, { resetStats = true } = {}) {
   player.cool = 0;
 
   enemies = buildEnemiesFromStage(stage);
+  walls = buildWallsFromStage(stage);
   updateHud();
 
   isRunning = true;
@@ -490,6 +531,20 @@ function update(dt) {
     .map((b) => ({ ...b, y: b.y + b.vy * dt }))
     .filter((b) => b.y - b.r < viewH + 10);
 
+  // Collisions: bullets vs walls (both sides)
+  for (const b of bullets) {
+    for (const w of walls) {
+      if (w.hp <= 0) continue;
+      const hit = rectHit(w.x, w.y, w.w, w.h, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+      if (!hit) continue;
+      w.hp = Math.max(0, w.hp - 1);
+      b.y = -9999;
+      break;
+    }
+  }
+  bullets = bullets.filter((b) => b.y > -1000);
+  walls = walls.filter((w) => w.hp > 0);
+
   // Collisions: player bullets vs enemies
   for (const b of bullets) {
     for (const e of enemies) {
@@ -506,6 +561,19 @@ function update(dt) {
     }
   }
   bullets = bullets.filter((b) => b.y > -1000);
+
+  for (const b of enemyBullets) {
+    for (const w of walls) {
+      if (w.hp <= 0) continue;
+      const hit = rectHit(w.x, w.y, w.w, w.h, b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+      if (!hit) continue;
+      w.hp = Math.max(0, w.hp - 1);
+      b.y = 9999;
+      break;
+    }
+  }
+  enemyBullets = enemyBullets.filter((b) => b.y < 9000);
+  walls = walls.filter((w) => w.hp > 0);
 
   // Collisions: enemy bullets vs player
   for (const b of enemyBullets) {
@@ -557,6 +625,37 @@ function drawDefaultInvaderAt(x, y, w, h) {
   ctx.restore();
 }
 
+function drawWalls() {
+  for (const w of walls) {
+    const t = w.maxHp > 0 ? w.hp / w.maxHp : 0;
+    ctx.fillStyle = `rgba(255,255,255,${0.10 + 0.18 * t})`;
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(w.x + 0.5, w.y + 0.5, w.w - 1, w.h - 1);
+
+    // cracks
+    ctx.strokeStyle = 'rgba(17,24,39,0.28)';
+    ctx.lineWidth = 2;
+    if (w.hp <= 2) {
+      ctx.beginPath();
+      ctx.moveTo(w.x + w.w * 0.15, w.y + w.h * 0.35);
+      ctx.lineTo(w.x + w.w * 0.85, w.y + w.h * 0.55);
+      ctx.stroke();
+    }
+    if (w.hp <= 1) {
+      ctx.beginPath();
+      ctx.moveTo(w.x + w.w * 0.25, w.y + w.h * 0.15);
+      ctx.lineTo(w.x + w.w * 0.55, w.y + w.h * 0.85);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(w.x + w.w * 0.70, w.y + w.h * 0.20);
+      ctx.lineTo(w.x + w.w * 0.42, w.y + w.h * 0.78);
+      ctx.stroke();
+    }
+  }
+}
+
 function draw() {
   ctx.clearRect(0, 0, viewW, viewH);
   ctx.imageSmoothingEnabled = false;
@@ -599,6 +698,9 @@ function draw() {
       ctx.fillRect(x, y, e.w, e.h);
     }
   }
+
+  // Walls
+  drawWalls();
 
   // Player
   ctx.fillStyle = '#6c5ce7';
