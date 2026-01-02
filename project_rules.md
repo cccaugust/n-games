@@ -1,5 +1,9 @@
 # プロジェクトルール & AIエージェント設定 🤖✨
 
+> 注記（Cursor移行）  
+> Cursor でのAIルールは `.cursor/rules/` に移行しました。  
+> このファイルは **旧Antigravity向けの参照用** として残しています（必要に応じて内容を `.cursor/rules/*.mdc` 側へ反映します）。
+
 このプロジェクトにおけるAIエージェント「Antigravity」の振る舞いや、開発のルールを定義します。
 
 ## AIエージェント設定: Antigravity
