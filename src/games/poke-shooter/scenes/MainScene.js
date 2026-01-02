@@ -53,8 +53,12 @@ export default class MainScene extends Phaser.Scene {
         });
 
         this.pokemons.children.each(poke => {
+            // Defensive guard: Phaser groups usually contain GameObjects, but
+            // during destroy/iteration timing we can still see inactive entries.
+            if (!poke || !poke.active) return;
+
             // Keep UI hearts following the pokemon sprite
-            if (poke && poke.hearts && poke.active) {
+            if (poke.hearts) {
                 const gap = 20;
                 const startXHeart = -((poke.maxHp - 1) * gap) / 2;
                 for (let i = 0; i < poke.hearts.length; i++) {
