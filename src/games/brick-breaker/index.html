@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>ブロックくずし | N-Games</title>
+  <meta http-equiv="refresh" content="0; url=./stage-select.html" />
   <link rel="stylesheet" href="../../style.css" />
   <link rel="stylesheet" href="./style.css" />
 </head>
@@ -14,29 +15,21 @@
     <div class="bb-topbar">
       <a class="bb-back" href="../../pages/portal/portal.html">&larr; もどる</a>
       <span class="bb-chip">ブロックくずし</span>
-      <span class="bb-chip" id="stageSize">14×10</span>
+      <span class="bb-chip">ステージ選択へ</span>
     </div>
 
     <div class="bb-page" style="padding: 0;">
       <div class="bb-panel" style="margin-top: 12px;">
-        <h2 style="margin: 0; color: var(--primary-color);">モードをえらぼう</h2>
+        <h2 style="margin: 0; color: var(--primary-color);">ステージ選択へ移動します…</h2>
         <p style="margin-top: 8px; color: var(--text-light);">
-          「あそぶ」はプレイ画面を最大化、「つくる」はステージ編集にいきます。
+          自動で移動しないときは、下のボタンを押してね。
         </p>
-
         <div style="display:flex; gap: 12px; flex-wrap: wrap; margin-top: 14px;">
-          <button class="btn-primary" id="goPlay" style="border-radius: 999px; padding: 14px 18px;">🕹️ あそぶ</button>
-          <button class="bb-tool-btn" id="goEdit" style="border-radius: 999px; padding: 14px 18px;">✏️ つくる</button>
-        </div>
-
-        <div class="bb-hint">
-          ※ 画面を広く使うため、ステージ選択/プレイ/編集は別ページになりました。
+          <a class="btn-primary" href="./stage-select.html" style="text-decoration:none; border-radius: 999px; padding: 14px 18px; display:inline-flex; align-items:center;">ステージ選択</a>
         </div>
       </div>
     </div>
   </div>
-
-  <script type="module" src="./mode.js"></script>
 </body>
 
 </html>

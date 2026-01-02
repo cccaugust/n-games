@@ -85,6 +85,23 @@
   gap: 12px;
 }
 
+.bb-stage-preview-wrap {
+  width: 100%;
+  aspect-ratio: 14 / 10;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111827;
+  border: 1px solid rgba(17, 24, 39, 0.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  margin-bottom: 10px;
+}
+
+.bb-stage-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .bb-mini-btn {
   padding: 10px 12px;
   border-radius: 12px;
