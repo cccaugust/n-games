@@ -25,6 +25,11 @@ function isTouchDevice() {
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 }
 
+// タッチ端末用のCSSフラグ（タブレットでボタンが隠れないようにする）
+if (isTouchDevice()) {
+  document.documentElement.classList.add('touch-device');
+}
+
 function makeEmptyMaze(name = '新しい迷路') {
   const grid = new Uint8Array(SIZE * SIZE);
   // outer border as wall
@@ -694,6 +699,42 @@ if (mobileControls && isTouchDevice()) {
     btn.addEventListener('pointerleave', () => mobileAct.delete(act));
   });
 }
+
+// タッチ端末: 画面ドラッグで向きを変える（横ドラッグ = 回転）
+let lookPointerId = null;
+let lastLookX = 0;
+const LOOK_SENSITIVITY = 0.006; // rad / px（大きいほど速く回る）
+
+playCanvas?.addEventListener('pointerdown', (e) => {
+  if (!isTouchDevice()) return;
+  // ボタン操作と干渉しないよう、キャンバス上のみ対象
+  lookPointerId = e.pointerId;
+  lastLookX = e.clientX;
+  playCanvas.setPointerCapture?.(e.pointerId);
+  e.preventDefault();
+});
+
+playCanvas?.addEventListener('pointermove', (e) => {
+  if (!isTouchDevice()) return;
+  if (lookPointerId == null) return;
+  if (e.pointerId !== lookPointerId) return;
+  if (!isPlaying) return;
+
+  const dx = e.clientX - lastLookX;
+  lastLookX = e.clientX;
+  player.a += dx * LOOK_SENSITIVITY;
+  e.preventDefault();
+});
+
+function endLook(e) {
+  if (lookPointerId == null) return;
+  if (e?.pointerId != null && e.pointerId !== lookPointerId) return;
+  lookPointerId = null;
+}
+
+playCanvas?.addEventListener('pointerup', endLook);
+playCanvas?.addEventListener('pointercancel', endLook);
+playCanvas?.addEventListener('pointerleave', endLook);
 
 let playingMaze = null;
 let player = {
