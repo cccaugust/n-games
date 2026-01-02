@@ -11,6 +11,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'japan-map-quest',
+    title: '日本マップクエスト',
+    desc: '奈良県をめざせ！県ミッションつき🗾',
+    color: '#74b9ff',
+    icon: '🗾',
+    link: '/games/japan-map-quest/'
+  },
+  {
     id: 'whack-a-mole',
     title: 'モグラたたき',
     desc: 'ピコピコハンマーでやっつけろ！',
