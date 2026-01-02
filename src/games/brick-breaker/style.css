@@ -1,0 +1,217 @@
+/* Brick Breaker pages: shared UI */
+
+.bb-safe {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+}
+
+.bb-page {
+  max-width: 980px;
+  margin: 14px auto;
+  padding: 0 14px;
+}
+
+.bb-topbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-light);
+  text-decoration: none;
+  font-weight: 700;
+  padding: 10px 6px;
+}
+
+.bb-panel {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.bb-chip {
+  background: #f1f2f6;
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+}
+
+.bb-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bb-row .left,
+.bb-row .right {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bb-tool-btn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f2f6;
+  font-weight: 700;
+  min-width: 72px;
+}
+
+.bb-tool-btn[data-active='true'] {
+  background: var(--secondary-color);
+  color: #003d3b;
+}
+
+.bb-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.bb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.bb-mini-btn {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: white;
+  font-weight: 800;
+  min-width: 80px;
+}
+
+.bb-mini-btn.danger {
+  background: rgba(255, 118, 117, 0.18);
+  border-color: rgba(255, 118, 117, 0.35);
+}
+
+/* Fullscreen game/editor pages: maximize canvas on mobile */
+.bb-full {
+  height: 100svh;
+  padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right))
+    calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.bb-full .bb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bb-full .bb-header .bb-title {
+  font-weight: 900;
+  color: var(--text-dark);
+}
+
+.bb-full .bb-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bb-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.bb-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 12px;
+  background: #2d3436;
+  touch-action: none;
+}
+
+.bb-grid-canvas {
+  background: #f8f9ff;
+}
+
+.bb-hud {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.bb-hud .bb-hud-pill {
+  background: rgba(17, 24, 39, 0.65);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.bb-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 18px;
+  z-index: 50;
+}
+
+.bb-overlay .bb-overlay-card {
+  max-width: 520px;
+  width: 100%;
+  background: rgba(17, 24, 39, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+  padding: 18px 16px;
+  color: white;
+}
+
+.bb-overlay .bb-overlay-title {
+  color: white;
+  margin: 0;
+}
+
+.bb-overlay .bb-overlay-text {
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 10px;
+}
+
+.bb-overlay .bb-overlay-extra {
+  margin-top: 12px;
+}
+
+.bb-hint {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
