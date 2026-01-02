@@ -3,19 +3,23 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Kama-Surf - NK Games 2</title>
     <link rel="stylesheet" href="../../style.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div id="game-container"></div>
-    <div class="instructions">
-        <h3>あそびかた</h3>
-        <p>カマサウルスでなみにのろう！<br>クリック・タップでジャンプして、いわをよけよう！</p>
-        <a href="../../index.html" class="back-link">← もどる</a>
-    </div>
+    <a href="../../index.html" class="back-fab" aria-label="ポータルへ戻る">← もどる</a>
+
+    <main class="page">
+        <div id="game-container" aria-label="Kama-Surf ゲーム画面"></div>
+
+        <details class="instructions">
+            <summary>あそびかた</summary>
+            <p>カマサウルスでなみにのろう！<br>クリック・タップでジャンプして、いわをよけよう！</p>
+        </details>
+    </main>
     <script type="module" src="game.js"></script>
 </body>
 

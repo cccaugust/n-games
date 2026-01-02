@@ -1,17 +1,83 @@
 import Phaser from 'phaser';
 import { pokemonData } from '../../data/pokemonData.js';
 
+const DESIGN_WIDTH = 960;
+const DESIGN_HEIGHT = 540;
+const DESIGN_ASPECT = DESIGN_WIDTH / DESIGN_HEIGHT; // 16:9
+
+function getViewportSize() {
+    // visualViewport はモバイルのアドレスバー伸縮に強い
+    const vv = window.visualViewport;
+    const width = vv?.width ?? window.innerWidth;
+    const height = vv?.height ?? window.innerHeight;
+    return { width, height };
+}
+
+function getBodyPaddingsPx() {
+    const cs = window.getComputedStyle(document.body);
+    const toNum = (v) => {
+        const n = Number.parseFloat(v);
+        return Number.isFinite(n) ? n : 0;
+    };
+    return {
+        top: toNum(cs.paddingTop),
+        right: toNum(cs.paddingRight),
+        bottom: toNum(cs.paddingBottom),
+        left: toNum(cs.paddingLeft)
+    };
+}
+
+function resizeGameContainer() {
+    const container = document.getElementById('game-container');
+    if (!container) return { width: DESIGN_WIDTH, height: DESIGN_HEIGHT };
+
+    const { width: vw, height: vh } = getViewportSize();
+    const pad = getBodyPaddingsPx();
+
+    const instructions = document.querySelector('.instructions');
+    const instructionsH = instructions ? instructions.offsetHeight : 0;
+    const gap = 12; // .page の gap と合わせる
+
+    const availableW = Math.max(0, vw - pad.left - pad.right);
+    const availableH = Math.max(0, vh - pad.top - pad.bottom - instructionsH - gap);
+
+    // 16:9 を保って、W/H の両方に収まる最大サイズを選ぶ
+    const wByW = availableW;
+    const hByW = wByW / DESIGN_ASPECT;
+    const hByH = availableH;
+    const wByH = hByH * DESIGN_ASPECT;
+
+    let width;
+    let height;
+    if (hByW <= availableH) {
+        width = wByW;
+        height = hByW;
+    } else {
+        width = wByH;
+        height = hByH;
+    }
+
+    // 大画面では固定デザインを上限にする（見切れ防止 & 文字サイズ保持）
+    width = Math.floor(Math.max(240, Math.min(width, DESIGN_WIDTH)));
+    height = Math.floor(Math.max(135, Math.min(height, DESIGN_HEIGHT)));
+
+    container.style.width = `${width}px`;
+    container.style.height = `${height}px`;
+
+    return { width, height };
+}
+
 const CONFIG = {
     // 16:9 Aspect Ratio for better tablet fit
-    width: 960,
-    height: 540,
+    width: DESIGN_WIDTH,
+    height: DESIGN_HEIGHT,
     backgroundColor: '#74b9ff',
     scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         parent: 'game-container',
-        width: 960,
-        height: 540
+        width: DESIGN_WIDTH,
+        height: DESIGN_HEIGHT
     },
     physics: {
         default: 'arcade',
@@ -37,7 +103,7 @@ class MainScene extends Phaser.Scene {
             this.load.image('player', kama.image);
         }
 
-        // Generate Graphics Textures (Clouds, Stars)
+        // Generate Graphics Textures (Clouds, Stars, Obstacles)
         // Cloud
         const cloudG = this.make.graphics({ x: 0, y: 0, add: false });
         cloudG.fillStyle(0xffffff, 0.8);
@@ -51,6 +117,20 @@ class MainScene extends Phaser.Scene {
         starG.fillStyle(0xffdd59, 1);
         starG.fillStar(15, 15, 5, 8, 15);
         starG.generateTexture('star', 30, 30);
+
+        // Obstacles (generate once)
+        if (!this.textures.exists('rock')) {
+            const r = this.make.graphics({ x: 0, y: 0, add: false });
+            r.fillStyle(0x636e72);
+            r.fillTriangle(0, 60, 30, 0, 60, 60);
+            r.generateTexture('rock', 60, 60);
+        }
+        if (!this.textures.exists('wood')) {
+            const w = this.make.graphics({ x: 0, y: 0, add: false });
+            w.fillStyle(0x8d6e63);
+            w.fillRect(0, 0, 80, 40);
+            w.generateTexture('wood', 80, 40);
+        }
 
         // Sea Texture (Gradient-ish)
         const seaCanvas = this.make.graphics({ x: 0, y: 0, add: false });
@@ -180,6 +260,7 @@ class MainScene extends Phaser.Scene {
         this.titleContainer.setVisible(true);
         this.gameOverContainer.setVisible(false);
         this.scoreText.setVisible(false);
+        this.physics.resume();
 
         // Reset player for title screen
         this.player.setPosition(150, 400);
@@ -193,6 +274,7 @@ class MainScene extends Phaser.Scene {
         this.gameState = 'PLAYING';
         this.titleContainer.setVisible(false);
         this.scoreText.setVisible(true);
+        this.physics.resume();
 
         // Reset Stats
         this.score = 0;
@@ -297,18 +379,10 @@ class MainScene extends Phaser.Scene {
         let obs;
         if (type === 0) {
             // Rock
-            const r = this.make.graphics({ x: 0, y: 0, add: false });
-            r.fillStyle(0x636e72);
-            r.fillTriangle(0, 60, 30, 0, 60, 60);
-            r.generateTexture('rock', 60, 60);
             obs = this.obstacles.create(CONFIG.width + 50, yPos, 'rock');
             obs.body.setSize(40, 40);
         } else {
             // Driftwood (Platform-ish but harmful?) -> Just obstacle for now
-            const w = this.make.graphics({ x: 0, y: 0, add: false });
-            w.fillStyle(0x8d6e63);
-            w.fillRect(0, 0, 80, 40);
-            w.generateTexture('wood', 80, 40);
             obs = this.obstacles.create(CONFIG.width + 50, yPos, 'wood');
         }
 
@@ -370,7 +444,11 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-const game = new Phaser.Game({
+// 画面に収まるように、Phaser生成前にコンテナを調整
+resizeGameContainer();
+
+let game;
+game = new Phaser.Game({
     type: Phaser.AUTO,
     width: CONFIG.width,
     height: CONFIG.height,
@@ -380,3 +458,19 @@ const game = new Phaser.Game({
     physics: CONFIG.physics,
     scene: [MainScene]
 });
+
+// リサイズ/回転/アドレスバー伸縮に追従
+let resizeQueued = false;
+const scheduleResize = () => {
+    if (resizeQueued) return;
+    resizeQueued = true;
+    window.requestAnimationFrame(() => {
+        resizeQueued = false;
+        resizeGameContainer();
+        game?.scale?.refresh();
+    });
+};
+
+window.addEventListener('resize', scheduleResize, { passive: true });
+window.addEventListener('orientationchange', scheduleResize, { passive: true });
+window.visualViewport?.addEventListener('resize', scheduleResize, { passive: true });
