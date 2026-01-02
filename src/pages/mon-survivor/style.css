@@ -20,7 +20,6 @@ body {
     width: 100vw;
     height: 100svh;
     touch-action: none; /* ゲーム画面内だけスクロール等を抑制 */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 canvas {
@@ -98,6 +97,7 @@ canvas {
     width: 100%;
     height: 100%;
     pointer-events: auto;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Top Bar */
@@ -150,7 +150,7 @@ canvas {
 /* Health Bar */
 .health-container {
     position: absolute;
-    bottom: 30px;
+    bottom: calc(30px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%);
     width: 300px;

@@ -54,11 +54,28 @@ export class Player extends Entity {
     }
 
     update(input, width, height) {
-        // Movement
-        if (input.keys['ArrowUp'] || input.keys['w']) this.y -= this.speed;
-        if (input.keys['ArrowDown'] || input.keys['s']) this.y += this.speed;
-        if (input.keys['ArrowLeft'] || input.keys['a']) this.x -= this.speed;
-        if (input.keys['ArrowRight'] || input.keys['d']) this.x += this.speed;
+        // Movement (Keyboard + Virtual Joystick)
+        let mx = 0;
+        let my = 0;
+
+        if (input.keys['ArrowUp'] || input.keys['w']) my -= 1;
+        if (input.keys['ArrowDown'] || input.keys['s']) my += 1;
+        if (input.keys['ArrowLeft'] || input.keys['a']) mx -= 1;
+        if (input.keys['ArrowRight'] || input.keys['d']) mx += 1;
+
+        if (input.joystick) {
+            mx += input.joystick.x || 0;
+            my += input.joystick.y || 0;
+        }
+
+        const len = Math.hypot(mx, my);
+        if (len > 1) {
+            mx /= len;
+            my /= len;
+        }
+
+        this.x += mx * this.speed;
+        this.y += my * this.speed;
 
         // Boundaries
         this.x = Math.max(this.radius, Math.min(width - this.radius, this.x));
