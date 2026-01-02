@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>日本マップクエスト | N-Games</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div class="container jm-container">
+    <a class="jm-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+
+    <div class="jm-header">
+      <div>
+        <h2 class="jm-title">日本マップクエスト 🗾</h2>
+        <p class="jm-subtitle">ドラクエ風フィールドで 県をめぐろう！</p>
+      </div>
+
+      <div class="jm-actions">
+        <button class="btn-primary jm-btn" id="newMissionBtn">ミッション変更</button>
+        <button class="jm-btn-secondary" id="resetBtn">東京にもどる</button>
+      </div>
+    </div>
+
+    <div class="jm-layout">
+      <div class="jm-stage card">
+        <div class="jm-hud">
+          <div class="jm-hud-row">
+            <div class="jm-pill">いま：<span id="currentPref">-</span></div>
+            <div class="jm-pill">ちけい：<span id="currentTerrain">-</span></div>
+          </div>
+          <div class="jm-hud-row">
+            <div class="jm-mission">
+              <span class="jm-mission-label">ミッション</span>
+              <span id="missionText">-</span>
+              <span id="missionStatus" class="jm-mission-status"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="jm-canvas-wrap">
+          <canvas id="worldCanvas" class="jm-world" aria-label="日本マップ"></canvas>
+          <div class="jm-toast" id="toast" aria-live="polite"></div>
+        </div>
+
+        <div class="jm-controls" id="controls">
+          <button class="jm-pad" data-dir="up" aria-label="上">▲</button>
+          <div class="jm-pad-row">
+            <button class="jm-pad" data-dir="left" aria-label="左">◀</button>
+            <button class="jm-pad" data-dir="down" aria-label="下">▼</button>
+            <button class="jm-pad" data-dir="right" aria-label="右">▶</button>
+          </div>
+          <div class="jm-help">PC: 矢印 / WASD　スマホ: ボタン</div>
+        </div>
+      </div>
+
+      <aside class="jm-side card">
+        <h3 class="jm-side-title">ミニマップ</h3>
+        <canvas id="miniCanvas" class="jm-mini" aria-label="ミニマップ"></canvas>
+        <div class="jm-legend">
+          <div class="jm-legend-item"><span class="jm-dot jm-dot-player"></span>あなた</div>
+          <div class="jm-legend-item"><span class="jm-dot jm-dot-target"></span>目的地</div>
+        </div>
+        <div class="jm-note">
+          県の境界は「ざっくり版」です（今後、精度アップ可能）。
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
