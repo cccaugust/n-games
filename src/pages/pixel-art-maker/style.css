@@ -626,6 +626,11 @@ input[type='color'] {
   padding: 16px;
 }
 
+/* `hidden` 属性が確実に効くようにする（初期表示でモーダルが出っぱなしになるのを防ぐ） */
+.modal-backdrop[hidden] {
+  display: none !important;
+}
+
 .modal {
   width: min(760px, 100%);
   max-height: min(84vh, 760px);

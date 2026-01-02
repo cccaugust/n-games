@@ -794,6 +794,9 @@ canvas.addEventListener('pointerleave', () => {
   canvasFrame.classList.toggle('grid', gridToggle.checked);
   renderPalette();
 
+  // Safety: make sure modal is closed on first paint (and also after bfcache restores).
+  closeNewAssetModal();
+
   setView('gallery');
   await refreshGalleryList();
   updateStatus('準備OK');
