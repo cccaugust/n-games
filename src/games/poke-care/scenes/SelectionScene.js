@@ -13,14 +13,15 @@ export default class SelectionScene extends Phaser.Scene {
         this.page = 0;
         this.perPage = 9;
         this.cols = 3;
+        this.safe = this.getSafeInsetsInGame();
 
-        this.add.text(w / 2, 44, 'パートナーをえらんでね', {
+        this.titleText = this.add.text(w / 2, 44 + this.safe.top, 'パートナーをえらんでね', {
             fontSize: '24px',
             color: '#ffffff',
             align: 'center'
         }).setOrigin(0.5);
 
-        this.add.text(w / 2, 74, 'タップでけってい（◀ ▶ でページ）', {
+        this.helpText = this.add.text(w / 2, 74 + this.safe.top, 'タップでけってい（◀ ▶ でページ）', {
             fontSize: '14px',
             color: '#ffffff',
             align: 'center'
@@ -30,7 +31,7 @@ export default class SelectionScene extends Phaser.Scene {
         this.gridRoot = this.add.container(0, 0);
 
         // Navigation
-        const navY = h - 56;
+        const navY = h - 56 - this.safe.bottom;
         this.prevBtn = this.createNavBtn(70, navY, '◀', () => this.setPage(this.page - 1));
         this.nextBtn = this.createNavBtn(w - 70, navY, '▶', () => this.setPage(this.page + 1));
         this.pageText = this.add.text(w / 2, navY, '', { fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
@@ -51,6 +52,20 @@ export default class SelectionScene extends Phaser.Scene {
             if (Math.abs(dy) > 90) return;
             if (dx < 0) this.setPage(this.page + 1);
             else this.setPage(this.page - 1);
+        });
+
+        // Re-layout on resize / orientation change
+        this.scale.on('resize', () => {
+            this.safe = this.getSafeInsetsInGame();
+            const newNavY = this.scale.height - 56 - this.safe.bottom;
+            this.prevBtn.bg.setPosition(70, newNavY);
+            this.prevBtn.text.setPosition(70, newNavY);
+            this.nextBtn.bg.setPosition(this.scale.width - 70, newNavY);
+            this.nextBtn.text.setPosition(this.scale.width - 70, newNavY);
+            this.pageText.setPosition(this.scale.width / 2, newNavY);
+            this.titleText.setPosition(this.scale.width / 2, 44 + this.safe.top);
+            this.helpText.setPosition(this.scale.width / 2, 74 + this.safe.top);
+            this.renderPage();
         });
 
         this.setPage(0);
@@ -86,8 +101,8 @@ export default class SelectionScene extends Phaser.Scene {
         const list = (pokemonData || []).slice(start, end);
 
         const rows = 3;
-        const top = 110;
-        const bottom = h - 110;
+        const top = 110 + this.safe.top;
+        const bottom = h - 110 - this.safe.bottom;
         const gridH = Math.max(200, bottom - top);
         const cellW = w / this.cols;
         const cellH = gridH / rows;
@@ -128,6 +143,36 @@ export default class SelectionScene extends Phaser.Scene {
 
             this.gridRoot.add(container);
         });
+    }
+
+    getSafeInsetsInGame() {
+        const safe = this.registry.get('safeAreaPx') || { top: 0, bottom: 0, left: 0, right: 0 };
+        const canvas = this.sys.game?.canvas;
+        if (!canvas) return { top: 0, bottom: 0, left: 0, right: 0 };
+
+        const rect = canvas.getBoundingClientRect();
+        const vvH = window.visualViewport?.height || window.innerHeight;
+        const vvW = window.visualViewport?.width || window.innerWidth;
+
+        // How much the safe areas actually overlap the canvas area (letterboxing reduces it)
+        const overlapTopPx = Math.max(0, (safe.top || 0) - rect.top);
+        const overlapBottomPx = Math.max(0, (safe.bottom || 0) - Math.max(0, vvH - rect.bottom));
+        const overlapLeftPx = Math.max(0, (safe.left || 0) - rect.left);
+        const overlapRightPx = Math.max(0, (safe.right || 0) - Math.max(0, vvW - rect.right));
+
+        const scaleX = rect.width / this.scale.width;
+        const scaleY = rect.height / this.scale.height;
+
+        const toGameX = (px) => (scaleX > 0 ? px / scaleX : 0);
+        const toGameY = (px) => (scaleY > 0 ? px / scaleY : 0);
+
+        // Clamp to reasonable range so UI doesn't jump too much
+        return {
+            top: Phaser.Math.Clamp(toGameY(overlapTopPx), 0, 64),
+            bottom: Phaser.Math.Clamp(toGameY(overlapBottomPx), 0, 96),
+            left: Phaser.Math.Clamp(toGameX(overlapLeftPx), 0, 64),
+            right: Phaser.Math.Clamp(toGameX(overlapRightPx), 0, 64)
+        };
     }
 
     selectPokemon(id) {

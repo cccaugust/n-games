@@ -22,6 +22,7 @@ export default class MainScene extends Phaser.Scene {
     create() {
         const w = this.scale.width;
         const h = this.scale.height;
+        this.safe = this.getSafeInsetsInGame();
 
         // Background
         this.add.rectangle(0, 0, w, h, 0xfdf2e9).setOrigin(0);
@@ -33,8 +34,8 @@ export default class MainScene extends Phaser.Scene {
 
         const pokeMeta = pokemonData.find((p) => p.id === this.pokemonId);
         const pokeName = pokeMeta?.name || `No.${this.pokemonId}`;
-        this.add.text(centerX, 18, pokeName, { fontSize: '22px', color: '#111827', fontStyle: 'bold' }).setOrigin(0.5, 0);
-        this.add.text(centerX, 46, 'タップで なでる', { fontSize: '14px', color: '#374151' }).setOrigin(0.5, 0);
+        this.headerName = this.add.text(centerX, 18 + this.safe.top, pokeName, { fontSize: '22px', color: '#111827', fontStyle: 'bold' }).setOrigin(0.5, 0);
+        this.headerHint = this.add.text(centerX, 46 + this.safe.top, 'タップで なでる', { fontSize: '14px', color: '#374151' }).setOrigin(0.5, 0);
 
         // Pokemon Sprite
         this.pokemon = this.add.image(centerX, centerY, this.pokemonId);
@@ -75,6 +76,12 @@ export default class MainScene extends Phaser.Scene {
             this.showToast('えさ🍎・あそぶ⚽・ねる💤 で そだてよう！');
             localStorage.setItem('poke-care-tutorial-done', '1');
         }
+
+        // Re-layout on resize / orientation change
+        this.scale.on('resize', () => {
+            this.safe = this.getSafeInsetsInGame();
+            this.layoutUI();
+        });
     }
 
     createUI() {
@@ -82,9 +89,9 @@ export default class MainScene extends Phaser.Scene {
         const h = this.scale.height;
 
         // Top HUD panel
-        const panel = this.add.rectangle(w / 2, 118, w - 24, 140, 0xffffff, 0.82);
-        panel.setStrokeStyle(1, 0x000000, 0.08);
-        panel.setOrigin(0.5);
+        this.hudPanel = this.add.rectangle(w / 2, 118, w - 24, 140, 0xffffff, 0.82);
+        this.hudPanel.setStrokeStyle(1, 0x000000, 0.08);
+        this.hudPanel.setOrigin(0.5);
 
         this.levelText = this.add.text(22, 74, '', { fontSize: '22px', color: '#111827', fontStyle: 'bold' });
         this.xpText = this.add.text(22, 100, '', { fontSize: '12px', color: '#374151' });
@@ -99,18 +106,18 @@ export default class MainScene extends Phaser.Scene {
         };
 
         // Bottom Bar - Actions
-        const barY = h - 78;
-        const barBg = this.add.rectangle(w / 2, barY, w - 24, 86, 0xffffff, 0.9);
-        barBg.setStrokeStyle(1, 0x000000, 0.06);
+        this.actionBarY = h - 78;
+        this.actionBarBg = this.add.rectangle(w / 2, this.actionBarY, w - 24, 86, 0xffffff, 0.9);
+        this.actionBarBg.setStrokeStyle(1, 0x000000, 0.06);
 
         this.actionBtns = {
-            feed: this.createActionBtn(62, barY - 10, '🍎', 'えさ', 0x3b82f6, () => this.feedPokemon()),
-            play: this.createActionBtn(w / 2, barY - 10, '⚽', 'あそぶ', 0xf59e0b, () => this.playPokemon()),
-            sleep: this.createActionBtn(w - 62, barY - 10, '💤', 'ねる', 0x10b981, () => this.sleepPokemon())
+            feed: this.createActionBtn(62, this.actionBarY - 10, '🍎', 'えさ', 0x3b82f6, () => this.feedPokemon()),
+            play: this.createActionBtn(w / 2, this.actionBarY - 10, '⚽', 'あそぶ', 0xf59e0b, () => this.playPokemon()),
+            sleep: this.createActionBtn(w - 62, this.actionBarY - 10, '💤', 'ねる', 0x10b981, () => this.sleepPokemon())
         };
 
         // Partner change
-        const changeBtn = this.add.text(w - 12, 72, 'パートナー変更', { fontSize: '12px', color: '#6b7280' })
+        this.changeBtn = this.add.text(w - 12, 72, 'パートナー変更', { fontSize: '12px', color: '#6b7280' })
             .setOrigin(1, 0)
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => {
@@ -118,6 +125,69 @@ export default class MainScene extends Phaser.Scene {
                 localStorage.removeItem('poke-care-stats');
                 this.scene.start('SelectionScene');
             });
+
+        this.layoutUI();
+    }
+
+    layoutUI() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        // Header
+        if (this.headerName) this.headerName.setPosition(w / 2, 18 + this.safe.top);
+        if (this.headerHint) this.headerHint.setPosition(w / 2, 46 + this.safe.top);
+
+        // Top HUD block (push down if notch overlaps canvas)
+        const hudTop = 74 + this.safe.top;
+        const panelCenterY = 118 + this.safe.top;
+        this.hudPanel.setPosition(w / 2, panelCenterY);
+        this.levelText.setPosition(22, hudTop);
+        this.xpText.setPosition(22, hudTop + 26);
+        this.xpBarBg.setPosition(22, hudTop + 46);
+        this.xpBarFill.setPosition(22, hudTop + 46);
+
+        this.setStatRowPos(this.statRows.hunger, hudTop + 70);
+        this.setStatRowPos(this.statRows.happiness, hudTop + 98);
+        this.setStatRowPos(this.statRows.energy, hudTop + 126);
+
+        // Bottom action bar (lift above home indicator if it overlaps the canvas)
+        this.actionBarY = h - 78 - this.safe.bottom;
+        this.actionBarBg.setPosition(w / 2, this.actionBarY);
+        // Reposition buttons (caption is inside the helper, so rebuild is easiest)
+        // Keep existing buttons but move their internal display objects by offsetting group
+        // (We created them as independent objects, so we adjust by known coordinates)
+        const btnY = this.actionBarY - 10;
+        this._repositionActionBtn(this.actionBtns.feed, 62, btnY);
+        this._repositionActionBtn(this.actionBtns.play, w / 2, btnY);
+        this._repositionActionBtn(this.actionBtns.sleep, w - 62, btnY);
+
+        // Change button
+        this.changeBtn.setPosition(w - 12, 72 + this.safe.top);
+
+        // If toast exists, keep it above action bar
+        if (this._toast) {
+            const toastY = this.actionBarY - 104;
+            this._toast.bg.setPosition(w / 2, toastY);
+            this._toast.text.setPosition(w / 2, toastY);
+        }
+    }
+
+    setStatRowPos(row, y) {
+        const w = this.scale.width;
+        const x = 22;
+        row.name.setPosition(x, y);
+        row.valueText.setPosition(w - 22, y);
+        row.barBg.setPosition(x + 74, y);
+        row.barFill.setPosition(x + 74, y);
+    }
+
+    _repositionActionBtn(btn, x, y) {
+        // This object currently only exposes setEnabled; we can still move via internal references
+        // by duck-typing known properties if present (older instances won't have them).
+        if (!btn) return;
+        if (btn.circle) btn.circle.setPosition(x, y);
+        if (btn.text) btn.text.setPosition(x, y - 2);
+        if (btn.caption) btn.caption.setPosition(x, y + 30);
     }
 
     createStatRow(y, label, icon, color) {
@@ -141,9 +211,13 @@ export default class MainScene extends Phaser.Scene {
         });
 
         return {
+            circle,
+            text,
+            caption,
             setEnabled: (enabled) => {
                 circle.setAlpha(enabled ? 1 : 0.35);
                 text.setAlpha(enabled ? 1 : 0.35);
+                caption.setAlpha(enabled ? 1 : 0.35);
                 circle.disableInteractive();
                 if (enabled) circle.setInteractive({ useHandCursor: true });
             }
@@ -344,7 +418,7 @@ export default class MainScene extends Phaser.Scene {
 
     showToast(message) {
         const w = this.scale.width;
-        const y = this.scale.height - 182;
+        const y = this.actionBarY ? (this.actionBarY - 104) : (this.scale.height - 182);
         if (this._toast) {
             this._toast.bg.destroy();
             this._toast.text.destroy();
@@ -365,5 +439,33 @@ export default class MainScene extends Phaser.Scene {
                 this._toast = null;
             }
         });
+    }
+
+    getSafeInsetsInGame() {
+        const safe = this.registry.get('safeAreaPx') || { top: 0, bottom: 0, left: 0, right: 0 };
+        const canvas = this.sys.game?.canvas;
+        if (!canvas) return { top: 0, bottom: 0, left: 0, right: 0 };
+
+        const rect = canvas.getBoundingClientRect();
+        const vvH = window.visualViewport?.height || window.innerHeight;
+        const vvW = window.visualViewport?.width || window.innerWidth;
+
+        const overlapTopPx = Math.max(0, (safe.top || 0) - rect.top);
+        const overlapBottomPx = Math.max(0, (safe.bottom || 0) - Math.max(0, vvH - rect.bottom));
+        const overlapLeftPx = Math.max(0, (safe.left || 0) - rect.left);
+        const overlapRightPx = Math.max(0, (safe.right || 0) - Math.max(0, vvW - rect.right));
+
+        const scaleX = rect.width / this.scale.width;
+        const scaleY = rect.height / this.scale.height;
+
+        const toGameX = (px) => (scaleX > 0 ? px / scaleX : 0);
+        const toGameY = (px) => (scaleY > 0 ? px / scaleY : 0);
+
+        return {
+            top: Phaser.Math.Clamp(toGameY(overlapTopPx), 0, 64),
+            bottom: Phaser.Math.Clamp(toGameY(overlapBottomPx), 0, 96),
+            left: Phaser.Math.Clamp(toGameX(overlapLeftPx), 0, 64),
+            right: Phaser.Math.Clamp(toGameX(overlapRightPx), 0, 64)
+        };
     }
 }
