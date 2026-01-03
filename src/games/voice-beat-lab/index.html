@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ボイスビートラボ | N-Games</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <div class="container">
+    <a href="../../pages/portal/portal.html" class="back-link">&larr; もどる</a>
+
+    <div class="card shell">
+      <div class="header-row">
+        <div>
+          <div class="title">ボイスビートラボ</div>
+          <div class="subtitle">こえでドラム！ヘンテコ曲をつくろう</div>
+        </div>
+        <button class="btn-primary" id="helpBtn" type="button">あそびかた</button>
+      </div>
+
+      <div class="status-row">
+        <div class="status-pill" id="micStatus" aria-live="polite">🎤 マイク: まだ</div>
+        <div class="status-pill" id="audioStatus" aria-live="polite">🔊 音: まだ</div>
+      </div>
+
+      <div class="top-controls">
+        <button class="btn-primary big" id="micBtn" type="button">🎤 マイクをつかう</button>
+        <button class="btn-secondary big" id="panicBtn" type="button" disabled>🤣 ぎゃはは！</button>
+      </div>
+
+      <div class="grid">
+        <section class="card inner">
+          <h3>① こえをとる（4こ）</h3>
+          <p class="hint">ボタンをおすと <b>1.0秒</b> とるよ（おわったら自動でとまる）</p>
+
+          <div class="pads" id="pads" aria-label="録音パッド"></div>
+
+          <div class="row">
+            <label class="toggle">
+              <input type="checkbox" id="funMode" />
+              <span>ヘンテコモード（チップモンク/ロボ/ぎゃくさいせい）</span>
+            </label>
+            <button class="btn-ghost" id="clearBtn" type="button">ぜんぶけす</button>
+          </div>
+        </section>
+
+        <section class="card inner">
+          <h3>② ならべて きょくにする（8こ）</h3>
+          <div class="seq-controls">
+            <button class="btn-primary" id="playBtn" type="button" disabled>▶︎ スタート</button>
+            <button class="btn-ghost" id="stopBtn" type="button" disabled>■ とめる</button>
+            <div class="tempo">
+              <div class="tempo-label">テンポ: <span id="bpmLabel">110</span></div>
+              <input id="bpm" type="range" min="60" max="170" value="110" />
+            </div>
+          </div>
+
+          <div class="sequencer" id="sequencer" aria-label="シーケンサー"></div>
+          <p class="hint small">マスをタップでON/OFF。上の光がうごいたら成功！</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="helpOverlay" role="dialog" aria-modal="true" aria-label="あそびかた">
+    <div class="overlay-card">
+      <h2>あそびかた</h2>
+      <ol class="help-list">
+        <li><b>「🎤 マイクをつかう」</b> をおして、マイクをOKする</li>
+        <li>4つのボタンで、こえやおとを <b>1秒</b> とる（「たー！」とか「ぷー！」とか）</li>
+        <li>下のマスをタップして、ならべる</li>
+        <li><b>スタート</b> で きょくになる！</li>
+      </ol>
+      <p class="small">※ マイクは <b>HTTPS</b> のページやローカル開発で使えます。</p>
+      <button class="btn-primary" id="closeHelpBtn" type="button">OK!</button>
+    </div>
+  </div>
+
+  <div class="floating-layer" id="floatingLayer" aria-hidden="true"></div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
+
