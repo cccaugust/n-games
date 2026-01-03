@@ -35,6 +35,30 @@ function makeCanvas(w, h) {
   return { w, h, p: new Uint32Array(w * h) };
 }
 
+/**
+ * Create a canvas from "ASCII art" rows.
+ * - '.' or ' ' => transparent
+ * - other chars => lookup from colorMap
+ * @param {string[]} rows
+ * @param {Record<string, number>} colorMap
+ */
+function makeFromAscii(rows, colorMap) {
+  const h = Array.isArray(rows) ? rows.length : 0;
+  const w = rows.reduce((m, r) => Math.max(m, String(r).length), 0);
+  const c = makeCanvas(w, h);
+  for (let y = 0; y < h; y++) {
+    const row = String(rows[y] || '');
+    for (let x = 0; x < w; x++) {
+      const ch = row[x] ?? '.';
+      if (ch === '.' || ch === ' ') continue;
+      const col = colorMap[ch];
+      if (col == null) continue;
+      setPx(c, x, y, col >>> 0);
+    }
+  }
+  return c;
+}
+
 function idx(c, x, y) {
   return y * c.w + x;
 }
@@ -135,6 +159,31 @@ const PALETTE = {
   gray1: hex('#6c7a89'),
   gray2: hex('#aab7c4'),
   gray3: hex('#e6eef7')
+};
+
+const ASCII_COLORS = {
+  K: PALETTE.ink,
+  s: PALETTE.shadow,
+  w: PALETTE.white,
+  l: PALETTE.light,
+  r: PALETTE.red1,
+  R: PALETTE.red2,
+  o: PALETTE.orange1,
+  O: PALETTE.orange2,
+  y: PALETTE.yellow1,
+  Y: PALETTE.yellow2,
+  g: PALETTE.green1,
+  G: PALETTE.green2,
+  H: PALETTE.green3,
+  b: PALETTE.blue1,
+  B: PALETTE.blue2,
+  C: PALETTE.blue3,
+  1: PALETTE.brown1,
+  2: PALETTE.brown2,
+  3: PALETTE.brown3,
+  d: PALETTE.gray1,
+  D: PALETTE.gray2,
+  E: PALETTE.gray3
 };
 
 function makeSlimeBlue() {
@@ -447,6 +496,527 @@ function makeStarGem() {
   return c;
 }
 
+// --- 16x16 samples (simple, editable starters) ---
+function makeSlimeMini16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '................',
+      '....bbbbbb......',
+      '...bBBBBBBb.....',
+      '..bBCCCCCCBb....',
+      '..bBCw..wCBb....',
+      '..bBC....CBb....',
+      '..bBCCCCCCBb....',
+      '..bBBBBBBBBb....',
+      '...bBBBBBBb.....',
+      '....bbbbbb......',
+      '.....s..s.......',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  // ensure outlines look crisp
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeCatFace16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....o......o....',
+      '...ooo....ooo...',
+      '..oOOo....oOOo..',
+      '..oOOooooooOOo..',
+      '..oOOOOOOOOOOo..',
+      '..oOOOK..KOOOo..',
+      '..oOOO....OOOo..',
+      '..oOOO.rr.OOOo..',
+      '..oOOO..r.OOOo..',
+      '..oOOOOOOOOOOo..',
+      '...oOOOOOOOOo...',
+      '....ooooooo.....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeGhost16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.....lllll......',
+      '....lwwwwwl.....',
+      '...lwwwwwwwl....',
+      '...lwwK..Kwl....',
+      '...lww....wl....',
+      '...lwwwwwwwl....',
+      '..lwwwwwwwwwl...',
+      '..lwwwwwwwwwl...',
+      '..lwwwwwwwwwl...',
+      '..lwwwwwwwwwl...',
+      '...lwwwwwwwl....',
+      '...lwlwlwlwl....',
+      '....l.l.l.l.....',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeChick16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......yyyy......',
+      '....yyYYYYyy....',
+      '...yYYYYYYYYy...',
+      '...yYYK..KYYy...',
+      '...yYY....YYy...',
+      '...yYYYooYYYy...',
+      '....yYYYYYYy....',
+      '.....yYYYYy.....',
+      '....yYYYYYYy....',
+      '...yYYYYYYYYy...',
+      '...yYyYYYYyYy...',
+      '....y..yy..y....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeFrog16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....GG....GG....',
+      '...GHHG..GHHG...',
+      '..GHHHHGGHHHHG..',
+      '..GHHKHGKGHKHG..',
+      '..GHHHHHHHHHHG..',
+      '..GHH.... ....G.',
+      '..GHH..K.K..HHG.',
+      '..GHH.... ....G.',
+      '..GHHHHHHHHHHG..',
+      '...GHHHHHHHHG...',
+      '....GGGGGGGG....',
+      '.....s....s.....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeRobotHead16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......R.........',
+      '.....dDd........',
+      '....dEEEd.......',
+      '...dEEDDEd......',
+      '..dEEDDDDEd.....',
+      '..dEDB..BDEd....',
+      '..dEDBwwBDEd....',
+      '..dEDDDDDDEd....',
+      '..dEDdDdDdDEd...',
+      '...dEEEEEEEd....',
+      '....ddddd.dd....',
+      '......s..s......',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeHeart16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....RR..RR......',
+      '...RRRRRRRR.....',
+      '..RRRRRRRRRR....',
+      '..RRRRRRRRRR....',
+      '..RRRRRRRRRR....',
+      '...RRRRRRRR.....',
+      '....RRRRRR......',
+      '.....RRRR.......',
+      '......RR........',
+      '................',
+      '................',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeStar16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......y........',
+      '......yyy.......',
+      '..y..yyyyy..y...',
+      '..yyyyYYYYyyy...',
+      '...yyYYYYYyy....',
+      '....yYYYYYy.....',
+      '..yyyyYYYYyyyy..',
+      '...yyYYYYYYYy...',
+      '....yyyyyyy.....',
+      '.....yyyyy......',
+      '......yyy.......',
+      '.......y........',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeCoin16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.....yyyyy......',
+      '....yYYYYYy.....',
+      '...yYYYYYYYy....',
+      '..yYYyyyyyYYy...',
+      '..yYYyYYYyYYy...',
+      '..yYYyYYYyYYy...',
+      '..yYYyyyyyYYy...',
+      '...yYYYYYYYy....',
+      '....yYYYYYy.....',
+      '.....yyyyy......',
+      '......s.s.......',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeGemBlue16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......b........',
+      '......bBb.......',
+      '.....bBCBb......',
+      '....bBCCCBb.....',
+      '...bBCCCCCBb....',
+      '..bBCCCCCCCCb...',
+      '...bBCCCCCBb....',
+      '....bBCCCBb.....',
+      '.....bBCBb......',
+      '......bBb.......',
+      '.......b........',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 55) });
+  return c;
+}
+
+function makePotionGreen16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......DDD......',
+      '......DEED......',
+      '......DEED......',
+      '.....DDDDDD.....',
+      '.....DllllD.....',
+      '....DlGGGGDl....',
+      '....DlGGGGDl....',
+      '....DlGGGGDl....',
+      '.....DGGGGD.....',
+      '.....DGGGGD.....',
+      '......DDDD......',
+      '.......s........',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeKey16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......yyy.......',
+      '.....yYYYy......',
+      '.....yY.yy......',
+      '......yy........',
+      '......y.........',
+      '......y.........',
+      '..yyyyyyyyy.....',
+      '......y..y......',
+      '......y..y......',
+      '......y.........',
+      '......y.........',
+      '......s.........',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeBomb16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......o........',
+      '......oO........',
+      '.....oOOo.......',
+      '......ddd.......',
+      '....ddDDDDd.....',
+      '...dDDKKKDDd....',
+      '..dDDKdddKDDd...',
+      '..dDDKdddKDDd...',
+      '..dDDKKKDDDDd...',
+      '...dDDDDDDd.....',
+      '....ddddd.......',
+      '......s...s.....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 60) });
+  return c;
+}
+
+function makeMushroom16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....RRRRRR......',
+      '...RRwwwwRR.....',
+      '..RRwwwwwwRR....',
+      '..RRwwwwwwRR....',
+      '...RRwwwwRR.....',
+      '....RRRRRR......',
+      '.....3333.......',
+      '....33YY33......',
+      '....33YY33......',
+      '....33YY33......',
+      '.....3333.......',
+      '......s.s.......',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeLeaf16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......G........',
+      '......GHG.......',
+      '.....GHHHG......',
+      '....GHHHHHG.....',
+      '...GHHGHHHHG....',
+      '..GHHHGHGHHHG...',
+      '..GHHHHGHHHHG...',
+      '...GHHHHHHHG....',
+      '....GHHHHHG.....',
+      '.....GHHHG......',
+      '......GHG.......',
+      '.......G........',
+      '.......1........',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeTreeMini16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......GGG.......',
+      '.....GHHHG......',
+      '....GHHHHHG.....',
+      '....GHHGHHG.....',
+      '...GHHHHHHHG....',
+      '....GHHHHHG.....',
+      '......GGG.......',
+      '......222.......',
+      '......212.......',
+      '......212.......',
+      '......222.......',
+      '.....s....s.....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeHouseMini16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.......R........',
+      '......RRR.......',
+      '.....RRRRR......',
+      '....RRRRRRR.....',
+      '...RRRRRRRRR....',
+      '...333333333....',
+      '...322222223....',
+      '...322D.D223....',
+      '...322D.D223....',
+      '...322111223....',
+      '...333333333....',
+      '.....s....s.....',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeTileGrass16() {
+  const c = makeFromAscii(
+    [
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG',
+      'GGGHGGGHGGGHGGGH',
+      'GHHGGHHGGHHGGHHG'
+    ],
+    ASCII_COLORS
+  );
+  return c;
+}
+
+function makeTileWater16() {
+  const c = makeFromAscii(
+    [
+      'BBBBBBBBBBBBBBBB',
+      'BBCCCCBBCCCCBBCC',
+      'BCCCCBBCCCCBBCCC',
+      'BBCCCCBBCCCCBBCC',
+      'BBBBBBBBBBBBBBBB',
+      'BBCCCCBBCCCCBBCC',
+      'BCCCCBBCCCCBBCCC',
+      'BBCCCCBBCCCCBBCC',
+      'BBBBBBBBBBBBBBBB',
+      'BBCCCCBBCCCCBBCC',
+      'BCCCCBBCCCCBBCCC',
+      'BBCCCCBBCCCCBBCC',
+      'BBBBBBBBBBBBBBBB',
+      'BBCCCCBBCCCCBBCC',
+      'BCCCCBBCCCCBBCCC',
+      'BBCCCCBBCCCCBBCC'
+    ],
+    ASCII_COLORS
+  );
+  return c;
+}
+
+function makeTileStone16() {
+  const c = makeFromAscii(
+    [
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD',
+      'DDDDDDDDDDDDDDDD',
+      'DddDDddDDddDDddD'
+    ],
+    ASCII_COLORS
+  );
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -469,7 +1039,31 @@ const samples = [
   toSample('chest_wood', 'たからばこ', 'object', makeChest(), ['アイテム', '32x32', '小物']),
   toSample('tree_green', 'もりのき', 'tile', makeTree(), ['マップ', '32x32', 'タイル']),
   toSample('fireball', 'ファイアボール', 'object', makeFireball(), ['エフェクト', '32x32', '小物']),
-  toSample('house_red', 'ちいさなおうち', 'tile', makeHouse(), ['マップ', '32x32', 'タイル'])
+  toSample('house_red', 'ちいさなおうち', 'tile', makeHouse(), ['マップ', '32x32', 'タイル']),
+
+  // 16x16 pack (about 20)
+  toSample('slime_mini_16', 'ちびスライム', 'character', makeSlimeMini16(), ['モンスター', '16x16', 'キャラ']),
+  toSample('cat_face_16', 'ねこかお', 'character', makeCatFace16(), ['どうぶつ', '16x16', 'キャラ']),
+  toSample('ghost_16', 'おばけ', 'character', makeGhost16(), ['モンスター', '16x16', 'キャラ']),
+  toSample('chick_16', 'ひよこ', 'character', makeChick16(), ['どうぶつ', '16x16', 'キャラ']),
+  toSample('frog_16', 'かえる', 'character', makeFrog16(), ['どうぶつ', '16x16', 'キャラ']),
+  toSample('robot_head_16', 'ロボのあたま', 'character', makeRobotHead16(), ['メカ', '16x16', 'キャラ']),
+
+  toSample('heart_16', 'ハート', 'object', makeHeart16(), ['アイコン', '16x16', '小物']),
+  toSample('star_16', 'スター', 'object', makeStar16(), ['アイコン', '16x16', '小物']),
+  toSample('coin_16', 'コイン', 'object', makeCoin16(), ['アイテム', '16x16', '小物']),
+  toSample('gem_blue_16', 'あおジェム', 'object', makeGemBlue16(), ['アイテム', '16x16', '小物']),
+  toSample('potion_green_16', 'みどりポーション', 'object', makePotionGreen16(), ['アイテム', '16x16', '小物']),
+  toSample('key_16', 'カギ', 'object', makeKey16(), ['アイテム', '16x16', '小物']),
+  toSample('bomb_16', 'ボム', 'object', makeBomb16(), ['アイテム', '16x16', '小物']),
+  toSample('mushroom_16', 'きのこ', 'object', makeMushroom16(), ['どうぶつ', '16x16', '小物']),
+  toSample('leaf_16', 'はっぱ', 'object', makeLeaf16(), ['自然', '16x16', '小物']),
+
+  toSample('tree_mini_16', 'ちびのき', 'tile', makeTreeMini16(), ['マップ', '16x16', 'タイル']),
+  toSample('house_mini_16', 'ちびハウス', 'tile', makeHouseMini16(), ['マップ', '16x16', 'タイル']),
+  toSample('tile_grass_16', 'くさタイル', 'tile', makeTileGrass16(), ['マップ', '16x16', 'タイル']),
+  toSample('tile_water_16', 'みずタイル', 'tile', makeTileWater16(), ['マップ', '16x16', 'タイル']),
+  toSample('tile_stone_16', 'いしタイル', 'tile', makeTileStone16(), ['マップ', '16x16', 'タイル'])
 ];
 
 const output = {
