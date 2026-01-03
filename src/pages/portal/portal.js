@@ -214,6 +214,14 @@ const games = [
     color: '#ffeaa7',
     icon: '♟️',
     link: '/games/shogi-studio/setup.html'
+  },
+  {
+    id: 'aquarium',
+    title: '水槽シミュレーター',
+    desc: '魚を作って泳がせよう！🐠',
+    color: '#0ea5e9',
+    icon: '🐠',
+    link: '/games/aquarium/'
   }
 ];
 
