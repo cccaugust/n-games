@@ -10,6 +10,41 @@ export default defineConfig({
 
     root: 'src',
     base: './', // Relative paths for GitHub Pages
+    plugins: [
+        {
+            name: 'n-games-favicon-injector',
+            /**
+             * Inject favicon tags into every HTML entry.
+             * Important: use a relative path so it works on GitHub Pages with base "./"
+             * and for nested HTML pages (e.g. games/<name>/index.html).
+             */
+            transformIndexHtml(html, ctx) {
+                // Avoid double-injecting if a page already defines its own icon.
+                if (/\brel=["']icon["']/.test(html) || /\brel=["']shortcut icon["']/.test(html)) {
+                    return html;
+                }
+
+                const rawPath = (ctx?.path ?? '').toString();
+                const cleanPath = rawPath.replace(/^[#/]+/, '').split('?')[0].split('#')[0].replace(/^\//, '');
+                const parts = cleanPath ? cleanPath.split('/').filter(Boolean) : [];
+                const depth = Math.max(0, parts.length - 1);
+                const prefix = depth > 0 ? '../'.repeat(depth) : '';
+                const faviconSvgHref = `${prefix}favicon.svg`;
+                const faviconIcoHref = `${prefix}favicon.ico`;
+                const appleTouchIconHref = `${prefix}apple-touch-icon.png`;
+
+                const tags = [
+                    { tag: 'link', attrs: { rel: 'icon', type: 'image/svg+xml', href: faviconSvgHref } },
+                    { tag: 'link', attrs: { rel: 'icon', type: 'image/x-icon', href: faviconIcoHref } },
+                    { tag: 'link', attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: appleTouchIconHref } },
+                    // Optional, but helps unify browser UI colors.
+                    { tag: 'meta', attrs: { name: 'theme-color', content: '#4f46e5' } }
+                ];
+
+                return { html, tags };
+            }
+        }
+    ],
     publicDir: '../public',
     build: {
         outDir: '../dist',
