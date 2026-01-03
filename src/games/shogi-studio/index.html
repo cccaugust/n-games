@@ -154,6 +154,15 @@
       pointer-events: none;
     }
 
+    .cell[data-hover="true"]::before {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 10px;
+      border: 2px solid rgba(17, 24, 39, 0.35);
+      pointer-events: none;
+    }
+
     .piece {
       width: 88%;
       height: 92%;
@@ -174,6 +183,53 @@
     .piece[data-owner="GOTE"] {
       transform: rotate(180deg);
     }
+
+    /* Drag ghost */
+    .drag-ghost {
+      position: fixed;
+      z-index: 120;
+      pointer-events: none;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, -60%);
+      filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.28));
+    }
+
+    .drag-ghost .piece {
+      width: min(72px, 18svw);
+      height: min(78px, 20svw);
+      font-size: clamp(12px, 4svw, 20px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+    }
+
+    /* FX */
+    @keyframes cellPulseMove {
+      0% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+      40% { box-shadow: inset 0 0 0 999px rgba(0, 206, 201, 0.18), 0 0 0 6px rgba(0, 206, 201, 0.18); }
+      100% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+    }
+    @keyframes cellPulseCapture {
+      0% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+      35% { box-shadow: inset 0 0 0 999px rgba(253, 121, 168, 0.18), 0 0 0 8px rgba(253, 121, 168, 0.20); }
+      100% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+    }
+    @keyframes cellPulseDrop {
+      0% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+      45% { box-shadow: inset 0 0 0 999px rgba(108, 92, 231, 0.12), 0 0 0 7px rgba(108, 92, 231, 0.16); }
+      100% { box-shadow: inset 0 0 0 rgba(0,0,0,0), 0 0 0 rgba(0,0,0,0); }
+    }
+    @keyframes cellInvalid {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-2px); }
+      50% { transform: translateX(2px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
+    }
+
+    .cell.fx-move { animation: cellPulseMove 420ms ease-out; }
+    .cell.fx-capture { animation: cellPulseCapture 440ms ease-out; }
+    .cell.fx-drop { animation: cellPulseDrop 420ms ease-out; }
+    .cell.fx-invalid { animation: cellInvalid 220ms ease-out; }
 
     .piece small {
       display: none;
@@ -538,7 +594,7 @@
               <div style="font-weight:900;">表示</div>
               <label style="display:flex; align-items:center; gap: 10px; font-weight: 900;">
                 <input id="toggleMoveCheck" type="checkbox" />
-                移動チェック（対応している駒だけ）
+                移動チェック（合法手のみ・固定ON）
               </label>
             </div>
             <div class="row">
@@ -582,6 +638,32 @@
       <div class="modal-footer">
         <div style="color: var(--text-light); font-size: 0.95rem;">
           移動の図は「先手視点（上が相手側）」です。
+        </div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Piece Info (Long press) -->
+  <div class="overlay" id="infoOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="駒の説明" style="width: min(520px, 96vw);">
+      <div class="modal-header">
+        <div class="modal-title">🧩 駒の説明</div>
+        <button class="ghost-btn" id="btnInfoClose">とじる</button>
+      </div>
+      <div class="modal-body">
+        <div class="card2">
+          <div style="font-weight: 900; font-size: 1.1rem;" id="infoTitle">-</div>
+          <div style="color: var(--text-light); font-weight: 800; margin-top: 6px;" id="infoDesc"></div>
+          <div style="margin-top: 10px;">
+            <div style="font-weight: 900; margin-bottom: 6px;">移動（先手視点）</div>
+            <div class="dex-move" id="infoMove"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div style="color: var(--text-light); font-size: 0.95rem;">
+          長押しで表示（ドラッグはキャンセルになります）
         </div>
         <div></div>
       </div>

@@ -5,6 +5,11 @@ import { PIECE_PACKS, getPieceDef, listPiecesByPack, listAllPieces, toHandKind }
 const STORAGE_KEY = 'ngames.shogiStudio.v1';
 const LIB_KEY = 'ngames.shogiStudio.library.v1';
 
+const UI = {
+  LONG_PRESS_MS: 460,
+  DRAG_START_PX: 6,
+};
+
 const el = {
   boardArea: document.getElementById('boardArea'),
   boardWrap: document.getElementById('boardWrap'),
@@ -44,6 +49,13 @@ const el = {
   btnDexClose: document.getElementById('btnDexClose'),
   dexGrid: document.getElementById('dexGrid'),
   dexFilter: document.getElementById('dexFilter'),
+
+  // Piece info (long press)
+  infoOverlay: document.getElementById('infoOverlay'),
+  btnInfoClose: document.getElementById('btnInfoClose'),
+  infoTitle: document.getElementById('infoTitle'),
+  infoDesc: document.getElementById('infoDesc'),
+  infoMove: document.getElementById('infoMove'),
 };
 
 function clamp(v, min, max) {
@@ -98,7 +110,8 @@ function makeEmptyState() {
     boardN: 9,
     current: 'SENTE',
     flipped: false,
-    moveCheck: false,
+    // 対局での「不正な移動」を防ぐため、基本は常にON
+    moveCheck: true,
     board: [], // filled by resizeBoard
     hands: { SENTE: {}, GOTE: {} },
     history: []
@@ -170,7 +183,8 @@ function applyPayloadToState(state, payload) {
   state.packId = p.packId;
   state.current = p.current;
   state.flipped = !!p.flipped;
-  state.moveCheck = !!p.moveCheck;
+  // ヒント/チェックは基本ON（保存データでOFFでも戻す）
+  state.moveCheck = true;
   state.hands = p.hands;
   state.board = p.board;
   state.history = [];
@@ -245,6 +259,7 @@ function makeCell(idx) {
   btn.className = 'cell';
   btn.dataset.idx = String(idx);
   btn.dataset.highlight = '';
+  btn.dataset.hover = 'false';
   return btn;
 }
 
@@ -253,6 +268,7 @@ function renderPiece(piece) {
   const p = document.createElement('div');
   p.className = 'piece';
   p.dataset.owner = piece.owner;
+  p.dataset.kind = piece.kind;
   p.dataset.promoted = String(!!def?.demoteTo);
   p.textContent = def?.label || piece.kind;
   return p;
@@ -425,7 +441,6 @@ function getMovesFrom(state, fromIdx) {
   const piece = state.board[fromIdx];
   if (!piece) return [];
   const def = getPieceDef(piece.kind);
-  if (!state.moveCheck) return [];
   if (!def?.moves) return [];
 
   const from = xyOf(fromIdx, n);
@@ -458,20 +473,34 @@ function getMovesFrom(state, fromIdx) {
 }
 
 function canMoveTo(state, fromIdx, toIdx) {
-  if (!state.moveCheck) return true;
+  const piece = state.board[fromIdx];
+  if (!piece) return false;
+  const def = getPieceDef(piece.kind);
+  // moves が未定義の駒は「チェック対象外」として従来どおり自由に（拡張/将来追加の保険）
+  if (!def?.moves) return true;
   const moves = getMovesFrom(state, fromIdx);
   return moves.some((m) => m.to === toIdx);
 }
 
-function highlightMoves(state, fromIdx) {
+function highlightMoves(state, fromIdx, force = false) {
   clearHighlights();
   const cell = el.board.querySelector(`.cell[data-idx="${fromIdx}"]`);
   if (cell) cell.dataset.highlight = 'select';
-  if (!state.moveCheck) return;
+  if (!force && !state.moveCheck) return;
   const moves = getMovesFrom(state, fromIdx);
   for (const m of moves) {
     const c = el.board.querySelector(`.cell[data-idx="${m.to}"]`);
     if (c) c.dataset.highlight = m.capture ? 'capture' : 'move';
+  }
+}
+
+function highlightDropTargets(state) {
+  // 持ち駒の打てる場所（現状: 空マスのみ）
+  clearHighlights();
+  for (let i = 0; i < state.board.length; i++) {
+    if (state.board[i]) continue;
+    const c = el.board.querySelector(`.cell[data-idx="${i}"]`);
+    if (c) c.dataset.highlight = 'move';
   }
 }
 
@@ -481,6 +510,26 @@ const selection = {
   idx: -1,
   kind: ''
 };
+
+// Drag & drop state
+const drag = {
+  active: false,
+  pointerId: -1,
+  source: /** @type {'none'|'cell'|'hand'} */ ('none'),
+  fromIdx: -1,
+  kind: '',
+  owner: /** @type {Owner|null} */ (null),
+  startX: 0,
+  startY: 0,
+  lastX: 0,
+  lastY: 0,
+  moved: false,
+  hoverIdx: -1,
+  ghostEl: /** @type {HTMLElement|null} */ (null),
+  longPressTimer: /** @type {number} */ (0),
+};
+
+let suppressClickUntil = 0;
 
 // Editor state
 const editor = {
@@ -514,13 +563,15 @@ function setCellSelection(idx) {
   renderHand(state);
 }
 
+/** @returns {{ok:true, capture:boolean}|{ok:false}} */
 function tryMove(fromIdx, toIdx) {
   const src = state.board[fromIdx];
-  if (!src) return false;
-  if (src.owner !== state.current) return false;
-  if (!canMoveTo(state, fromIdx, toIdx)) return false;
+  if (!src) return { ok: false };
+  if (src.owner !== state.current) return { ok: false };
+  if (!canMoveTo(state, fromIdx, toIdx)) return { ok: false };
   const dst = state.board[toIdx];
   pushHistory(state);
+  const didCapture = !!(dst && dst.owner !== src.owner);
   if (dst && dst.owner !== src.owner) {
     const capturedKind = toHandKind(dst.kind);
     state.hands[state.current][capturedKind] = (state.hands[state.current][capturedKind] || 0) + 1;
@@ -528,20 +579,21 @@ function tryMove(fromIdx, toIdx) {
   state.board[toIdx] = src;
   state.board[fromIdx] = null;
   state.current = otherOwner(state.current);
-  return true;
+  return { ok: true, capture: didCapture };
 }
 
+/** @returns {{ok:true}|{ok:false}} */
 function tryDrop(kind, toIdx) {
   const dst = state.board[toIdx];
-  if (dst) return false;
+  if (dst) return { ok: false };
   const n = Math.max(0, Math.floor(Number(state.hands[state.current][kind]) || 0));
-  if (n <= 0) return false;
+  if (n <= 0) return { ok: false };
   pushHistory(state);
   state.board[toIdx] = { kind, owner: state.current };
   if (n === 1) delete state.hands[state.current][kind];
   else state.hands[state.current][kind] = n - 1;
   state.current = otherOwner(state.current);
-  return true;
+  return { ok: true };
 }
 
 function handleBoardClick(idx) {
@@ -563,9 +615,11 @@ function handleBoardClick(idx) {
   const piece = state.board[idx];
 
   if (selection.type === 'hand') {
-    const ok = tryDrop(selection.kind, idx);
-    if (ok) {
+    const res = tryDrop(selection.kind, idx);
+    if (res.ok) {
       clearSelection();
+      queueFx({ type: 'drop', idx });
+      playSfx('drop');
       renderAll();
       return;
     }
@@ -578,9 +632,11 @@ function handleBoardClick(idx) {
       clearSelection();
       return;
     }
-    const ok = tryMove(selection.idx, idx);
-    if (ok) {
+    const res = tryMove(selection.idx, idx);
+    if (res.ok) {
       clearSelection();
+      queueFx({ type: res.capture ? 'capture' : 'move', idx });
+      playSfx(res.capture ? 'capture' : 'move');
       renderAll();
       return;
     }
@@ -597,6 +653,343 @@ function handleBoardClick(idx) {
     setCellSelection(idx);
   } else {
     clearSelection();
+  }
+}
+
+// === Piece info (long press) ===
+function renderMoveGrid5x5(containerEl, pieceDef) {
+  if (!containerEl) return;
+  containerEl.innerHTML = '';
+  // 5x5, center=(2,2)
+  for (let y = 0; y < 5; y++) {
+    for (let x = 0; x < 5; x++) {
+      const c = document.createElement('div');
+      c.className = 'dex-cell';
+      c.dataset.kind = '';
+      if (x === 2 && y === 2) c.dataset.kind = 'self';
+      containerEl.appendChild(c);
+    }
+  }
+  if (!Array.isArray(pieceDef?.moves)) return;
+  const center = { x: 2, y: 2 };
+  for (const m of pieceDef.moves) {
+    const tx = center.x + m.dx;
+    const ty = center.y + m.dy;
+    if (tx < 0 || ty < 0 || tx >= 5 || ty >= 5) continue;
+    const idx = ty * 5 + tx;
+    const cell = containerEl.children[idx];
+    if (!cell) continue;
+    cell.dataset.kind = m.repeat ? 'slide' : 'move';
+  }
+}
+
+function openPieceInfo(kind) {
+  if (!el.infoOverlay) return;
+  const def = getPieceDef(kind);
+  if (!def) return;
+  // 情報表示を優先（長押し＝説明）: ドラッグはキャンセル扱い
+  if (drag.active) {
+    endDrag(false);
+  }
+  if (el.infoTitle) el.infoTitle.textContent = `${def.label}：${def.name}`;
+  if (el.infoDesc) el.infoDesc.textContent = def.description || '';
+  renderMoveGrid5x5(el.infoMove, def);
+  openOverlay(el.infoOverlay);
+}
+
+function closePieceInfo() {
+  if (!el.infoOverlay) return;
+  closeOverlay(el.infoOverlay);
+}
+
+// === SFX ===
+let audioCtx = /** @type {AudioContext|null} */ (null);
+function getAudioCtx() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // iOSなどでsuspendされてたら起こす（失敗してもOK）
+    void audioCtx.resume?.();
+  } catch {
+    audioCtx = null;
+  }
+  return audioCtx;
+}
+
+function playTone(freq, ms, type = 'sine', gain = 0.05) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const t0 = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(gain, t0 + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + ms / 1000);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + ms / 1000 + 0.02);
+}
+
+function playSfx(kind) {
+  // kind: 'move'|'capture'|'drop'|'invalid'
+  if (kind === 'capture') {
+    playTone(740, 70, 'triangle', 0.06);
+    setTimeout(() => playTone(520, 90, 'triangle', 0.06), 60);
+    return;
+  }
+  if (kind === 'drop') {
+    playTone(520, 60, 'sine', 0.05);
+    return;
+  }
+  if (kind === 'invalid') {
+    playTone(180, 120, 'sawtooth', 0.04);
+    return;
+  }
+  // move
+  playTone(620, 55, 'sine', 0.045);
+}
+
+// === FX (visual) ===
+let fxQueue = /** @type {{type:'move'|'capture'|'drop'|'invalid', idx:number}|null} */ (null);
+function queueFx(fx) {
+  fxQueue = fx;
+}
+
+function applyQueuedFx() {
+  const fx = fxQueue;
+  if (!fx) return;
+  fxQueue = null;
+  const cell = el.board.querySelector(`.cell[data-idx="${fx.idx}"]`);
+  if (!cell) return;
+  cell.classList.remove('fx-move', 'fx-capture', 'fx-drop', 'fx-invalid');
+  // 強制reflowして連続適用でも動くように
+  void cell.offsetWidth;
+  cell.classList.add(`fx-${fx.type}`);
+  window.setTimeout(() => {
+    cell.classList.remove(`fx-${fx.type}`);
+  }, 420);
+}
+
+function setHoverIdx(idx) {
+  if (drag.hoverIdx === idx) return;
+  // clear old
+  if (drag.hoverIdx >= 0) {
+    const old = el.board.querySelector(`.cell[data-idx="${drag.hoverIdx}"]`);
+    if (old) old.dataset.hover = 'false';
+  }
+  drag.hoverIdx = idx;
+  if (idx >= 0) {
+    const c = el.board.querySelector(`.cell[data-idx="${idx}"]`);
+    if (c) c.dataset.hover = 'true';
+  }
+}
+
+function clearHover() {
+  setHoverIdx(-1);
+}
+
+function cleanupDragVisual() {
+  if (drag.ghostEl) {
+    drag.ghostEl.remove();
+    drag.ghostEl = null;
+  }
+  // show original piece (if still there)
+  el.board.querySelectorAll('.piece[data-drag-hidden="true"]').forEach((p) => {
+    p.dataset.dragHidden = 'false';
+    p.style.opacity = '';
+  });
+  clearHover();
+  clearHighlights();
+}
+
+function cancelLongPress() {
+  if (drag.longPressTimer) {
+    clearTimeout(drag.longPressTimer);
+    drag.longPressTimer = 0;
+  }
+}
+
+function scheduleLongPress(kind) {
+  cancelLongPress();
+  drag.longPressTimer = window.setTimeout(() => {
+    // まだ押していて、ほとんど動いてない時だけ
+    if (!drag.active) return;
+    if (drag.moved) return;
+    openPieceInfo(kind);
+  }, UI.LONG_PRESS_MS);
+}
+
+function startGhost(pieceKind, owner, clientX, clientY) {
+  const g = document.createElement('div');
+  g.className = 'drag-ghost';
+  g.style.left = `${clientX}px`;
+  g.style.top = `${clientY}px`;
+  const def = getPieceDef(pieceKind);
+  const p = document.createElement('div');
+  p.className = 'piece';
+  p.dataset.owner = owner;
+  p.dataset.kind = pieceKind;
+  p.dataset.promoted = String(!!def?.demoteTo);
+  p.textContent = def?.label || pieceKind;
+  g.appendChild(p);
+  document.body.appendChild(g);
+  drag.ghostEl = g;
+}
+
+function updateGhost(clientX, clientY) {
+  if (!drag.ghostEl) return;
+  drag.ghostEl.style.left = `${clientX}px`;
+  drag.ghostEl.style.top = `${clientY}px`;
+}
+
+function cellIdxFromPoint(clientX, clientY) {
+  const hit = document.elementFromPoint(clientX, clientY);
+  const cell = hit?.closest?.('.cell');
+  if (!cell) return -1;
+  const idx = Number(cell.dataset.idx);
+  return Number.isFinite(idx) ? idx : -1;
+}
+
+function beginDragFromCell(fromIdx, clientX, clientY, pointerId) {
+  const piece = state.board[fromIdx];
+  if (!piece) return false;
+  if (activeMode !== 'play') return false;
+  if (piece.owner !== state.current) return false;
+
+  drag.active = true;
+  drag.pointerId = pointerId;
+  drag.source = 'cell';
+  drag.fromIdx = fromIdx;
+  drag.kind = piece.kind;
+  drag.owner = piece.owner;
+  drag.startX = clientX;
+  drag.startY = clientY;
+  drag.lastX = clientX;
+  drag.lastY = clientY;
+  drag.moved = false;
+  drag.hoverIdx = -1;
+  scheduleLongPress(piece.kind);
+
+  // 見た目: 元の駒を薄く（ドラッグ開始まで ghost は出さない）
+  const cellEl = el.board.querySelector(`.cell[data-idx="${fromIdx}"]`);
+  const pieceEl = cellEl?.querySelector?.('.piece');
+  if (pieceEl) {
+    pieceEl.dataset.dragHidden = 'true';
+    pieceEl.style.opacity = '0.25';
+  }
+  // 合法手ハイライト（常に表示）
+  highlightMoves(state, fromIdx, true);
+  return true;
+}
+
+function beginDragFromHand(kind, clientX, clientY, pointerId) {
+  if (activeMode !== 'play') return false;
+  const n = Math.max(0, Math.floor(Number(state.hands[state.current][kind]) || 0));
+  if (n <= 0) return false;
+
+  drag.active = true;
+  drag.pointerId = pointerId;
+  drag.source = 'hand';
+  drag.fromIdx = -1;
+  drag.kind = kind;
+  drag.owner = state.current;
+  drag.startX = clientX;
+  drag.startY = clientY;
+  drag.lastX = clientX;
+  drag.lastY = clientY;
+  drag.moved = false;
+  drag.hoverIdx = -1;
+  scheduleLongPress(kind);
+
+  // 打てる場所（空き）をハイライト
+  highlightDropTargets(state);
+  return true;
+}
+
+function updateDrag(clientX, clientY) {
+  if (!drag.active) return;
+  if (drag.pointerId < 0) return;
+  drag.lastX = clientX;
+  drag.lastY = clientY;
+
+  const dx = clientX - drag.startX;
+  const dy = clientY - drag.startY;
+  const dist = Math.hypot(dx, dy);
+  if (!drag.moved && dist >= UI.DRAG_START_PX) {
+    drag.moved = true;
+    cancelLongPress();
+    if (!drag.ghostEl && drag.owner) startGhost(drag.kind, drag.owner, clientX, clientY);
+  }
+  if (drag.moved) updateGhost(clientX, clientY);
+
+  const idx = cellIdxFromPoint(clientX, clientY);
+  setHoverIdx(idx);
+}
+
+function endDrag(commit) {
+  if (!drag.active) return;
+  cancelLongPress();
+
+  const hover = drag.hoverIdx;
+  const source = drag.source;
+  const fromIdx = drag.fromIdx;
+  const kind = drag.kind;
+
+  // cleanup state first (so clicks won't act on stale)
+  drag.active = false;
+  drag.pointerId = -1;
+  drag.source = 'none';
+  drag.fromIdx = -1;
+  drag.kind = '';
+  drag.owner = null;
+  drag.moved = false;
+  drag.hoverIdx = -1;
+
+  const moved = commit && hover >= 0;
+
+  cleanupDragVisual();
+
+  // ドラッグ後に click が飛ぶ端末があるので、少しだけ抑制
+  suppressClickUntil = Date.now() + 320;
+
+  if (!moved) return;
+
+  // 元の場所 / 置けない場所ならキャンセル
+  if (source === 'cell') {
+    if (hover === fromIdx) {
+      playSfx('invalid');
+      queueFx({ type: 'invalid', idx: hover });
+      applyQueuedFx();
+      return;
+    }
+    const res = tryMove(fromIdx, hover);
+    if (!res.ok) {
+      playSfx('invalid');
+      queueFx({ type: 'invalid', idx: hover });
+      renderAll();
+      return;
+    }
+    queueFx({ type: res.capture ? 'capture' : 'move', idx: hover });
+    playSfx(res.capture ? 'capture' : 'move');
+    clearSelection();
+    renderAll();
+    return;
+  }
+
+  if (source === 'hand') {
+    const res = tryDrop(kind, hover);
+    if (!res.ok) {
+      playSfx('invalid');
+      queueFx({ type: 'invalid', idx: hover });
+      renderAll();
+      return;
+    }
+    queueFx({ type: 'drop', idx: hover });
+    playSfx('drop');
+    clearSelection();
+    renderAll();
   }
 }
 
@@ -668,6 +1061,7 @@ function renderAll() {
   saveState(state);
   requestAnimationFrame(() => {
     computeBoardPx();
+    applyQueuedFx();
   });
 }
 
@@ -729,22 +1123,106 @@ el.dexOverlay.addEventListener('click', (e) => {
   if (e.target === el.dexOverlay) closeDex(true);
 });
 
-el.board.addEventListener('pointerdown', (e) => {
+// piece info overlay
+el.btnInfoClose?.addEventListener('click', () => closePieceInfo());
+el.infoOverlay?.addEventListener('click', (e) => {
+  if (e.target === el.infoOverlay) closePieceInfo();
+});
+
+// board click (tap) remains
+el.board.addEventListener('click', (e) => {
+  if (drag.active) return;
+  if (Date.now() < suppressClickUntil) return;
+  if (activeMode !== 'play' && activeMode !== 'edit') return;
   const cell = e.target.closest('.cell');
   if (!cell) return;
   const idx = Number(cell.dataset.idx);
   if (!Number.isFinite(idx)) return;
   handleBoardClick(idx);
+});
+
+// drag start on board (play mode only)
+el.board.addEventListener('pointerdown', (e) => {
+  if (activeMode !== 'play') return;
+  const pieceEl = e.target.closest('.piece');
+  if (!pieceEl) return;
+  const cell = e.target.closest('.cell');
+  if (!cell) return;
+  const idx = Number(cell.dataset.idx);
+  if (!Number.isFinite(idx)) return;
+  const ok = beginDragFromCell(idx, e.clientX, e.clientY, e.pointerId);
+  if (!ok) return;
+  // capture move events
+  el.board.setPointerCapture?.(e.pointerId);
+  e.preventDefault();
+  e.stopPropagation();
+}, { passive: false });
+
+el.board.addEventListener('pointermove', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  updateDrag(e.clientX, e.clientY);
   e.preventDefault();
 }, { passive: false });
 
+el.board.addEventListener('pointerup', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  // ドロップ確定（ただし動いてない＝タップ扱いは commit=false）
+  const commit = !!drag.moved;
+  endDrag(commit);
+  e.preventDefault();
+}, { passive: false });
+
+el.board.addEventListener('pointercancel', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  endDrag(false);
+});
+
 el.handList.addEventListener('click', (e) => {
+  if (Date.now() < suppressClickUntil) return;
   const btn = e.target.closest('.hand-piece');
   if (!btn) return;
   const kind = btn.dataset.kind || '';
   if (!kind) return;
   if (selection.type === 'hand' && selection.kind === kind) clearSelection();
   else setHandSelection(kind);
+});
+
+// drag start from hand (play mode)
+el.handList.addEventListener('pointerdown', (e) => {
+  if (activeMode !== 'play') return;
+  const btn = e.target.closest('.hand-piece');
+  if (!btn) return;
+  const kind = btn.dataset.kind || '';
+  if (!kind) return;
+  const ok = beginDragFromHand(kind, e.clientX, e.clientY, e.pointerId);
+  if (!ok) return;
+  el.handList.setPointerCapture?.(e.pointerId);
+  e.preventDefault();
+  e.stopPropagation();
+}, { passive: false });
+
+el.handList.addEventListener('pointermove', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  updateDrag(e.clientX, e.clientY);
+  e.preventDefault();
+}, { passive: false });
+
+el.handList.addEventListener('pointerup', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  const commit = !!drag.moved;
+  endDrag(commit);
+  e.preventDefault();
+}, { passive: false });
+
+el.handList.addEventListener('pointercancel', (e) => {
+  if (!drag.active) return;
+  if (e.pointerId !== drag.pointerId) return;
+  endDrag(false);
 });
 
 el.btnUndo.addEventListener('click', () => {
@@ -980,7 +1458,8 @@ updateEditorPieceOptions(state.packId);
 el.boardPreset.value = ['9', '19'].includes(String(state.boardN)) ? String(state.boardN) : 'custom';
 el.boardCustom.style.display = el.boardPreset.value === 'custom' ? '' : 'none';
 el.boardCustom.value = String(state.boardN);
-el.toggleMoveCheck.checked = !!state.moveCheck;
+el.toggleMoveCheck.checked = true;
+el.toggleMoveCheck.disabled = true;
 el.boardWrap.style.transform = state.flipped ? 'rotate(180deg)' : '';
 
 renderAll();
