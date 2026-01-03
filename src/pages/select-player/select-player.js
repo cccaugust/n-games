@@ -3,6 +3,7 @@ import { supabase } from '../../js/supabaseClient.js';
 import { isImageAvatar, makeImageAvatar, renderAvatarInto } from '../../js/avatar.js';
 import { pokemonData } from '../../data/pokemonData.js';
 import { assetPreviewDataUrl, listPixelAssets } from '../../js/pixelAssets.js';
+import { navigateTo } from '../../js/config.js';
 
 requireAuth();
 
