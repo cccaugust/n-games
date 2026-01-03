@@ -7,16 +7,47 @@
     <title>神経衰弱 | N-Games</title>
     <link rel="stylesheet" href="../../style.css">
     <style>
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .top-bar a {
+            display: inline-block;
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(108, 92, 231, 0.25);
+            color: var(--text-dark);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 900;
+            box-shadow: var(--shadow);
+        }
+
+        .hud-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
         .game-container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 980px;
+            margin: 14px auto 20px;
             text-align: center;
         }
 
         .memory-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(var(--cols, 4), var(--card-size, 1fr));
+            gap: var(--grid-gap, 10px);
+            justify-content: center;
             margin-top: 20px;
         }
 
@@ -47,7 +78,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
+            font-size: var(--face-font-size, 3rem);
             box-shadow: var(--shadow);
         }
 
@@ -77,15 +108,134 @@
             justify-content: center;
             color: white;
             z-index: 100;
+            padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+        }
+
+        .overlay-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.22);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            font-size: 1.05rem;
+            font-weight: 900;
+        }
+
+        .btn-ghost:active {
+            transform: translateY(2px);
+        }
+
+        /* Modal (simple) */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)) 16px;
+            z-index: 999;
+        }
+
+        .modal-card {
+            width: min(520px, 96vw);
+            max-height: 85svh;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 18px;
+            border: 3px solid rgba(108, 92, 231, 0.35);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+            text-align: left;
+        }
+
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .modal-title {
+            font-weight: 900;
+            color: var(--primary-color);
+            font-size: 1.15rem;
+        }
+
+        .modal-close {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #ecf0f1;
+            color: #333;
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 14px;
+            overflow: auto;
+            max-height: calc(85svh - 58px);
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .field label {
+            font-weight: 900;
+            color: var(--text-dark);
+        }
+
+        .field select {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            outline: none;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .field select:focus {
+            border-color: rgba(108, 92, 231, 0.55);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+        }
+
+        .modal-note {
+            margin-top: 10px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <a href="../../pages/portal/portal.html"
-            style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
-            もどる</a>
+        <div class="top-bar">
+            <a href="../../pages/portal/portal.html">&larr; もどる</a>
+            <button class="hud-btn" id="openSettingsBtn" type="button">設定</button>
+        </div>
 
         <div class="game-container">
             <div class="memory-grid" id="grid">
@@ -96,15 +246,40 @@
 
     <div class="start-overlay" id="overlay">
         <h1>神経衰弱 🃏</h1>
-        <p>同じえもじをさがしてね</p>
-        <button class="btn-primary" id="startBtn" style="margin-top: 20px;">スタート！</button>
+        <p>同じカードをさがしてね</p>
+        <div class="overlay-actions">
+            <button class="btn-primary" id="startBtn" type="button">スタート！</button>
+            <button class="btn-ghost" id="openSettingsFromOverlayBtn" type="button">設定</button>
+        </div>
     </div>
 
     <div class="start-overlay" id="winOverlay" style="display: none;">
         <h1>クリア！ 🎉</h1>
         <p>すごい！ぜんぶそろったね！</p>
-        <button class="btn-primary" onclick="location.reload()">もういっかい</button>
+        <div class="overlay-actions">
+            <button class="btn-primary" onclick="location.reload()" type="button">もういっかい</button>
+            <button class="btn-ghost" id="openSettingsFromWinBtn" type="button">設定</button>
+        </div>
         <a href="../../pages/portal/portal.html" style="color: white; margin-top: 20px;">&larr; ほかのゲーム</a>
+    </div>
+
+    <div class="modal hidden" id="settingsModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal-head">
+                <div class="modal-title" id="settingsTitle">設定（難易度）</div>
+                <button class="modal-close" id="closeSettingsBtn" type="button">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label for="pairCountSelect">カードの枚数</label>
+                    <select id="pairCountSelect"></select>
+                    <div class="modal-note">※ 枚数を変えるとゲームはリセットされます</div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-primary" id="applySettingsBtn" type="button">この枚数であそぶ</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module" src="./game.js"></script>
