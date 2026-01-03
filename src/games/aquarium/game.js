@@ -109,7 +109,7 @@ function hueRotatePixels(pixels, deg) {
   return out;
 }
 
-function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', outline = '#0b1220' } = {}) {
+function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', outline = '#0b1220', stripeMode = 'double' } = {}) {
   const bodyC = hexToRgbaInt(body) >>> 0;
   const stripeC = hexToRgbaInt(stripe) >>> 0;
   const outlineC = hexToRgbaInt(outline) >>> 0;
@@ -160,10 +160,31 @@ function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', 
         continue;
       }
 
-      // Stripe
-      if (x >= 10 && x <= 17 && (y === 14 || y === 18)) {
-        pixels[i] = stripeC;
-        continue;
+      // Stripe patterns
+      if (stripeMode === 'double') {
+        if (x >= 10 && x <= 17 && (y === 14 || y === 18)) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'single') {
+        if (x >= 10 && x <= 18 && y === 16) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'clown') {
+        if (x >= 10 && x <= 12) {
+          pixels[i] = stripeC;
+          continue;
+        }
+        if (x >= 16 && x <= 18) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'zebra') {
+        if ((x >= 11 && x <= 12) || (x >= 14 && x <= 15) || (x >= 17 && x <= 18)) {
+          pixels[i] = stripeC;
+          continue;
+        }
       }
 
       pixels[i] = bodyC;
@@ -181,6 +202,391 @@ function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', 
   return pixels;
 }
 
+function makeMask(w, h) {
+  return new Uint8Array(w * h);
+}
+
+function maskIdx(w, x, y) {
+  return y * w + x;
+}
+
+function fillEllipse(mask, w, h, cx, cy, rx, ry) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / rx;
+      const dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function fillRect(mask, w, x0, y0, x1, y1) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (x < 0 || y < 0 || x >= w) continue;
+      mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function fillTriangle(mask, w, h, ax, ay, bx, by, cx, cy) {
+  const minX = Math.max(0, Math.floor(Math.min(ax, bx, cx)));
+  const maxX = Math.min(w - 1, Math.ceil(Math.max(ax, bx, cx)));
+  const minY = Math.max(0, Math.floor(Math.min(ay, by, cy)));
+  const maxY = Math.min(h - 1, Math.ceil(Math.max(ay, by, cy)));
+  const area = (x1, y1, x2, y2, x3, y3) => (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+  const A = area(ax, ay, bx, by, cx, cy);
+  if (A === 0) return;
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      const a1 = area(x, y, bx, by, cx, cy) / A;
+      const a2 = area(ax, ay, x, y, cx, cy) / A;
+      const a3 = area(ax, ay, bx, by, x, y) / A;
+      if (a1 >= -0.02 && a2 >= -0.02 && a3 >= -0.02) mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function maskToPixels(mask, w, h, { fill = '#60a5fa', outline = '#0b1220' } = {}) {
+  const fillC = hexToRgbaInt(fill) >>> 0;
+  const outlineC = hexToRgbaInt(outline) >>> 0;
+  const pixels = new Uint32Array(w * h);
+  const idx = (x, y) => y * w + x;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = idx(x, y);
+      if (!mask[i]) continue;
+      const isEdge =
+        (x > 0 && !mask[idx(x - 1, y)]) ||
+        (x < w - 1 && !mask[idx(x + 1, y)]) ||
+        (y > 0 && !mask[idx(x, y - 1)]) ||
+        (y < h - 1 && !mask[idx(x, y + 1)]);
+      pixels[i] = isEdge ? outlineC : fillC;
+    }
+  }
+  return pixels;
+}
+
+function setPixel(pixels, w, x, y, hex) {
+  if (x < 0 || y < 0) return;
+  if (x >= w) return;
+  const i = y * w + x;
+  if (i < 0 || i >= pixels.length) return;
+  pixels[i] = hexToRgbaInt(hex) >>> 0;
+}
+
+function makeSeafoodPixels({ type, w = 32, h = 32, body = '#93c5fd', accent = '#60a5fa', outline = '#0b1220' } = {}) {
+  const mask = makeMask(w, h);
+
+  if (type === 'shrimp') {
+    // Curved segments
+    fillEllipse(mask, w, h, 15, 16, 8.2, 5.2);
+    fillEllipse(mask, w, h, 19, 15, 6.8, 4.6);
+    fillEllipse(mask, w, h, 22, 14, 5.2, 3.8);
+    // Tail fan
+    fillTriangle(mask, w, h, 27, 14, 31, 16, 27, 18);
+    // Head bump + antenna base
+    fillEllipse(mask, w, h, 9, 16, 4.4, 3.8);
+  } else if (type === 'crab') {
+    fillEllipse(mask, w, h, 16, 16, 7.6, 5.8);
+    // Claws
+    fillEllipse(mask, w, h, 6, 16, 3.2, 2.6);
+    fillEllipse(mask, w, h, 26, 16, 3.2, 2.6);
+    fillTriangle(mask, w, h, 3, 16, 6, 14, 6, 18);
+    fillTriangle(mask, w, h, 29, 16, 26, 14, 26, 18);
+    // Legs
+    fillRect(mask, w, 9, 21, 10, 24);
+    fillRect(mask, w, 13, 22, 14, 25);
+    fillRect(mask, w, 18, 22, 19, 25);
+    fillRect(mask, w, 22, 21, 23, 24);
+  } else if (type === 'octopus') {
+    fillEllipse(mask, w, h, 16, 13, 7.2, 6.8);
+    // Tentacles
+    for (let i = 0; i < 7; i++) {
+      const x = 10 + i * 2;
+      fillRect(mask, w, x, 18, x, 26);
+      if (i % 2 === 0) fillRect(mask, w, x + 1, 20, x + 1, 25);
+    }
+    fillRect(mask, w, 10, 26, 22, 27);
+  } else if (type === 'squid') {
+    // Mantle + fins
+    fillTriangle(mask, w, h, 16, 7, 9, 20, 23, 20);
+    fillEllipse(mask, w, h, 11, 12, 3.2, 2.2);
+    fillEllipse(mask, w, h, 21, 12, 3.2, 2.2);
+    // Arms
+    for (let i = 0; i < 6; i++) {
+      const x = 11 + i * 2;
+      fillRect(mask, w, x, 20, x, 27);
+    }
+  } else if (type === 'jellyfish') {
+    // Dome
+    fillEllipse(mask, w, h, 16, 12, 8.0, 6.2);
+    // Skirt
+    fillRect(mask, w, 9, 15, 23, 16);
+    // Tentacles
+    for (let i = 0; i < 7; i++) {
+      const x = 10 + i * 2;
+      fillRect(mask, w, x, 17, x, 27);
+      if (i % 3 === 0) fillRect(mask, w, x, 22, x + 1, 22);
+    }
+  } else if (type === 'starfish') {
+    // 5-point star: union of triangles
+    fillTriangle(mask, w, h, 16, 6, 14, 16, 18, 16);
+    fillTriangle(mask, w, h, 8, 12, 16, 14, 12, 18);
+    fillTriangle(mask, w, h, 24, 12, 16, 14, 20, 18);
+    fillTriangle(mask, w, h, 12, 26, 16, 18, 20, 26);
+    fillEllipse(mask, w, h, 16, 16, 5.4, 5.2);
+  } else if (type === 'clam') {
+    fillEllipse(mask, w, h, 16, 18, 9.2, 6.4);
+    fillRect(mask, w, 7, 18, 25, 23);
+  } else if (type === 'scallop') {
+    // Fan shell
+    fillEllipse(mask, w, h, 16, 19, 9.2, 7.2);
+    fillTriangle(mask, w, h, 16, 10, 8, 20, 24, 20);
+  } else if (type === 'urchin') {
+    fillEllipse(mask, w, h, 16, 16, 6.2, 6.2);
+    // Spines (simple rays)
+    for (let a = 0; a < 12; a++) {
+      const ang = (Math.PI * 2 * a) / 12;
+      const x = Math.round(16 + Math.cos(ang) * 9);
+      const y = Math.round(16 + Math.sin(ang) * 9);
+      fillTriangle(mask, w, h, 16, 16, x, y, Math.round(16 + Math.cos(ang) * 7), Math.round(16 + Math.sin(ang) * 7));
+    }
+  } else if (type === 'lobster') {
+    // Body segments
+    fillEllipse(mask, w, h, 16, 16, 6.6, 4.8);
+    fillEllipse(mask, w, h, 20, 16, 6.0, 4.4);
+    fillEllipse(mask, w, h, 23, 16, 4.6, 3.8);
+    // Tail
+    fillTriangle(mask, w, h, 27, 13, 31, 16, 27, 19);
+    // Claws
+    fillEllipse(mask, w, h, 8, 15, 3.8, 2.8);
+    fillTriangle(mask, w, h, 4, 15, 8, 13, 8, 17);
+  } else if (type === 'seahorse') {
+    // Simple seahorse: head + belly + curled tail
+    fillEllipse(mask, w, h, 14, 12, 4.8, 4.2); // head
+    fillEllipse(mask, w, h, 15, 17, 4.8, 6.2); // body
+    // Snout
+    fillRect(mask, w, 8, 11, 11, 12);
+    // Tail curl
+    fillEllipse(mask, w, h, 18, 24, 4.4, 3.8);
+    fillEllipse(mask, w, h, 20, 22, 3.6, 3.2);
+    fillRect(mask, w, 16, 20, 18, 25);
+    // Dorsal fin
+    fillTriangle(mask, w, h, 18, 16, 22, 18, 18, 20);
+  } else if (type === 'puffer') {
+    // Round body + spikes
+    fillEllipse(mask, w, h, 16, 16, 7.2, 6.8);
+    // small tail
+    fillTriangle(mask, w, h, 24, 16, 30, 13, 30, 19);
+    // spikes rays
+    const spikes = [
+      [16, 7],
+      [10, 9],
+      [22, 9],
+      [8, 16],
+      [24, 12],
+      [24, 20],
+      [8, 20],
+      [16, 25]
+    ];
+    spikes.forEach(([x, y]) => fillTriangle(mask, w, h, 16, 16, x, y, Math.round((16 + x) / 2), Math.round((16 + y) / 2)));
+  } else if (type === 'manta') {
+    // Diamond wings + tail
+    fillTriangle(mask, w, h, 16, 10, 6, 16, 16, 22);
+    fillTriangle(mask, w, h, 16, 10, 26, 16, 16, 22);
+    fillEllipse(mask, w, h, 16, 16, 9.4, 5.2);
+    fillRect(mask, w, 15, 22, 16, 28); // tail
+  } else if (type === 'whaleshark') {
+    // Big fish silhouette (like shark) with tail
+    fillEllipse(mask, w, h, 14, 16, 9.0, 5.6);
+    fillTriangle(mask, w, h, 22, 14, 31, 16, 22, 18);
+    // dorsal fin
+    fillTriangle(mask, w, h, 14, 9, 16, 12, 12, 12);
+    // pectoral fin
+    fillTriangle(mask, w, h, 12, 18, 16, 20, 11, 22);
+  } else if (type === 'angler') {
+    // Chunky fish + lure
+    fillEllipse(mask, w, h, 14, 17, 8.6, 5.6);
+    fillTriangle(mask, w, h, 21, 15, 30, 17, 21, 19);
+    // lure stalk
+    fillRect(mask, w, 10, 8, 11, 11);
+    fillRect(mask, w, 9, 7, 10, 7);
+  } else if (type === 'eel') {
+    // Long body, slight wave
+    fillRect(mask, w, 6, 15, 26, 17);
+    fillRect(mask, w, 10, 13, 24, 14);
+    fillRect(mask, w, 10, 18, 24, 19);
+    // head
+    fillEllipse(mask, w, h, 6, 16, 3.8, 2.8);
+    // tail taper
+    fillTriangle(mask, w, h, 26, 15, 31, 16, 26, 17);
+  } else if (type === 'turtle') {
+    // Shell + head + flippers
+    fillEllipse(mask, w, h, 16, 16, 7.8, 6.4);
+    fillEllipse(mask, w, h, 8, 16, 2.8, 2.4); // head
+    fillEllipse(mask, w, h, 12, 10, 3.6, 2.2); // top-left flipper
+    fillEllipse(mask, w, h, 20, 10, 3.6, 2.2); // top-right flipper
+    fillEllipse(mask, w, h, 12, 22, 3.6, 2.2); // bottom-left flipper
+    fillEllipse(mask, w, h, 20, 22, 3.6, 2.2); // bottom-right flipper
+    fillTriangle(mask, w, h, 23, 16, 28, 14, 28, 18); // tail nub
+  } else if (type === 'dolphin') {
+    // Streamlined body + dorsal fin
+    fillEllipse(mask, w, h, 16, 16, 9.2, 4.6);
+    fillTriangle(mask, w, h, 22, 14, 31, 16, 22, 18);
+    fillTriangle(mask, w, h, 16, 10, 18, 13, 14, 13); // dorsal
+    // snout
+    fillRect(mask, w, 5, 15, 8, 16);
+  } else if (type === 'ray') {
+    // Stingray (smaller manta-like) with longer tail
+    fillTriangle(mask, w, h, 16, 11, 7, 16, 16, 20);
+    fillTriangle(mask, w, h, 16, 11, 25, 16, 16, 20);
+    fillEllipse(mask, w, h, 16, 15, 8.0, 4.6);
+    fillRect(mask, w, 15, 20, 16, 30);
+  } else if (type === 'seadragon') {
+    // Leafy seadragon-ish: thin body + leaf fins
+    fillRect(mask, w, 10, 10, 12, 25);
+    fillEllipse(mask, w, h, 12, 10, 3.4, 3.0); // head
+    fillTriangle(mask, w, h, 12, 22, 18, 24, 12, 26); // leaf fin right
+    fillTriangle(mask, w, h, 10, 16, 4, 18, 10, 20); // leaf fin left
+    fillTriangle(mask, w, h, 12, 25, 16, 30, 11, 29); // tail leaf
+  } else {
+    // Fallback: fish
+    return makeFishPixels({ w, h, body, stripe: accent, outline });
+  }
+
+  const pixels = maskToPixels(mask, w, h, { fill: body, outline });
+
+  // Accents / details
+  if (type === 'shrimp') {
+    // Eye + antenna
+    setPixel(pixels, w, 9, 14, '#ffffff');
+    setPixel(pixels, w, 9, 15, '#111827');
+    for (let k = 0; k < 6; k++) setPixel(pixels, w, 6 + k, 12 - Math.floor(k / 2), outline);
+    // Segment lines
+    const a = accent;
+    for (let x = 14; x <= 24; x += 3) {
+      setPixel(pixels, w, x, 16, a);
+      setPixel(pixels, w, x, 17, a);
+    }
+  } else if (type === 'crab') {
+    setPixel(pixels, w, 13, 14, '#ffffff');
+    setPixel(pixels, w, 13, 15, '#111827');
+    setPixel(pixels, w, 19, 14, '#ffffff');
+    setPixel(pixels, w, 19, 15, '#111827');
+    // Shell line
+    for (let x = 12; x <= 20; x++) setPixel(pixels, w, x, 18, accent);
+  } else if (type === 'octopus') {
+    setPixel(pixels, w, 13, 12, '#ffffff');
+    setPixel(pixels, w, 13, 13, '#111827');
+    setPixel(pixels, w, 18, 12, '#ffffff');
+    setPixel(pixels, w, 18, 13, '#111827');
+    // Suckers dots
+    for (let x = 10; x <= 22; x += 2) {
+      setPixel(pixels, w, x, 23, accent);
+      if (x % 4 === 0) setPixel(pixels, w, x, 26, accent);
+    }
+  } else if (type === 'squid') {
+    setPixel(pixels, w, 14, 14, '#ffffff');
+    setPixel(pixels, w, 14, 15, '#111827');
+    setPixel(pixels, w, 18, 14, '#ffffff');
+    setPixel(pixels, w, 18, 15, '#111827');
+  } else if (type === 'jellyfish') {
+    for (let x = 12; x <= 20; x++) setPixel(pixels, w, x, 14, accent);
+    setPixel(pixels, w, 14, 11, '#ffffff');
+    setPixel(pixels, w, 14, 12, '#111827');
+    setPixel(pixels, w, 18, 11, '#ffffff');
+    setPixel(pixels, w, 18, 12, '#111827');
+  } else if (type === 'starfish') {
+    // Dots
+    const dots = [
+      [16, 12],
+      [12, 16],
+      [20, 16],
+      [16, 20],
+      [14, 14],
+      [18, 14],
+      [14, 18],
+      [18, 18]
+    ];
+    dots.forEach(([x, y]) => setPixel(pixels, w, x, y, accent));
+  } else if (type === 'clam' || type === 'scallop') {
+    for (let x = 10; x <= 22; x += 2) setPixel(pixels, w, x, 19, accent);
+    for (let x = 11; x <= 21; x += 2) setPixel(pixels, w, x, 21, accent);
+  } else if (type === 'urchin') {
+    setPixel(pixels, w, 14, 16, '#ffffff');
+    setPixel(pixels, w, 14, 17, '#111827');
+    setPixel(pixels, w, 18, 16, '#ffffff');
+    setPixel(pixels, w, 18, 17, '#111827');
+  } else if (type === 'lobster') {
+    // Segment bands
+    for (let x = 14; x <= 25; x += 3) setPixel(pixels, w, x, 16, accent);
+    setPixel(pixels, w, 10, 15, '#ffffff');
+    setPixel(pixels, w, 10, 16, '#111827');
+  } else if (type === 'seahorse') {
+    setPixel(pixels, w, 12, 11, '#ffffff');
+    setPixel(pixels, w, 12, 12, '#111827');
+    // belly highlight
+    for (let y = 16; y <= 22; y += 2) setPixel(pixels, w, 14, y, accent);
+  } else if (type === 'puffer') {
+    setPixel(pixels, w, 12, 15, '#ffffff');
+    setPixel(pixels, w, 12, 16, '#111827');
+    setPixel(pixels, w, 15, 18, accent);
+    setPixel(pixels, w, 18, 14, accent);
+  } else if (type === 'manta' || type === 'ray') {
+    setPixel(pixels, w, 13, 15, '#ffffff');
+    setPixel(pixels, w, 13, 16, '#111827');
+    setPixel(pixels, w, 19, 15, '#ffffff');
+    setPixel(pixels, w, 19, 16, '#111827');
+    // center stripe
+    for (let y = 13; y <= 19; y++) setPixel(pixels, w, 16, y, accent);
+  } else if (type === 'whaleshark') {
+    // spots
+    const spots = [
+      [10, 15],
+      [12, 13],
+      [14, 17],
+      [16, 14],
+      [18, 17],
+      [20, 15]
+    ];
+    spots.forEach(([x, y]) => setPixel(pixels, w, x, y, accent));
+    setPixel(pixels, w, 8, 15, '#ffffff');
+    setPixel(pixels, w, 8, 16, '#111827');
+  } else if (type === 'angler') {
+    setPixel(pixels, w, 9, 16, '#ffffff');
+    setPixel(pixels, w, 9, 17, '#111827');
+    // lure bulb
+    setPixel(pixels, w, 8, 7, '#fde68a');
+    setPixel(pixels, w, 8, 8, '#f59e0b');
+  } else if (type === 'eel') {
+    setPixel(pixels, w, 5, 15, '#ffffff');
+    setPixel(pixels, w, 5, 16, '#111827');
+    // side stripe
+    for (let x = 8; x <= 26; x += 2) setPixel(pixels, w, x, 16, accent);
+  } else if (type === 'turtle') {
+    // shell pattern
+    for (let x = 12; x <= 20; x += 2) setPixel(pixels, w, x, 16, accent);
+    for (let y = 14; y <= 18; y += 2) setPixel(pixels, w, 16, y, accent);
+    setPixel(pixels, w, 7, 15, '#ffffff');
+    setPixel(pixels, w, 7, 16, '#111827');
+  } else if (type === 'dolphin') {
+    setPixel(pixels, w, 9, 15, '#ffffff');
+    setPixel(pixels, w, 9, 16, '#111827');
+    // belly light
+    for (let x = 12; x <= 20; x += 2) setPixel(pixels, w, x, 18, accent);
+  } else if (type === 'seadragon') {
+    setPixel(pixels, w, 11, 9, '#ffffff');
+    setPixel(pixels, w, 11, 10, '#111827');
+    // leaf accents
+    setPixel(pixels, w, 16, 24, accent);
+    setPixel(pixels, w, 6, 19, accent);
+  }
+
+  return pixels;
+}
+
 /**
  * @returns {import('../../js/pixelAssets.js').PixelAsset[]}
  */
@@ -188,8 +594,7 @@ function buildSampleFishAssets() {
   const w = 32;
   const h = 32;
   const now = new Date().toISOString();
-  const mk = (id, name, colors) => {
-    const pixels = makeFishPixels({ w, h, ...colors });
+  const mk = (id, name, pixels) => {
     return {
       id: `sample_aquarium_${id}`,
       ownerId,
@@ -206,10 +611,39 @@ function buildSampleFishAssets() {
   };
 
   return [
-    mk('blue', 'あおいさかな', { body: '#38bdf8', stripe: '#0ea5e9' }),
-    mk('green', 'みどりさかな', { body: '#4ade80', stripe: '#22c55e' }),
-    mk('pink', 'ももいろさかな', { body: '#fb7185', stripe: '#f43f5e' }),
-    mk('gold', 'きんいろさかな', { body: '#fbbf24', stripe: '#f59e0b' })
+    // fish
+    mk('blue', 'あおいさかな', makeFishPixels({ w, h, body: '#38bdf8', stripe: '#0ea5e9', stripeMode: 'double' })),
+    mk('green', 'みどりさかな', makeFishPixels({ w, h, body: '#4ade80', stripe: '#22c55e', stripeMode: 'double' })),
+    mk('pink', 'ももいろさかな', makeFishPixels({ w, h, body: '#fb7185', stripe: '#f43f5e', stripeMode: 'double' })),
+    mk('gold', 'きんいろさかな', makeFishPixels({ w, h, body: '#fbbf24', stripe: '#f59e0b', stripeMode: 'double' })),
+    mk('purple', 'むらさきさかな', makeFishPixels({ w, h, body: '#a78bfa', stripe: '#7c3aed', stripeMode: 'single' })),
+    mk('teal', 'みずいろさかな', makeFishPixels({ w, h, body: '#22d3ee', stripe: '#06b6d4', stripeMode: 'single' })),
+    mk('clown', 'カクレさかな', makeFishPixels({ w, h, body: '#fb923c', stripe: '#ffffff', stripeMode: 'clown', outline: '#111827' })),
+    mk('zebra', 'しましまさかな', makeFishPixels({ w, h, body: '#e5e7eb', stripe: '#111827', stripeMode: 'zebra', outline: '#111827' })),
+
+    // seafood (non-fish) ~10
+    mk('shrimp', 'えび', makeSeafoodPixels({ type: 'shrimp', w, h, body: '#fb7185', accent: '#f43f5e', outline: '#111827' })),
+    mk('crab', 'かに', makeSeafoodPixels({ type: 'crab', w, h, body: '#ef4444', accent: '#fb7185', outline: '#111827' })),
+    mk('octopus', 'たこ', makeSeafoodPixels({ type: 'octopus', w, h, body: '#c084fc', accent: '#a855f7', outline: '#111827' })),
+    mk('squid', 'いか', makeSeafoodPixels({ type: 'squid', w, h, body: '#e5e7eb', accent: '#94a3b8', outline: '#111827' })),
+    mk('jellyfish', 'くらげ', makeSeafoodPixels({ type: 'jellyfish', w, h, body: '#93c5fd', accent: '#60a5fa', outline: '#111827' })),
+    mk('starfish', 'ひとで', makeSeafoodPixels({ type: 'starfish', w, h, body: '#fb923c', accent: '#f97316', outline: '#111827' })),
+    mk('clam', 'あさり', makeSeafoodPixels({ type: 'clam', w, h, body: '#d1d5db', accent: '#9ca3af', outline: '#111827' })),
+    mk('scallop', 'ほたて', makeSeafoodPixels({ type: 'scallop', w, h, body: '#fde68a', accent: '#f59e0b', outline: '#111827' })),
+    mk('urchin', 'うに', makeSeafoodPixels({ type: 'urchin', w, h, body: '#111827', accent: '#6b7280', outline: '#0b1220' })),
+    mk('lobster', 'ロブスター', makeSeafoodPixels({ type: 'lobster', w, h, body: '#dc2626', accent: '#fb7185', outline: '#111827' })),
+
+    // fun sea creatures ~10
+    mk('seahorse', 'タツノオトシゴ', makeSeafoodPixels({ type: 'seahorse', w, h, body: '#fbbf24', accent: '#f59e0b', outline: '#111827' })),
+    mk('puffer', 'ハリセンボン', makeSeafoodPixels({ type: 'puffer', w, h, body: '#a3e635', accent: '#65a30d', outline: '#111827' })),
+    mk('manta', 'マンタ', makeSeafoodPixels({ type: 'manta', w, h, body: '#94a3b8', accent: '#e2e8f0', outline: '#111827' })),
+    mk('ray', 'エイ', makeSeafoodPixels({ type: 'ray', w, h, body: '#64748b', accent: '#cbd5e1', outline: '#111827' })),
+    mk('whaleshark', 'ジンベエ', makeSeafoodPixels({ type: 'whaleshark', w, h, body: '#1e40af', accent: '#93c5fd', outline: '#111827' })),
+    mk('angler', 'チョウチンアンコウ', makeSeafoodPixels({ type: 'angler', w, h, body: '#111827', accent: '#6b7280', outline: '#0b1220' })),
+    mk('eel', 'うつぼ', makeSeafoodPixels({ type: 'eel', w, h, body: '#22c55e', accent: '#bbf7d0', outline: '#111827' })),
+    mk('turtle', 'ウミガメ', makeSeafoodPixels({ type: 'turtle', w, h, body: '#16a34a', accent: '#bbf7d0', outline: '#111827' })),
+    mk('dolphin', 'イルカ', makeSeafoodPixels({ type: 'dolphin', w, h, body: '#60a5fa', accent: '#dbeafe', outline: '#111827' })),
+    mk('seadragon', 'リーフィー', makeSeafoodPixels({ type: 'seadragon', w, h, body: '#34d399', accent: '#a7f3d0', outline: '#111827' }))
   ];
 }
 
@@ -221,6 +655,7 @@ class AquariumScene extends Phaser.Scene {
     super({ key: 'AquariumScene' });
     this.fishMap = new Map();
     this.textureCache = new Set();
+    this.emptyHint = null;
   }
 
   create() {
@@ -234,6 +669,24 @@ class AquariumScene extends Phaser.Scene {
       const x = (this.scale.width / 6) * i + 30;
       g.fillTriangle(x, 0, x + 90, 0, x + 10, this.scale.height);
     }
+
+    this.emptyHint = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n右の「＋」から追加してね', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '20px',
+        color: '#ffffff',
+        align: 'center'
+      })
+      .setOrigin(0.5, 0.5)
+      .setAlpha(0.85);
+
+    this.scale.on('resize', (gameSize) => {
+      const w = Number(gameSize?.width || this.scale.width);
+      const h = Number(gameSize?.height || this.scale.height);
+      if (this.emptyHint) {
+        this.emptyHint.setPosition(w / 2, h / 2);
+      }
+    });
 
     this.events.emit('ready');
   }
@@ -323,6 +776,10 @@ class AquariumScene extends Phaser.Scene {
       sprite.setOrigin(0.5, 0.5);
       sprite.setScale(fish.size);
       sprite.setData('seed', Math.random() * 1000);
+      sprite.setInteractive({ useHandCursor: true });
+      sprite.on('pointerdown', () => {
+        this.events.emit('fishTapped', fish.id);
+      });
 
       const obj = {
         fish,
@@ -335,6 +792,7 @@ class AquariumScene extends Phaser.Scene {
         changeIn: Phaser.Math.FloatBetween(0.8, 2.2)
       };
       this.fishMap.set(fish.id, obj);
+      this.setEmptyHintVisible(this.fishMap.size === 0);
       return;
     }
 
@@ -348,6 +806,12 @@ class AquariumScene extends Phaser.Scene {
     if (!it) return;
     it.sprite.destroy();
     this.fishMap.delete(fishId);
+    this.setEmptyHintVisible(this.fishMap.size === 0);
+  }
+
+  setEmptyHintVisible(on) {
+    if (!this.emptyHint) return;
+    this.emptyHint.setVisible(Boolean(on));
   }
 
   pickNextTarget(state) {
@@ -495,6 +959,9 @@ let selectedFishId = null;
 
 const SAMPLE_ASSETS = buildSampleFishAssets();
 
+const MAX_FISH = 48;
+const REPRO_TICK_MS = 2400;
+
 function setSelectedFish(id) {
   selectedFishId = id;
   renderFishList();
@@ -545,8 +1012,61 @@ function renderFishList() {
     const empty = document.createElement('div');
     empty.className = 'aq-note';
     empty.style.padding = '10px';
-    empty.textContent = 'まだ魚がいません。右上の「＋」から追加してね。';
+    empty.textContent = 'まだ魚がいません。下のサンプルをタップ（または右上の「＋」）で追加してね。';
     fishListEl.appendChild(empty);
+
+    // Quick add samples (so there is always something selectable)
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+    grid.style.gap = '8px';
+    grid.style.padding = '10px';
+
+    SAMPLE_ASSETS.slice(0, 16).forEach((a) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'aq-btn';
+      btn.style.display = 'grid';
+      btn.style.gridTemplateColumns = '44px 1fr';
+      btn.style.alignItems = 'center';
+      btn.style.gap = '10px';
+      btn.style.padding = '10px';
+      btn.style.borderRadius = '14px';
+      btn.style.textAlign = 'left';
+
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = assetPreviewDataUrl(a, 44);
+      img.style.width = '44px';
+      img.style.height = '44px';
+      img.style.imageRendering = 'pixelated';
+      img.style.borderRadius = '12px';
+      img.style.border = '1px solid rgba(0,0,0,0.08)';
+      img.style.background = 'rgba(0,0,0,0.04)';
+
+      const label = document.createElement('div');
+      label.style.fontWeight = '900';
+      label.style.whiteSpace = 'nowrap';
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      label.textContent = a.name;
+
+      btn.appendChild(img);
+      btn.appendChild(label);
+      btn.addEventListener('click', () => {
+        void (async () => {
+          // Save as "my" asset so it appears in pixel-art-maker too
+          const saved = await duplicatePixelAsset(
+            { ...a, ownerId, name: `${a.name}（水槽）` },
+            { ownerId, name: `${a.name}（水槽）` }
+          );
+          addFishFromAsset(saved, { name: saved.name });
+        })();
+      });
+      grid.appendChild(btn);
+    });
+    fishListEl.appendChild(grid);
+
     return;
   }
 
@@ -585,19 +1105,19 @@ function syncToScene(fish) {
   scene.upsertFish(fish);
 }
 
-function addFishFromAsset(asset, { name } = {}) {
+function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, select = true } = {}) {
   const fish = {
     id: createId('fish'),
     name: String(name || asset?.name || 'さかな'),
-    personality: 'calm',
-    speed: 70,
-    size: 1,
-    hueDeg: 0,
+    personality: personality || 'calm',
+    speed: clamp(Number(speed ?? 70) || 70, 20, 200),
+    size: clamp(Number(size ?? 1) || 1, 0.4, 3),
+    hueDeg: clamp(Number(hueDeg ?? 0) || 0, -180, 180),
     asset
   };
   fishes = [fish, ...fishes];
   syncToScene(fish);
-  setSelectedFish(fish.id);
+  if (select) setSelectedFish(fish.id);
 }
 
 function deleteSelectedFish() {
@@ -790,6 +1310,55 @@ hueRange.addEventListener('input', () => {
   syncToScene(f);
 });
 
+function focusSelectedInList() {
+  const id = selectedFishId;
+  if (!id) return;
+  const row = fishListEl.querySelector(`.aq-fish-row`);
+  // If empty list or quick-add grid, nothing to focus.
+  if (!row) return;
+  // Scroll the selected row into view (best effort)
+  const selected = fishListEl.querySelector(`.aq-fish-row[data-selected='true']`);
+  if (selected && typeof selected.scrollIntoView === 'function') {
+    selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+function randomPersonality() {
+  const list = /** @type {const} */ (['calm', 'energetic', 'shy', 'lazy']);
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function reproduceTick() {
+  if (fishes.length === 0) return;
+  if (fishes.length >= MAX_FISH) return;
+
+  // Expected births per tick scales with current population (fast early growth, capped by MAX_FISH).
+  const expected = clamp(fishes.length * 0.06, 0, 3.2);
+  const base = Math.floor(expected);
+  const extra = Math.random() < expected - base ? 1 : 0;
+  let births = base + extra;
+  births = Math.min(births, Math.max(0, MAX_FISH - fishes.length));
+
+  for (let i = 0; i < births; i++) {
+    const parent = fishes[Math.floor(Math.random() * fishes.length)];
+    if (!parent?.asset) continue;
+
+    const mutateHue = clamp((Number(parent.hueDeg) || 0) + Phaser.Math.Between(-22, 22), -180, 180);
+    const mutateSpeed = clamp((Number(parent.speed) || 70) + Phaser.Math.Between(-10, 14), 20, 200);
+    const mutateSize = clamp((Number(parent.size) || 1) + Phaser.Math.FloatBetween(-0.12, 0.14), 0.4, 3);
+    const mutatePersonality = Math.random() < 0.78 ? parent.personality : randomPersonality();
+
+    addFishFromAsset(parent.asset, {
+      name: `${parent.name || 'さかな'}のこ`,
+      personality: mutatePersonality,
+      speed: mutateSpeed,
+      size: mutateSize,
+      hueDeg: mutateHue,
+      select: false
+    });
+  }
+}
+
 // -----------------------
 // Init Phaser
 // -----------------------
@@ -810,9 +1379,26 @@ new Phaser.Game({
 
 aquariumScene.events.on('ready', () => {
   scene = aquariumScene;
-  // Initial fish
-  addFishFromAsset(SAMPLE_ASSETS[0], { name: 'あおさかな' });
   renderFishList();
   renderSelectedForm();
+  scene.setEmptyHintVisible(fishes.length === 0);
 });
+
+aquariumScene.events.on('fishTapped', (fishId) => {
+  setSelectedFish(String(fishId));
+  renderSelectedForm();
+  // Ensure the selected fish is visible in the list
+  requestAnimationFrame(() => focusSelectedInList());
+});
+
+// Reproduction loop
+setInterval(() => {
+  try {
+    // Do not reproduce while picker modal is open (user is choosing)
+    if (!pickerModal.hidden) return;
+    reproduceTick();
+  } catch (e) {
+    console.warn('Reproduction tick failed:', e);
+  }
+}, REPRO_TICK_MS);
 
