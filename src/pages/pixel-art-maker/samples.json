@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-01-03T01:48:10.968Z",
+  "updatedAt": "2026-01-03T02:19:24.272Z",
   "note": "ドット絵メーカー用のサンプル素材です。サンプルはDBに保存されず、ユーザーが「コピーして編集」することで自分の作品として保存できます。",
   "samples": [
     {
@@ -212,6 +212,146 @@
       ]
     },
     {
+      "id": "enemy_bat_16",
+      "name": "こうもり",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/8S3qv/Et6r/iXps/4l6bP/Et6r/xLeq/4l6bP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/8S3qv+Jemz/iXps/yobG/8qGxv/iXps/4l6bP/Et6r/iXps/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/iXps/4l6bP///////////4l6bP+Jemz/xLeq/4l6bP9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAEQrK/+Jemz/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP9EKyv/AAAAAAAAAABEKyv/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAEQrK/+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/RCsr/0QrK/+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/RCsr/wAAAAAAAAAARCsr/4l6bP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_goblin_16",
+      "name": "ゴブリン",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/b9Ji/2/SYv9v0mL/b9Ji/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/b9Ji/7Dyt/+w8rf/sPK3/7Dyt/9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/b9Ji/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/2/SYv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/b9Ji/7Dyt/+w8rf/Khsb/7Dyt/+w8rf/Khsb/7Dyt/+w8rf/b9Ji/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/2/SYv+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/2/SYv9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/9v0mL/sPK3/7Dyt/+w8rf/KznA/ys5wP+w8rf/sPK3/7Dyt/9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2/SYv+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9Ge7D/RCsr/0QrK/9EKyv/RCsr/0Z7sP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_skeleton_16",
+      "name": "スケルトン",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P/09PT/9PT0//T09P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P//////////////////////9PT0/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P//////Khsb////////////Khsb///////09PT/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//09PT/////////////////////////////////9PT0/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P//////////////////////9PT0/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/9PT0//T09P/09PT/9PT0/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/9PT0///////////////////////09PT/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/9PT0//////////////////////////////////T09P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//09PT///////////////////////T09P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//09PT/////////////////////////////////9PT0/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//09PT////////////09PT////////////09PT////////////09PT/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P/09PT/RCsr/0QrK/9EKyv/RCsr//T09P/09PT/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//T09P9EKyv/RCsr//T09P9EKyv/RCsr//T09P9EKyv/RCsr//T09P9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_eye_16",
+      "name": "めだま",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps//fu5v/37ub/9+7m//fu5v/37ub/iXps/0QrK/8AAAA3AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps//fu5v////////////////////////////fu5v+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/37ub///////+1ZP//tWT//7Vk///////37ub/iXps/0QrK/8AAAA3AAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/9+7m////////tWT/Khsb/yobG///////9+7m/4l6bP9EKyv/AAAANwAAAAAAAAAAAAAAAAAAAABEKyv/iXps//fu5v///////7Vk//+1ZP//tWT///////fu5v+Jemz/RCsr/wAAADcAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/37ub////////////////////////////37ub/iXps/0QrK/8AAAA3AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps//fu5v/37ub/9+7m//fu5v/37ub/iXps/0QrK/8AAAA3AAAANwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP9EKyv/AAAANwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/AAAANwAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAANwAAADdEKyv/AAAANwAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADcAAAAAAAAAAAAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_slime_red_16",
+      "name": "あかスライム",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/KznA/2tr//9ra///a2v//2tr//9ra///a2v//ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/KznA/2tr//+o8f//qPH//6jx//+o8f//qPH//6jx//9ra///KznA/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/ys5wP9ra///qPH///////9EKyv/RCsr//////+o8f//a2v//ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/8rOcD/a2v//6jx//9EKyv/RCsr/0QrK/9EKyv/qPH//2tr//8rOcD/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/KznA/2tr//+o8f//qPH//6jx//+o8f//qPH//6jx//9ra///KznA/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/ys5wP9ra///a2v//2tr//9ra///a2v//2tr//9ra///a2v//ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/KznA/2tr//9ra///a2v//2tr//9ra///a2v//ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_imp_16",
+      "name": "こあくま",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9ra///a2v//0QrK/8AAAAAAAAAAEQrK/9ra///a2v//0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9ra///KznA/2tr//9EKyv/RCsr/0QrK/9EKyv/a2v//ys5wP9ra///RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/2tr//9ra///a2v//2tr//9ra///a2v//2tr//9ra///RCsr/0QrK/8AAAAAAAAAAAAAAABEKyv/a2v//2tr//9ra///KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/a2v//2tr//9ra///RCsr/wAAAAAAAAAARCsr/2tr//9ra///KznA/yobG/8rOcD/KznA/ys5wP8rOcD/Khsb/ys5wP9ra///a2v//0QrK/8AAAAAAAAAAEQrK/9ra///a2v//ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/a2v//2tr//9EKyv/AAAAAAAAAAAAAAAARCsr/2tr//9ra///a2v//ys5wP8rOcD/KznA/ys5wP9ra///a2v//2tr//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/a2v//2tr//9ra///a2v//2tr//9ra///a2v//2tr//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf9Ge7D/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/RCsr/0QrK/9Ge7D/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/RCsr/wAAAAAAAAAARCsr/0Z7sP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_spider_16",
+      "name": "くも",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/AAAAAAAAAAAAAAAARCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/AAAAPAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/4l6bP+Jemz/iXps/8S3qv/Et6r/iXps/4l6bP+Jemz/RCsr/wAAADwAAAA8AAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/xLeq/yobG/8qGxv/Khsb/yobG//Et6r/xLeq/4l6bP9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/xLeq/8S3qv//////////////////////xLeq/8S3qv+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/0QrK/8AAAA8AAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/RCsr/0QrK/8AAAA8AAAAPAAAAAAAAAAAAAAAAAAAAAAAAAA8RCsr/4l6bP/Et6r/xLeq/8S3qv+Jemz/RCsr/wAAADwAAAA8AAAAPAAAADwAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP9EKyv/RCsr/wAAADwAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP9EKyv/AAAAAAAAAAAAAAAARCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/RCsr/4l6bP9EKyv/AAAAPAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/0QrK/9EKyv/iXps/0QrK/9EKyv/iXps/0QrK/9EKyv/iXps/0QrK/8AAAA8AAAAAAAAAAAAAAAAAAAAPEQrK/8AAAA8AAAAPEQrK/8AAAA8AAAAPEQrK/8AAAA8AAAAPEQrK/8AAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAA8AAAAPAAAADwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwAAAAAAAAAAAAAADwAAAAAAAAAAAAAADwAAAAAAAAAAAAAADwAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_knight_16",
+      "name": "よろい",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP+Jemz/iXps/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/37ub/9+7m//fu5v+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/37ub//////yobG/8qGxv/9+7m/4l6bP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+Jemz/9+7m//////////////////////+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/4l6bP/Et6r/xLeq/8S3qv/Et6r/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv/Et6r/D8Tx/w/E8f8PxPH/D8Tx/8S3qv/Et6r/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv/Et6r/D8Tx/8S3qv/Et6r/xLeq/8S3qv8PxPH/xLeq/8S3qv9EKyv/AAAAAAAAAAAAAAAARCsr/8S3qv/Et6r/D8Tx/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/w/E8f/Et6r/xLeq/0QrK/8AAAAAAAAAAEQrK//Et6r/xLeq/w/E8f/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv8PxPH/xLeq/8S3qv9EKyv/AAAAAAAAAAAAAAAARCsr/8S3qv/Et6r/D8Tx/8S3qv/Et6r/xLeq/8S3qv8PxPH/xLeq/8S3qv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/8S3qv8PxPH/D8Tx/w/E8f8PxPH/xLeq/8S3qv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Rnuw/0QrK/9EKyv/Rnuw/0Z7sP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Rnuw/0QrK/8AAAAAAAAAAEQrK/9Ge7D/Rnuw/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_mushroom_16",
+      "name": "どくきのこ",
+      "kind": "character",
+      "width": 17,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/a2v//2tr//9ra///a2v//2tr//9ra///RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr//9ra////////////////////////2tr//9ra///RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9ra///a2v//////////////////////////////////2tr//9ra///RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr//9ra////////yobG////////////yobG////////////2tr//9ra///RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr//9ra////////////////////////2tr//9ra///RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr//9ra///a2v//2tr//9ra///a2v//0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/5zC4P+cwuD/nMLg/5zC4P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+cwuD/nMLg/6jx//+o8f//nMLg/5zC4P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/5zC4P+cwuD/qPH//6jx//+cwuD/nMLg/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/nMLg/5zC4P+o8f//qPH//5zC4P+cwuD/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/nMLg/5zC4P+cwuD/nMLg/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/5zC4P9EKyv/RCsr/5zC4P9EKyv/RCsr/5zC4P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+cwuD/RCsr/wAAAAAAAAAARCsr/wAAAAAAAAAARCsr/5zC4P9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
+      "id": "enemy_slime_purple_16",
+      "name": "どくスライム",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/32wt/99sLf/fbC3/32wt/99sLf/fbC3/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/32wt//+1ZP//tWT//7Vk//+1ZP//tWT//7Vk/99sLf9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/32wt//+1ZP+Jemz/iXps/4l6bP+Jemz/iXps/8S3qv//tWT/32wt/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/99sLf//tWT/iXps/yobG/9EKyv/RCsr/yobG///tWT/xLeq//+1ZP9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK//fbC3//7Vk/4l6bP9EKyv/RCsr/0QrK/9EKyv/iXps/8S3qv//tWT/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/32wt//+1ZP+Jemz/iXps/4l6bP+Jemz/iXps/8S3qv//tWT/32wt/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/99sLf//tWT//7Vk//+1ZP//tWT//7Vk//+1ZP//tWT//7Vk/99sLf9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/32wt//+1ZP//tWT//7Vk//+1ZP//tWT//7Vk/99sLf9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//fbC3/32wt/99sLf/fbC3/32wt/99sLf9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "モンスター",
+        "16x16",
+        "キャラ",
+        "敵"
+      ]
+    },
+    {
       "id": "heart_16",
       "name": "ハート",
       "kind": "object",
@@ -391,6 +531,700 @@
         "マップ",
         "16x16",
         "タイル"
+      ]
+    },
+    {
+      "id": "tile_dirt_16",
+      "name": "つちタイル",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P9Ge7D/nMLg/x89bf9Ge7D/xLeq/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP/Et6r/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/Rnuw/0Z7sP8fPW3/Rnuw/x89bf8fPW3/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP/Et6r/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv8fPW3/Rnuw/0Z7sP9Ge7D/xLeq/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "地面"
+      ]
+    },
+    {
+      "id": "tile_sand_16",
+      "name": "すなタイル",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//D8Tx/6jx//+o8f//qPH//0ez//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//8PxPH/qPH//w/E8f+o8f//qPH//6jx//9Hs///D8Tx/6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//8PxPH/qPH//w/E8f9Hs///qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//R7P//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//9Hs///D8Tx/6jx//8PxPH/qPH//w/E8f+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//0ez//+o8f//R7P//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "地面"
+      ]
+    },
+    {
+      "id": "tile_brick_red_16",
+      "name": "あかレンガ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP9ra///KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/2tr//8rOcD/KznA//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v8rOcD/KznA/2tr///37ub/KznA/2tr//8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8AVNP/AFTT//fu5v8rOcD/KznA/ys5wP8AVNP/AFTT//fu5v8rOcD/KznA/ys5wP8AVNP/AFTT//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/2tr//8rOcD/KznA//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/a2v//ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/AFTT/wBU0//37ub/KznA/2tr//8rOcD/AFTT/wBU0//37ub/KznA/ys5wP8rOcD/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP9ra///KznA//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/a2v//ys5wP/37ub/KznA/ys5wP8rOcD/a2v//2tr///37ub/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "壁"
+      ]
+    },
+    {
+      "id": "tile_wood_plank_16",
+      "name": "もくざい（いた）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "nMLg/5zC4P9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP8fPW3/nMLg/x89bf9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP+cwuD/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP+cwuD/Hz1t/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_cobble_16",
+      "name": "いしだたみ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/9+7m/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP+Jemz/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "道"
+      ]
+    },
+    {
+      "id": "tile_metal_plate_16",
+      "name": "てつプレート",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/4l6bP/37ub/9+7m//fu5v+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/9+7m/8S3qv/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/iXps/8S3qv+Jemz/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "工場"
+      ]
+    },
+    {
+      "id": "tile_lava_16",
+      "name": "ようがん",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "D8Tx/wBU0/8PxPH/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/D8Tx/wBU0/+o8f//KznA/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/ys5wP8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/w/E8f8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/AFTT/0ez//8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/0ez//8AVNP/AFTT/wBU0/8PxPH/AFTT/w/E8f8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/wBU0/8AVNP/AFTT/ys5wP8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8rOcD/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/KznA/wBU0/8AVNP/AFTT/0ez//8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/9Hs///D8Tx/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/6jx//8AVNP/AFTT/wBU0/8PxPH/R7P//wBU0/8AVNP/AFTT/wBU0/9Hs///KznA/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/ys5wP9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/+o8f//AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "危険",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_ice_16",
+      "name": "こおり",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/7Vk///ov///tWT//+i///+1ZP//6L///7Vk///ov///tWT//+i///+1ZP//6L///7Vk///ov///tWT//+i////ov///6L///+i/////////6L///7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov////////7Vk///ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L///7Vk//+1ZP///////7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///7Vk///ov///tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L////////+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L////////+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov////////+i////ov///6L///+i////ov///6L///+i/////////tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L/////////ov///6L///+i////ov///tWT//+i/////////tWT//+i////ov///tWT//+i////ov///tWT//+i////ov///6L///+i////ov///6L///+i////ov///tWT//7Vk///ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov///6L///+i////ov///6L///+i/////////tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///tWT//+i////ov///6L///+i///+1ZP//6L///+i///+1ZP//6L///+i////ov///6L///+i////ov////////+i////ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_grass_block_16",
+      "name": "くさつちブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "TIof/0yKH/+w8rf/TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//b9Ji/7Dyt/+w8rf/TIof/0yKH/9Mih//sPK3/0yKH/9v0mL/b9Ji/0yKH/+w8rf/TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9v0mL/sPK3/0yKH/9v0mL/TIof/2/SYv9Mih//TIof/0yKH/9v0mL/TIof/0yKH/9v0mL/TIof/2/SYv9v0mL/TIof/0yKH/9Mih//TIof/2/SYv9Mih//b9Ji/2/SYv+w8rf/sPK3/0yKH/9Mih//TIof/0yKH/+w8rf/sPK3/7Dyt/9v0mL/b9Ji/0yKH/9Mih//b9Ji/2/SYv9Mih//b9Ji/2/SYv9Mih//b9Ji/0yKH/9Mih//b9Ji/0yKH/9v0mL/b9Ji/2/SYv+w8rf/sPK3/0yKH/9v0mL/TIof/7Dyt/9Mih//TIof/0yKH/9v0mL/sPK3/0yKH/+w8rf/TIof/2/SYv9Mih//Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/TIof/0Z7sP9Ge7D/TIof/0yKH/+cwuD/Hz1t/0yKH/9Mih//Hz1t/8S3qv9Ge7D/Rnuw/0yKH/9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/xLeq/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP/Et6r/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "足場"
+      ]
+    },
+    {
+      "id": "tile_spikes_16",
+      "name": "トゲ（わな）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/xLeq/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/8S3qv/37ub/9+7m//fu5v/37ub/iXps//fu5v/37ub/9+7m//fu5v+Jemz/9+7m//fu5v/37ub/9+7m/4l6bP/Et6r/xLeq////////////iXps/8S3qv/Et6r///////////+Jemz/xLeq/8S3qv///////////4l6bP/Et6r/xLeq/8S3qv/Et6r/RCsr/8S3qv/Et6r/xLeq/8S3qv9EKyv/xLeq/8S3qv/Et6r/xLeq/0QrK/+Jemz/xLeq/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "トラップ",
+        "危険"
+      ]
+    },
+    {
+      "id": "bw_stone_smooth_16",
+      "name": "なめらかいし",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "石"
+      ]
+    },
+    {
+      "id": "bw_log_oak_side_16",
+      "name": "げんぼく（よこ）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/nMLg/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP8fPW3/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P8fPW3/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP8fPW3/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP8fPW3/Hz1t/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "木"
+      ]
+    },
+    {
+      "id": "bw_log_oak_top_16",
+      "name": "げんぼく（うえ）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/x89bf8fPW3/nMLg/x89bf+cwuD/nMLg/5zC4P+cwuD/nMLg/0Z7sP+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P8fPW3/Hz1t/5zC4P8fPW3/nMLg/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/5zC4P+cwuD/Hz1t/x89bf+cwuD/nMLg/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP+cwuD/nMLg/x89bf8fPW3/nMLg/5zC4P9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/5zC4P8fPW3/Hz1t/5zC4P+cwuD/Rnuw/0Z7sP8fPW3/Hz1t/x89bf9Ge7D/Hz1t/x89bf8fPW3/Rnuw/0Z7sP+cwuD/Hz1t/x89bf+cwuD/nMLg/x89bf9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/nMLg/x89bf8fPW3/nMLg/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP8fPW3/Hz1t/5zC4P+cwuD/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP+cwuD/Hz1t/x89bf+cwuD/nMLg/0Z7sP9Ge7D/Hz1t/x89bf8fPW3/Rnuw/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/nMLg/x89bf8fPW3/nMLg/5zC4P9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/0Z7sP8fPW3/Rnuw/5zC4P8fPW3/Hz1t/5zC4P+cwuD/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/Hz1t/x89bf+cwuD/Hz1t/5zC4P+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/nMLg/x89bf8fPW3/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/0Z7sP+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "木"
+      ]
+    },
+    {
+      "id": "bw_leaves_16",
+      "name": "はっぱブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/sPK3/0yKH/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/wAAAABv0mL/b9Ji/2/SYv9Mih//sPK3/2/SYv9v0mL/b9Ji/0yKH/9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9Mih//b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/9Mih//b9Ji/2/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/AAAAAG/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9v0mL/sPK3/0yKH/9v0mL/b9Ji/2/SYv9v0mL/sPK3/2/SYv9v0mL/sPK3/0yKH/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9Mih//b9Ji/2/SYv9v0mL/sPK3/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/TIof/2/SYv9v0mL/AAAAAG/SYv9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/sPK3/2/SYv9v0mL/sPK3/2/SYv9v0mL/b9Ji/2/SYv9v0mL/sPK3/2/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv8AAAAAb9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9Mih//b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/AAAAAG/SYv9v0mL/b9Ji/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "自然"
+      ]
+    },
+    {
+      "id": "bw_glass_16",
+      "name": "ガラス",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L5a////eP/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovoz/6L6M/+i+Wv/ovlr///94/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L6M/+i+jP/ovlr/6L5a/+i+Wv///3j/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+jP/ovoz/6L5a////jP/ovlr/6L5a////eP/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovoz/6L6M/+i+Wv/ovlr/6L5a/+i+Wv/ovlr///94/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L6M/+i+jP/ovlr/6L5a////jP/ovlr/6L5a/+i+Wv///3j/6L5a/+i+Wv/ovlr/6L5a////jP/ovlr/6L5a/+i+jP/ovoz/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a////eP/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovoz/6L6M/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr///94/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L6M/+i+jP/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv///3j/6L5a/+i+Wv/ovlr/6L5a/+i+jP/ovoz/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a////eP/ovlr/6L5a/+i+Wv/ovoz/6L6M/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr///94/+i+Wv/ovlr/6L6M/+i+jP/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv///3j/6L5a/+i+jP/ovoz/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovoz/6L6M/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L5a/+i+Wv/ovlr/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jP/ovoz/6L6M/+i+jA==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "建材"
+      ]
+    },
+    {
+      "id": "bw_obsidian_16",
+      "name": "くろいかたい石",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8qGxv/RCsr/yobG/9EKyv/Khsb//+1ZP8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/RCsr/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/0QrK/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/0QrK/8qGxv/Khsb/yobG//fbC3/Khsb/yobG/8qGxv/RCsr/yobG/8qGxv/RCsr/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/0QrK/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/RCsr/yobG//fbC3/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/RCsr/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/99sLf8qGxv/Khsb/0QrK/8qGxv/RCsr//+1ZP8qGxv/Khsb/yobG//fbC3/Khsb/99sLf8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/99sLf8qGxv/RCsr/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/0QrK/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/Khsb/yobG/9EKyv/Khsb/yobG/8qGxv/RCsr/yobG/8qGxv/Khsb/99sLf8qGxv/Khsb/yobG/8qGxv/Khsb/0QrK/9EKyv/RCsr/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/99sLf9EKyv/Khsb/yobG/8qGxv/Khsb/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "レア"
+      ]
+    },
+    {
+      "id": "bw_crafting_top_16",
+      "name": "さぎょうだい（うえ）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf+cwuD/Rnuw/0Z7sP+cwuD/Hz1t/0Z7sP+cwuD/Rnuw/0Z7sP+cwuD/Rnuw/0Z7sP+cwuD/Rnuw/x89bf8fPW3/Rnuw//fu5v9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/9+7m/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/x89bf9Ge7D/9+7m/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP/37ub/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "クラフト"
+      ]
+    },
+    {
+      "id": "bw_furnace_front_16",
+      "name": "かまど（まえ）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/iXps//fu5v+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP/37ub/xLeq/8S3qv/Et6r/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/8S3qv+Jemz/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP/37ub/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/9+7m/8S3qv/Et6r/xLeq/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/iXps/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv8qGxv/R7P//6jx//+o8f//qPH//6jx//9Hs///Khsb/4l6bP/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/Khsb/0ez//9Hs///R7P//0ez//9Hs///R7P//yobG/+Jemz/xLeq/8S3qv+Jemz/9+7m/4l6bP+Jemz/iXps/yobG/8qGxv/Khsb/yobG/8qGxv/Khsb/yobG/8qGxv/iXps/4l6bP+Jemz/iXps//fu5v/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "クラフト"
+      ]
+    },
+    {
+      "id": "bw_ore_coal_16",
+      "name": "くろいこうせき",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v8qGxv/xLeq/8S3qv8qGxv/RCsr/8S3qv8qGxv/xLeq//fu5v8qGxv/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/yobG//Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv8qGxv/xLeq/8S3qv8qGxv/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/Khsb/8S3qv/Et6r/xLeq/8S3qv/Et6r/Khsb//fu5v8qGxv/RCsr/yobG/9EKyv/iXps//fu5v/Et6r/Khsb/0QrK//Et6r/Khsb/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/Khsb/8S3qv+Jemz/9+7m/8S3qv/Et6r/iXps/8S3qv8qGxv/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/Khsb/0QrK//Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/Khsb/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/yobG/+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "鉱石"
+      ]
+    },
+    {
+      "id": "bw_ore_iron_16",
+      "name": "てつこうせき",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv+Jemz/R7P//8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/0ez//9Hs///D8Tx/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv9Hs///xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/R7P//8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv9Hs///D8Tx/8S3qv9Hs///xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/0ez///Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv9Hs///xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/R7P//w/E8f/37ub/xLeq/8S3qv9Hs///D8Tx/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv9Hs///iXps/8S3qv+Jemz/9+7m/0ez//9Hs///xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/R7P//4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "鉱石"
+      ]
+    },
+    {
+      "id": "bw_ore_gold_16",
+      "name": "きんこうせき",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/D8Tx/6jx//+Jemz/xLeq/w/E8f/Et6r/xLeq/8S3qv/Et6r/xLeq/w/E8f/Et6r/D8Tx/6jx//+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/w/E8f/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/D8Tx/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/D8Tx/w/E8f/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/D8Tx/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/D8Tx/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv8PxPH/qPH//4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/D8Tx/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "鉱石"
+      ]
+    },
+    {
+      "id": "bw_ore_gemblue_16",
+      "name": "あおこうせき",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/99sLf/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/32wt/4l6bP/37ub/xLeq/8S3qv/fbC3/32wt/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m/8S3qv/fbC3/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/fbC3/iXps/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/32wt//+1ZP/Et6r/iXps//fu5v/fbC3/iXps/8S3qv/Et6r/xLeq/99sLf/Et6r/xLeq/8S3qv/Et6r/xLeq/99sLf//tWT/xLeq/4l6bP/37ub/xLeq/8S3qv/fbC3/xLeq/8S3qv/Et6r/xLeq/8S3qv/fbC3//7Vk/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "鉱石"
+      ]
+    },
+    {
+      "id": "bw_ore_red_16",
+      "name": "あかこうせき",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv+Jemz/KznA/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/ys5wP8rOcD/xLeq/8S3qv/Et6r/KznA//fu5v/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/Et6r/xLeq/ys5wP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/ys5wP9ra///xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v8rOcD/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/ys5wP/Et6r/xLeq/4l6bP/37ub/xLeq/ys5wP/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/9+7m/8S3qv/Et6r/xLeq/ys5wP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/ys5wP9ra///xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "鉱石"
+      ]
+    },
+    {
+      "id": "bw_torch_16",
+      "name": "たいまつ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/w/E8f9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/w/E8f+o8f//D8Tx/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/w/E8f9Hs///R7P//0ez//8PxPH/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Hs///R7P//0ez//9Hs///R7P//0QrK/8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0ez//9Hs///R7P//0QrK/8AAAAtAAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/R7P//x89bf9EKyv/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0Z7sP8fPW3/RCsr/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Hz1t/0QrK/8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/x89bf9EKyv/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/x89bf9EKyv/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0Z7sP8fPW3/RCsr/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Ge7D/Hz1t/0QrK/8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/x89bf9EKyv/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "小物",
+        "クラフト"
+      ]
+    },
+    {
+      "id": "bw_pickaxe_16",
+      "name": "つるはし",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9EKyv/RCsr/wAAAABEKyv/Rnuw/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv///////fu5v/Et6r/9+7m//////9EKyv/Rnuw/x89bf9EKyv/AAAAMgAAAAAAAAAAAAAAAEQrK/9EKyv/9+7m//fu5v9EKyv/xLeq/0QrK//37ub/9+7m/0QrK/9EKyv/AAAAMgAAADIAAAAAAAAAAEQrK//37ub/9+7m/0QrK/9EKyv/RCsr/8S3qv9EKyv/Rnuw/x89bf/37ub/9+7m/0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/0QrK/8AAAAyAAAAMkQrK//Et6r/Rnuw/0QrK/9EKyv/RCsr/0QrK/8AAAAyAAAAMgAAAAAAAAAAAAAAAAAAAAAAAAAyAAAAMgAAAABEKyv/Rnuw/x89bf9EKyv/AAAAMgAAADIAAAAyAAAAMgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/0QrK/9EKyv/AAAAMgAAADIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/x89bf9EKyv/AAAAMgAAADIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/Rnuw/0QrK/9EKyv/AAAAMgAAADIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/x89bf9EKyv/AAAAMgAAADIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAAMgAAADIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "小物",
+        "クラフト"
+      ]
+    },
+    {
+      "id": "bw_apple_16",
+      "name": "りんご",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/x89bf8fPW3/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/8fPW3/Hz1t/0QrK/9v0mL/b9Ji/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr////////a2v//ys5wP9ra///a2v//7Dyt/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2tr//////////////////8rOcD/KznA/ys5wP8rOcD/a2v//0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK////////////////////////////ys5wP8rOcD/KznA/ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/KznA/////////////////ys5wP8rOcD/KznA/ys5wP8rOcD/RCsr/wAAAC0AAAAAAAAAAAAAAABEKyv/a2v//ys5wP8rOcD//////2tr//8rOcD/KznA/ys5wP8rOcD/KznA/2tr//9EKyv/AAAAAAAAAAAAAAAARCsr/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/RCsr/wAAAAAAAAAAAAAAAAAAAABEKyv/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/RCsr/wAAAC0AAAAtAAAAAAAAAAAAAAAARCsr/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/0QrK/8AAAAtAAAALQAAAAAAAAAAAAAAAEQrK/8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP9EKyv/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP9EKyv/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAC1EKyv/RCsr/0QrK/8rOcD/RCsr/0QrK/9EKyv/AAAALQAAAC0AAAAtAAAAAA==",
+      "tags": [
+        "ブロックワールド",
+        "16x16",
+        "小物",
+        "食べもの"
+      ]
+    },
+    {
+      "id": "pl_ground_grass_16",
+      "name": "くさつち（だいち）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/2/SYv+w8rf/sPK3/2/SYv+w8rf/sPK3/2/SYv+w8rf/sPK3/2/SYv+w8rf/sPK3/2/SYv+w8rf/sPK3/2/SYv9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//Rnuw/0Z7sP+cwuD/TIof/0Z7sP9Ge7D/Rnuw/0yKH/9Ge7D/Rnuw/0yKH/9Ge7D/Rnuw/0yKH/9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP+cwuD/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/w==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "地面"
+      ]
+    },
+    {
+      "id": "pl_brick_orange_16",
+      "name": "オレンジれんが",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf9Hs///AFTT/0ez//9Hs///R7P//5zC4P9Hs///AFTT/0ez//9Hs///R7P//5zC4P9Hs///AFTT/0ez//8fPW3/R7P//0ez//9Hs///R7P//0ez//+cwuD/R7P//0ez//9Hs///R7P//0ez//+cwuD/R7P//0ez//9Hs///Hz1t/0ez//9Hs///R7P//x89bf8fPW3/nMLg/0ez//9Hs///R7P//x89bf8fPW3/nMLg/0ez//9Hs///AFTT/x89bf+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P8fPW3/R7P//0ez//+cwuD/R7P//wBU0/9Hs///R7P//0ez//+cwuD/R7P//wBU0/9Hs///R7P//0ez//+cwuD/Hz1t/0ez//9Hs///nMLg/0ez//9Hs///AFTT/wBU0/8AVNP/nMLg/wBU0/8AVNP/R7P//0ez//9Hs///nMLg/x89bf8fPW3/Hz1t/5zC4P9Hs///R7P//0ez//8fPW3/Hz1t/5zC4P8AVNP/AFTT/0ez//8fPW3/Hz1t/5zC4P8fPW3/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/Hz1t/0ez//8AVNP/R7P//0ez//9Hs///nMLg/0ez//8AVNP/R7P//0ez//9Hs///nMLg/0ez//8AVNP/R7P//x89bf9Hs///AFTT/wBU0/9Hs///R7P//5zC4P8AVNP/R7P//0ez//9Hs///R7P//5zC4P9Hs///R7P//0ez//8fPW3/R7P//0ez//9Hs///Hz1t/x89bf+cwuD/R7P//wBU0/9Hs///Hz1t/x89bf+cwuD/R7P//0ez//9Hs///Hz1t/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/x89bf9Hs///R7P//5zC4P9Hs///AFTT/0ez//9Hs///R7P//5zC4P9Hs///AFTT/0ez//9Hs///R7P//5zC4P8fPW3/R7P//0ez//+cwuD/R7P//wBU0/9Hs///R7P//wBU0/+cwuD/R7P//0ez//9Hs///AFTT/0ez//+cwuD/Hz1t/x89bf8fPW3/nMLg/0ez//9Hs///R7P//x89bf8fPW3/nMLg/0ez//9Hs///R7P//x89bf8fPW3/nMLg/w==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "ブロック"
+      ]
+    },
+    {
+      "id": "pl_coin_block_16",
+      "name": "コインブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//AFTT/6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//wBU0/+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8AVNP/qPH//6jx//8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/AFTT/6jx//+o8f//D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/wBU0/+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f+o8f//qPH//w/E8f+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f8AVNP/qPH//6jx//8PxPH/D8Tx/w/E8f+o8f////////////8PxPH/D8Tx/w/E8f+o8f//D8Tx/w/E8f8PxPH/AFTT/6jx//+o8f//D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/wBU0/+o8f//qPH//w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f+o8f//D8Tx/w/E8f8AVNP/qPH//6jx//8PxPH/D8Tx/w/E8f+o8f//D8Tx/w/E8f8PxPH/D8Tx/w/E8f+o8f//D8Tx/w/E8f8PxPH/AFTT/6jx//+o8f//D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/D8Tx/wBU0/+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f+o8f//qPH//w/E8f+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f8AVNP/qPH//6jx//8PxPH/qPH//w/E8f8PxPH/D8Tx/w/E8f+o8f//D8Tx/w/E8f8PxPH/qPH//w/E8f8PxPH/AFTT/6jx//+o8f//D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/wBU0/+o8f//qPH//w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8PxPH/D8Tx/w/E8f8AVNP/qPH//6jx//8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/w==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "pl_pipe_green_16",
+      "name": "みどりパイプ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "b9Ji/2/SYv9v0mL/sPK3/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9Mih//RCsr/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/9v0mL/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/TIof/0QrK/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv+w8rf/b9Ji/wAAAFAAAABQAAAAUAAAAFAAAABQAAAAUEyKH/9EKyv/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/sPK3/2/SYv9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9Mih//RCsr/2/SYv9v0mL/b9Ji/0yKH/9Mih//TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/9Mih//TIof/0yKH/9Mih//TIof/0yKH/+w8rf/b9Ji/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9EKyv/TIof/0yKH/9Mih//TIof/0yKH/9Mih//sPK3/2/SYv9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//RCsr/0yKH/9Mih//TIof/0yKH/9Mih//TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/9Mih//TIof/0yKH/9Mih//TIof/0yKH/+w8rf/b9Ji/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9EKyv/TIof/0yKH/9Mih//TIof/0yKH/9Mih//sPK3/2/SYv9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//RCsr/0yKH/9Mih//TIof/0yKH/9Mih//TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/9Mih//TIof/0yKH/9Mih//TIof/0yKH/+w8rf/b9Ji/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9EKyv/TIof/0yKH/9Mih//TIof/0yKH/9Mih//sPK3/2/SYv9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//RCsr/0yKH/9Mih//TIof/0yKH/9Mih//TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/9Mih//TIof/0yKH/9Mih//TIof/0yKH/+w8rf/b9Ji/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9EKyv/TIof/0yKH/9Mih//RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/w==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "pl_cloud_16",
+      "name": "くも",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv//////0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//////////////////////////////////////9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr/////////////////////////////////////////////////0QrK/8AAAAAAAAAAAAAAABEKyv///////////////////////////////////////////////////////////9EKyv/AAAAAAAAAABEKyv/////////////////////////////////////////////////////////////////RCsr/wAAAAAAAAAARCsr//////////////////////////////////////////////////////////////////////9EKyv/RCsr////////////////////////////////////////////////////////////////////////////RCsr/wAAAABEKyv/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P8AAAAARCsr//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P9EKyv/RCsr//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/9PT0//T09P/09PT/RCsr/wAAAABEKyv/9PT0//T09P/09PT/9PT0//T09P9EKyv/RCsr//T09P9EKyv/RCsr//T09P9EKyv/RCsr/wAAAAAAAAAARCsr//T09P/09PT/9PT0//T09P/09PT/RCsr/wAAAABEKyv/AAAAAAAAAABEKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr//T09P9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "pl_bush_16",
+      "name": "しげみ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9v0mL/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/2/SYv9v0mL/b9Ji/2/SYv9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9EKyv/RCsr/wAAAAAAAAAAAAAAAEQrK/9v0mL/b9Ji/7Dyt/9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv+w8rf/b9Ji/2/SYv9EKyv/AAAAAEQrK/9v0mL/b9Ji/7Dyt/+w8rf/sPK3/2/SYv9v0mL/b9Ji/2/SYv+w8rf/sPK3/7Dyt/9v0mL/b9Ji/0QrK/9EKyv/b9Ji/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/b9Ji/2/SYv+w8rf/sPK3/7Dyt/+w8rf/sPK3/2/SYv9EKyv/RCsr/2/SYv9v0mL/sPK3/7Dyt/+w8rf/b9Ji/2/SYv9v0mL/b9Ji/7Dyt/+w8rf/sPK3/2/SYv9v0mL/RCsr/2/SYv9v0mL/b9Ji/2/SYv+w8rf/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/sPK3/2/SYv9v0mL/b9Ji/2/SYv9EKyv/TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9EKyv/RCsr/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//RCsr/0QrK/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/8AAAAARCsr/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0yKH/9Mih//TIof/0QrK/8AAAAAAAAAAAAAAABEKyv/RCsr/0QrK/9Mih//RCsr/0QrK/9EKyv/RCsr/0yKH/9EKyv/RCsr/0QrK/8AAAAAAAAAAA==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "pl_oneway_platform_16",
+      "name": "すりぬけ足場",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P+cwuD/nMLg/5zC4P9Ge7D/Rnuw/6jx//+o8f//qPH//0Z7sP9Ge7D/qPH//6jx//+o8f//Rnuw/0Z7sP+o8f//qPH//6jx//9Ge7D/Rnuw/0Z7sP9Ge7D/D8Tx/0Z7sP9Ge7D/Rnuw/0Z7sP8PxPH/Rnuw/0Z7sP9Ge7D/Rnuw/w/E8f9Ge7D/Rnuw/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "タイル",
+        "足場",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "pl_flag_16",
+      "name": "ゴールのはた",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAARCsr//fu5v9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/2/SYv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/b9Ji/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/sPK3/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/2/SYv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/7Dyt/+w8rf/sPK3/7Dyt/+w8rf/sPK3/7Dyt/9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv9v0mL/b9Ji/2/SYv9v0mL/b9Ji/2/SYv9v0mL/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr/8S3qv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/iXps/4l6bP+Jemz/RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "小物",
+        "ゴール"
+      ]
+    },
+    {
+      "id": "pl_spring_16",
+      "name": "バネ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9EKyv/xLeq/8S3qv/Et6r/xLeq/8S3qv9EKyv/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/9+7m//fu5v/37ub/9+7m//fu5v9EKyv/AAAALQAAAC0AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//37ub/9+7m//fu5v/37ub/9+7m/0QrK/8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK//Et6r/xLeq/8S3qv/Et6r/xLeq/0QrK/8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARCsr//fu5v/37ub/9+7m//fu5v/37ub/RCsr/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/RCsr//fu5v/37ub/9+7m//fu5v/37ub/RCsr/0QrK/9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/a2v//2tr//9ra///a2v//2tr//9ra///a2v//2tr//9ra///a2v//0QrK/8AAAAAAAAAAAAAAAAAAAAARCsr/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP9EKyv/AAAAAAAAAAAAAAAAAAAAAEQrK/8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/KznA/ys5wP8rOcD/RCsr/wAAAC0AAAAAAAAAAAAAAAAAAAAARCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/wAAAC0AAAAtAAAAAA==",
+      "tags": [
+        "プラットフォーマー",
+        "16x16",
+        "小物",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "dw_mascot_round_16",
+      "name": "まんまるマスコット",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbng8/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbng8/+vS//9ueDz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/bng8//Dm//++5nj/8Ob//254PP9ueDz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/254PP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP++5nj/vuZ4/6XIUP++5nj/vuZ4/77meP++5nj/bng8/wAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/vuZ4/77meP9ueDz/AAAAAAAAAAAAAAAAbng8/77meP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP++5nj/bng8/wAAAAAAAAAAAAAAAG54PP++5nj/pchQ/yobG///////pchQ/6XIUP+lyFD/Khsb//////+lyFD/vuZ4/254PP8AAAAtAAAAAG54PP++5nj/vuZ4/6XIUP8qGxv/Khsb/6XIUP+lyFD/pchQ/yobG/8qGxv/pchQ/77meP++5nj/bng8/wAAAAAAAAAAbng8/6XIUP+lyFD/Khsb/yobG/+lyFD/pchQ/6XIUP8qGxv/Khsb/6XIUP+lyFD/bng8/wAAAC0AAAAAAAAAAG54PP++5nj/0rT//6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP/StP//vuZ4/254PP8AAAAtAAAAAAAAAABueDz/vuZ4/6XIUP+lyFD/pchQ/0QrK/9EKyv/pchQ/6XIUP+lyFD/pchQ/77meP9ueDz/AAAALQAAAAAAAAAAAAAAAG54PP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP9ueDz/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAtbng8/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP9ueDz/AAAALQAAAC0AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAC1ueDz/bng8/254PP+lyFD/bng8/254PP9ueDz/AAAALQAAAC0AAAAtAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "キャラ"
+      ]
+    },
+    {
+      "id": "dw_pastel_sky_16",
+      "name": "パステルそら",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i/////////////////yP7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw////////ObI//zmyP/85sj///////zmyP/85sj//ObI//zmyP/85sj//ObI//zmyP///////ObI//zmyP/85sj/++bM//vmzP/75sz/++bM//vmzP/75sz/++bM///////////I++bM//vmzP/75sz/++bM//vmzP/75sz////////////////I+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/45NT/+OTU//jk1P/45NT/+OTU//jk1P/45NT/+OTU///////45NT///////jk1P/45NT/+OTU//jk1P/45NT/9+PZ///////349n///////fj2f/349n/9+PZ//fj2f/349n/9+PZ//fj2f/349n/9+PZ//fj2f/349n/9+PZ//bi3f/24t3/9uLd//bi3f/24t3/9uLd//bi3f/24t3///////bi3f/24t3/9uLd//bi3f//////////yPbi3f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/8+Hl//Ph5f/z4eX/8+Hl///////////I8+Hl///////z4eX/8+Hl//Ph5f/z4eX/8+Hl//Ph5f/z4eX/8+Hl//Lg6v/y4Or/8uDq//Lg6v/y4Or/8uDq///////y4Or/8uDq///////////I8uDq//Lg6v/y4Or///////Lg6v/w3+7/8N/u//Df7v/w3+7///////Df7v/w3+7/8N/u//Df7v/w3+7/8N/u//Df7v/w3+7///////Df7v/w3+7/797y///////v3vL//////////8jv3vL/797y/+/e8v/v3vL/797y/+/e8v/v3vL/797y/+/e8v/v3vL/797y/+7e9v//////7t72/+7e9v/u3vb/7t72/+7e9v/u3vb/7t72///////u3vb/7t72/+7e9v/u3vb/7t72/+7e9v/s3fv/7N37/+zd+///////7N37/+zd+//s3fv/7N37///////s3fv/7N37/+zd+//s3fv/7N37/+zd+//s3fv/69z//+vc///r3P//69z//+vc///r3P//69z//+vc///r3P//69z////////////I69z//+vc///r3P//69z//w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "dw_puffy_cloud_16",
+      "name": "ふわふわくも",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/wAAAADSqoz/0qqM/9KqjP/////m0qqM/9KqjP/Sqoz/AAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/0qqM/////+bSqoz/////5v///+b////m////5v///+b////m////5tKqjP8AAAAAAAAAANKqjP/////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m0qqM/9KqjP/////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5tKqjP/Sqoz/////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+bSqoz/0qqM/////+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5tKqjP/Sqoz///X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS0qqM///19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS0qqM/9KqjP//9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10tKqjP8AAAAA0qqM///19dL/9fXS//X10v/19dL/9fXS//X10v/19dLSqoz///X10tKqjP//9fXS0qqM/9KqjP8AAAAAAAAAAAAAAADSqoz/0qqM/9KqjP//9fXS0qqM/9KqjP/Sqoz/AAAAANKqjP8AAAAA0qqM/wAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "dw_dream_grass_16",
+      "name": "ゆめのくさつち",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/9LI///SyP//tIzS/9LI//++5nj/0sj//9LI///SyP//0sj//77meP/SyP//0sj//7SM0v/SyP//vuZ4/9LI///SyP//0sj//9LI//+0jNL/0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj///Dm///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/7SM0v/SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj///Dm///SyP//0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "地面"
+      ]
+    },
+    {
+      "id": "dw_star_block_16",
+      "name": "スターのブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///tIzS//jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS/////////////+vS///r0v//69L//0ez///r0v//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//qPH//+vS//+o8f//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//qPH//+vS//9Hs///69L//0ez///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//+vS//9Hs///69L//+vS///r0v//R7P//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//6jx///r0v//69L//+vS///r0v//69L//6jx///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//R7P//+vS///r0v//69L//+vS///r0v//R7P//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//6jx///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//R7P//+vS///r0v//69L//0ez///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//+vS///r0v//69L//0ez///r0v//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr//+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "ブロック"
+      ]
+    },
+    {
+      "id": "dw_candy_stripe_16",
+      "name": "キャンディしま",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7////////ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS////6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7////////ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS////6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "床"
+      ]
+    },
+    {
+      "id": "dw_sparkle_16",
+      "name": "きらきら",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAP/ovv///////+i+/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAqPH//wAAACMAAAAjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "エフェクト"
+      ]
+    },
+    {
+      "id": "dw_star_wand_16",
+      "name": "ほしのつえ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+o8f//RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv//////0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/qPH//0QrK/+o8f//RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/qPH//0QrK/9Hs///RCsr/0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Hs///RCsr/0QrK/9EKyv/R7P//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/qPH//0QrK/+o8f//RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/9Hs///RCsr/0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/9EKyv/qPH//0QrK/9EKyv/AAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/8AAAAoAAAAKEQrK/9Hs///RCsr/wAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/8AAAAoAAAAKAAAACgAAAAoRCsr/wAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAACgAAAAoAAAAKAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAABEKyv/8Ob//0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物"
+      ]
+    },
+    {
+      "id": "dw_lollipop_16",
+      "name": "ぺろぺろキャンディ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/0qqM/+vS///Sqoz/0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L//+vS////6L7/69L//+vS///Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L////ovv///////+i+///ovv//6L7/69L//9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7//+i+///ovv//6L7//+i+/+vS///Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7/////////////////////////////////69L//9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L////ovv//6L7//+i+///ovv//6L7/69L//9KqjP8AAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7//+i+///ovv///////+i+/+vS///Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L//+vS////6L7/69L//+vS///Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKNKqjP//////69L//9KqjP/Sqoz/AAAAKAAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//////9zc3P/Sqoz/AAAAKAAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///////c3Nz/0qqM/wAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//////3Nzc/9KqjP8AAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//////9zc3P/Sqoz/AAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "食べもの"
+      ]
+    },
+    {
+      "id": "dw_dream_door_16",
+      "name": "ゆめのとびら",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz//+i+/9KqjP/Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/9KqjP//6L7//+i+///ovv//6L7//+i+/9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv//6L7//+i+///ovv/r0v///+i+///ovv//6L7/0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7//+i+/+vS///r0v//69L//+vS///r0v///+i+///ovv/Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//69L//+vS///Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAtAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//+vS///r0v///+i+/9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//69L////ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//6jx//+o8f//qPH//9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//R7P////ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//+vS///r0v///+i+/9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+///ovv//6L7//+i+///ovv//6L7//+i+///ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/0qqM/9KqjP/Sqoz/0qqM/9KqjP/Sqoz/AAAALQAAAC0AAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "dw_bubble_16",
+      "name": "しゃぼんだま",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L6M////jP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/ovoz/6L48////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L48/+i+PP///4z///+M////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PAAAAAAAAAAAAAAAAAAAAAD/6L6M/+i+PP///4z///+M////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAP/ovjz/6L48////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48AAAAAAAAAAAAAAAAAAAAAP/ovoz/6L48/+i+PP///4z///+M////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovowAAAAAAAAAAAAAAAAAAAAA/+i+PP/ovjz/6L48////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjwAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+jAAAAAAAAAAAAAAAAAAAAAD/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovowAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+jAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "エフェクト"
+      ]
+    },
+    {
+      "id": "dw_strawberry_16",
+      "name": "いちご",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/AAAAAAAAAAAAAAAAWjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/1o8jP9aPIz/WjyM/77meP9aPIz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/77meP++5nj/8P/c/77meP++5nj/vuZ4/1o8jP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/WjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFo8jP++5nj/vuZ4/77meP+geP//vuZ4/77meP++5nj/WjyM/wAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAFo8jP+geP//oHj//77meP+geP//ZDzS/6B4//++5nj/oHj//6B4//9aPIz/AAAAKAAAAAAAAAAAAAAAAAAAAABaPIz/oHj///jr//9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v+geP//WjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v/46///ZDzS//jr//9kPNL/+Ov//2Q80v9kPNL/ZDzS/1o8jP8AAAAoAAAAAAAAAAAAAAAAWjyM/6B4///46///ZDzS/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v+geP//WjyM/wAAAAAAAAAAAAAAAFo8jP9kPNL/ZDzS/2Q80v9kPNL/ZDzS//jr//9kPNL/ZDzS/2Q80v9kPNL/ZDzS/1o8jP8AAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v9kPNL/+Ov//2Q80v/46///ZDzS/2Q80v/46///ZDzS/1o8jP8AAAAoAAAAKAAAAAAAAAAAAAAAAFo8jP9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9aPIz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9aPIz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAChaPIz/WjyM/1o8jP9kPNL/WjyM/1o8jP9aPIz/AAAAKAAAACgAAAAoAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "食べもの"
       ]
     }
   ]
