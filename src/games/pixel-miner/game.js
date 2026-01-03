@@ -20,6 +20,7 @@ const resetBtn = document.getElementById('resetBtn');
 const hotbarEl = document.getElementById('hotbar');
 const touchControls = document.getElementById('touchControls');
 const playerPill = document.getElementById('playerPill');
+const hpPill = document.getElementById('hpPill');
 
 const TILE_SIZE = 16;
 const WORLD_W = 256;
@@ -59,6 +60,12 @@ const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK];
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
+}
+
+function approach(current, target, maxDelta) {
+  const d = target - current;
+  if (Math.abs(d) <= maxDelta) return target;
+  return current + Math.sign(d) * maxDelta;
 }
 
 function isTouchLike() {
@@ -282,6 +289,15 @@ function updatePlayerPill() {
   )}`;
 }
 
+function updateHpPill() {
+  if (!hpPill) return;
+  const hp = Math.max(0, Math.floor(state.hp || 0));
+  const max = Math.max(1, Math.floor(state.maxHp || 5));
+  const full = Math.max(0, Math.min(max, hp));
+  const empty = Math.max(0, max - full);
+  hpPill.textContent = `${'♥'.repeat(full)}${'♡'.repeat(empty)} ${hp}/${max}`;
+}
+
 /** @type {{samplesById: Map<string, any>, tileImg: Map<number, HTMLCanvasElement>, playerSprite: HTMLCanvasElement}} */
 const assets = {
   samplesById: new Map(),
@@ -312,6 +328,38 @@ function loadAssetsFromSamples() {
         ? 'slime_mini_16'
         : 'cat_face_16';
   assets.playerSprite = makeSpriteCanvas(assets.samplesById, playerSampleId);
+}
+
+const MONSTER_KIND = {
+  SLIME: 'slime'
+};
+
+/** @type {Record<string, {name: string, speed: number, contactDamage: number, spriteSampleId: string, w: number, h: number}>} */
+const MONSTER_DEF = {
+  [MONSTER_KIND.SLIME]: {
+    name: 'スライム',
+    speed: 56,
+    contactDamage: 1,
+    spriteSampleId: 'slime_mini_16',
+    w: 14,
+    h: 12
+  }
+};
+
+/** @type {Map<string, HTMLCanvasElement>} */
+const monsterSprites = new Map();
+
+function loadMonsterSprites() {
+  monsterSprites.clear();
+  Object.keys(MONSTER_DEF).forEach((k) => {
+    const def = MONSTER_DEF[k];
+    const sid = def?.spriteSampleId;
+    if (!sid) return;
+    // サンプルに無ければ、プレイヤーと同じにしておく（確実に表示される）
+    const useId = assets.samplesById.has(sid) ? sid : assets.samplesById.has('slime_mini_16') ? 'slime_mini_16' : null;
+    if (!useId) return;
+    monsterSprites.set(k, makeSpriteCanvas(assets.samplesById, useId));
+  });
 }
 
 function generateWorld(seedStr) {
@@ -416,6 +464,16 @@ function findSpawnY(world, spawnX) {
   return 10;
 }
 
+function findSurfaceY(world, x) {
+  for (let y = 0; y < WORLD_H - 2; y++) {
+    const t = getTile(world, x, y);
+    if (t !== TILE.AIR && t !== TILE.WATER && t !== TILE.LAVA) {
+      return Math.max(0, y - 2);
+    }
+  }
+  return 10;
+}
+
 function loadSave() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
@@ -433,7 +491,9 @@ function loadSave() {
         y: Number(data?.player?.y) || 0,
         vx: Number(data?.player?.vx) || 0,
         vy: Number(data?.player?.vy) || 0
-      }
+      },
+      hp: Math.max(0, Math.floor(Number(data?.hp) || 0)),
+      maxHp: Math.max(1, Math.floor(Number(data?.maxHp) || 5))
     };
   } catch {
     return null;
@@ -452,7 +512,9 @@ function saveNow() {
         y: state.player.y,
         vx: state.player.vx,
         vy: state.player.vy
-      }
+      },
+      hp: state.hp,
+      maxHp: state.maxHp
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
   } catch {
@@ -477,10 +539,16 @@ function resetSave() {
  *  mode: 'mine'|'place',
  *  zoom: number,
  *  cam: {x:number,y:number},
+ *  spawn: {x:number,y:number},
  *  player: {x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean},
  *  input: {left:boolean,right:boolean,jump:boolean},
  *  pointer: {down:boolean, screenX:number, screenY:number, worldTx:number, worldTy:number},
  *  mining: {active:boolean, tx:number, ty:number, t:number, progressMs:number, needMs:number},
+ *  hp: number,
+ *  maxHp: number,
+ *  invulnMs: number,
+ *  damageFlashMs: number,
+ *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number}>,
  *  lastSaveAt: number
  * }} */
 const state = {
@@ -492,12 +560,61 @@ const state = {
   mode: 'mine',
   zoom: 3,
   cam: { x: 0, y: 0 },
+  spawn: { x: 0, y: 0 },
   player: { x: 0, y: 0, vx: 0, vy: 0, w: 12, h: 14, onGround: false },
   input: { left: false, right: false },
   pointer: { down: false, screenX: 0, screenY: 0, worldTx: -1, worldTy: -1 },
   mining: { active: false, tx: -1, ty: -1, t: TILE.AIR, progressMs: 0, needMs: 0 },
+  hp: 5,
+  maxHp: 5,
+  invulnMs: 0,
+  damageFlashMs: 0,
+  monsters: [],
   lastSaveAt: 0
 };
+
+let monsterIdSeq = 1;
+
+function spawnMonsters(world, seedStr) {
+  const seed = (hashSeed(seedStr) ^ 0x9e3779b9) >>> 0;
+  const rand = mulberry32(seed);
+  /** @type {Array<any>} */
+  const out = [];
+
+  const want = 6;
+  let tries = 0;
+  while (out.length < want && tries < 220) {
+    tries++;
+    const x = Math.floor(rand() * WORLD_W);
+    const y = findSurfaceY(world, x);
+    const tHere = getTile(world, x, y);
+    const tBelow = getTile(world, x, y + 1);
+    if (tHere !== TILE.AIR) continue;
+    if (!isSolidTileId(tBelow)) continue;
+    const kind = MONSTER_KIND.SLIME;
+    const def = MONSTER_DEF[kind];
+    if (!def) continue;
+
+    // プレイヤー初期位置付近は避ける
+    const wx = x * TILE_SIZE + TILE_SIZE * 0.5;
+    if (Math.abs(wx - state.player.x) < TILE_SIZE * 10) continue;
+
+    out.push({
+      id: monsterIdSeq++,
+      kind,
+      x: wx,
+      y: y * TILE_SIZE + TILE_SIZE * 0.5,
+      vx: 0,
+      vy: 0,
+      w: def.w,
+      h: def.h,
+      onGround: false,
+      dir: rand() < 0.5 ? -1 : 1,
+      thinkMs: 150 + Math.floor(rand() * 450)
+    });
+  }
+  state.monsters = out;
+}
 
 function initNewWorld() {
   const player = getCurrentPlayer?.();
@@ -520,7 +637,15 @@ function initNewWorld() {
   state.player.onGround = false;
   state.cam.x = state.player.x;
   state.cam.y = state.player.y;
+  state.spawn.x = state.player.x;
+  state.spawn.y = state.player.y;
   state.mining.active = false;
+  state.maxHp = 5;
+  state.hp = state.maxHp;
+  state.invulnMs = 0;
+  state.damageFlashMs = 0;
+  spawnMonsters(state.world, state.seed);
+  updateHpPill();
   saveNow();
 }
 
@@ -537,6 +662,14 @@ function loadOrCreate() {
     state.player.vy = saved.player.vy || 0;
     state.cam.x = state.player.x;
     state.cam.y = state.player.y;
+    state.spawn.x = state.player.x;
+    state.spawn.y = state.player.y;
+    state.maxHp = saved.maxHp || 5;
+    state.hp = saved.hp > 0 ? saved.hp : state.maxHp;
+    state.invulnMs = 0;
+    state.damageFlashMs = 0;
+    spawnMonsters(state.world, state.seed);
+    updateHpPill();
     return;
   }
   initNewWorld();
@@ -735,6 +868,124 @@ function tileAtPlayerFeet(world) {
   return getTile(world, tx, ty);
 }
 
+function aabbOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  const ax0 = ax - aw / 2;
+  const ay0 = ay - ah / 2;
+  const ax1 = ax + aw / 2;
+  const ay1 = ay + ah / 2;
+  const bx0 = bx - bw / 2;
+  const by0 = by - bh / 2;
+  const bx1 = bx + bw / 2;
+  const by1 = by + bh / 2;
+  return ax0 < bx1 && ax1 > bx0 && ay0 < by1 && ay1 > by0;
+}
+
+function applyPlayerDamage(amount, fromX) {
+  if (state.invulnMs > 0) return;
+  const dmg = Math.max(0, Math.floor(amount || 0));
+  if (dmg <= 0) return;
+  state.hp = Math.max(0, (state.hp || 0) - dmg);
+  state.invulnMs = 850;
+  state.damageFlashMs = 160;
+
+  // knockback
+  const p = state.player;
+  const dir = p.x < fromX ? -1 : 1;
+  p.vx = -dir * 150;
+  p.vy = Math.min(p.vy, -220);
+
+  if (state.hp <= 0) {
+    // 最小版: その場でリスポーン（ワールドは維持）
+    state.hp = state.maxHp;
+    p.x = state.spawn.x;
+    p.y = state.spawn.y;
+    p.vx = 0;
+    p.vy = 0;
+    state.cam.x = p.x;
+    state.cam.y = p.y;
+    spawnMonsters(state.world, state.seed);
+    state.invulnMs = 1000;
+    state.damageFlashMs = 260;
+  }
+  updateHpPill();
+}
+
+function tileIdAtWorldPx(world, wx, wy) {
+  const tx = Math.floor(wx / TILE_SIZE);
+  const ty = Math.floor(wy / TILE_SIZE);
+  return getTile(world, tx, ty);
+}
+
+function updateMonsterAi(m, dtMs) {
+  const def = MONSTER_DEF[m.kind] || MONSTER_DEF[MONSTER_KIND.SLIME];
+  const p = state.player;
+  const dx = p.x - m.x;
+  const dy = p.y - m.y;
+  const dist2 = dx * dx + dy * dy;
+  const chase = dist2 < (TILE_SIZE * 14) * (TILE_SIZE * 14);
+
+  m.thinkMs -= dtMs;
+  if (m.thinkMs <= 0) {
+    m.thinkMs = chase ? 80 + Math.random() * 120 : 220 + Math.random() * 520;
+    if (chase) m.dir = dx < 0 ? -1 : 1;
+    else if (Math.random() < 0.45) m.dir *= -1;
+  }
+
+  // 障害物があればジャンプ（簡易）
+  const lookX = m.x + m.dir * (m.w / 2 + 2);
+  const feetY = m.y + m.h / 2 - 2;
+  const headY = m.y - m.h / 2 + 2;
+  const tFoot = tileIdAtWorldPx(state.world, lookX, feetY);
+  const tHead = tileIdAtWorldPx(state.world, lookX, headY);
+  const blocked = isSolidTileId(tFoot) || isSolidTileId(tHead);
+  if (blocked && m.onGround) {
+    m.vy = -250;
+  } else if (chase && m.onGround && Math.abs(dx) < TILE_SIZE * 2.5 && dy < -TILE_SIZE * 0.8) {
+    // プレイヤーが少し上にいたら追いかけジャンプ
+    m.vy = -250;
+  }
+
+  const desiredVx = m.dir * def.speed;
+  m.vx = approach(m.vx, desiredVx, dtMs * 0.8);
+}
+
+function tickMonsters(dtMs) {
+  const dt = Math.min(0.033, dtMs / 1000);
+  const world = state.world;
+  for (let i = 0; i < state.monsters.length; i++) {
+    const m = state.monsters[i];
+    const def = MONSTER_DEF[m.kind];
+    if (!def) continue;
+    m.onGround = false;
+
+    updateMonsterAi(m, dtMs);
+
+    // gravity (水は軽め)
+    const feet = tileIdAtWorldPx(world, m.x, m.y + m.h / 2 + 2);
+    const inWater = feet === TILE.WATER;
+    const gravity = inWater ? 320 : 760;
+    m.vy += gravity * dt;
+    if (inWater) m.vy = clamp(m.vy, -140, 200);
+
+    // move X/Y with collision
+    m.x += m.vx * dt;
+    resolveCollisionsAxis(world, m, 'x');
+    m.y += m.vy * dt;
+    resolveCollisionsAxis(world, m, 'y');
+
+    // keep in world bounds + reverse when hitting edge
+    const beforeX = m.x;
+    m.x = clamp(m.x, TILE_SIZE * 1, WORLD_W * TILE_SIZE - TILE_SIZE * 1);
+    if (Math.abs(m.x - beforeX) > 0.01) m.dir *= -1;
+    m.y = clamp(m.y, TILE_SIZE * 1, WORLD_H * TILE_SIZE - TILE_SIZE * 1);
+
+    // contact damage
+    if (aabbOverlap(m.x, m.y, m.w, m.h, state.player.x, state.player.y, state.player.w, state.player.h)) {
+      applyPlayerDamage(def.contactDamage, m.x);
+    }
+  }
+}
+
 function tick(dtMs) {
   const dt = Math.min(0.033, dtMs / 1000);
   const p = state.player;
@@ -802,6 +1053,13 @@ function tick(dtMs) {
     }
   }
 
+  // monsters
+  tickMonsters(dtMs);
+
+  // invuln / flash timers
+  state.invulnMs = Math.max(0, (state.invulnMs || 0) - dtMs);
+  state.damageFlashMs = Math.max(0, (state.damageFlashMs || 0) - dtMs);
+
   // autosave (not every frame)
   const now = performance.now();
   if (now - state.lastSaveAt > 1200) {
@@ -857,6 +1115,28 @@ function draw() {
     }
   }
 
+  // monsters (behind player)
+  for (let i = 0; i < state.monsters.length; i++) {
+    const m = state.monsters[i];
+    const spr = monsterSprites.get(m.kind);
+    if (spr) {
+      const mw = spr.width;
+      const mh = spr.height;
+      ctx.save();
+      if (m.dir < 0) {
+        ctx.translate(Math.round(m.x), Math.round(m.y));
+        ctx.scale(-1, 1);
+        ctx.drawImage(spr, -mw / 2, -mh / 2);
+      } else {
+        ctx.drawImage(spr, Math.round(m.x - mw / 2), Math.round(m.y - mh / 2));
+      }
+      ctx.restore();
+    } else {
+      ctx.fillStyle = 'rgba(255,0,255,0.85)';
+      ctx.fillRect(Math.round(m.x - m.w / 2), Math.round(m.y - m.h / 2), m.w, m.h);
+    }
+  }
+
   // mining highlight
   if (state.pointer.worldTx >= 0 && state.pointer.worldTy >= 0 && canReach(state.pointer.worldTx, state.pointer.worldTy)) {
     const px = state.pointer.worldTx * TILE_SIZE;
@@ -883,7 +1163,13 @@ function draw() {
   const ph = spr.height;
   const drawX = state.player.x - pw / 2;
   const drawY = state.player.y - ph / 2;
-  ctx.drawImage(spr, Math.round(drawX), Math.round(drawY));
+  if (state.invulnMs > 0 && Math.floor(state.invulnMs / 90) % 2 === 0) {
+    ctx.globalAlpha = 0.55;
+    ctx.drawImage(spr, Math.round(drawX), Math.round(drawY));
+    ctx.globalAlpha = 1;
+  } else {
+    ctx.drawImage(spr, Math.round(drawX), Math.round(drawY));
+  }
 
   // simple cursor tool icon (near pointer) for desktop
   if (!isTouchLike() && state.pointer.worldTx >= 0 && state.pointer.worldTy >= 0) {
@@ -905,6 +1191,15 @@ function draw() {
   if (feet === TILE.LAVA) {
     ctx.save();
     ctx.fillStyle = 'rgba(255, 80, 80, 0.12)';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+    ctx.restore();
+  }
+
+  // damage flash
+  if (state.damageFlashMs > 0) {
+    const a = clamp(state.damageFlashMs / 160, 0, 1) * 0.14;
+    ctx.save();
+    ctx.fillStyle = `rgba(255, 60, 60, ${a})`;
     ctx.fillRect(0, 0, rect.width, rect.height);
     ctx.restore();
   }
@@ -1131,6 +1426,7 @@ function bindTouchControls() {
 function boot() {
   updatePlayerPill();
   loadAssetsFromSamples();
+  loadMonsterSprites();
 
   // 初期ズーム（スマホは少し引き気味）
   setZoom(isTouchLike() ? 2 : 3);
@@ -1139,6 +1435,7 @@ function boot() {
 
   loadOrCreate();
   renderHotbar();
+  updateHpPill();
 
   resizeCanvas();
   window.addEventListener('resize', () => {
