@@ -190,6 +190,14 @@ const games = [
     color: '#00cec9',
     icon: '🧩',
     link: '/games/maze/'
+  },
+  {
+    id: 'pixel-quest',
+    title: 'ピクセルクエスト',
+    desc: '💎を集めて🏁へ！ステージも作れる',
+    color: '#111827',
+    icon: '💎',
+    link: '/games/pixel-quest/'
   }
 ];
 

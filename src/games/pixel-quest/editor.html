@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ステージ作成 | ピクセルクエスト</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body class="pq-full pq-safe">
+    <div class="container" style="padding-top: 10px;">
+      <div class="pq-topbar">
+        <a class="pq-back" href="./stage-select.html">&larr; ステージ選択</a>
+        <span class="pq-chip" id="editorStatus">16×12</span>
+        <a class="pq-tool-btn" href="./stage-select.html" style="text-decoration: none; display: inline-flex; align-items: center;"
+          >ステージ選択</a
+        >
+      </div>
+
+      <div class="pq-page">
+        <div class="pq-panel">
+          <div class="pq-row">
+            <div style="display:flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <button class="pq-tool-btn" data-tool="floor" id="toolFloor">⬜ ゆか</button>
+              <button class="pq-tool-btn" data-tool="wall" id="toolWall">🧱 かべ</button>
+              <button class="pq-tool-btn" data-tool="gem" id="toolGem">💎 ほうせき</button>
+              <button class="pq-tool-btn" data-tool="spike" id="toolSpike">⚠️ トゲ</button>
+              <button class="pq-tool-btn" data-tool="goal" id="toolGoal">🏁 ゴール</button>
+              <button class="pq-tool-btn" data-tool="start" id="toolStart">⭐ スタート</button>
+              <span class="pq-chip" id="toolHint">ドラッグでぬろう</span>
+            </div>
+
+            <div style="display:flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <label class="pq-chip" style="display: inline-flex; gap: 8px; align-items: center;">
+                名前:
+                <input
+                  id="stageName"
+                  maxlength="24"
+                  placeholder="たとえば：うちのステージ"
+                  style="border: none; background: transparent; outline: none; width: 220px; color: white;"
+                />
+              </label>
+              <button class="btn-primary" id="saveBtn">保存</button>
+              <button class="pq-tool-btn" id="loadBtn">ライブラリ</button>
+              <button class="pq-tool-btn" id="clearBtn">ぜんぶ床</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px; display:flex; gap: 8px; flex-wrap: wrap; align-items:center;">
+            <span class="pq-chip">見た目</span>
+            <button class="pq-tool-btn pq-mini" data-skin-slot="playerAssetId" id="pickPlayerBtn">🙂 プレイヤー</button>
+            <button class="pq-tool-btn pq-mini" data-skin-slot="wallAssetId" id="pickWallBtn">🧱 かべ</button>
+            <button class="pq-tool-btn pq-mini" data-skin-slot="gemAssetId" id="pickGemBtn">💎 ほうせき</button>
+            <button class="pq-tool-btn pq-mini" data-skin-slot="goalAssetId" id="pickGoalBtn">🏁 ゴール</button>
+            <button class="pq-tool-btn pq-mini" data-skin-slot="spikeAssetId" id="pickSpikeBtn">⚠️ トゲ</button>
+            <span class="pq-chip" id="skinStatus">ドット絵メーカーの作品を使えるよ</span>
+          </div>
+        </div>
+
+        <div class="pq-canvas-wrap">
+          <canvas id="editorCanvas" class="pq-canvas" width="800" height="520"></canvas>
+        </div>
+
+        <div class="pq-hint">
+          ルール：💎をぜんぶ取ってから🏁へ行くとクリア。⚠️にのるとやり直し。<br />
+          ヒント：ドット絵メーカーで作った作品を「見た目」に設定すると、ステージがオリジナルになるよ。
+        </div>
+      </div>
+    </div>
+
+    <div class="pq-overlay" id="overlay">
+      <div class="pq-overlay-card" style="text-align:center;">
+        <h2 class="pq-overlay-title" id="overlayTitle">ピクセルクエスト</h2>
+        <p class="pq-overlay-text" id="overlayText"></p>
+        <div class="pq-overlay-extra" id="overlayExtra"></div>
+        <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+      </div>
+    </div>
+
+    <div class="pq-overlay" id="libraryOverlay" aria-hidden="true">
+      <div class="pq-overlay-card" style="max-width: 920px; text-align:left;">
+        <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+          <h2 style="color:white; margin:0;">📚 ステージライブラリ</h2>
+          <button class="pq-tool-btn" id="libraryClose" style="background: rgba(255,255,255,0.14); color: white;">とじる</button>
+        </div>
+
+        <p style="color: rgba(255,255,255,0.9); margin-top: 10px; margin-bottom: 0;">
+          ステージをロード/削除/書き出しできます。
+        </p>
+
+        <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-top: 10px;">
+          <div style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+            <button class="pq-tool-btn" id="libraryNew" style="background: rgba(255,255,255,0.14); color: white;">新しく作る</button>
+            <button class="pq-tool-btn" id="libraryExportAll" style="background: rgba(255,255,255,0.14); color: white;">全部を書き出し</button>
+            <button class="pq-tool-btn" id="libraryImportBtn" style="background: rgba(255,255,255,0.14); color: white;">取りこみ</button>
+            <input id="libraryImportFile" type="file" accept="application/json" hidden />
+          </div>
+          <div class="pq-chip" id="libraryCount" style="background: rgba(255,255,255,0.14); color: white;">0こ</div>
+        </div>
+
+        <div id="libraryList" style="display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <div class="pq-overlay" id="assetPickerOverlay" aria-hidden="true">
+      <div class="pq-overlay-card" style="max-width: 920px; text-align:left;">
+        <div style="display:flex; justify-content: space-between; gap: 10px; align-items: baseline;">
+          <h2 style="color:white; margin:0;" id="assetPickerTitle">🧩 見た目をえらぶ</h2>
+          <button class="pq-tool-btn" id="assetPickerClose" style="background: rgba(255,255,255,0.14); color: white;">とじる</button>
+        </div>
+
+        <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px;">
+          <button class="pq-tool-btn pq-mini" id="assetPickerNone">なし（標準）</button>
+          <label class="pq-chip" style="display:inline-flex; gap: 8px; align-items:center;">
+            検索:
+            <input id="assetPickerSearch" placeholder="名前で検索" style="border:none; background:transparent; outline:none; color:white; width: 240px;" />
+          </label>
+          <label class="pq-chip" style="display:inline-flex; gap: 8px; align-items:center;">
+            表示:
+            <select id="assetPickerScope" style="border:none; background:transparent; outline:none; color:white;">
+              <option value="mine">自分の作品</option>
+              <option value="all">みんなの作品</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pq-asset-grid" id="assetPickerList"></div>
+      </div>
+    </div>
+
+    <script type="module" src="./editor.js"></script>
+  </body>
+</html>
+

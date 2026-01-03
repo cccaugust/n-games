@@ -1,0 +1,233 @@
+:root {
+  --pq-bg: #0b1020;
+  --pq-panel: rgba(255, 255, 255, 0.08);
+  --pq-panel-border: rgba(255, 255, 255, 0.12);
+}
+
+.pq-safe {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.pq-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.pq-back {
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 800;
+  background: white;
+  padding: 10px 12px;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
+
+.pq-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: white;
+  font-weight: 800;
+}
+
+.pq-page {
+  margin-top: 12px;
+}
+
+.pq-panel {
+  background: var(--pq-panel);
+  border: 1px solid var(--pq-panel-border);
+  border-radius: 18px;
+  padding: 12px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.pq-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .pq-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+}
+
+.pq-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  padding: 12px;
+}
+
+.pq-stage-preview-wrap {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.pq-stage-preview {
+  width: 100%;
+  height: 140px;
+  display: block;
+}
+
+.pq-tool-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.pq-tool-btn[data-active="true"] {
+  background: rgba(0, 206, 201, 0.22);
+  border: 1px solid rgba(0, 206, 201, 0.35);
+}
+
+.pq-full {
+  min-height: 100svh;
+  background: radial-gradient(1200px 600px at 20% 0%, rgba(0, 206, 201, 0.18), transparent 60%),
+    radial-gradient(900px 540px at 80% 30%, rgba(162, 155, 254, 0.18), transparent 60%),
+    linear-gradient(180deg, var(--pq-bg), #0a0f1e 60%, #070b16);
+}
+
+.pq-canvas-wrap {
+  margin-top: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.pq-canvas {
+  width: 100%;
+  height: min(62svh, 520px);
+  display: block;
+  touch-action: none;
+}
+
+.pq-hint {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.pq-dpad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+  justify-items: stretch;
+}
+
+.pq-dpad button {
+  min-height: 48px;
+}
+
+.pq-dpad .blank {
+  background: transparent;
+  border: none;
+}
+
+.pq-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 50;
+  padding: 18px;
+}
+
+.pq-overlay-card {
+  width: min(820px, 100%);
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 16px;
+  color: white;
+  backdrop-filter: blur(8px);
+}
+
+.pq-overlay-title {
+  margin: 0;
+  font-weight: 900;
+}
+
+.pq-overlay-text {
+  margin: 10px 0 0;
+  opacity: 0.95;
+}
+
+.pq-overlay-extra {
+  margin-top: 10px;
+}
+
+.pq-mini {
+  padding: 8px 10px;
+  border-radius: 999px;
+  min-height: 40px;
+  font-weight: 800;
+}
+
+.pq-mini.danger {
+  background: rgba(255, 118, 117, 0.2);
+  border: 1px solid rgba(255, 118, 117, 0.35);
+}
+
+.pq-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.pq-asset-btn {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pq-asset-btn img {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  background: white;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
