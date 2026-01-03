@@ -1,11 +1,9 @@
 import Phaser from 'phaser';
 import { getCurrentPlayer, requireAuth } from '../../js/auth.js';
 import { resolvePath } from '../../js/config.js';
-import { avatarToHtml, escapeHtml } from '../../js/avatar.js';
 import {
   assetPreviewDataUrl,
   createEmptyAsset,
-  duplicatePixelAsset,
   listPixelAssets,
   pixelsToImageData,
   putPixelAsset,
@@ -21,10 +19,22 @@ const ownerId = player?.id != null ? String(player.id) : 'unknown';
 // Header
 const backToPortal = document.getElementById('backToPortal');
 backToPortal.href = resolvePath('/pages/portal/portal.html');
-const playerPill = document.getElementById('playerPill');
-playerPill.innerHTML = `${avatarToHtml(player?.avatar, { size: 18, className: 'portal-avatar', alt: '' })} ${escapeHtml(
-  player?.name || 'Player'
-)}`;
+const openCreateFishBtn = document.getElementById('openCreateFishBtn');
+const fishPaletteEl = document.getElementById('fishPalette');
+const aquariumDropEl = document.getElementById('aquariumDrop');
+const dropHintEl = document.getElementById('dropHint');
+
+// Fish edit modal
+const fishModal = document.getElementById('fishModal');
+const fishModalTitle = document.getElementById('fishModalTitle');
+const fishModalSub = document.getElementById('fishModalSub');
+const fishModalCloseBtn = document.getElementById('fishModalCloseBtn');
+const fishModalDeleteBtn = document.getElementById('fishModalDeleteBtn');
+const fishModalPreview = document.getElementById('fishModalPreview');
+const fishModalNameInput = document.getElementById('fishModalNameInput');
+const fishModalPersonalitySelect = document.getElementById('fishModalPersonalitySelect');
+const fishModalHueRange = document.getElementById('fishModalHueRange');
+const fishModalHueValue = document.getElementById('fishModalHueValue');
 
 // Make mobile layout stable by exposing topbar height to CSS
 const topbarEl = document.querySelector('.aq-topbar');
@@ -683,7 +693,7 @@ class AquariumScene extends Phaser.Scene {
     }
 
     this.emptyHint = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n右の「＋」から追加してね', {
+      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n上の魚をドラッグして追加してね', {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '20px',
         color: '#ffffff',
@@ -782,8 +792,10 @@ class AquariumScene extends Phaser.Scene {
     const tex = this.ensureTextureFromAsset(asset, fish.hueDeg);
 
     if (!existing) {
-      const x = Phaser.Math.Between(40, Math.max(40, W - 40));
-      const y = Phaser.Math.Between(40, Math.max(40, H - 40));
+      const sx = Number(fish?.spawnX);
+      const sy = Number(fish?.spawnY);
+      const x = Number.isFinite(sx) ? clamp(sx, 40, Math.max(40, W - 40)) : Phaser.Math.Between(40, Math.max(40, W - 40));
+      const y = Number.isFinite(sy) ? clamp(sy, 40, Math.max(40, H - 40)) : Phaser.Math.Between(40, Math.max(40, H - 40));
       const sprite = this.add.sprite(x, y, tex);
       sprite.setOrigin(0.5, 0.5);
       sprite.setScale(fish.size);
@@ -940,195 +952,42 @@ class AquariumScene extends Phaser.Scene {
 // -----------------------
 // UI + state
 // -----------------------
-const fishListEl = document.getElementById('fishList');
-const openAddMenuBtn = document.getElementById('openAddMenuBtn');
-const addMenuModal = document.getElementById('addMenuModal');
-const addMenuCloseBtn = document.getElementById('addMenuCloseBtn');
-const addMenuSampleBtn = document.getElementById('addMenuSampleBtn');
-const addMenuAssetBtn = document.getElementById('addMenuAssetBtn');
-const addMenuCreateBtn = document.getElementById('addMenuCreateBtn');
-
-const selectedInfo = document.getElementById('selectedInfo');
-const deleteFishBtn = document.getElementById('deleteFishBtn');
-const fishNameInput = document.getElementById('fishNameInput');
-const personalitySelect = document.getElementById('personalitySelect');
-const speedRange = document.getElementById('speedRange');
-const sizeRange = document.getElementById('sizeRange');
-const hueRange = document.getElementById('hueRange');
-const hueValue = document.getElementById('hueValue');
-
-const pickerModal = document.getElementById('pickerModal');
-const pickerTitle = document.getElementById('pickerTitle');
-const pickerNote = document.getElementById('pickerNote');
-const pickerCloseBtn = document.getElementById('pickerCloseBtn');
-const pickerSearchInput = document.getElementById('pickerSearchInput');
-const pickerOnly32 = document.getElementById('pickerOnly32');
-const pickerGrid = document.getElementById('pickerGrid');
-
 /** @type {AquariumScene|null} */
 let scene = null;
 
-/** @type {{id:string, name:string, personality:'calm'|'energetic'|'shy'|'lazy', speed:number, size:number, hueDeg:number, asset:any}[]} */
+/**
+ * @typedef {'calm'|'energetic'|'shy'|'lazy'} Personality
+ */
+
+/** @type {{id:string, name:string, personality:Personality, speed:number, size:number, hueDeg:number, asset:any, spawnX?:number, spawnY?:number}[]} */
 let fishes = [];
+
+/** @type {string|null} */
 let selectedFishId = null;
 
 const SAMPLE_ASSETS = buildSampleFishAssets();
-
 const MAX_FISH = 48;
-const REPRO_TICK_MS = 2400;
 
-let renderScheduled = false;
-function scheduleRender() {
-  if (renderScheduled) return;
-  renderScheduled = true;
-  requestAnimationFrame(() => {
-    renderScheduled = false;
-    renderFishList();
-    renderSelectedForm();
-  });
-}
+/** @type {Map<string, any>} */
+let paletteMap = new Map();
 
-function setSelectedFish(id) {
-  selectedFishId = id;
-  renderFishList();
-  renderSelectedForm();
+let toastTimer = null;
+function showToast(text) {
+  if (!text) return;
+  const existing = document.querySelector('.aq-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'aq-toast';
+  t.textContent = String(text);
+  document.body.appendChild(t);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.remove();
+  }, 1300);
 }
 
 function getSelectedFish() {
   return fishes.find((f) => f.id === selectedFishId) || null;
-}
-
-function setFormEnabled(on) {
-  const dis = !on;
-  deleteFishBtn.disabled = dis;
-  fishNameInput.disabled = dis;
-  personalitySelect.disabled = dis;
-  speedRange.disabled = dis;
-  sizeRange.disabled = dis;
-  hueRange.disabled = dis;
-}
-
-function renderSelectedForm() {
-  const f = getSelectedFish();
-  if (!f) {
-    selectedInfo.textContent = 'まだ選ばれていません';
-    fishNameInput.value = '';
-    personalitySelect.value = 'calm';
-    speedRange.value = '70';
-    sizeRange.value = '1';
-    hueRange.value = '0';
-    hueValue.textContent = '0°';
-    setFormEnabled(false);
-    return;
-  }
-
-  selectedInfo.textContent = `ID: ${f.id.slice(0, 8)}… / 素材: ${f.asset?.name || '不明'}`;
-  fishNameInput.value = f.name || '';
-  personalitySelect.value = f.personality;
-  speedRange.value = String(f.speed);
-  sizeRange.value = String(f.size);
-  hueRange.value = String(Math.round(f.hueDeg));
-  hueValue.textContent = `${Math.round(f.hueDeg)}°`;
-  setFormEnabled(true);
-}
-
-function renderFishList() {
-  fishListEl.innerHTML = '';
-  if (fishes.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'aq-note';
-    empty.style.padding = '10px';
-    empty.textContent = 'まだ魚がいません。下のサンプルをタップ（または右上の「＋」）で追加してね。';
-    fishListEl.appendChild(empty);
-
-    // Quick add samples (so there is always something selectable)
-    const grid = document.createElement('div');
-    grid.style.display = 'grid';
-    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
-    grid.style.gap = '8px';
-    grid.style.padding = '10px';
-
-    SAMPLE_ASSETS.slice(0, 16).forEach((a) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'aq-btn';
-      btn.style.display = 'grid';
-      btn.style.gridTemplateColumns = '44px 1fr';
-      btn.style.alignItems = 'center';
-      btn.style.gap = '10px';
-      btn.style.padding = '10px';
-      btn.style.borderRadius = '14px';
-      btn.style.textAlign = 'left';
-
-      const img = document.createElement('img');
-      img.alt = '';
-      img.src = assetPreviewDataUrl(a, 44);
-      img.style.width = '44px';
-      img.style.height = '44px';
-      img.style.imageRendering = 'pixelated';
-      img.style.borderRadius = '12px';
-      img.style.border = '1px solid rgba(0,0,0,0.08)';
-      img.style.background = 'rgba(0,0,0,0.04)';
-
-      const label = document.createElement('div');
-      label.style.fontWeight = '900';
-      label.style.whiteSpace = 'nowrap';
-      label.style.overflow = 'hidden';
-      label.style.textOverflow = 'ellipsis';
-      label.textContent = a.name;
-
-      btn.appendChild(img);
-      btn.appendChild(label);
-      btn.addEventListener('click', () => {
-        void (async () => {
-          try {
-            // Save as "my" asset so it appears in pixel-art-maker too
-            const saved = await duplicatePixelAsset(
-              { ...a, ownerId, name: `${a.name}（水槽）` },
-              { ownerId, name: `${a.name}（水槽）` }
-            );
-            addFishFromAsset(saved, { name: saved.name });
-          } catch (e) {
-            console.warn('Failed to add sample fish:', e);
-            alert('サンプル追加に失敗しました。通信/保存状態を確認して、もう一度試してね。');
-          }
-        })();
-      });
-      grid.appendChild(btn);
-    });
-    fishListEl.appendChild(grid);
-
-    return;
-  }
-
-  fishes.forEach((f) => {
-    const row = document.createElement('div');
-    row.className = 'aq-fish-row';
-    row.dataset.selected = f.id === selectedFishId ? 'true' : 'false';
-
-    const img = document.createElement('img');
-    img.className = 'aq-fish-thumb';
-    img.alt = '';
-    img.src = assetPreviewDataUrl(f.asset, 48);
-    img.style.filter = f.hueDeg ? `hue-rotate(${Math.round(f.hueDeg)}deg)` : '';
-
-    const meta = document.createElement('div');
-    meta.className = 'aq-fish-meta';
-    meta.innerHTML = `
-      <div class="aq-fish-name">${escapeHtml(f.name || 'さかな')}</div>
-      <div class="aq-fish-sub">${escapeHtml(f.asset?.name || '')}</div>
-    `;
-
-    const chip = document.createElement('div');
-    chip.className = 'aq-chip';
-    chip.textContent = f.personality === 'energetic' ? 'げんき' : f.personality === 'shy' ? 'びびり' : f.personality === 'lazy' ? 'マイペース' : 'おだやか';
-
-    row.appendChild(img);
-    row.appendChild(meta);
-    row.appendChild(chip);
-    row.addEventListener('click', () => setSelectedFish(f.id));
-    fishListEl.appendChild(row);
-  });
 }
 
 function syncToScene(fish) {
@@ -1136,76 +995,223 @@ function syncToScene(fish) {
   scene.upsertFish(fish);
 }
 
-function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, select = true } = {}) {
+function removeFromScene(fishId) {
+  scene?.removeFish(fishId);
+}
+
+function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, spawnX, spawnY, select = true } = {}) {
   if (!asset) {
-    alert('素材が見つからず、魚を追加できませんでした。');
+    showToast('素材が見つからず、追加できませんでした');
     return;
   }
   if (fishes.length >= MAX_FISH) {
-    alert(`魚が多すぎるため追加できません（最大 ${MAX_FISH} 匹）。`);
+    showToast(`魚が多すぎるため追加できません（最大 ${MAX_FISH} 匹）`);
     return;
   }
+
   const fish = {
     id: createId('fish'),
-    name: String(name || asset?.name || 'さかな'),
-    personality: personality || 'calm',
+    name: String(name || asset?.name || 'さかな').slice(0, 40),
+    personality: /** @type {Personality} */ (personality || 'calm'),
     speed: clamp(Number(speed ?? 70) || 70, 20, 200),
     size: clamp(Number(size ?? 1) || 1, 0.4, 3),
     hueDeg: clamp(Number(hueDeg ?? 0) || 0, -180, 180),
-    asset
+    asset,
+    spawnX: Number.isFinite(Number(spawnX)) ? Number(spawnX) : undefined,
+    spawnY: Number.isFinite(Number(spawnY)) ? Number(spawnY) : undefined
   };
+
   fishes = [fish, ...fishes];
   syncToScene(fish);
-  if (select) setSelectedFish(fish.id);
-  else scheduleRender(); // reproduction等で追加した場合もリストに反映する
+  if (select) openFishModal(fish.id);
 }
 
-function deleteSelectedFish() {
+function deleteFishById(fishId) {
+  const f = fishes.find((x) => x.id === fishId);
+  if (!f) return;
+  const label = f.name || 'さかな';
+  if (!confirm(`「${label}」を削除しますか？`)) return;
+  fishes = fishes.filter((x) => x.id !== fishId);
+  removeFromScene(fishId);
+  if (selectedFishId === fishId) closeFishModal();
+}
+
+function renderFishModal() {
   const f = getSelectedFish();
   if (!f) return;
-  if (!confirm(`「${f.name}」を削除しますか？`)) return;
-  fishes = fishes.filter((x) => x.id !== f.id);
-  scene?.removeFish(f.id);
-  selectedFishId = fishes[0]?.id || null;
-  renderFishList();
-  renderSelectedForm();
+  fishModalTitle.textContent = f.name || 'さかな';
+  fishModalSub.textContent = `性格・色相を変更できます`;
+
+  fishModalPreview.src = assetPreviewDataUrl(f.asset, 96);
+  fishModalPreview.style.filter = f.hueDeg ? `hue-rotate(${Math.round(f.hueDeg)}deg)` : '';
+
+  fishModalNameInput.value = String(f.name || '');
+  fishModalPersonalitySelect.value = String(f.personality || 'calm');
+  fishModalHueRange.value = String(Math.round(Number(f.hueDeg) || 0));
+  fishModalHueValue.textContent = `${Math.round(Number(f.hueDeg) || 0)}°`;
 }
 
-// Picker modal
-let pickerMode = 'samples'; // 'samples' | 'assets'
-let pickerItems = []; // {key, name, asset, previewUrl, meta}
-
-function openPicker(mode) {
-  pickerMode = mode;
-  pickerSearchInput.value = '';
-  pickerOnly32.checked = true;
-  pickerModal.hidden = false;
-  document.body.classList.add('modal-open');
-  pickerTitle.textContent = mode === 'samples' ? 'サンプルから追加' : '作品から追加';
-  pickerNote.textContent = mode === 'samples' ? 'タップで追加（自分の作品として保存されます）' : 'タップで水槽に追加';
-  renderPickerGrid();
-}
-
-function closePicker() {
-  pickerModal.hidden = true;
-  document.body.classList.remove('modal-open');
-}
-
-function openAddMenu() {
-  if (!addMenuModal) return;
-  addMenuModal.hidden = false;
+function openFishModal(fishId) {
+  selectedFishId = String(fishId);
+  renderFishModal();
+  fishModal.hidden = false;
   document.body.classList.add('modal-open');
 }
 
-function closeAddMenu() {
-  if (!addMenuModal) return;
-  addMenuModal.hidden = true;
+function closeFishModal() {
+  fishModal.hidden = true;
   document.body.classList.remove('modal-open');
+  selectedFishId = null;
 }
 
-async function openAssetsPicker() {
-  pickerItems = await buildPickerItemsFromAssets();
-  openPicker('assets');
+function rectPointToLocal(rect, clientX, clientY) {
+  const x = clamp(clientX - rect.left, 0, rect.width);
+  const y = clamp(clientY - rect.top, 0, rect.height);
+  return { x, y };
+}
+
+function setDropUi(on) {
+  aquariumDropEl.classList.toggle('is-drop-over', Boolean(on));
+  if (dropHintEl) dropHintEl.hidden = !on;
+}
+
+async function loadPalette() {
+  /** @type {any[]} */
+  let assets = [];
+  try {
+    assets = (await listPixelAssets()) || [];
+  } catch (e) {
+    console.warn('Failed to list assets:', e);
+    assets = [];
+  }
+
+  const own = assets
+    .filter((a) => Number(a?.width) === 32 && Number(a?.height) === 32)
+    .sort((a, b) => String(b?.updatedAt || '').localeCompare(String(a?.updatedAt || '')))
+    .slice(0, 80);
+
+  const palette = [...SAMPLE_ASSETS, ...own];
+  paletteMap = new Map(palette.map((a) => [String(a.id), a]));
+  renderPalette(palette);
+}
+
+function renderPalette(assets) {
+  fishPaletteEl.innerHTML = '';
+  assets.forEach((a) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'aq-palette-item';
+    btn.setAttribute('aria-label', String(a?.name || 'さかな'));
+    btn.title = String(a?.name || 'さかな');
+    btn.draggable = true;
+
+    const img = document.createElement('img');
+    img.alt = '';
+    img.src = assetPreviewDataUrl(a, 40);
+    btn.appendChild(img);
+
+    btn.addEventListener('click', () => {
+      if (btn.dataset.suppressClick === '1') {
+        btn.dataset.suppressClick = '0';
+        return;
+      }
+      // クリック/タップでは名前表示（追加はドラッグ推奨）
+      showToast(a?.name || 'さかな');
+    });
+
+    btn.addEventListener('dragstart', (e) => {
+      try {
+        e.dataTransfer?.setData('text/plain', String(a.id));
+        e.dataTransfer.effectAllowed = 'copy';
+      } catch {
+        // ignore
+      }
+      setDropUi(true);
+    });
+    btn.addEventListener('dragend', () => setDropUi(false));
+
+    // Touch/pen: long-press to "drag"
+    let pressT = null;
+    let startX = 0;
+    let startY = 0;
+    let ghost = null;
+    let dragging = false;
+
+    const cleanup = () => {
+      if (pressT) clearTimeout(pressT);
+      pressT = null;
+      dragging = false;
+      if (ghost) ghost.remove();
+      ghost = null;
+      setDropUi(false);
+    };
+
+    const updateGhost = (clientX, clientY) => {
+      if (!ghost) return;
+      ghost.style.left = `${clientX}px`;
+      ghost.style.top = `${clientY}px`;
+      const rect = aquariumDropEl.getBoundingClientRect();
+      const inside = clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+      setDropUi(inside);
+    };
+
+    const startDrag = (clientX, clientY) => {
+      if (dragging) return;
+      dragging = true;
+      ghost = document.createElement('div');
+      ghost.className = 'aq-drag-ghost';
+      const gi = document.createElement('img');
+      gi.alt = '';
+      gi.src = assetPreviewDataUrl(a, 48);
+      ghost.appendChild(gi);
+      document.body.appendChild(ghost);
+      updateGhost(clientX, clientY);
+    };
+
+    btn.addEventListener('pointerdown', (e) => {
+      if (!e.isPrimary) return;
+      // mouseはHTML5 D&Dに任せる
+      if (e.pointerType === 'mouse') return;
+      startX = e.clientX;
+      startY = e.clientY;
+      pressT = setTimeout(() => startDrag(e.clientX, e.clientY), 180);
+    });
+
+    btn.addEventListener('pointermove', (e) => {
+      if (e.pointerType === 'mouse') return;
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      if (!dragging && pressT && (dx > 8 || dy > 8)) {
+        clearTimeout(pressT);
+        pressT = null;
+        startDrag(e.clientX, e.clientY);
+      }
+      if (dragging) updateGhost(e.clientX, e.clientY);
+    });
+
+    btn.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse') return;
+      const rect = aquariumDropEl.getBoundingClientRect();
+      const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+      if (dragging && inside) {
+        const { x, y } = rectPointToLocal(rect, e.clientX, e.clientY);
+        addFishFromAsset(a, { name: a?.name, spawnX: x, spawnY: y, select: false });
+        btn.dataset.suppressClick = '1';
+        try {
+          e.preventDefault();
+        } catch {
+          // ignore
+        }
+      } else if (!dragging) {
+        showToast(a?.name || 'さかな');
+      }
+      cleanup();
+    });
+
+    btn.addEventListener('pointercancel', cleanup);
+
+    fishPaletteEl.appendChild(btn);
+  });
 }
 
 async function createFishFlow() {
@@ -1221,225 +1227,101 @@ async function createFishFlow() {
     showHue: true
   });
   if (!saved) return;
-  // Ensure it is saved (openPixelArtModal already saves). But keep a safety upsert if needed.
   try {
     await putPixelAsset(saved);
   } catch {
     // ignore
   }
-  addFishFromAsset(saved, { name: saved.name });
+  await loadPalette();
+  // つくった魚は、とりあえず水槽にも1匹出す
+  const rect = aquariumDropEl.getBoundingClientRect();
+  addFishFromAsset(saved, { name: saved.name, spawnX: rect.width * 0.5, spawnY: rect.height * 0.5, select: true });
 }
 
-function buildPickerItemsFromSamples() {
-  return SAMPLE_ASSETS.map((a) => ({
-    key: a.id,
-    name: a.name,
-    asset: a,
-    previewUrl: assetPreviewDataUrl(a, 56),
-    meta: `${a.width}×${a.height}`
-  }));
-}
-
-async function buildPickerItemsFromAssets() {
-  const list = await listPixelAssets();
-  return (list || []).map((a) => ({
-    key: a.id,
-    name: a.name,
-    asset: a,
-    previewUrl: assetPreviewDataUrl(a, 56),
-    meta: `${a.width}×${a.height}`
-  }));
-}
-
-function applyPickerFilters(items) {
-  const q = String(pickerSearchInput.value || '').trim().toLowerCase();
-  let out = Array.isArray(items) ? items.slice() : [];
-  if (pickerOnly32.checked) out = out.filter((it) => Number(it.asset?.width) === 32 && Number(it.asset?.height) === 32);
-  if (q) out = out.filter((it) => String(it.name || '').toLowerCase().includes(q));
-  return out;
-}
-
-function renderPickerGrid() {
-  pickerGrid.innerHTML = '';
-  const filtered = applyPickerFilters(pickerItems);
-  if (filtered.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'aq-note';
-    empty.textContent = '見つからなかったよ。検索やフィルタを変えてみてね。';
-    pickerGrid.appendChild(empty);
-    return;
-  }
-
-  filtered.slice(0, 120).forEach((it) => {
-    const btn = document.createElement('div');
-    btn.className = 'aq-picker-item';
-    btn.innerHTML = `
-      <img alt="" src="${it.previewUrl}" />
-      <div>
-        <div style="font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(it.name || '(no name)')}</div>
-        <div class="aq-note">${escapeHtml(it.meta || '')}</div>
-      </div>
-    `;
-    btn.addEventListener('click', () => {
-      void (async () => {
-        try {
-          if (pickerMode === 'samples') {
-            // Save as "my" asset so it shows in pixel-art-maker too
-            const base = it.asset;
-            const saved = await duplicatePixelAsset(
-              { ...base, ownerId, name: `${base.name}（水槽）` },
-              { ownerId, name: `${base.name}（水槽）` }
-            );
-            closePicker();
-            addFishFromAsset(saved, { name: saved.name });
-            return;
-          }
-          closePicker();
-          addFishFromAsset(it.asset, { name: it.asset?.name });
-        } catch (e) {
-          console.warn('Failed to add fish from picker:', e);
-          alert('追加に失敗しました。通信/保存状態を確認して、もう一度試してね。');
-        }
-      })();
-    });
-    pickerGrid.appendChild(btn);
-  });
-}
-
-// Events
-pickerCloseBtn.addEventListener('click', closePicker);
-pickerModal.addEventListener('click', (e) => {
-  if (e.target === pickerModal) closePicker();
+// Modal events
+fishModalCloseBtn?.addEventListener('click', closeFishModal);
+fishModal?.addEventListener('click', (e) => {
+  if (e.target === fishModal) closeFishModal();
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (addMenuModal && !addMenuModal.hidden) closeAddMenu();
-  else if (!pickerModal.hidden) closePicker();
+  if (fishModal && !fishModal.hidden) closeFishModal();
 });
-pickerSearchInput.addEventListener('input', renderPickerGrid);
-pickerOnly32.addEventListener('change', renderPickerGrid);
 
-openAddMenuBtn?.addEventListener('click', openAddMenu);
-addMenuCloseBtn?.addEventListener('click', closeAddMenu);
-addMenuModal?.addEventListener('click', (e) => {
-  if (e.target === addMenuModal) closeAddMenu();
+fishModalDeleteBtn?.addEventListener('click', () => {
+  if (!selectedFishId) return;
+  deleteFishById(selectedFishId);
 });
-addMenuSampleBtn?.addEventListener('click', () => {
-  closeAddMenu();
-  pickerItems = buildPickerItemsFromSamples();
-  openPicker('samples');
+
+fishModalNameInput?.addEventListener('input', () => {
+  const f = getSelectedFish();
+  if (!f) return;
+  f.name = String(fishModalNameInput.value || '').slice(0, 40);
+  renderFishModal();
 });
-addMenuAssetBtn?.addEventListener('click', () => {
-  closeAddMenu();
-  void (async () => {
-    try {
-      await openAssetsPicker();
-    } catch (e) {
-      console.warn('Failed to load assets for picker:', e);
-      alert('作品一覧の読み込みに失敗しました。通信/保存状態を確認して、もう一度試してね。');
-    }
-  })();
+
+fishModalPersonalitySelect?.addEventListener('change', () => {
+  const f = getSelectedFish();
+  if (!f) return;
+  f.personality = /** @type {Personality} */ (fishModalPersonalitySelect.value || 'calm');
+  syncToScene(f);
+  renderFishModal();
 });
-addMenuCreateBtn?.addEventListener('click', () => {
-  closeAddMenu();
+
+fishModalHueRange?.addEventListener('input', () => {
+  const f = getSelectedFish();
+  if (!f) return;
+  f.hueDeg = clamp(Number(fishModalHueRange.value) || 0, -180, 180);
+  syncToScene(f);
+  renderFishModal();
+});
+
+// Header actions
+openCreateFishBtn?.addEventListener('click', () => {
   void (async () => {
     try {
       await createFishFlow();
     } catch (e) {
       console.warn('Failed to create fish:', e);
-      alert('魚の作成に失敗しました。もう一度試してね。');
+      showToast('魚の作成に失敗しました');
     }
   })();
 });
 
-deleteFishBtn.addEventListener('click', deleteSelectedFish);
-
-fishNameInput.addEventListener('input', () => {
-  const f = getSelectedFish();
-  if (!f) return;
-  f.name = String(fishNameInput.value || '').slice(0, 40);
-  renderFishList();
+// Drop handlers (desktop)
+['dragenter', 'dragover'].forEach((t) => {
+  aquariumDropEl.addEventListener(t, (e) => {
+    e.preventDefault();
+    setDropUi(true);
+    try {
+      e.dataTransfer.dropEffect = 'copy';
+    } catch {
+      // ignore
+    }
+  });
 });
-
-personalitySelect.addEventListener('change', () => {
-  const f = getSelectedFish();
-  if (!f) return;
-  f.personality = /** @type {any} */ (personalitySelect.value || 'calm');
-  renderFishList();
-  syncToScene(f);
+aquariumDropEl.addEventListener('dragleave', (e) => {
+  // 子要素間の移動で消えないようにする
+  const rt = /** @type {any} */ (e).relatedTarget;
+  if (rt && aquariumDropEl.contains(rt)) return;
+  setDropUi(false);
 });
-
-speedRange.addEventListener('input', () => {
-  const f = getSelectedFish();
-  if (!f) return;
-  f.speed = clamp(Number(speedRange.value) || 70, 20, 200);
-  syncToScene(f);
-});
-
-sizeRange.addEventListener('input', () => {
-  const f = getSelectedFish();
-  if (!f) return;
-  f.size = clamp(Number(sizeRange.value) || 1, 0.4, 3);
-  syncToScene(f);
-});
-
-hueRange.addEventListener('input', () => {
-  const f = getSelectedFish();
-  if (!f) return;
-  f.hueDeg = clamp(Number(hueRange.value) || 0, -180, 180);
-  hueValue.textContent = `${Math.round(f.hueDeg)}°`;
-  renderFishList();
-  syncToScene(f);
-});
-
-function focusSelectedInList() {
-  const id = selectedFishId;
-  if (!id) return;
-  const row = fishListEl.querySelector(`.aq-fish-row`);
-  // If empty list or quick-add grid, nothing to focus.
-  if (!row) return;
-  // Scroll the selected row into view (best effort)
-  const selected = fishListEl.querySelector(`.aq-fish-row[data-selected='true']`);
-  if (selected && typeof selected.scrollIntoView === 'function') {
-    selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+aquariumDropEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  setDropUi(false);
+  const id = String(e.dataTransfer?.getData?.('text/plain') || '');
+  const asset = paletteMap.get(id);
+  if (!asset) {
+    showToast('素材が見つかりませんでした');
+    return;
   }
-}
+  const rect = aquariumDropEl.getBoundingClientRect();
+  const { x, y } = rectPointToLocal(rect, e.clientX, e.clientY);
+  addFishFromAsset(asset, { name: asset?.name, spawnX: x, spawnY: y, select: false });
+});
 
-function randomPersonality() {
-  const list = /** @type {const} */ (['calm', 'energetic', 'shy', 'lazy']);
-  return list[Math.floor(Math.random() * list.length)];
-}
-
-function reproduceTick() {
-  if (fishes.length === 0) return;
-  if (fishes.length >= MAX_FISH) return;
-
-  // Expected births per tick scales with current population (fast early growth, capped by MAX_FISH).
-  const expected = clamp(fishes.length * 0.06, 0, 3.2);
-  const base = Math.floor(expected);
-  const extra = Math.random() < expected - base ? 1 : 0;
-  let births = base + extra;
-  births = Math.min(births, Math.max(0, MAX_FISH - fishes.length));
-
-  for (let i = 0; i < births; i++) {
-    const parent = fishes[Math.floor(Math.random() * fishes.length)];
-    if (!parent?.asset) continue;
-
-    const mutateHue = clamp((Number(parent.hueDeg) || 0) + Phaser.Math.Between(-22, 22), -180, 180);
-    const mutateSpeed = clamp((Number(parent.speed) || 70) + Phaser.Math.Between(-10, 14), 20, 200);
-    const mutateSize = clamp((Number(parent.size) || 1) + Phaser.Math.FloatBetween(-0.12, 0.14), 0.4, 3);
-    const mutatePersonality = Math.random() < 0.78 ? parent.personality : randomPersonality();
-
-    addFishFromAsset(parent.asset, {
-      name: `${parent.name || 'さかな'}のこ`,
-      personality: mutatePersonality,
-      speed: mutateSpeed,
-      size: mutateSize,
-      hueDeg: mutateHue,
-      select: false
-    });
-  }
-}
+// Init palette
+void loadPalette();
 
 // -----------------------
 // Init Phaser
@@ -1461,28 +1343,12 @@ new Phaser.Game({
 
 aquariumScene.events.on('ready', () => {
   scene = aquariumScene;
-  renderFishList();
-  renderSelectedForm();
   scene.setEmptyHintVisible(fishes.length === 0);
   // If fishes were added before Phaser finished booting, sync them now.
   fishes.forEach((f) => syncToScene(f));
 });
 
 aquariumScene.events.on('fishTapped', (fishId) => {
-  setSelectedFish(String(fishId));
-  renderSelectedForm();
-  // Ensure the selected fish is visible in the list
-  requestAnimationFrame(() => focusSelectedInList());
+  openFishModal(String(fishId));
 });
-
-// Reproduction loop
-setInterval(() => {
-  try {
-    // Do not reproduce while picker modal is open (user is choosing)
-    if (!pickerModal.hidden) return;
-    reproduceTick();
-  } catch (e) {
-    console.warn('Reproduction tick failed:', e);
-  }
-}, REPRO_TICK_MS);
 
