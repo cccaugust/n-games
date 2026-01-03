@@ -78,6 +78,13 @@ const colorBtn = document.getElementById('colorBtn');
 const colorDot = document.getElementById('colorDot');
 const colorPopover = document.getElementById('colorPopover');
 const colorPopoverCloseBtn = document.getElementById('colorPopoverCloseBtn');
+const hueBtn = document.getElementById('hueBtn');
+const huePopover = document.getElementById('huePopover');
+const huePopoverCloseBtn = document.getElementById('huePopoverCloseBtn');
+const hueRange = document.getElementById('hueRange');
+const hueValue = document.getElementById('hueValue');
+const hueResetBtn = document.getElementById('hueResetBtn');
+const hueApplyBtn = document.getElementById('hueApplyBtn');
 const undoBtn = document.getElementById('undoBtn');
 const redoBtn = document.getElementById('redoBtn');
 const clearBtn = document.getElementById('clearBtn');
@@ -138,6 +145,7 @@ let zoom = Number(zoomRange.value);
 let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
+let huePreviewDeg = 0;
 
 const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
 if (avatarPickBtn) avatarPickBtn.hidden = !pickAvatarMode;
@@ -241,6 +249,104 @@ function setReadOnly(next) {
 
   // Prevent pointer edits entirely in read-only.
   if (canvas) canvas.style.pointerEvents = disableEdit ? 'none' : '';
+
+  // Hue "apply" is a destructive edit, but preview is OK.
+  if (hueApplyBtn) hueApplyBtn.disabled = disableEdit;
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function updateHueUi() {
+  if (hueValue) {
+    const d = Math.round(huePreviewDeg);
+    hueValue.textContent = `${d}°`;
+  }
+  if (canvas) {
+    canvas.style.filter = huePreviewDeg ? `hue-rotate(${huePreviewDeg}deg)` : '';
+  }
+}
+
+function setHuePreview(deg) {
+  huePreviewDeg = clamp(Number(deg) || 0, -180, 180);
+  if (hueRange) hueRange.value = String(Math.round(huePreviewDeg));
+  updateHueUi();
+}
+
+function openHuePopover() {
+  if (!huePopover) return;
+  huePopover.hidden = false;
+}
+
+function closeHuePopover() {
+  if (!huePopover) return;
+  huePopover.hidden = true;
+}
+
+function rgbaIntToRgba(rgba) {
+  const v = (rgba >>> 0);
+  const a = (v >>> 24) & 255;
+  const r = (v >>> 16) & 255;
+  const g = (v >>> 8) & 255;
+  const b = v & 255;
+  return { r, g, b, a };
+}
+
+function rgbToHsl(r, g, b) {
+  const rn = (r & 255) / 255;
+  const gn = (g & 255) / 255;
+  const bn = (b & 255) / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const delta = max - min;
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1));
+    if (max === rn) h = ((gn - bn) / delta) % 6;
+    else if (max === gn) h = (bn - rn) / delta + 2;
+    else h = (rn - gn) / delta + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+
+  return { h, s, l };
+}
+
+function hslToRgb(h, s, l) {
+  const hh = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((hh / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+  if (hh < 60) [r1, g1, b1] = [c, x, 0];
+  else if (hh < 120) [r1, g1, b1] = [x, c, 0];
+  else if (hh < 180) [r1, g1, b1] = [0, c, x];
+  else if (hh < 240) [r1, g1, b1] = [0, x, c];
+  else if (hh < 300) [r1, g1, b1] = [x, 0, c];
+  else [r1, g1, b1] = [c, 0, x];
+  const rOut = Math.round((r1 + m) * 255);
+  const gOut = Math.round((g1 + m) * 255);
+  const bOut = Math.round((b1 + m) * 255);
+  return {
+    r: clamp(rOut, 0, 255),
+    g: clamp(gOut, 0, 255),
+    b: clamp(bOut, 0, 255)
+  };
+}
+
+function hueRotateRgbaInt(rgba, deg) {
+  const v = (rgba >>> 0);
+  if (v === 0) return 0;
+  const { r, g, b, a } = rgbaIntToRgba(v);
+  const { h, s, l } = rgbToHsl(r, g, b);
+  const { r: nr, g: ng, b: nb } = hslToRgb(h + deg, s, l);
+  return ((((a & 255) << 24) | ((nr & 255) << 16) | ((ng & 255) << 8) | (nb & 255)) >>> 0);
 }
 
 function maxHistoryForPixels(pixelCount) {
@@ -532,6 +638,7 @@ function setAsset(asset, { persisted }) {
   isPersisted = Boolean(persisted);
   setDirty(false);
   setReadOnly(Boolean(asset?.ownerId) && String(asset.ownerId) !== String(ownerId));
+  setHuePreview(0);
 
   // Sync UI fields
   nameInput.value = asset.name || '';
@@ -954,11 +1061,76 @@ if (colorPopoverCloseBtn) {
   colorPopoverCloseBtn.addEventListener('click', () => closeColorPopover());
 }
 
+if (hueBtn) {
+  hueBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!huePopover) return;
+    huePopover.hidden ? openHuePopover() : closeHuePopover();
+  });
+}
+
+if (huePopoverCloseBtn) {
+  huePopoverCloseBtn.addEventListener('click', () => closeHuePopover());
+}
+
+if (hueRange) {
+  hueRange.addEventListener('input', () => {
+    setHuePreview(Number(hueRange.value));
+  });
+}
+
+if (hueResetBtn) {
+  hueResetBtn.addEventListener('click', () => {
+    setHuePreview(0);
+    updateStatus('色相リセット');
+  });
+}
+
+if (hueApplyBtn) {
+  hueApplyBtn.addEventListener('click', () => {
+    if (!currentAsset) return;
+    if (isReadOnly) return;
+    const deg = Number(hueRange?.value ?? 0) || 0;
+    if (!deg) {
+      updateStatus('色相は 0°（変更なし）');
+      return;
+    }
+    const snapshot = snapshotCurrentPixels();
+    let changed = 0;
+    for (let i = 0; i < currentAsset.pixels.length; i++) {
+      const prev = currentAsset.pixels[i] >>> 0;
+      if (prev === 0) continue;
+      const next = hueRotateRgbaInt(prev, deg);
+      if (next !== prev) {
+        currentAsset.pixels[i] = next;
+        changed++;
+      }
+    }
+    if (changed > 0) {
+      pushUndoSnapshot(snapshot);
+      setDirty(true);
+      scheduleRender();
+      setHuePreview(0);
+      closeHuePopover();
+      updateStatus('色相を適用した');
+    } else {
+      updateStatus('色相を適用（変化なし）');
+    }
+  });
+}
+
 document.addEventListener('click', (e) => {
   if (!colorPopover || colorPopover.hidden) return;
   const t = /** @type {HTMLElement} */ (e.target);
   if (t.closest('#colorPopover') || t.closest('#colorBtn')) return;
   closeColorPopover();
+});
+
+document.addEventListener('click', (e) => {
+  if (!huePopover || huePopover.hidden) return;
+  const t = /** @type {HTMLElement} */ (e.target);
+  if (t.closest('#huePopover') || t.closest('#hueBtn')) return;
+  closeHuePopover();
 });
 
 nameInput.addEventListener('input', () => {
@@ -1082,6 +1254,7 @@ document.addEventListener('keydown', (e) => {
   if (!newAssetModal.hidden) closeNewAssetModal();
   if (sampleModal && !sampleModal.hidden) closeSampleModal();
   if (colorPopover && !colorPopover.hidden) closeColorPopover();
+  if (huePopover && !huePopover.hidden) closeHuePopover();
 });
 
 if (sampleCloseBtn) sampleCloseBtn.addEventListener('click', closeSampleModal);
@@ -1347,6 +1520,7 @@ canvas.addEventListener('pointerleave', () => {
   setTool('pen');
   canvasFrame.classList.toggle('grid', gridToggle.checked);
   renderPalette();
+  setHuePreview(0);
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
   closeNewAssetModal();

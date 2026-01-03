@@ -125,6 +125,34 @@
               </div>
             </div>
 
+            <div class="toolbar-group" aria-label="色相">
+              <button class="tool-icon" id="hueBtn" type="button" aria-label="色相を変える（プレビュー）">
+                <i class="fa-solid fa-circle-half-stroke"></i><span>色相</span>
+              </button>
+
+              <div class="hue-popover card" id="huePopover" hidden>
+                <div class="color-popover-head">
+                  <div class="color-popover-title">色相</div>
+                  <button class="btn-sub btn-icon" id="huePopoverCloseBtn" type="button" aria-label="閉じる">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+
+                <div class="hue-row">
+                  <div class="hue-label">
+                    <span>プレビュー</span>
+                    <strong id="hueValue">0°</strong>
+                  </div>
+                  <input id="hueRange" type="range" min="-180" max="180" step="1" value="0" aria-label="色相" />
+                  <div class="hue-actions">
+                    <button class="btn-mini" id="hueResetBtn" type="button">リセット</button>
+                    <button class="btn-mini primary" id="hueApplyBtn" type="button">適用</button>
+                  </div>
+                  <div class="tiny-note">※「適用」で色を確定（もどすOK）</div>
+                </div>
+              </div>
+            </div>
+
             <div class="toolbar-group" aria-label="もどす・やりなおし">
               <button class="tool-icon" id="undoBtn" type="button" aria-label="もどす">
                 <i class="fa-solid fa-rotate-left"></i><span>もどす</span>
