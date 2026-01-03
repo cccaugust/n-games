@@ -109,7 +109,7 @@ function hueRotatePixels(pixels, deg) {
   return out;
 }
 
-function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', outline = '#0b1220' } = {}) {
+function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', outline = '#0b1220', stripeMode = 'double' } = {}) {
   const bodyC = hexToRgbaInt(body) >>> 0;
   const stripeC = hexToRgbaInt(stripe) >>> 0;
   const outlineC = hexToRgbaInt(outline) >>> 0;
@@ -160,10 +160,31 @@ function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', 
         continue;
       }
 
-      // Stripe
-      if (x >= 10 && x <= 17 && (y === 14 || y === 18)) {
-        pixels[i] = stripeC;
-        continue;
+      // Stripe patterns
+      if (stripeMode === 'double') {
+        if (x >= 10 && x <= 17 && (y === 14 || y === 18)) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'single') {
+        if (x >= 10 && x <= 18 && y === 16) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'clown') {
+        if (x >= 10 && x <= 12) {
+          pixels[i] = stripeC;
+          continue;
+        }
+        if (x >= 16 && x <= 18) {
+          pixels[i] = stripeC;
+          continue;
+        }
+      } else if (stripeMode === 'zebra') {
+        if ((x >= 11 && x <= 12) || (x >= 14 && x <= 15) || (x >= 17 && x <= 18)) {
+          pixels[i] = stripeC;
+          continue;
+        }
       }
 
       pixels[i] = bodyC;
@@ -206,10 +227,14 @@ function buildSampleFishAssets() {
   };
 
   return [
-    mk('blue', 'あおいさかな', { body: '#38bdf8', stripe: '#0ea5e9' }),
-    mk('green', 'みどりさかな', { body: '#4ade80', stripe: '#22c55e' }),
-    mk('pink', 'ももいろさかな', { body: '#fb7185', stripe: '#f43f5e' }),
-    mk('gold', 'きんいろさかな', { body: '#fbbf24', stripe: '#f59e0b' })
+    mk('blue', 'あおいさかな', { body: '#38bdf8', stripe: '#0ea5e9', stripeMode: 'double' }),
+    mk('green', 'みどりさかな', { body: '#4ade80', stripe: '#22c55e', stripeMode: 'double' }),
+    mk('pink', 'ももいろさかな', { body: '#fb7185', stripe: '#f43f5e', stripeMode: 'double' }),
+    mk('gold', 'きんいろさかな', { body: '#fbbf24', stripe: '#f59e0b', stripeMode: 'double' }),
+    mk('purple', 'むらさきさかな', { body: '#a78bfa', stripe: '#7c3aed', stripeMode: 'single' }),
+    mk('teal', 'みずいろさかな', { body: '#22d3ee', stripe: '#06b6d4', stripeMode: 'single' }),
+    mk('clown', 'カクレさかな', { body: '#fb923c', stripe: '#ffffff', stripeMode: 'clown', outline: '#111827' }),
+    mk('zebra', 'しましまさかな', { body: '#e5e7eb', stripe: '#111827', stripeMode: 'zebra', outline: '#111827' })
   ];
 }
 
@@ -221,6 +246,7 @@ class AquariumScene extends Phaser.Scene {
     super({ key: 'AquariumScene' });
     this.fishMap = new Map();
     this.textureCache = new Set();
+    this.emptyHint = null;
   }
 
   create() {
@@ -234,6 +260,24 @@ class AquariumScene extends Phaser.Scene {
       const x = (this.scale.width / 6) * i + 30;
       g.fillTriangle(x, 0, x + 90, 0, x + 10, this.scale.height);
     }
+
+    this.emptyHint = this.add
+      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n右の「＋」から追加してね', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '20px',
+        color: '#ffffff',
+        align: 'center'
+      })
+      .setOrigin(0.5, 0.5)
+      .setAlpha(0.85);
+
+    this.scale.on('resize', (gameSize) => {
+      const w = Number(gameSize?.width || this.scale.width);
+      const h = Number(gameSize?.height || this.scale.height);
+      if (this.emptyHint) {
+        this.emptyHint.setPosition(w / 2, h / 2);
+      }
+    });
 
     this.events.emit('ready');
   }
@@ -323,6 +367,10 @@ class AquariumScene extends Phaser.Scene {
       sprite.setOrigin(0.5, 0.5);
       sprite.setScale(fish.size);
       sprite.setData('seed', Math.random() * 1000);
+      sprite.setInteractive({ useHandCursor: true });
+      sprite.on('pointerdown', () => {
+        this.events.emit('fishTapped', fish.id);
+      });
 
       const obj = {
         fish,
@@ -335,6 +383,7 @@ class AquariumScene extends Phaser.Scene {
         changeIn: Phaser.Math.FloatBetween(0.8, 2.2)
       };
       this.fishMap.set(fish.id, obj);
+      this.setEmptyHintVisible(this.fishMap.size === 0);
       return;
     }
 
@@ -348,6 +397,12 @@ class AquariumScene extends Phaser.Scene {
     if (!it) return;
     it.sprite.destroy();
     this.fishMap.delete(fishId);
+    this.setEmptyHintVisible(this.fishMap.size === 0);
+  }
+
+  setEmptyHintVisible(on) {
+    if (!this.emptyHint) return;
+    this.emptyHint.setVisible(Boolean(on));
   }
 
   pickNextTarget(state) {
@@ -495,6 +550,9 @@ let selectedFishId = null;
 
 const SAMPLE_ASSETS = buildSampleFishAssets();
 
+const MAX_FISH = 48;
+const REPRO_TICK_MS = 2400;
+
 function setSelectedFish(id) {
   selectedFishId = id;
   renderFishList();
@@ -545,8 +603,61 @@ function renderFishList() {
     const empty = document.createElement('div');
     empty.className = 'aq-note';
     empty.style.padding = '10px';
-    empty.textContent = 'まだ魚がいません。右上の「＋」から追加してね。';
+    empty.textContent = 'まだ魚がいません。下のサンプルをタップ（または右上の「＋」）で追加してね。';
     fishListEl.appendChild(empty);
+
+    // Quick add samples (so there is always something selectable)
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+    grid.style.gap = '8px';
+    grid.style.padding = '10px';
+
+    SAMPLE_ASSETS.slice(0, 8).forEach((a) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'aq-btn';
+      btn.style.display = 'grid';
+      btn.style.gridTemplateColumns = '44px 1fr';
+      btn.style.alignItems = 'center';
+      btn.style.gap = '10px';
+      btn.style.padding = '10px';
+      btn.style.borderRadius = '14px';
+      btn.style.textAlign = 'left';
+
+      const img = document.createElement('img');
+      img.alt = '';
+      img.src = assetPreviewDataUrl(a, 44);
+      img.style.width = '44px';
+      img.style.height = '44px';
+      img.style.imageRendering = 'pixelated';
+      img.style.borderRadius = '12px';
+      img.style.border = '1px solid rgba(0,0,0,0.08)';
+      img.style.background = 'rgba(0,0,0,0.04)';
+
+      const label = document.createElement('div');
+      label.style.fontWeight = '900';
+      label.style.whiteSpace = 'nowrap';
+      label.style.overflow = 'hidden';
+      label.style.textOverflow = 'ellipsis';
+      label.textContent = a.name;
+
+      btn.appendChild(img);
+      btn.appendChild(label);
+      btn.addEventListener('click', () => {
+        void (async () => {
+          // Save as "my" asset so it appears in pixel-art-maker too
+          const saved = await duplicatePixelAsset(
+            { ...a, ownerId, name: `${a.name}（水槽）` },
+            { ownerId, name: `${a.name}（水槽）` }
+          );
+          addFishFromAsset(saved, { name: saved.name });
+        })();
+      });
+      grid.appendChild(btn);
+    });
+    fishListEl.appendChild(grid);
+
     return;
   }
 
@@ -585,19 +696,19 @@ function syncToScene(fish) {
   scene.upsertFish(fish);
 }
 
-function addFishFromAsset(asset, { name } = {}) {
+function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, select = true } = {}) {
   const fish = {
     id: createId('fish'),
     name: String(name || asset?.name || 'さかな'),
-    personality: 'calm',
-    speed: 70,
-    size: 1,
-    hueDeg: 0,
+    personality: personality || 'calm',
+    speed: clamp(Number(speed ?? 70) || 70, 20, 200),
+    size: clamp(Number(size ?? 1) || 1, 0.4, 3),
+    hueDeg: clamp(Number(hueDeg ?? 0) || 0, -180, 180),
     asset
   };
   fishes = [fish, ...fishes];
   syncToScene(fish);
-  setSelectedFish(fish.id);
+  if (select) setSelectedFish(fish.id);
 }
 
 function deleteSelectedFish() {
@@ -790,6 +901,55 @@ hueRange.addEventListener('input', () => {
   syncToScene(f);
 });
 
+function focusSelectedInList() {
+  const id = selectedFishId;
+  if (!id) return;
+  const row = fishListEl.querySelector(`.aq-fish-row`);
+  // If empty list or quick-add grid, nothing to focus.
+  if (!row) return;
+  // Scroll the selected row into view (best effort)
+  const selected = fishListEl.querySelector(`.aq-fish-row[data-selected='true']`);
+  if (selected && typeof selected.scrollIntoView === 'function') {
+    selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+function randomPersonality() {
+  const list = /** @type {const} */ (['calm', 'energetic', 'shy', 'lazy']);
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function reproduceTick() {
+  if (fishes.length === 0) return;
+  if (fishes.length >= MAX_FISH) return;
+
+  // Expected births per tick scales with current population (fast early growth, capped by MAX_FISH).
+  const expected = clamp(fishes.length * 0.06, 0, 3.2);
+  const base = Math.floor(expected);
+  const extra = Math.random() < expected - base ? 1 : 0;
+  let births = base + extra;
+  births = Math.min(births, Math.max(0, MAX_FISH - fishes.length));
+
+  for (let i = 0; i < births; i++) {
+    const parent = fishes[Math.floor(Math.random() * fishes.length)];
+    if (!parent?.asset) continue;
+
+    const mutateHue = clamp((Number(parent.hueDeg) || 0) + Phaser.Math.Between(-22, 22), -180, 180);
+    const mutateSpeed = clamp((Number(parent.speed) || 70) + Phaser.Math.Between(-10, 14), 20, 200);
+    const mutateSize = clamp((Number(parent.size) || 1) + Phaser.Math.FloatBetween(-0.12, 0.14), 0.4, 3);
+    const mutatePersonality = Math.random() < 0.78 ? parent.personality : randomPersonality();
+
+    addFishFromAsset(parent.asset, {
+      name: `${parent.name || 'さかな'}のこ`,
+      personality: mutatePersonality,
+      speed: mutateSpeed,
+      size: mutateSize,
+      hueDeg: mutateHue,
+      select: false
+    });
+  }
+}
+
 // -----------------------
 // Init Phaser
 // -----------------------
@@ -810,9 +970,26 @@ new Phaser.Game({
 
 aquariumScene.events.on('ready', () => {
   scene = aquariumScene;
-  // Initial fish
-  addFishFromAsset(SAMPLE_ASSETS[0], { name: 'あおさかな' });
   renderFishList();
   renderSelectedForm();
+  scene.setEmptyHintVisible(fishes.length === 0);
 });
+
+aquariumScene.events.on('fishTapped', (fishId) => {
+  setSelectedFish(String(fishId));
+  renderSelectedForm();
+  // Ensure the selected fish is visible in the list
+  requestAnimationFrame(() => focusSelectedInList());
+});
+
+// Reproduction loop
+setInterval(() => {
+  try {
+    // Do not reproduce while picker modal is open (user is choosing)
+    if (!pickerModal.hidden) return;
+    reproduceTick();
+  } catch (e) {
+    console.warn('Reproduction tick failed:', e);
+  }
+}, REPRO_TICK_MS);
 
