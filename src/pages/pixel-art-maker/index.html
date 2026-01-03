@@ -34,7 +34,10 @@
             <div class="section-title">ギャラリー</div>
             <div class="tiny-note">作品をえらんで編集 / もしくは新規作成</div>
           </div>
-          <button class="btn-primary-solid" id="galleryNewBtn" type="button">＋ 新規作成</button>
+          <div class="gallery-head-actions">
+            <button class="btn-sub" id="gallerySamplesBtn" type="button">サンプル</button>
+            <button class="btn-primary-solid" id="galleryNewBtn" type="button">＋ 新規作成</button>
+          </div>
         </div>
         <div class="gallery-controls" aria-label="ギャラリー操作">
           <div class="gallery-search">
@@ -209,6 +212,20 @@
           <div class="row actions">
             <button class="btn-primary-solid" id="newAssetCreateBtn" type="button">作成して編集</button>
           </div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="sampleModal" hidden>
+        <div class="card modal">
+          <div class="modal-head">
+            <div>
+              <div class="section-title">サンプル素材</div>
+              <div class="tiny-note">コピーして、自分の作品として編集・保存できます（サンプル自体はDBに保存されません）</div>
+            </div>
+            <button class="btn-sub" id="sampleCloseBtn" type="button">× 閉じる</button>
+          </div>
+
+          <div class="assets-list" id="sampleList" aria-label="サンプル一覧"></div>
         </div>
       </div>
     </main>

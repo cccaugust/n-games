@@ -116,6 +116,14 @@ img.pm-pill-avatar {
   margin-bottom: 12px;
 }
 
+.gallery-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .gallery-controls {
   display: flex;
   align-items: center;
@@ -804,6 +812,31 @@ input[type='color'] {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.sample-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.btn-mini {
+  appearance: none;
+  border: 1px solid var(--pm-border);
+  background: #ffffff;
+  color: var(--text-dark);
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 900;
+  min-height: 40px;
+}
+
+.btn-mini.primary {
+  background: var(--primary-color);
+  color: white;
+  border-color: rgba(0, 0, 0, 0.06);
 }
 
 .asset-item {

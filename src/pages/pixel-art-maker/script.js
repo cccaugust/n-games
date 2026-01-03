@@ -13,6 +13,7 @@ import {
   putPixelAsset,
   rgbaIntToHex
 } from '../../js/pixelAssets.js';
+import samplePack from './samples.json';
 
 requireAuth();
 
@@ -44,6 +45,7 @@ backToPortal.href = resolvePath('/pages/portal/portal.html');
 const appRoot = document.getElementById('appRoot');
 const galleryView = document.getElementById('galleryView');
 const galleryNewBtn = document.getElementById('galleryNewBtn');
+const gallerySamplesBtn = document.getElementById('gallerySamplesBtn');
 const galleryList = document.getElementById('galleryList');
 const gallerySummary = document.getElementById('gallerySummary');
 const gallerySearchInput = document.getElementById('gallerySearchInput');
@@ -99,6 +101,18 @@ const newAssetModal = document.getElementById('newAssetModal');
 const newAssetCloseBtn = document.getElementById('newAssetCloseBtn');
 const newAssetCreateBtn = document.getElementById('newAssetCreateBtn');
 const newNameInput = document.getElementById('newNameInput');
+
+// Sample modal
+const sampleModal = document.getElementById('sampleModal');
+const sampleCloseBtn = document.getElementById('sampleCloseBtn');
+const sampleList = document.getElementById('sampleList');
+
+/**
+ * @typedef {{id:string,name:string,kind:'character'|'object'|'tile',width:number,height:number,pixelsB64:string,tags?:string[]}} SampleAsset
+ */
+
+/** @type {SampleAsset[]} */
+const SAMPLE_ASSETS = Array.isArray(samplePack?.samples) ? samplePack.samples : [];
 
 // State
 /** @type {'pen'|'eraser'|'fill'|'picker'} */
@@ -227,6 +241,159 @@ function updateStatus(message) {
   if (!dirty && isPersisted) parts.push('保存済み');
   if (!dirty && !isPersisted) parts.push('新規（未保存）');
   statusText.textContent = parts.join(' / ') || '-';
+}
+
+function base64ToArrayBuffer(b64) {
+  const binary = atob(String(b64 || ''));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function decodePixelsB64(b64) {
+  try {
+    return new Uint32Array(base64ToArrayBuffer(b64));
+  } catch {
+    return new Uint32Array();
+  }
+}
+
+/**
+ * @param {SampleAsset} sample
+ * @returns {import('../../js/pixelAssets.js').PixelAsset}
+ */
+function sampleToPixelAsset(sample) {
+  const now = new Date().toISOString();
+  const w = Number(sample.width) || 16;
+  const h = Number(sample.height) || 16;
+  const pixels = decodePixelsB64(sample.pixelsB64);
+  const safePixels = pixels.length === w * h ? pixels : new Uint32Array(w * h);
+  return {
+    id: `sample_${sample.id}`,
+    ownerId,
+    name: sample.name || 'サンプル',
+    kind: sample.kind || DEFAULT_KIND,
+    width: w,
+    height: h,
+    pixels: safePixels,
+    frames: [
+      {
+        index: 0,
+        width: w,
+        height: h,
+        pixels: new Uint32Array(safePixels),
+        durationMs: 100
+      }
+    ],
+    version: 1,
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
+function openSampleModal() {
+  if (!sampleModal) return;
+  renderSampleList();
+  sampleModal.hidden = false;
+  sampleModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+function closeSampleModal() {
+  if (!sampleModal) return;
+  sampleModal.hidden = true;
+  sampleModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+}
+
+function renderSampleList() {
+  if (!sampleList) return;
+  sampleList.innerHTML = '';
+
+  if (SAMPLE_ASSETS.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'tiny-note';
+    empty.textContent = 'サンプルが見つかりませんでした。';
+    sampleList.appendChild(empty);
+    return;
+  }
+
+  SAMPLE_ASSETS.forEach((sample) => {
+    const asset = sampleToPixelAsset(sample);
+
+    const row = document.createElement('div');
+    row.className = 'asset-item';
+
+    const img = document.createElement('img');
+    img.className = 'asset-thumb';
+    img.alt = '';
+    img.src = assetPreviewDataUrl(asset, 56);
+
+    const meta = document.createElement('div');
+
+    const name = document.createElement('div');
+    name.className = 'asset-name';
+    name.textContent = sample.name || '(no name)';
+
+    const info = document.createElement('div');
+    info.className = 'asset-meta';
+    info.textContent = `${asset.width}×${asset.height} / ${sample.kind || DEFAULT_KIND}`;
+
+    const tags = document.createElement('div');
+    tags.className = 'asset-tags';
+    const tagEls = (Array.isArray(sample.tags) ? sample.tags : []).slice(0, 6);
+    ['サンプル', ...tagEls].forEach((t) => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = t;
+      tags.appendChild(span);
+    });
+
+    const actions = document.createElement('div');
+    actions.className = 'sample-actions';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn-mini primary';
+    copyBtn.textContent = 'コピーして編集';
+    copyBtn.addEventListener('click', async () => {
+      if (dirty && !confirm('いまの変更は保存されていません。サンプルをコピーして開きますか？')) return;
+      const base = sampleToPixelAsset(sample);
+      const nextName = `${base.name}（コピー）`;
+      const created = await duplicatePixelAsset({ ...base, name: nextName }, { name: nextName });
+      closeSampleModal();
+      setAsset(created, { persisted: true });
+      setTool('pen');
+      setView('editor');
+      await refreshGalleryList();
+      updateStatus('サンプルをコピーした');
+    });
+
+    const previewBtn = document.createElement('button');
+    previewBtn.type = 'button';
+    previewBtn.className = 'btn-mini';
+    previewBtn.textContent = '開くだけ（保存しない）';
+    previewBtn.addEventListener('click', () => {
+      if (dirty && !confirm('いまの変更は保存されていません。サンプルを開きますか？（保存はされません）')) return;
+      closeSampleModal();
+      setAsset(sampleToPixelAsset(sample), { persisted: false });
+      setTool('pen');
+      setView('editor');
+      updateStatus('サンプルを開いた（未保存）');
+    });
+
+    actions.appendChild(copyBtn);
+    actions.appendChild(previewBtn);
+
+    meta.appendChild(name);
+    meta.appendChild(info);
+    meta.appendChild(tags);
+    meta.appendChild(actions);
+
+    row.appendChild(img);
+    row.appendChild(meta);
+    sampleList.appendChild(row);
+  });
 }
 
 function setTool(tool) {
@@ -857,6 +1024,13 @@ galleryNewBtn.addEventListener('click', () => {
   openNewAssetModal();
 });
 
+if (gallerySamplesBtn) {
+  gallerySamplesBtn.addEventListener('click', () => {
+    if (dirty && !confirm('いまの変更は保存されていません。サンプルを見ますか？')) return;
+    openSampleModal();
+  });
+}
+
 newBtn.addEventListener('click', () => {
   if (dirty && !confirm('いまの変更は保存されていません。新規にしますか？')) return;
   openNewAssetModal();
@@ -880,8 +1054,16 @@ newNameInput.addEventListener('keydown', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (!newAssetModal.hidden) closeNewAssetModal();
+  if (sampleModal && !sampleModal.hidden) closeSampleModal();
   if (colorPopover && !colorPopover.hidden) closeColorPopover();
 });
+
+if (sampleCloseBtn) sampleCloseBtn.addEventListener('click', closeSampleModal);
+if (sampleModal) {
+  sampleModal.addEventListener('click', (e) => {
+    if (e.target === sampleModal) closeSampleModal();
+  });
+}
 
 // Small usability helpers (keyboard shortcuts)
 document.addEventListener('keydown', (e) => {
@@ -1126,6 +1308,7 @@ canvas.addEventListener('pointerleave', () => {
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
   closeNewAssetModal();
+  closeSampleModal();
 
   setView('gallery');
   await refreshGalleryList();
