@@ -3,37 +3,76 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>モグラたたき | N-Games</title>
     <link rel="stylesheet" href="../../style.css">
     <style>
-        body {
-            touch-action: manipulation;
-            /* Prevent zoom on double tap */
+        .whack-page {
+            padding:
+                calc(16px + env(safe-area-inset-top))
+                calc(16px + env(safe-area-inset-right))
+                calc(16px + env(safe-area-inset-bottom))
+                calc(16px + env(safe-area-inset-left));
         }
 
         .game-container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 640px;
+            margin: 12px auto;
             text-align: center;
         }
 
-        .score-board {
+        .hud {
             background: white;
-            padding: 15px;
+            padding: 14px;
             border-radius: 16px;
             display: flex;
             justify-content: space-around;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 10px;
             box-shadow: var(--shadow);
+        }
+
+        .hud-item {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hud-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            letter-spacing: 0.02em;
+        }
+
+        .hud-value {
+            font-size: clamp(1.15rem, 4vw, 1.6rem);
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .timer-bar {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.08);
+            margin-bottom: 14px;
+        }
+
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+            border-radius: 999px;
+            transition: width 0.25s linear;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: clamp(10px, 3vw, 15px);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .hole {
@@ -43,6 +82,7 @@
             position: relative;
             overflow: hidden;
             cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
             box-shadow: inset 0 10px 0 rgba(0, 0, 0, 0.1);
         }
 
@@ -66,12 +106,46 @@
             content: "🐹";
         }
 
+        .hole.gold .mole::after {
+            content: "⭐";
+        }
+
         .hole.up .mole {
             bottom: 0;
         }
 
         .hole.bonk .mole::after {
             content: "💥";
+        }
+
+        .hole.miss {
+            animation: whack-shake 0.12s linear;
+        }
+
+        @keyframes whack-shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            50% { transform: translateX(2px); }
+            75% { transform: translateX(-2px); }
+            100% { transform: translateX(0); }
+        }
+
+        .float-score {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            animation: float-up 0.55s ease-out forwards;
+        }
+
+        @keyframes float-up {
+            0% { opacity: 0; transform: translate(-50%, -30%) scale(0.9); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -90%) scale(1.05); }
         }
 
         .start-overlay {
@@ -87,24 +161,120 @@
             justify-content: center;
             color: white;
             z-index: 100;
+            padding:
+                calc(24px + env(safe-area-inset-top))
+                calc(18px + env(safe-area-inset-right))
+                calc(24px + env(safe-area-inset-bottom))
+                calc(18px + env(safe-area-inset-left));
+        }
+
+        .start-overlay h1 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .start-overlay p {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 18px;
+        }
+
+        .settings {
+            width: min(520px, 92vw);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 18px;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .setting-row + .setting-row {
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .setting-label {
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .segmented {
+            display: inline-flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .seg {
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-weight: 800;
+            min-width: 90px;
+        }
+
+        .seg.active {
+            background: rgba(255, 255, 255, 0.92);
+            color: #111;
+            border-color: rgba(255, 255, 255, 0.92);
+        }
+
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+        }
+
+        .toggle input {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .mole { transition: none; }
+            .float-score { animation: none; opacity: 0; }
+            .hole.miss { animation: none; }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container whack-page">
         <!-- Back Button -->
         <a href="../../pages/portal/portal.html"
             style="display:inline-block; margin-top: 10px; color: var(--text-light); text-decoration: none;">&larr;
             もどる</a>
 
         <div class="game-container">
-            <div class="score-board">
-                <div>スコア: <span id="score">0</span></div>
-                <div>じかん: <span id="time">30</span></div>
+            <div class="hud">
+                <div class="hud-item">
+                    <div class="hud-label">スコア</div>
+                    <div class="hud-value" id="score">0</div>
+                </div>
+                <div class="hud-item">
+                    <div class="hud-label">じかん</div>
+                    <div class="hud-value"><span id="time">30</span>s</div>
+                </div>
+                <div class="hud-item">
+                    <div class="hud-label">コンボ</div>
+                    <div class="hud-value" id="combo">0</div>
+                </div>
             </div>
 
-            <div class="grid">
+            <div class="timer-bar" aria-hidden="true">
+                <div class="timer-fill" id="timerFill"></div>
+            </div>
+
+            <div class="grid" id="grid">
                 <div class="hole" data-index="0">
                     <div class="mole"></div>
                 </div>
@@ -138,12 +308,38 @@
 
     <div class="start-overlay" id="overlay">
         <h1>モグラたたき！</h1>
-        <p>ひょっこり出てくるモグラを叩こう！</p>
-        <button class="btn-primary" id="startBtn" style="margin-top: 20px;">スタート！</button>
+        <p>でてきたら すばやくタップ！</p>
+
+        <div class="settings" aria-label="ゲームせってい">
+            <div class="setting-row">
+                <div class="setting-label">むずかしさ</div>
+                <div class="segmented" id="difficultyPicker" aria-label="むずかしさ">
+                    <button type="button" class="seg" data-difficulty="easy">かんたん</button>
+                    <button type="button" class="seg active" data-difficulty="normal">ふつう</button>
+                    <button type="button" class="seg" data-difficulty="hard">むずかしい</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">じかん</div>
+                <div class="segmented" id="durationPicker" aria-label="じかん">
+                    <button type="button" class="seg" data-duration="20">20s</button>
+                    <button type="button" class="seg active" data-duration="30">30s</button>
+                    <button type="button" class="seg" data-duration="45">45s</button>
+                </div>
+            </div>
+            <div class="setting-row">
+                <div class="setting-label">おと</div>
+                <label class="toggle">
+                    <input type="checkbox" id="soundToggle" checked>
+                    <span>ON</span>
+                </label>
+            </div>
+        </div>
+
+        <button class="btn-primary" id="startBtn">スタート！</button>
     </div>
 
     <div class="start-overlay" id="resultOverlay" style="display: none;">
-        <!-- Need to make sure game.js targets this if it exists, but game.js creates innerHTML of overlay, so this is fine -->
     </div>
 
     <script type="module" src="./game.js"></script>
