@@ -213,7 +213,7 @@ const games = [
     desc: '盤サイズ自由！配置編集＆対人戦＆図鑑',
     color: '#ffeaa7',
     icon: '♟️',
-    link: '/games/shogi-studio/'
+    link: '/games/shogi-studio/setup.html'
   }
 ];
 

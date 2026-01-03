@@ -3,6 +3,7 @@ import { PIECE_PACKS, getPieceDef, listPiecesByPack, listAllPieces, toHandKind }
 /** @typedef {'SENTE'|'GOTE'} Owner */
 
 const STORAGE_KEY = 'ngames.shogiStudio.v1';
+const LIB_KEY = 'ngames.shogiStudio.library.v1';
 
 const el = {
   boardArea: document.getElementById('boardArea'),
@@ -33,6 +34,8 @@ const el = {
   btnExport: document.getElementById('btnExport'),
   btnImport: document.getElementById('btnImport'),
   importFile: document.getElementById('importFile'),
+  layoutName: document.getElementById('layoutName'),
+  btnSaveLayout: document.getElementById('btnSaveLayout'),
   btnClearHands: document.getElementById('btnClearHands'),
   btnFillHands: document.getElementById('btnFillHands'),
   toggleMoveCheck: document.getElementById('toggleMoveCheck'),
@@ -49,6 +52,35 @@ function clamp(v, min, max) {
 
 function deepCopy(obj) {
   return JSON.parse(JSON.stringify(obj));
+}
+
+function uuid() {
+  try {
+    if (crypto?.randomUUID) return crypto.randomUUID();
+  } catch {
+    // ignore
+  }
+  return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function loadLibrary() {
+  try {
+    const raw = localStorage.getItem(LIB_KEY);
+    if (!raw) return { version: 1, items: [] };
+    const parsed = JSON.parse(raw);
+    const items = Array.isArray(parsed?.items) ? parsed.items : [];
+    return { version: 1, items };
+  } catch {
+    return { version: 1, items: [] };
+  }
+}
+
+function saveLibrary(lib) {
+  try {
+    localStorage.setItem(LIB_KEY, JSON.stringify({ version: 1, items: lib.items || [] }));
+  } catch {
+    // ignore
+  }
 }
 
 function ownerLabel(owner) {
@@ -104,6 +136,45 @@ function normalizeHands(h) {
     }
   }
   return out;
+}
+
+function normalizePayload(parsed) {
+  if (!parsed || typeof parsed !== 'object') return null;
+  const n = clamp(Math.floor(Number(parsed.boardN) || 9), 5, 25);
+  const out = {
+    version: 1,
+    packId: PIECE_PACKS[parsed.packId] ? parsed.packId : 'standard',
+    boardN: n,
+    current: parsed.current === 'GOTE' ? 'GOTE' : 'SENTE',
+    flipped: !!parsed.flipped,
+    moveCheck: !!parsed.moveCheck,
+    board: makeEmptyBoard(n),
+    hands: normalizeHands(parsed.hands)
+  };
+  const b = Array.isArray(parsed.board) ? parsed.board : [];
+  for (let i = 0; i < out.board.length; i++) {
+    const p = b[i];
+    if (!p) continue;
+    const kind = typeof p.kind === 'string' ? p.kind : '';
+    const owner = p.owner === 'GOTE' ? 'GOTE' : 'SENTE';
+    if (!getPieceDef(kind)) continue;
+    out.board[i] = { kind, owner };
+  }
+  return out;
+}
+
+function applyPayloadToState(state, payload) {
+  const p = normalizePayload(payload);
+  if (!p) return false;
+  resizeBoard(state, p.boardN);
+  state.packId = p.packId;
+  state.current = p.current;
+  state.flipped = !!p.flipped;
+  state.moveCheck = !!p.moveCheck;
+  state.hands = p.hands;
+  state.board = p.board;
+  state.history = [];
+  return true;
 }
 
 function loadState() {
@@ -266,6 +337,7 @@ function setSegmentActive(container, selector, activeEl) {
 
 function standardSetup9(state) {
   resizeBoard(state, 9);
+  state.packId = 'standard';
   state.hands = { SENTE: {}, GOTE: {} };
   state.current = 'SENTE';
   state.history = [];
@@ -285,6 +357,41 @@ function standardSetup9(state) {
   place(1, 7, 'B', 'SENTE');
   place(7, 7, 'R', 'SENTE');
   ['L', 'N', 'S', 'G', 'K', 'G', 'S', 'N', 'L'].forEach((k, x) => place(x, 8, k, 'SENTE'));
+}
+
+function makadaidaiLiteSetup19(state) {
+  // 摩訶大大将棋（簡易）: 19×19 + 拡張駒入りの“それっぽい”初期配置
+  resizeBoard(state, 19);
+  state.packId = 'makadaidai-lite';
+  state.hands = { SENTE: {}, GOTE: {} };
+  state.current = 'SENTE';
+  state.history = [];
+
+  const n = 19;
+  const place = (x, y, kind, owner) => {
+    state.board[idxOf(x, y, n)] = { kind, owner };
+  };
+
+  const back = ['L', 'N', 'S', 'G', 'BE', 'WF', 'EL', 'TB', 'DR', 'K', 'DR', 'TB', 'EL', 'WF', 'BE', 'G', 'S', 'N', 'L'];
+  back.forEach((k, x) => place(x, 0, k, 'GOTE'));
+  back.forEach((k, x) => place(x, 18, k, 'SENTE'));
+
+  // 2段目: 飛/角＋麒麟/鳳凰＋獅子（中心）
+  place(4, 1, 'R', 'GOTE');
+  place(14, 1, 'B', 'GOTE');
+  place(7, 1, 'KI', 'GOTE');
+  place(11, 1, 'HO', 'GOTE');
+  place(9, 1, 'LI', 'GOTE');
+
+  place(4, 17, 'B', 'SENTE');
+  place(14, 17, 'R', 'SENTE');
+  place(7, 17, 'HO', 'SENTE');
+  place(11, 17, 'KI', 'SENTE');
+  place(9, 17, 'LI', 'SENTE');
+
+  // 歩をずらして2列（19枚）
+  for (let x = 0; x < 19; x++) place(x, 2, 'P', 'GOTE');
+  for (let x = 0; x < 19; x++) place(x, 16, 'P', 'SENTE');
 }
 
 function emptySetup(state) {
@@ -750,6 +857,27 @@ el.btnExport.addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+el.btnSaveLayout?.addEventListener('click', () => {
+  const name = String(el.layoutName?.value || '').trim().slice(0, 24) || 'マイ配置';
+  const payload = {
+    version: 1,
+    packId: state.packId,
+    boardN: state.boardN,
+    current: state.current,
+    flipped: !!state.flipped,
+    moveCheck: !!state.moveCheck,
+    board: state.board,
+    hands: state.hands
+  };
+  const lib = loadLibrary();
+  lib.items = Array.isArray(lib.items) ? lib.items : [];
+  lib.items.unshift({ id: uuid(), name, updatedAt: Date.now(), payload });
+  if (lib.items.length > 60) lib.items.length = 60;
+  saveLibrary(lib);
+  // ささやかなフィードバック
+  if (el.layoutName) el.layoutName.value = '';
+});
+
 el.btnImport.addEventListener('click', () => {
   el.importFile.value = '';
   el.importFile.click();
@@ -765,25 +893,8 @@ el.importFile.addEventListener('change', async () => {
     return;
   }
   if (!parsed || typeof parsed !== 'object') return;
-  const n = clamp(Math.floor(Number(parsed.boardN) || 9), 5, 25);
-  resizeBoard(state, n);
-  state.packId = PIECE_PACKS[parsed.packId] ? parsed.packId : 'standard';
-  state.current = parsed.current === 'GOTE' ? 'GOTE' : 'SENTE';
-  state.flipped = !!parsed.flipped;
-  state.moveCheck = !!parsed.moveCheck;
-  state.hands = normalizeHands(parsed.hands);
-  state.history = [];
-  // board
-  const b = Array.isArray(parsed.board) ? parsed.board : [];
-  state.board = makeEmptyBoard(state.boardN);
-  for (let i = 0; i < state.board.length; i++) {
-    const p = b[i];
-    if (!p) continue;
-    const kind = typeof p.kind === 'string' ? p.kind : '';
-    const owner = p.owner === 'GOTE' ? 'GOTE' : 'SENTE';
-    if (!getPieceDef(kind)) continue;
-    state.board[i] = { kind, owner };
-  }
+  const ok = applyPayloadToState(state, parsed);
+  if (!ok) return;
   // UI sync
   el.piecePack.value = state.packId;
   updateEditorPieceOptions(state.packId);
@@ -823,26 +934,44 @@ window.addEventListener('resize', () => computeBoardPx());
 
 // === init ===
 let state = makeEmptyState();
-const saved = loadState();
-if (saved) {
-  state.packId = PIECE_PACKS[saved.packId] ? saved.packId : 'standard';
-  resizeBoard(state, saved.boardN || 9);
-  state.current = saved.current === 'GOTE' ? 'GOTE' : 'SENTE';
-  state.flipped = !!saved.flipped;
-  state.moveCheck = !!saved.moveCheck;
-  state.hands = normalizeHands(saved.hands);
-  // board
-  const b = Array.isArray(saved.board) ? saved.board : [];
-  for (let i = 0; i < state.board.length; i++) {
-    const p = b[i];
-    if (!p) continue;
-    const kind = typeof p.kind === 'string' ? p.kind : '';
-    const owner = p.owner === 'GOTE' ? 'GOTE' : 'SENTE';
-    if (!getPieceDef(kind)) continue;
-    state.board[i] = { kind, owner };
-  }
-} else {
+
+// URL params（setup画面からの遷移）
+const params = new URLSearchParams(location.search);
+const preset = params.get('preset') || '';
+const layoutId = params.get('layoutId') || '';
+const isNew = params.get('new') === '1';
+const autoEdit = params.get('edit') === '1';
+
+let initializedByParams = false;
+
+if (preset === 'standard') {
   standardSetup9(state);
+  initializedByParams = true;
+} else if (preset === 'makadaidai') {
+  makadaidaiLiteSetup19(state);
+  initializedByParams = true;
+} else if (layoutId) {
+  const lib = loadLibrary();
+  const it = (lib.items || []).find((x) => x?.id === layoutId);
+  if (it?.payload) {
+    const ok = applyPayloadToState(state, it.payload);
+    if (ok) initializedByParams = true;
+  }
+} else if (isNew) {
+  // 新規: とりあえず空盤（デフォ9×9）
+  resizeBoard(state, 9);
+  state.packId = 'standard';
+  emptySetup(state);
+  initializedByParams = true;
+}
+
+if (!initializedByParams) {
+  const saved = loadState();
+  if (saved) {
+    applyPayloadToState(state, saved);
+  } else {
+    standardSetup9(state);
+  }
 }
 
 // initial UI sync
@@ -856,4 +985,9 @@ el.boardWrap.style.transform = state.flipped ? 'rotate(180deg)' : '';
 
 renderAll();
 computeBoardPx();
+
+// setupから「編集で開く」場合は最初に編集モーダルを出す
+if (autoEdit) {
+  openEdit();
+}
 

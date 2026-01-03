@@ -426,7 +426,7 @@
   <div class="container shogi-page">
     <div class="topbar">
       <div class="topbar-left">
-        <a href="../../pages/portal/portal.html"
+        <a href="./setup.html"
           style="display:inline-block; color: var(--text-light); text-decoration: none;">&larr; もどる</a>
         <div class="title">将棋スタジオ</div>
         <div class="pill" id="turnPill">手番: <strong id="turnLabel">先手</strong></div>
@@ -524,6 +524,14 @@
                 <button class="seg" id="btnExport">書き出し</button>
                 <button class="seg" id="btnImport">読みこみ</button>
                 <input id="importFile" type="file" accept="application/json" style="display:none;">
+              </div>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">マイ配置に保存</div>
+              <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+                <input id="layoutName" maxlength="24" placeholder="たとえば：うちの初期配置"
+                  style="padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); background: white; width: min(340px, 70vw);" />
+                <button class="seg" id="btnSaveLayout" style="min-width: 110px;">保存</button>
               </div>
             </div>
             <div class="row">
