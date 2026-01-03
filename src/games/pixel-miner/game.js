@@ -581,9 +581,10 @@ function spawnMonsters(world, seedStr) {
   /** @type {Array<any>} */
   const out = [];
 
-  const want = 6;
+  // 敵の数（スマホは少し控えめ）
+  const want = isTouchLike() ? 10 : 14;
   let tries = 0;
-  while (out.length < want && tries < 220) {
+  while (out.length < want && tries < 420) {
     tries++;
     const x = Math.floor(rand() * WORLD_W);
     const y = findSurfaceY(world, x);
