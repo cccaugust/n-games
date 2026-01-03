@@ -133,6 +133,10 @@ function toolToTile(tool) {
   if (tool === 'reverse') return TILE.REVERSE;
   if (tool === 'big') return TILE.BIG;
   if (tool === 'oneway') return TILE.ONE_WAY;
+  if (tool === 'slow') return TILE.SLOW;
+  if (tool === 'fast') return TILE.FAST;
+  if (tool === 'sticky') return TILE.STICKY;
+  if (tool === 'invincible') return TILE.INVINCIBLE;
   return TILE.NORMAL;
 }
 
@@ -163,6 +167,10 @@ function tileColor(t) {
   if (t === TILE.REVERSE) return '#55efc4';
   if (t === TILE.BIG) return '#81ecec';
   if (t === TILE.ONE_WAY) return '#fab1a0';
+  if (t === TILE.SLOW) return '#74f8ff';
+  if (t === TILE.FAST) return '#ff5252';
+  if (t === TILE.STICKY) return '#b388ff';
+  if (t === TILE.INVINCIBLE) return '#ffe66d';
   return '#ffffff';
 }
 
@@ -204,6 +212,10 @@ function drawEditor() {
       if (t === TILE.REVERSE) ectx.fillText('🙃', px + cellW / 2, py + cellH / 2);
       if (t === TILE.BIG) ectx.fillText('🔵', px + cellW / 2, py + cellH / 2);
       if (t === TILE.ONE_WAY) ectx.fillText('⬇', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.SLOW) ectx.fillText('🐌', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.FAST) ectx.fillText('⚡', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.STICKY) ectx.fillText('🩹', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.INVINCIBLE) ectx.fillText('🌈', px + cellW / 2, py + cellH / 2);
     }
   }
 

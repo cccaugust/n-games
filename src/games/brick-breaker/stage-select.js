@@ -38,6 +38,10 @@ function tileColor(t) {
   if (t === TILE.REVERSE) return '#55efc4';
   if (t === TILE.BIG) return '#81ecec';
   if (t === TILE.ONE_WAY) return '#fab1a0';
+  if (t === TILE.SLOW) return '#74f8ff';
+  if (t === TILE.FAST) return '#ff5252';
+  if (t === TILE.STICKY) return '#b388ff';
+  if (t === TILE.INVINCIBLE) return '#ffe66d';
   return '#000000';
 }
 
