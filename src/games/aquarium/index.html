@@ -42,9 +42,7 @@
             <div class="aq-note">タップして選ぶ → 下で設定</div>
           </div>
           <div class="aq-panel-actions">
-            <button class="aq-btn" id="addSampleBtn" type="button">＋ サンプル</button>
-            <button class="aq-btn" id="addAssetBtn" type="button">＋ 作品</button>
-            <button class="aq-btn primary" id="createFishBtn" type="button">＋ 作る</button>
+            <button class="aq-btn primary" id="openAddMenuBtn" type="button">＋ 追加</button>
           </div>
         </div>
 
@@ -97,6 +95,26 @@
       </div>
     </aside>
   </main>
+
+  <!-- Add menu modal (simple) -->
+  <div class="aq-modal-backdrop" id="addMenuModal" hidden>
+    <div class="aq-modal-card aq-modal-card--small">
+      <div class="aq-modal-head">
+        <div>
+          <div class="aq-modal-title">魚を追加</div>
+          <div class="aq-note">どれで追加する？</div>
+        </div>
+        <button class="aq-btn" id="addMenuCloseBtn" type="button">× 閉じる</button>
+      </div>
+      <div class="aq-modal-body">
+        <div class="aq-add-menu">
+          <button class="aq-btn primary aq-add-menu-btn" id="addMenuSampleBtn" type="button">サンプルから</button>
+          <button class="aq-btn aq-add-menu-btn" id="addMenuAssetBtn" type="button">作品から</button>
+          <button class="aq-btn aq-add-menu-btn" id="addMenuCreateBtn" type="button">作る（ドット絵）</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Picker modal (samples / assets) -->
   <div class="aq-modal-backdrop" id="pickerModal" hidden>

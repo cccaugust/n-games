@@ -7,6 +7,17 @@ body {
   margin: 0;
 }
 
+.aq-shell,
+.aq-aquarium,
+.aq-editor {
+  min-width: 0;
+}
+
+.aq-shell {
+  /* allow child scroll areas on mobile */
+  min-height: 0;
+}
+
 .aq-topbar {
   position: sticky;
   top: 0;
@@ -74,6 +85,18 @@ body {
 @media (max-width: 980px) {
   .aq-shell {
     grid-template-columns: 1fr;
+    /* Make aquarium stay visible within viewport on mobile */
+    grid-template-rows: minmax(260px, 1.15fr) minmax(220px, 0.85fr);
+    height: calc(100svh - var(--aq-topbar-h, 64px));
+    overflow: hidden;
+  }
+  .aq-aquarium,
+  .aq-editor {
+    min-height: 0;
+  }
+  .aq-editor {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -97,6 +120,16 @@ body {
   height: 100%;
   min-height: 52svh;
   touch-action: none;
+}
+
+@media (max-width: 980px) {
+  .aq-canvas-wrap {
+    min-height: 0;
+    height: 100%;
+  }
+  .aq-phaser-root {
+    min-height: 0;
+  }
 }
 
 .aq-hint {
@@ -265,6 +298,22 @@ body {
   border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+}
+
+.aq-modal-card.aq-modal-card--small {
+  width: min(520px, 100%);
+}
+
+.aq-add-menu {
+  display: grid;
+  gap: 10px;
+}
+
+.aq-add-menu-btn {
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 16px;
+  font-size: 1rem;
 }
 .aq-modal-head {
   position: sticky;

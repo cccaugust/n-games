@@ -26,6 +26,18 @@ playerPill.innerHTML = `${avatarToHtml(player?.avatar, { size: 18, className: 'p
   player?.name || 'Player'
 )}`;
 
+// Make mobile layout stable by exposing topbar height to CSS
+const topbarEl = document.querySelector('.aq-topbar');
+function updateTopbarHeightVar() {
+  const h = Math.max(44, Math.round(topbarEl?.getBoundingClientRect?.().height || 0));
+  document.documentElement.style.setProperty('--aq-topbar-h', `${h}px`);
+}
+updateTopbarHeightVar();
+window.addEventListener('resize', () => {
+  // Defer to next frame to reflect font/layout changes
+  requestAnimationFrame(updateTopbarHeightVar);
+});
+
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
@@ -929,9 +941,12 @@ class AquariumScene extends Phaser.Scene {
 // UI + state
 // -----------------------
 const fishListEl = document.getElementById('fishList');
-const addSampleBtn = document.getElementById('addSampleBtn');
-const addAssetBtn = document.getElementById('addAssetBtn');
-const createFishBtn = document.getElementById('createFishBtn');
+const openAddMenuBtn = document.getElementById('openAddMenuBtn');
+const addMenuModal = document.getElementById('addMenuModal');
+const addMenuCloseBtn = document.getElementById('addMenuCloseBtn');
+const addMenuSampleBtn = document.getElementById('addMenuSampleBtn');
+const addMenuAssetBtn = document.getElementById('addMenuAssetBtn');
+const addMenuCreateBtn = document.getElementById('addMenuCreateBtn');
 
 const selectedInfo = document.getElementById('selectedInfo');
 const deleteFishBtn = document.getElementById('deleteFishBtn');
@@ -961,6 +976,17 @@ const SAMPLE_ASSETS = buildSampleFishAssets();
 
 const MAX_FISH = 48;
 const REPRO_TICK_MS = 2400;
+
+let renderScheduled = false;
+function scheduleRender() {
+  if (renderScheduled) return;
+  renderScheduled = true;
+  requestAnimationFrame(() => {
+    renderScheduled = false;
+    renderFishList();
+    renderSelectedForm();
+  });
+}
 
 function setSelectedFish(id) {
   selectedFishId = id;
@@ -1055,12 +1081,17 @@ function renderFishList() {
       btn.appendChild(label);
       btn.addEventListener('click', () => {
         void (async () => {
-          // Save as "my" asset so it appears in pixel-art-maker too
-          const saved = await duplicatePixelAsset(
-            { ...a, ownerId, name: `${a.name}（水槽）` },
-            { ownerId, name: `${a.name}（水槽）` }
-          );
-          addFishFromAsset(saved, { name: saved.name });
+          try {
+            // Save as "my" asset so it appears in pixel-art-maker too
+            const saved = await duplicatePixelAsset(
+              { ...a, ownerId, name: `${a.name}（水槽）` },
+              { ownerId, name: `${a.name}（水槽）` }
+            );
+            addFishFromAsset(saved, { name: saved.name });
+          } catch (e) {
+            console.warn('Failed to add sample fish:', e);
+            alert('サンプル追加に失敗しました。通信/保存状態を確認して、もう一度試してね。');
+          }
         })();
       });
       grid.appendChild(btn);
@@ -1106,6 +1137,14 @@ function syncToScene(fish) {
 }
 
 function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, select = true } = {}) {
+  if (!asset) {
+    alert('素材が見つからず、魚を追加できませんでした。');
+    return;
+  }
+  if (fishes.length >= MAX_FISH) {
+    alert(`魚が多すぎるため追加できません（最大 ${MAX_FISH} 匹）。`);
+    return;
+  }
   const fish = {
     id: createId('fish'),
     name: String(name || asset?.name || 'さかな'),
@@ -1118,6 +1157,7 @@ function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, selec
   fishes = [fish, ...fishes];
   syncToScene(fish);
   if (select) setSelectedFish(fish.id);
+  else scheduleRender(); // reproduction等で追加した場合もリストに反映する
 }
 
 function deleteSelectedFish() {
@@ -1149,6 +1189,45 @@ function openPicker(mode) {
 function closePicker() {
   pickerModal.hidden = true;
   document.body.classList.remove('modal-open');
+}
+
+function openAddMenu() {
+  if (!addMenuModal) return;
+  addMenuModal.hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeAddMenu() {
+  if (!addMenuModal) return;
+  addMenuModal.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+async function openAssetsPicker() {
+  pickerItems = await buildPickerItemsFromAssets();
+  openPicker('assets');
+}
+
+async function createFishFlow() {
+  const initial = createEmptyAsset({ ownerId, kind: 'character', width: 32, height: 32, name: 'さかな（自作）' });
+  const saved = await openPixelArtModal({
+    ownerId,
+    title: 'さかなをつくる',
+    kind: 'character',
+    width: 32,
+    height: 32,
+    name: initial.name,
+    initialPixels: initial.pixels,
+    showHue: true
+  });
+  if (!saved) return;
+  // Ensure it is saved (openPixelArtModal already saves). But keep a safety upsert if needed.
+  try {
+    await putPixelAsset(saved);
+  } catch {
+    // ignore
+  }
+  addFishFromAsset(saved, { name: saved.name });
 }
 
 function buildPickerItemsFromSamples() {
@@ -1203,19 +1282,24 @@ function renderPickerGrid() {
     `;
     btn.addEventListener('click', () => {
       void (async () => {
-        if (pickerMode === 'samples') {
-          // Save as "my" asset so it shows in pixel-art-maker too
-          const base = it.asset;
-          const saved = await duplicatePixelAsset(
-            { ...base, ownerId, name: `${base.name}（水槽）` },
-            { ownerId, name: `${base.name}（水槽）` }
-          );
+        try {
+          if (pickerMode === 'samples') {
+            // Save as "my" asset so it shows in pixel-art-maker too
+            const base = it.asset;
+            const saved = await duplicatePixelAsset(
+              { ...base, ownerId, name: `${base.name}（水槽）` },
+              { ownerId, name: `${base.name}（水槽）` }
+            );
+            closePicker();
+            addFishFromAsset(saved, { name: saved.name });
+            return;
+          }
           closePicker();
-          addFishFromAsset(saved, { name: saved.name });
-          return;
+          addFishFromAsset(it.asset, { name: it.asset?.name });
+        } catch (e) {
+          console.warn('Failed to add fish from picker:', e);
+          alert('追加に失敗しました。通信/保存状態を確認して、もう一度試してね。');
         }
-        closePicker();
-        addFishFromAsset(it.asset, { name: it.asset?.name });
       })();
     });
     pickerGrid.appendChild(btn);
@@ -1229,44 +1313,42 @@ pickerModal.addEventListener('click', (e) => {
 });
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (!pickerModal.hidden) closePicker();
+  if (addMenuModal && !addMenuModal.hidden) closeAddMenu();
+  else if (!pickerModal.hidden) closePicker();
 });
 pickerSearchInput.addEventListener('input', renderPickerGrid);
 pickerOnly32.addEventListener('change', renderPickerGrid);
 
-addSampleBtn.addEventListener('click', () => {
+openAddMenuBtn?.addEventListener('click', openAddMenu);
+addMenuCloseBtn?.addEventListener('click', closeAddMenu);
+addMenuModal?.addEventListener('click', (e) => {
+  if (e.target === addMenuModal) closeAddMenu();
+});
+addMenuSampleBtn?.addEventListener('click', () => {
+  closeAddMenu();
   pickerItems = buildPickerItemsFromSamples();
   openPicker('samples');
 });
-
-addAssetBtn.addEventListener('click', () => {
+addMenuAssetBtn?.addEventListener('click', () => {
+  closeAddMenu();
   void (async () => {
-    pickerItems = await buildPickerItemsFromAssets();
-    openPicker('assets');
+    try {
+      await openAssetsPicker();
+    } catch (e) {
+      console.warn('Failed to load assets for picker:', e);
+      alert('作品一覧の読み込みに失敗しました。通信/保存状態を確認して、もう一度試してね。');
+    }
   })();
 });
-
-createFishBtn.addEventListener('click', () => {
+addMenuCreateBtn?.addEventListener('click', () => {
+  closeAddMenu();
   void (async () => {
-    const initial = createEmptyAsset({ ownerId, kind: 'character', width: 32, height: 32, name: 'さかな（自作）' });
-    const saved = await openPixelArtModal({
-      ownerId,
-      title: 'さかなをつくる',
-      kind: 'character',
-      width: 32,
-      height: 32,
-      name: initial.name,
-      initialPixels: initial.pixels,
-      showHue: true
-    });
-    if (!saved) return;
-    // Ensure it is saved (openPixelArtModal already saves). But keep a safety upsert if needed.
     try {
-      await putPixelAsset(saved);
-    } catch {
-      // ignore
+      await createFishFlow();
+    } catch (e) {
+      console.warn('Failed to create fish:', e);
+      alert('魚の作成に失敗しました。もう一度試してね。');
     }
-    addFishFromAsset(saved, { name: saved.name });
   })();
 });
 
@@ -1382,6 +1464,8 @@ aquariumScene.events.on('ready', () => {
   renderFishList();
   renderSelectedForm();
   scene.setEmptyHintVisible(fishes.length === 0);
+  // If fishes were added before Phaser finished booting, sync them now.
+  fishes.forEach((f) => syncToScene(f));
 });
 
 aquariumScene.events.on('fishTapped', (fishId) => {
