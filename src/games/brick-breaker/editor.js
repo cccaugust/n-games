@@ -45,6 +45,8 @@ const toolButtons = Array.from(document.querySelectorAll('.bb-tool-btn[data-tool
 const stageNameEl = qs('stageName');
 const toughHpEl = qs('toughHp');
 const splitTotalEl = qs('splitTotal');
+const toughHpWrap = qs('toughHpWrap');
+const splitTotalWrap = qs('splitTotalWrap');
 const saveBtn = qs('saveBtn');
 const loadBtn = qs('loadBtn');
 const clearBtn = qs('clearBtn');
@@ -101,6 +103,9 @@ function setTool(tool) {
   toolButtons.forEach(btn => {
     btn.dataset.active = btn.dataset.tool === tool ? 'true' : 'false';
   });
+  // UIをすっきり：必要なパラメータだけ見せる
+  if (toughHpWrap) toughHpWrap.style.display = tool === 'tough' ? 'inline-flex' : 'none';
+  if (splitTotalWrap) splitTotalWrap.style.display = tool === 'split' ? 'inline-flex' : 'none';
 }
 setTool('normal');
 
