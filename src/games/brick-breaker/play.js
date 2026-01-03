@@ -12,6 +12,308 @@ function qs(id) {
   return document.getElementById(id);
 }
 
+// --------------------
+// Settings (Sound)
+// --------------------
+const SOUND_KEY = 'ngames.brickBreaker.sound.v1';
+function loadSoundEnabled() {
+  try {
+    const v = localStorage.getItem(SOUND_KEY);
+    if (v == null) return true; // 初期はON（ただしユーザー操作でアンロックされるまで鳴らない）
+    return v === '1';
+  } catch {
+    return true;
+  }
+}
+function saveSoundEnabled(enabled) {
+  try {
+    localStorage.setItem(SOUND_KEY, enabled ? '1' : '0');
+  } catch {
+    // ignore
+  }
+}
+
+// --------------------
+// SFX (WebAudio, assetsなし)
+// --------------------
+function createSfx({ enabled = true, volume = 0.18 } = {}) {
+  let ctx = null;
+  let master = null;
+
+  function ensure() {
+    if (!enabled) return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      ctx = new AC({ latencyHint: 'interactive' });
+      master = ctx.createGain();
+      master.gain.value = clamp(volume, 0, 1);
+      master.connect(ctx.destination);
+    }
+    return ctx;
+  }
+
+  async function unlock() {
+    const c = ensure();
+    if (!c) return;
+    if (c.state === 'suspended') {
+      try { await c.resume(); } catch { /* ignore */ }
+    }
+  }
+
+  function setEnabled(v) {
+    enabled = !!v;
+    if (master) master.gain.value = enabled ? clamp(volume, 0, 1) : 0;
+  }
+  function getEnabled() {
+    return enabled;
+  }
+
+  function tone({
+    type = 'sine',
+    freq = 440,
+    dur = 0.08,
+    gain = 0.14,
+    attack = 0.003,
+    release = 0.06,
+    detune = 0,
+    freqTo = null
+  } = {}) {
+    const c = ensure();
+    if (!c || !master || c.state !== 'running') return;
+    const t0 = c.currentTime;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(Math.max(40, freq), t0);
+    if (freqTo != null) {
+      o.frequency.exponentialRampToValueAtTime(Math.max(40, freqTo), t0 + Math.max(0.001, dur));
+    }
+    o.detune.setValueAtTime(detune, t0);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + Math.max(0.001, attack));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + Math.max(0.01, dur + release));
+    o.connect(g);
+    g.connect(master);
+    o.start(t0);
+    o.stop(t0 + dur + release + 0.02);
+  }
+
+  function noise({ dur = 0.12, gain = 0.12, filterFreq = 900, q = 0.9 } = {}) {
+    const c = ensure();
+    if (!c || !master || c.state !== 'running') return;
+    const len = Math.max(1, Math.floor(c.sampleRate * Math.max(0.02, dur)));
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.85;
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const filt = c.createBiquadFilter();
+    filt.type = 'lowpass';
+    filt.frequency.value = Math.max(120, filterFreq);
+    filt.Q.value = Math.max(0.1, q);
+    const g = c.createGain();
+    const t0 = c.currentTime;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + Math.max(0.03, dur + 0.06));
+    src.connect(filt);
+    filt.connect(g);
+    g.connect(master);
+    src.start(t0);
+    src.stop(t0 + dur + 0.12);
+  }
+
+  // High-level cues
+  function paddle() {
+    tone({ type: 'triangle', freq: 260, freqTo: 340, dur: 0.045, gain: 0.12, release: 0.06 });
+  }
+  function wall() {
+    tone({ type: 'square', freq: 220, freqTo: 160, dur: 0.04, gain: 0.10, release: 0.05 });
+  }
+  function soft() {
+    tone({ type: 'sine', freq: 170, freqTo: 130, dur: 0.05, gain: 0.10, release: 0.08 });
+  }
+  function hit() {
+    tone({ type: 'triangle', freq: 420, freqTo: 380, dur: 0.035, gain: 0.10, release: 0.05 });
+  }
+  function toughHit() {
+    tone({ type: 'square', freq: 520, dur: 0.03, gain: 0.08, release: 0.04 });
+    tone({ type: 'triangle', freq: 780, dur: 0.02, gain: 0.05, release: 0.03, detune: -10 });
+  }
+  function breakNormal() {
+    tone({ type: 'triangle', freq: 520, freqTo: 360, dur: 0.06, gain: 0.14, release: 0.07 });
+  }
+  function breakSplit() {
+    tone({ type: 'sine', freq: 660, freqTo: 990, dur: 0.07, gain: 0.12, release: 0.10 });
+    tone({ type: 'sine', freq: 990, freqTo: 1320, dur: 0.06, gain: 0.08, release: 0.08, detune: 6 });
+  }
+  function powerUp() {
+    tone({ type: 'sine', freq: 520, freqTo: 1040, dur: 0.12, gain: 0.12, release: 0.12 });
+  }
+  function reverse() {
+    tone({ type: 'sawtooth', freq: 520, freqTo: 260, dur: 0.11, gain: 0.10, release: 0.12 });
+  }
+  function portal() {
+    tone({ type: 'sine', freq: 420, freqTo: 840, dur: 0.09, gain: 0.08, release: 0.12 });
+    tone({ type: 'triangle', freq: 980, freqTo: 520, dur: 0.08, gain: 0.06, release: 0.10, detune: 14 });
+  }
+  function bomb() {
+    noise({ dur: 0.10, gain: 0.14, filterFreq: 1200, q: 0.6 });
+    tone({ type: 'sine', freq: 120, freqTo: 70, dur: 0.18, gain: 0.12, release: 0.18 });
+  }
+
+  return {
+    unlock,
+    setEnabled,
+    getEnabled,
+    paddle,
+    wall,
+    soft,
+    hit,
+    toughHit,
+    breakNormal,
+    breakSplit,
+    powerUp,
+    reverse,
+    portal,
+    bomb
+  };
+}
+
+// --------------------
+// Particles / Screen shake
+// --------------------
+const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+const particles = [];
+const rings = [];
+let shakeT = 0;
+let shakePow = 0;
+
+function fxAddShake(pow, time = 0.12) {
+  shakePow = Math.max(shakePow, pow);
+  shakeT = Math.max(shakeT, time);
+}
+
+function fxSpawnRing(x, y, color, { r0 = 6, r1 = 36, life = 0.22, width = 3 } = {}) {
+  rings.push({ x, y, color, r0, r1, life, t: 0, width });
+}
+
+function fxSpawnBurst(x, y, color, {
+  count = 12,
+  speedMin = 80,
+  speedMax = 260,
+  lifeMin = 0.15,
+  lifeMax = 0.45,
+  sizeMin = 1.2,
+  sizeMax = 3.2,
+  gravity = 520,
+  drag = 0.02,
+  glow = false
+} = {}) {
+  const n = prefersReducedMotion ? Math.max(4, Math.floor(count * 0.55)) : count;
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = speedMin + Math.random() * (speedMax - speedMin);
+    const vx = Math.cos(a) * sp;
+    const vy = Math.sin(a) * sp;
+    const life = lifeMin + Math.random() * (lifeMax - lifeMin);
+    const size = sizeMin + Math.random() * (sizeMax - sizeMin);
+    particles.push({
+      x,
+      y,
+      vx,
+      vy,
+      g: gravity,
+      drag,
+      life,
+      t: 0,
+      size,
+      color,
+      glow
+    });
+  }
+}
+
+function fxUpdate(dt) {
+  if (shakeT > 0) {
+    shakeT = Math.max(0, shakeT - dt);
+    if (shakeT <= 0) shakePow = 0;
+  }
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.t += dt;
+    if (p.t >= p.life) {
+      particles.splice(i, 1);
+      continue;
+    }
+    p.vx *= (1 - p.drag);
+    p.vy *= (1 - p.drag);
+    p.vy += p.g * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+  }
+
+  for (let i = rings.length - 1; i >= 0; i--) {
+    const r = rings[i];
+    r.t += dt;
+    if (r.t >= r.life) {
+      rings.splice(i, 1);
+    }
+  }
+
+  // 念のため上限（長時間プレイの暴走防止）
+  const MAX_PARTICLES = 900;
+  if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
+  const MAX_RINGS = 30;
+  if (rings.length > MAX_RINGS) rings.splice(0, rings.length - MAX_RINGS);
+}
+
+function fxShakeOffset() {
+  if (shakeT <= 0 || shakePow <= 0) return { x: 0, y: 0 };
+  const t = shakeT;
+  const k = clamp(t / 0.12, 0, 1);
+  const p = shakePow * k;
+  return {
+    x: (Math.random() * 2 - 1) * p,
+    y: (Math.random() * 2 - 1) * p
+  };
+}
+
+function fxDraw(ctx2d) {
+  // rings
+  for (const r of rings) {
+    const tt = clamp(r.t / Math.max(0.0001, r.life), 0, 1);
+    const rr = r.r0 + (r.r1 - r.r0) * tt;
+    const a = (1 - tt) * 0.75;
+    ctx2d.save();
+    ctx2d.globalAlpha = a;
+    ctx2d.strokeStyle = r.color;
+    ctx2d.lineWidth = r.width;
+    ctx2d.beginPath();
+    ctx2d.arc(r.x, r.y, rr, 0, Math.PI * 2);
+    ctx2d.stroke();
+    ctx2d.restore();
+  }
+
+  // particles
+  // glow は lighter で気持ちよく
+  ctx2d.save();
+  for (const p of particles) {
+    const tt = clamp(p.t / Math.max(0.0001, p.life), 0, 1);
+    const a = (1 - tt);
+    ctx2d.globalAlpha = a;
+    if (p.glow) ctx2d.globalCompositeOperation = 'lighter';
+    else ctx2d.globalCompositeOperation = 'source-over';
+    ctx2d.fillStyle = p.color;
+    ctx2d.beginPath();
+    ctx2d.arc(p.x, p.y, Math.max(0.6, p.size * (0.9 + (1 - tt) * 0.35)), 0, Math.PI * 2);
+    ctx2d.fill();
+  }
+  ctx2d.restore();
+}
+
 function getStageFromUrl() {
   const sp = new URLSearchParams(location.search);
   const s = sp.get('stage');
@@ -32,10 +334,27 @@ const livesEl = qs('lives');
 const ballsEl = qs('balls');
 const continuesEl = qs('continues');
 
+const soundBtn = qs('soundBtn');
 const pauseBtn = qs('pauseBtn');
 const resetBtn = qs('resetBtn');
 
 const { showOverlay, closeOverlay } = initOverlay();
+
+const sfx = createSfx({ enabled: loadSoundEnabled() });
+function syncSoundBtn() {
+  if (!soundBtn) return;
+  const on = sfx.getEnabled();
+  soundBtn.textContent = `音: ${on ? 'ON' : 'OFF'}`;
+  soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+syncSoundBtn();
+soundBtn?.addEventListener('click', async () => {
+  const next = !sfx.getEnabled();
+  sfx.setEnabled(next);
+  saveSoundEnabled(next);
+  syncSoundBtn();
+  if (next) await sfx.unlock();
+});
 
 // --------------------
 // Canvas Resize (DPR対応)
@@ -141,7 +460,8 @@ function makeBricksFromStage(stage) {
         type: t,
         param: p,
         hp,
-        alive: true
+        alive: true,
+        flash: 0
       });
     }
   }
@@ -435,7 +755,13 @@ function stageCleared() {
 
 function updateGame(dt) {
   if (isPaused) return;
+  fxUpdate(dt);
   reverseTimeLeft = Math.max(0, reverseTimeLeft - dt);
+
+  // brick flash decay
+  for (const br of bricks) {
+    if ((br.flash || 0) > 0) br.flash = Math.max(0, (br.flash || 0) - dt);
+  }
 
   const aliveBricks = bricks.filter(b => b.alive);
 
@@ -451,6 +777,7 @@ function updateGame(dt) {
     if (others.length === 0) return false;
     const target = others[Math.floor(Math.random() * others.length)];
     const { x, y } = portalCenter(target);
+    const src = portalCenter(hitPortal);
 
     // 少しだけ前に出して「はまり」を防ぐ
     const vlen = Math.max(60, Math.hypot(ballObj.vx, ballObj.vy));
@@ -465,18 +792,131 @@ function updateGame(dt) {
     ballObj.vy = Math.sin(a) * vlen;
 
     ballObj.portalCd = 0.35;
+
+    // FX
+    sfx.portal();
+    fxSpawnRing(src.x, src.y, 'rgba(116,248,255,0.95)', { r0: 10, r1: 44, life: 0.22, width: 3 });
+    fxSpawnRing(x, y, 'rgba(116,248,255,0.95)', { r0: 10, r1: 44, life: 0.22, width: 3 });
+    fxSpawnBurst(src.x, src.y, 'rgba(116,248,255,0.95)', { count: 14, speedMin: 120, speedMax: 320, lifeMin: 0.18, lifeMax: 0.45, sizeMin: 1.3, sizeMax: 3.0, gravity: 320, glow: true });
+    fxSpawnBurst(x, y, 'rgba(116,248,255,0.95)', { count: 14, speedMin: 120, speedMax: 320, lifeMin: 0.18, lifeMax: 0.45, sizeMin: 1.3, sizeMax: 3.0, gravity: 320, glow: true });
     return true;
+  }
+
+  function brickFxColor(brick) {
+    return brickBaseColor(brick);
+  }
+  function hitPointOnRect(ballObj, rect) {
+    // ボール中心を矩形にクランプ（当たったっぽい点）
+    const hx = clamp(ballObj.x, rect.x, rect.x + rect.w);
+    const hy = clamp(ballObj.y, rect.y, rect.y + rect.h);
+    return { x: hx, y: hy };
+  }
+  function fxHitBrick(brick, rect, ballObj, { strong = false } = {}) {
+    const c = brickFxColor(brick);
+    const hp = hitPointOnRect(ballObj, rect);
+    brick.flash = Math.max(brick.flash || 0, strong ? 0.14 : 0.10);
+
+    if (brick.type === TILE.WALL) {
+      sfx.wall();
+      fxSpawnBurst(hp.x, hp.y, 'rgba(255,255,255,0.95)', { count: 8, speedMin: 80, speedMax: 220, lifeMin: 0.10, lifeMax: 0.25, sizeMin: 1.0, sizeMax: 2.4, gravity: 620, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.SOFT) {
+      sfx.soft();
+      fxSpawnBurst(hp.x, hp.y, 'rgba(255,234,167,0.95)', { count: 10, speedMin: 60, speedMax: 160, lifeMin: 0.12, lifeMax: 0.28, sizeMin: 1.0, sizeMax: 2.6, gravity: 760, drag: 0.04 });
+      return;
+    }
+
+    if (brick.type === TILE.TOUGH) {
+      sfx.toughHit();
+      fxSpawnBurst(hp.x, hp.y, 'rgba(255,255,255,0.95)', { count: strong ? 16 : 12, speedMin: 90, speedMax: 260, lifeMin: 0.10, lifeMax: 0.26, sizeMin: 1.0, sizeMax: 2.6, gravity: 720, glow: true });
+      fxSpawnBurst(hp.x, hp.y, c, { count: 6, speedMin: 60, speedMax: 160, lifeMin: 0.12, lifeMax: 0.28, sizeMin: 1.0, sizeMax: 2.2, gravity: 740 });
+      return;
+    }
+
+    // other breakables (normal/split/bomb/reverse/big/oneway)
+    sfx.hit();
+    fxSpawnBurst(hp.x, hp.y, c, { count: strong ? 14 : 10, speedMin: 80, speedMax: 220, lifeMin: 0.12, lifeMax: 0.30, sizeMin: 1.1, sizeMax: 2.8, gravity: 640, glow: brick.type === TILE.SPLIT });
+  }
+
+  function fxBreakBrick(brick, rect, { byBomb = false } = {}) {
+    const c = brickFxColor(brick);
+    const cx = rect.x + rect.w / 2;
+    const cy = rect.y + rect.h / 2;
+
+    if (brick.type === TILE.SPLIT) {
+      sfx.breakSplit();
+      fxSpawnRing(cx, cy, 'rgba(255,255,255,0.95)', { r0: 8, r1: 46, life: 0.20, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(255,255,255,0.95)', { count: 18, speedMin: 140, speedMax: 420, lifeMin: 0.14, lifeMax: 0.42, sizeMin: 1.1, sizeMax: 3.2, gravity: 420, glow: true });
+      fxSpawnBurst(cx, cy, c, { count: 14, speedMin: 120, speedMax: 320, lifeMin: 0.16, lifeMax: 0.45, sizeMin: 1.1, sizeMax: 3.0, gravity: 520 });
+      return;
+    }
+
+    if (brick.type === TILE.BOMB) {
+      // 爆発は別でまとめて出す。ここでは破片だけ。
+      fxSpawnBurst(cx, cy, c, { count: 14, speedMin: 120, speedMax: 360, lifeMin: 0.14, lifeMax: 0.42, sizeMin: 1.2, sizeMax: 3.4, gravity: 620, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.REVERSE) {
+      sfx.reverse();
+      fxSpawnRing(cx, cy, 'rgba(85,239,196,0.95)', { r0: 10, r1: 54, life: 0.26, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(85,239,196,0.95)', { count: 18, speedMin: 120, speedMax: 330, lifeMin: 0.14, lifeMax: 0.45, sizeMin: 1.2, sizeMax: 3.0, gravity: 520, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.BIG) {
+      sfx.powerUp();
+      fxSpawnRing(cx, cy, 'rgba(129,236,236,0.95)', { r0: 10, r1: 58, life: 0.26, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(129,236,236,0.95)', { count: 18, speedMin: 120, speedMax: 340, lifeMin: 0.14, lifeMax: 0.45, sizeMin: 1.2, sizeMax: 3.2, gravity: 480, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.ONE_WAY) {
+      // 片方向は軽め（貫通破壊の爽快感）
+      sfx.breakNormal();
+      fxSpawnBurst(cx, cy, c, { count: 12, speedMin: 110, speedMax: 280, lifeMin: 0.14, lifeMax: 0.38, sizeMin: 1.1, sizeMax: 3.0, gravity: 560 });
+      return;
+    }
+
+    if (brick.type === TILE.TOUGH) {
+      // toughの「割れた！」感
+      sfx.breakNormal();
+      fxSpawnRing(cx, cy, 'rgba(255,255,255,0.9)', { r0: 10, r1: 62, life: 0.22, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(255,255,255,0.95)', { count: 20, speedMin: 140, speedMax: 460, lifeMin: 0.12, lifeMax: 0.40, sizeMin: 1.2, sizeMax: 3.4, gravity: 520, glow: true });
+      fxSpawnBurst(cx, cy, c, { count: 12, speedMin: 120, speedMax: 300, lifeMin: 0.14, lifeMax: 0.42, sizeMin: 1.1, sizeMax: 3.0, gravity: 620 });
+      if (!byBomb) fxAddShake(4, 0.10);
+      return;
+    }
+
+    // normal / soft etc
+    if (brick.type === TILE.SOFT) sfx.soft();
+    else sfx.breakNormal();
+    fxSpawnBurst(cx, cy, c, { count: 14, speedMin: 120, speedMax: 320, lifeMin: 0.14, lifeMax: 0.38, sizeMin: 1.1, sizeMax: 3.2, gravity: 660 });
+  }
+
+  function fxBombExplosion(centerRect) {
+    const cx = centerRect.x + centerRect.w / 2;
+    const cy = centerRect.y + centerRect.h / 2;
+    sfx.bomb();
+    fxAddShake(7, 0.18);
+    fxSpawnRing(cx, cy, 'rgba(255,118,117,0.95)', { r0: 14, r1: 120, life: 0.30, width: 4 });
+    fxSpawnBurst(cx, cy, 'rgba(255,255,255,0.95)', { count: 26, speedMin: 220, speedMax: 620, lifeMin: 0.12, lifeMax: 0.45, sizeMin: 1.2, sizeMax: 3.8, gravity: 420, glow: true });
+    fxSpawnBurst(cx, cy, 'rgba(255,118,117,0.95)', { count: 22, speedMin: 180, speedMax: 520, lifeMin: 0.14, lifeMax: 0.55, sizeMin: 1.2, sizeMax: 3.6, gravity: 520 });
+    fxSpawnBurst(cx, cy, 'rgba(30,30,30,0.55)', { count: 18, speedMin: 90, speedMax: 240, lifeMin: 0.30, lifeMax: 0.90, sizeMin: 2.2, sizeMax: 6.5, gravity: 120, drag: 0.01 });
   }
 
   function killBrick(brick, fromBall) {
     if (!brick.alive) return false;
     if (brick.type === TILE.WALL || brick.type === TILE.PORTAL) return false;
+    const rect = brickRect(brick);
     brick.hp -= 1;
     if (brick.hp <= 0) {
       brick.alive = false;
       score += brickPoints(brick);
+      fxBreakBrick(brick, rect);
       if (brick.type === TILE.SPLIT) {
-        const rect = brickRect(brick);
         spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2, { desiredTotal: brick.param || 5 });
       }
       if (brick.type === TILE.REVERSE) {
@@ -486,12 +926,14 @@ function updateGame(dt) {
     }
     // かたいブロックは当てるだけでも少し加点
     if (brick.type === TILE.TOUGH) score += 2;
+    fxHitBrick(brick, rect, fromBall, { strong: false });
     return true;
   }
 
   function explodeAt(centerBrick, fromBall) {
     // 3x3（周りも巻きこむ）。かべ/ポータルは無視。
     let spawnedFromSplit = false;
+    const destroyed = [];
     for (const b of aliveBricks) {
       if (!b.alive) continue;
       if (b.type === TILE.WALL || b.type === TILE.PORTAL) continue;
@@ -508,6 +950,7 @@ function updateGame(dt) {
       if (b.hp <= 0) {
         b.alive = false;
         score += brickPoints(b);
+        destroyed.push(b);
         if (!spawnedFromSplit && b.type === TILE.SPLIT) {
           const rect = brickRect(b);
           spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2, { desiredTotal: b.param || 5 });
@@ -515,6 +958,12 @@ function updateGame(dt) {
         }
         if (b.type === TILE.REVERSE) reverseTimeLeft = Math.max(reverseTimeLeft, 6.0);
       }
+    }
+
+    // FX（巻きこみ破壊）
+    for (const d of destroyed) {
+      const r = brickRect(d);
+      fxBreakBrick(d, r, { byBomb: true });
     }
   }
 
@@ -560,6 +1009,10 @@ function updateGame(dt) {
       const vy = -Math.sqrt(Math.max(60, speed * speed - vx * vx));
       b.vx = vx;
       b.vy = vy;
+
+      // FX
+      sfx.paddle();
+      fxSpawnBurst(b.x, paddle.y, 'rgba(255,255,255,0.95)', { count: 8, speedMin: 80, speedMax: 260, lifeMin: 0.10, lifeMax: 0.22, sizeMin: 1.0, sizeMax: 2.6, gravity: 720, glow: true });
     }
 
     // Bricks
@@ -595,9 +1048,11 @@ function updateGame(dt) {
       if (isOneWay) {
         if (b.vy > 0) {
           b.vy = -Math.abs(b.vy);
+          fxHitBrick(brick, rect, b, { strong: false });
         } else {
           brick.alive = false;
           score += brickPoints(brick);
+          fxBreakBrick(brick, rect);
         }
         hitSomething = true;
         break;
@@ -611,6 +1066,16 @@ function updateGame(dt) {
         }
         // ワープできないときは普通の壁っぽく反射しておく
         b.vy = -b.vy;
+        // FX（ワープ失敗でも「触った感」）
+        brick.flash = Math.max(brick.flash || 0, 0.10);
+        fxSpawnBurst(rect.x + rect.w / 2, rect.y + rect.h / 2, 'rgba(116,248,255,0.95)', { count: 10, speedMin: 80, speedMax: 220, lifeMin: 0.12, lifeMax: 0.30, sizeMin: 1.0, sizeMax: 2.6, gravity: 260, glow: true });
+        hitSomething = true;
+        break;
+      }
+
+      // Wall: 壊れない（反射だけ）でも「当たった感」
+      if (isWall) {
+        fxHitBrick(brick, rect, b, { strong: false });
         hitSomething = true;
         break;
       }
@@ -623,6 +1088,7 @@ function updateGame(dt) {
           score += brickPoints(brick);
           b.baseR = b.baseR || b.r;
           b.bigTimeLeft = Math.max(b.bigTimeLeft || 0, 5.0);
+          fxBreakBrick(brick, rect);
         } else if (isBigBall && brick.type === TILE.TOUGH) {
           // でかボールは「硬いブロックだけ反射」＆一気に2減る
           b.vy = -b.vy;
@@ -630,8 +1096,10 @@ function updateGame(dt) {
           if (brick.hp <= 0) {
             brick.alive = false;
             score += brickPoints(brick);
+            fxBreakBrick(brick, rect);
           } else {
             score += 2;
+            fxHitBrick(brick, rect, b, { strong: true });
           }
         } else if (isBigBall && (
           brick.type === TILE.NORMAL ||
@@ -644,6 +1112,8 @@ function updateGame(dt) {
           if (brick.type === TILE.BOMB) {
             brick.alive = false;
             score += brickPoints(brick);
+            fxBreakBrick(brick, rect);
+            fxBombExplosion(rect);
             explodeAt(brick, b);
           } else {
             killBrick(brick, b);
@@ -652,6 +1122,8 @@ function updateGame(dt) {
           // 💣 ばくはつ：自分＋周りをまとめて
           brick.alive = false;
           score += brickPoints(brick);
+          fxBreakBrick(brick, rect);
+          fxBombExplosion(rect);
           explodeAt(brick, b);
         } else {
           killBrick(brick, b);
@@ -690,6 +1162,10 @@ function updateGame(dt) {
 function drawGame() {
   ctx.clearRect(0, 0, viewW, viewH);
 
+  const sh = fxShakeOffset();
+  ctx.save();
+  ctx.translate(sh.x, sh.y);
+
   // 背景グラデ
   const g = ctx.createLinearGradient(0, 0, 0, viewH);
   g.addColorStop(0, '#2d3436');
@@ -704,6 +1180,13 @@ function drawGame() {
     ctx.fillStyle = brickBaseColor(brick);
     ctx.globalAlpha = 1;
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+
+    // ヒット時フラッシュ
+    if ((brick.flash || 0) > 0) {
+      const a = clamp(brick.flash / 0.14, 0, 1) * 0.55;
+      ctx.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+      ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
+    }
 
     if (brick.type === TILE.TOUGH) {
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
@@ -793,6 +1276,9 @@ function drawGame() {
   }
   ctx.globalAlpha = 1;
 
+  // FX (particles/rings)
+  fxDraw(ctx);
+
   // Paddle
   ctx.fillStyle = paddle.color;
   ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
@@ -820,6 +1306,8 @@ function drawGame() {
     ctx.textBaseline = 'top';
     ctx.fillText('🔵 でかボール中！', viewW / 2, reverseTimeLeft > 0 ? 42 : 12);
   }
+
+  ctx.restore();
 }
 
 function loop(t) {
@@ -845,6 +1333,7 @@ function movePaddleFromClientX(clientX) {
 }
 
 canvas.addEventListener('pointerdown', (e) => {
+  void sfx.unlock();
   paddlePointerId = e.pointerId;
   canvas.setPointerCapture?.(e.pointerId);
   movePaddleFromClientX(e.clientX);
