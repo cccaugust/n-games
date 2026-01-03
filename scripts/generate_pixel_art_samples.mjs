@@ -654,6 +654,272 @@ function makeRobotHead16() {
   return c;
 }
 
+// --- 16x16 enemies (game-ready starters) ---
+function makeEnemyBat16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '................',
+      '....dddddd......',
+      '...dDDddDDd.....',
+      '..dDddKKddDd....',
+      '..dDddwwddDd....',
+      '..dDDDDDDDDd....',
+      '.dDDdDDDDdDDd...',
+      '.dDDDDDDDDDDd...',
+      '..dDDDDDDDDd....',
+      '...dDDDDDDd.....',
+      '....dDDDDd......',
+      '.....d..d.......',
+      '....d....d......',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemyGoblin16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.....GGGG.......',
+      '....GHHHHG......',
+      '...GHHHHHHG.....',
+      '..GHHKHHKHHG....',
+      '..GHHHHHHHHG....',
+      '..GHHHrrHHHG....',
+      '...GHHHHHHG.....',
+      '....GGGGGG......',
+      '...22222222.....',
+      '..221222212.....',
+      '..221222212.....',
+      '..22222222......',
+      '....2....2......',
+      '...s......s.....',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemySkeleton16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......llll......',
+      '.....lwwwwl.....',
+      '....lwKwwKwl....',
+      '....lwwwwwwl....',
+      '.....lwwwwl.....',
+      '......llll......',
+      '.....lwwwwl.....',
+      '....lwwwwwwl....',
+      '.....lwwwwl.....',
+      '....lwwwwwwl....',
+      '...lwwlwwlwwl...',
+      '....ll....ll....',
+      '...l..l..l..l...',
+      '...s..s..s..s...',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemyEye16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '.....dddddd.....',
+      '....dEEEEEd.....',
+      '...dEwwwwwEd....',
+      '...dEwBBBwEd....',
+      '...dEwBKKwEd....',
+      '...dEwBBBwEd....',
+      '...dEwwwwwEd....',
+      '....dEEEEEd.....',
+      '.....dddddd.....',
+      '......s..s......',
+      '................',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 55) });
+  return c;
+}
+
+function makeEnemySlimeRed16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '................',
+      '....rrrrrr......',
+      '...rRRRRRRr.....',
+      '..rRYYYYYYRr....',
+      '..rRYw..wYRr....',
+      '..rRY....YRr....',
+      '..rRYYYYYYRr....',
+      '..rRRRRRRRRr....',
+      '...rRRRRRRr.....',
+      '....rrrrrr......',
+      '.....s..s.......',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemyImp16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....RR....RR....',
+      '...RrR....RrR...',
+      '....RRRRRRRR....',
+      '..RRRrrrrrrRRR..',
+      '..RRrKrrrrKrRR..',
+      '..RRrrrrrrrrRR..',
+      '...RRRrrrrRRR...',
+      '....RRRRRRRR....',
+      '.....222222.....',
+      '....2212212.....',
+      '....222222......',
+      '.....2..2.......',
+      '....2....2......',
+      '...s......s.....',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemySpider16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '...d..d..d..d...',
+      '..d..d..d..d....',
+      '....dddDDddd....',
+      '...dDDKKKKDDd...',
+      '...dDDwwwwDDd...',
+      '...dDDDDDDDDd...',
+      '....dDDDDDd.....',
+      '.....dDDDd......',
+      '....dDDDDDd.....',
+      '...dDDDDDDDDd...',
+      '..d..d..d..d....',
+      '...d..d..d..d...',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 60) });
+  return c;
+}
+
+function makeEnemyKnight16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '......ddd.......',
+      '.....dEEEd......',
+      '....dEwKKEd.....',
+      '....dEwwwwd.....',
+      '.....dDDDD......',
+      '....DDyyyyDD....',
+      '...DDyDDDDyDD...',
+      '..DDyDDDDDDyDD..',
+      '..DDyDDDDDDyDD..',
+      '...DDyDDDDyDD...',
+      '....DDyyyyDD....',
+      '.....22..22.....',
+      '....22....22....',
+      '...s........s...',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemyMushroomBad16() {
+  const c = makeFromAscii(
+    [
+      '................',
+      '....RRRRRR......',
+      '...RRwwwwRR.....',
+      '..RRwwwwwwRR....',
+      '..RRwKwwKwwRR....',
+      '...RRwwwwRR.....',
+      '....RRRRRR......',
+      '.....3333.......',
+      '....33YY33......',
+      '....33YY33......',
+      '....33YY33......',
+      '.....3333.......',
+      '....3..3..3.....',
+      '...3.... ..3....',
+      '...s......s.....',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  // clean up accidental spaces in pattern row
+  // (ASCII parser treats space as transparent, so it's fine; keep as-is)
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeEnemySlimePurple16() {
+  // Use blue palette as base and tint with shadow/ink for a "poison" feel.
+  const c = makeFromAscii(
+    [
+      '................',
+      '................',
+      '....bbbbbb......',
+      '...bBBBBBBb.....',
+      '..bBdddddDBb....',
+      '..bBdK..KBDB....',
+      '..bBd....dDB....',
+      '..bBdddddDBb....',
+      '..bBBBBBBBBb....',
+      '...bBBBBBBb.....',
+      '....bbbbbb......',
+      '.....s..s.......',
+      '................',
+      '................',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
 function makeHeart16() {
   const c = makeFromAscii(
     [
@@ -1325,6 +1591,16 @@ const samples = [
   toSample('chick_16', 'ひよこ', 'character', makeChick16(), ['どうぶつ', '16x16', 'キャラ']),
   toSample('frog_16', 'かえる', 'character', makeFrog16(), ['どうぶつ', '16x16', 'キャラ']),
   toSample('robot_head_16', 'ロボのあたま', 'character', makeRobotHead16(), ['メカ', '16x16', 'キャラ']),
+  toSample('enemy_bat_16', 'こうもり', 'character', makeEnemyBat16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_goblin_16', 'ゴブリン', 'character', makeEnemyGoblin16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_skeleton_16', 'スケルトン', 'character', makeEnemySkeleton16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_eye_16', 'めだま', 'character', makeEnemyEye16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_slime_red_16', 'あかスライム', 'character', makeEnemySlimeRed16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_imp_16', 'こあくま', 'character', makeEnemyImp16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_spider_16', 'くも', 'character', makeEnemySpider16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_knight_16', 'よろい', 'character', makeEnemyKnight16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_mushroom_16', 'どくきのこ', 'character', makeEnemyMushroomBad16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSample('enemy_slime_purple_16', 'どくスライム', 'character', makeEnemySlimePurple16(), ['モンスター', '16x16', 'キャラ', '敵']),
 
   toSample('heart_16', 'ハート', 'object', makeHeart16(), ['アイコン', '16x16', '小物']),
   toSample('star_16', 'スター', 'object', makeStar16(), ['アイコン', '16x16', '小物']),
