@@ -1017,6 +1017,283 @@ function makeTileStone16() {
   return c;
 }
 
+function h2(x, y, seed = 0) {
+  // Small deterministic hash for texture patterns (0..255).
+  const n = (x * 17 + y * 31 + seed * 101 + ((x << 3) ^ (y << 5))) | 0;
+  return (n ^ (n >>> 7) ^ (n >>> 13)) & 255;
+}
+
+function makeTileDirt16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.brown2);
+  // speckles + subtle noise
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 1);
+      if (v % 23 === 0) setPx(c, x, y, PALETTE.brown3);
+      else if (v % 17 === 0) setPx(c, x, y, PALETTE.brown1);
+      else if (v % 29 === 0) setPx(c, x, y, PALETTE.gray2); // small pebble
+    }
+  }
+  // a few darker clumps
+  for (let i = 0; i < 10; i++) {
+    const x = (h2(i, 7, 9) % 14) + 1;
+    const y = (h2(i, 3, 11) % 14) + 1;
+    setPx(c, x, y, PALETTE.brown1);
+    if (i % 2 === 0) setPx(c, x + 1, y, PALETTE.brown1);
+  }
+  return c;
+}
+
+function makeTileSand16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.yellow2);
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 2);
+      if (v % 19 === 0) setPx(c, x, y, PALETTE.yellow1);
+      else if (v % 31 === 0) setPx(c, x, y, PALETTE.orange2);
+    }
+  }
+  // wind streaks (very subtle)
+  for (let y = 2; y < 16; y += 5) {
+    for (let x = 0; x < 16; x++) {
+      if ((x + y) % 4 === 0) setPx(c, x, y, PALETTE.yellow1);
+    }
+  }
+  return c;
+}
+
+function makeTileBrickRed16() {
+  const c = makeCanvas(16, 16);
+  const mortar = PALETTE.gray3;
+  // mortar grid
+  fillRect(c, 0, 0, 16, 16, mortar);
+  for (let y = 0; y < 16; y++) {
+    const row = (y / 4) | 0;
+    const innerY = y % 4;
+    const offset = (row % 2) * 3; // stagger
+    for (let x = 0; x < 16; x++) {
+      // leave mortar lines: 1px between bricks + 1px between rows
+      const innerX = (x + offset) % 6;
+      const isMortar = innerY === 0 || innerX === 0;
+      if (isMortar) continue;
+      // brick fill with a bit of variation
+      const v = h2(x, y, 3);
+      const base = v % 9 === 0 ? PALETTE.red2 : PALETTE.red1;
+      setPx(c, x, y, base);
+      // tiny shadow at bottom-right of brick cells
+      if (innerY === 3 && innerX >= 4) setPx(c, x, y, PALETTE.orange1);
+    }
+  }
+  return c;
+}
+
+function makeTileWoodPlank16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.brown2);
+  // plank seams
+  for (let y = 0; y < 16; y++) {
+    if (y === 5 || y === 11) for (let x = 0; x < 16; x++) setPx(c, x, y, PALETTE.brown1);
+  }
+  // wood grain + knots
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 4);
+      if (v % 13 === 0) setPx(c, x, y, PALETTE.brown1);
+      else if (v % 29 === 0) setPx(c, x, y, PALETTE.brown3);
+    }
+  }
+  // knots
+  fillCircle(c, 4, 8, 1, PALETTE.brown1);
+  setPx(c, 5, 8, PALETTE.brown3);
+  fillCircle(c, 12, 3, 1, PALETTE.brown1);
+  setPx(c, 11, 3, PALETTE.brown3);
+  // slight highlight on top edge
+  for (let x = 0; x < 16; x++) if (x % 3 === 0) setPx(c, x, 0, PALETTE.brown3);
+  return c;
+}
+
+function makeTileCobble16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.gray2);
+  // stones as small blobs
+  const stones = [
+    [4, 4, 3],
+    [12, 5, 3],
+    [7, 10, 3],
+    [2, 12, 2],
+    [14, 12, 2]
+  ];
+  for (const [cx, cy, r] of stones) {
+    fillCircle(c, cx, cy, r, PALETTE.gray2);
+    // shadow edge
+    for (let y = cy - r; y <= cy + r; y++) {
+      for (let x = cx - r; x <= cx + r; x++) {
+        if (!inBounds(c, x, y)) continue;
+        if (getPx(c, x, y) === 0) continue;
+        if ((x - cx) + (y - cy) > r - 1) setPx(c, x, y, PALETTE.gray1);
+      }
+    }
+    // highlight
+    setPx(c, cx - 1, cy - 1, PALETTE.gray3);
+    setPx(c, cx, cy - 2, PALETTE.gray3);
+  }
+  // cracks between stones
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 5);
+      if (v % 37 === 0) setPx(c, x, y, PALETTE.gray1);
+    }
+  }
+  return c;
+}
+
+function makeTileMetalPlate16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.gray2);
+  // beveled frame
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, PALETTE.gray3);
+    setPx(c, x, 1, PALETTE.gray3);
+    setPx(c, x, 15, PALETTE.gray1);
+  }
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, PALETTE.gray3);
+    setPx(c, 1, y, PALETTE.gray3);
+    setPx(c, 15, y, PALETTE.gray1);
+  }
+  // rivets
+  const rivets = [
+    [3, 3],
+    [12, 3],
+    [3, 12],
+    [12, 12]
+  ];
+  for (const [x, y] of rivets) {
+    setPx(c, x, y, PALETTE.gray3);
+    setPx(c, x + 1, y + 1, PALETTE.gray1);
+  }
+  // subtle scratches
+  for (let i = 0; i < 10; i++) {
+    const x = (h2(i, 1, 6) % 12) + 2;
+    const y = (h2(i, 2, 7) % 12) + 2;
+    setPx(c, x, y, PALETTE.gray3);
+    if (i % 3 === 0) setPx(c, x + 1, y, PALETTE.gray1);
+  }
+  return c;
+}
+
+function makeTileLava16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.orange1);
+  // hot veins
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 8);
+      if (v % 11 === 0) setPx(c, x, y, PALETTE.orange2);
+      if (v % 23 === 0) setPx(c, x, y, PALETTE.yellow1);
+      if (v % 41 === 0) setPx(c, x, y, PALETTE.yellow2);
+    }
+  }
+  // crust lines (darker)
+  for (let y = 2; y < 16; y += 5) {
+    for (let x = 0; x < 16; x++) if ((x * 3 + y) % 7 === 0) setPx(c, x, y, PALETTE.red1);
+  }
+  return c;
+}
+
+function makeTileIce16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.blue3);
+  // shading
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 10);
+      if (v % 17 === 0) setPx(c, x, y, PALETTE.blue2);
+      if (v % 29 === 0) setPx(c, x, y, PALETTE.white);
+    }
+  }
+  // cracks
+  const crack = [
+    [2, 3],
+    [4, 4],
+    [6, 6],
+    [8, 7],
+    [10, 9],
+    [12, 10],
+    [13, 12]
+  ];
+  for (const [x, y] of crack) {
+    setPx(c, x, y, PALETTE.white);
+    if (inBounds(c, x + 1, y)) setPx(c, x + 1, y, PALETTE.blue2);
+    if (inBounds(c, x, y + 1)) setPx(c, x, y + 1, PALETTE.blue2);
+  }
+  // edge tint
+  for (let x = 0; x < 16; x++) {
+    if (x % 2 === 0) setPx(c, x, 0, PALETTE.blue2);
+    if (x % 3 === 0) setPx(c, x, 15, PALETTE.blue2);
+  }
+  return c;
+}
+
+function makeTileGrassBlock16() {
+  const c = makeCanvas(16, 16);
+  // top grass
+  for (let y = 0; y < 6; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 12);
+      const col = v % 7 === 0 ? PALETTE.green3 : v % 3 === 0 ? PALETTE.green2 : PALETTE.green1;
+      setPx(c, x, y, col);
+    }
+  }
+  // dirt body
+  for (let y = 6; y < 16; y++) {
+    for (let x = 0; x < 16; x++) setPx(c, x, y, PALETTE.brown2);
+  }
+  // transition edge with a bit of jaggedness
+  for (let x = 0; x < 16; x++) {
+    const bump = h2(x, 0, 13) % 3; // 0..2
+    for (let k = 0; k < bump; k++) setPx(c, x, 6 + k, PALETTE.green1);
+    setPx(c, x, 6, PALETTE.brown1);
+  }
+  // dirt texture + pebbles
+  for (let y = 7; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 14);
+      if (v % 17 === 0) setPx(c, x, y, PALETTE.brown1);
+      else if (v % 23 === 0) setPx(c, x, y, PALETTE.brown3);
+      else if (v % 41 === 0) setPx(c, x, y, PALETTE.gray2);
+    }
+  }
+  return c;
+}
+
+function makeTileSpikes16() {
+  const c = makeCanvas(16, 16);
+  // stone base
+  fillRect(c, 0, 0, 16, 16, PALETTE.gray2);
+  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (h2(x, y, 15) % 23 === 0) setPx(c, x, y, PALETTE.gray1);
+  // spikes (3 triangles)
+  const spikeXs = [3, 8, 13];
+  for (const cx of spikeXs) {
+    for (let h = 0; h < 7; h++) {
+      const y = 15 - h;
+      for (let x = cx - h; x <= cx + h; x++) {
+        if (!inBounds(c, x, y)) continue;
+        setPx(c, x, y, h <= 1 ? PALETTE.white : PALETTE.gray3);
+      }
+      // shadow edge
+      if (inBounds(c, cx + h, y)) setPx(c, cx + h, y, PALETTE.gray1);
+    }
+    // outline base
+    if (inBounds(c, cx, 15)) setPx(c, cx, 15, PALETTE.shadow);
+  }
+  // top outline band for readability
+  for (let x = 0; x < 16; x++) setPx(c, x, 8, PALETTE.shadow);
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -1063,7 +1340,19 @@ const samples = [
   toSample('house_mini_16', 'ちびハウス', 'tile', makeHouseMini16(), ['マップ', '16x16', 'タイル']),
   toSample('tile_grass_16', 'くさタイル', 'tile', makeTileGrass16(), ['マップ', '16x16', 'タイル']),
   toSample('tile_water_16', 'みずタイル', 'tile', makeTileWater16(), ['マップ', '16x16', 'タイル']),
-  toSample('tile_stone_16', 'いしタイル', 'tile', makeTileStone16(), ['マップ', '16x16', 'タイル'])
+  toSample('tile_stone_16', 'いしタイル', 'tile', makeTileStone16(), ['マップ', '16x16', 'タイル']),
+
+  // tile/block pack (+10)
+  toSample('tile_dirt_16', 'つちタイル', 'tile', makeTileDirt16(), ['マップ', '16x16', 'タイル', 'ブロック', '地面']),
+  toSample('tile_sand_16', 'すなタイル', 'tile', makeTileSand16(), ['マップ', '16x16', 'タイル', 'ブロック', '地面']),
+  toSample('tile_brick_red_16', 'あかレンガ', 'tile', makeTileBrickRed16(), ['マップ', '16x16', 'タイル', 'ブロック', '壁']),
+  toSample('tile_wood_plank_16', 'もくざい（いた）', 'tile', makeTileWoodPlank16(), ['マップ', '16x16', 'タイル', 'ブロック', '床']),
+  toSample('tile_cobble_16', 'いしだたみ', 'tile', makeTileCobble16(), ['マップ', '16x16', 'タイル', 'ブロック', '道']),
+  toSample('tile_metal_plate_16', 'てつプレート', 'tile', makeTileMetalPlate16(), ['マップ', '16x16', 'タイル', 'ブロック', '工場']),
+  toSample('tile_lava_16', 'ようがん', 'tile', makeTileLava16(), ['マップ', '16x16', 'タイル', '危険', '床']),
+  toSample('tile_ice_16', 'こおり', 'tile', makeTileIce16(), ['マップ', '16x16', 'タイル', 'ブロック', '床']),
+  toSample('tile_grass_block_16', 'くさつちブロック', 'tile', makeTileGrassBlock16(), ['マップ', '16x16', 'タイル', 'ブロック', '足場']),
+  toSample('tile_spikes_16', 'トゲ（わな）', 'tile', makeTileSpikes16(), ['マップ', '16x16', 'タイル', 'トラップ', '危険'])
 ];
 
 const output = {

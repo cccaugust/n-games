@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-01-03T01:48:10.968Z",
+  "updatedAt": "2026-01-03T02:07:29.083Z",
   "note": "ドット絵メーカー用のサンプル素材です。サンプルはDBに保存されず、ユーザーが「コピーして編集」することで自分の作品として保存できます。",
   "samples": [
     {
@@ -391,6 +391,156 @@
         "マップ",
         "16x16",
         "タイル"
+      ]
+    },
+    {
+      "id": "tile_dirt_16",
+      "name": "つちタイル",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P9Ge7D/nMLg/x89bf9Ge7D/xLeq/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP/Et6r/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/Rnuw/0Z7sP8fPW3/Rnuw/x89bf8fPW3/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP/Et6r/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv8fPW3/Rnuw/0Z7sP9Ge7D/xLeq/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/5zC4P9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "地面"
+      ]
+    },
+    {
+      "id": "tile_sand_16",
+      "name": "すなタイル",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//D8Tx/6jx//+o8f//qPH//0ez//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//8PxPH/qPH//w/E8f+o8f//qPH//6jx//9Hs///D8Tx/6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//8PxPH/qPH//w/E8f9Hs///qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//R7P//w/E8f+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//9Hs///D8Tx/6jx//8PxPH/qPH//w/E8f+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//D8Tx/6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//0ez//+o8f//R7P//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//+o8f//qPH//6jx//8PxPH/qPH//w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "地面"
+      ]
+    },
+    {
+      "id": "tile_brick_red_16",
+      "name": "あかレンガ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP9ra///KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/2tr//8rOcD/KznA//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v8rOcD/KznA/2tr///37ub/KznA/2tr//8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8AVNP/AFTT//fu5v8rOcD/KznA/ys5wP8AVNP/AFTT//fu5v8rOcD/KznA/ys5wP8AVNP/AFTT//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/ys5wP8rOcD/KznA/ys5wP8rOcD/9+7m/2tr//8rOcD/KznA//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/a2v//ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/AFTT/wBU0//37ub/KznA/2tr//8rOcD/AFTT/wBU0//37ub/KznA/ys5wP8rOcD/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP9ra///KznA//fu5v8rOcD/KznA/ys5wP8rOcD/KznA//fu5v8rOcD/KznA/ys5wP/37ub/KznA/ys5wP8rOcD/a2v//ys5wP/37ub/KznA/ys5wP8rOcD/a2v//2tr///37ub/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/ys5wP8rOcD/KznA/wBU0/8AVNP/9+7m/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "壁"
+      ]
+    },
+    {
+      "id": "tile_wood_plank_16",
+      "name": "もくざい（いた）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "nMLg/5zC4P9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/nMLg/0Z7sP8fPW3/nMLg/x89bf9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP+cwuD/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/5zC4P9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP+cwuD/Hz1t/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_cobble_16",
+      "name": "いしだたみ",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/iXps/8S3qv/Et6r/9+7m/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv+Jemz/iXps/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP+Jemz/xLeq/8S3qv+Jemz/iXps/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/4l6bP+Jemz/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "道"
+      ]
+    },
+    {
+      "id": "tile_metal_plate_16",
+      "name": "てつプレート",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/iXps//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/iXps/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/4l6bP/37ub/9+7m//fu5v+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/xLeq/8S3qv+Jemz/9+7m//fu5v/Et6r/9+7m/8S3qv/37ub/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/9+7m/8S3qv/Et6r/iXps//fu5v/37ub/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/37ub/iXps/8S3qv+Jemz/xLeq/4l6bP/37ub/9+7m/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/9+7m//fu5v+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/4l6bP+Jemz/iXps/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "工場"
+      ]
+    },
+    {
+      "id": "tile_lava_16",
+      "name": "ようがん",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "D8Tx/wBU0/8PxPH/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/D8Tx/wBU0/+o8f//KznA/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/ys5wP8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/w/E8f8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/AFTT/0ez//8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/0ez//8AVNP/AFTT/wBU0/8PxPH/AFTT/w/E8f8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/wBU0/8AVNP/AFTT/ys5wP8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8rOcD/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/KznA/wBU0/8AVNP/AFTT/0ez//8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/9Hs///D8Tx/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/D8Tx/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/6jx//8AVNP/AFTT/wBU0/8PxPH/R7P//wBU0/8AVNP/AFTT/wBU0/9Hs///KznA/wBU0/8AVNP/AFTT/0ez//8AVNP/AFTT/ys5wP9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8PxPH/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/+o8f//AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/8AVNP/R7P//wBU0/8AVNP/AFTT/wBU0/8AVNP/AFTT/wBU0/9Hs///AFTT/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "危険",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_ice_16",
+      "name": "こおり",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/7Vk///ov///tWT//+i///+1ZP//6L///7Vk///ov///tWT//+i///+1ZP//6L///7Vk///ov///tWT//+i////ov///6L///+i/////////6L///7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov////////7Vk///ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L///7Vk//+1ZP///////7Vk///ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///7Vk///ov///tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L///7Vk///ov///6L///+i////ov///6L////////+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L////////+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov///6L///+i////ov///6L///+i////ov////////+i////ov///6L///+i////ov///6L///+i/////////tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L/////////ov///6L///+i////ov///tWT//+i/////////tWT//+i////ov///tWT//+i////ov///tWT//+i////ov///6L///+i////ov///6L///+i////ov///tWT//7Vk///ov///6L///+i////ov///6L///+i///+1ZP//6L///+i////ov///6L///+i////ov///6L///+i/////////tWT//+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///tWT//+i////ov///6L///+i///+1ZP//6L///+i///+1ZP//6L///+i////ov///6L///+i////ov////////+i////ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk///ov///6L///7Vk/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "床"
+      ]
+    },
+    {
+      "id": "tile_grass_block_16",
+      "name": "くさつちブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "TIof/0yKH/+w8rf/TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//b9Ji/7Dyt/+w8rf/TIof/0yKH/9Mih//sPK3/0yKH/9v0mL/b9Ji/0yKH/+w8rf/TIof/7Dyt/9v0mL/TIof/0yKH/9Mih//TIof/0yKH/9v0mL/sPK3/0yKH/9v0mL/TIof/2/SYv9Mih//TIof/0yKH/9v0mL/TIof/0yKH/9v0mL/TIof/2/SYv9v0mL/TIof/0yKH/9Mih//TIof/2/SYv9Mih//b9Ji/2/SYv+w8rf/sPK3/0yKH/9Mih//TIof/0yKH/+w8rf/sPK3/7Dyt/9v0mL/b9Ji/0yKH/9Mih//b9Ji/2/SYv9Mih//b9Ji/2/SYv9Mih//b9Ji/0yKH/9Mih//b9Ji/0yKH/9v0mL/b9Ji/2/SYv+w8rf/sPK3/0yKH/9v0mL/TIof/7Dyt/9Mih//TIof/0yKH/9v0mL/sPK3/0yKH/+w8rf/TIof/2/SYv9Mih//Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/x89bf8fPW3/Hz1t/0Z7sP9Ge7D/TIof/0Z7sP9Ge7D/TIof/0yKH/+cwuD/Hz1t/0yKH/9Mih//Hz1t/8S3qv9Ge7D/Rnuw/0yKH/9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Hz1t/0Z7sP9Ge7D/xLeq/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/5zC4P+cwuD/Rnuw/0Z7sP9Ge7D/Rnuw/x89bf9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/8S3qv9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP/Et6r/Rnuw/0Z7sP8fPW3/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/Rnuw/0Z7sP9Ge7D/nMLg/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "ブロック",
+        "足場"
+      ]
+    },
+    {
+      "id": "tile_spikes_16",
+      "name": "トゲ（わな）",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/iXps/8S3qv+Jemz/xLeq/4l6bP/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv+Jemz/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/8S3qv/Et6r/xLeq/4l6bP/Et6r/xLeq/8S3qv9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/RCsr/0QrK/9EKyv/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m//fu5v/37ub/9+7m/8S3qv/37ub/9+7m//fu5v/37ub/iXps//fu5v/37ub/9+7m//fu5v+Jemz/9+7m//fu5v/37ub/9+7m/4l6bP/Et6r/xLeq////////////iXps/8S3qv/Et6r///////////+Jemz/xLeq/8S3qv///////////4l6bP/Et6r/xLeq/8S3qv/Et6r/RCsr/8S3qv/Et6r/xLeq/8S3qv9EKyv/xLeq/8S3qv/Et6r/xLeq/0QrK/+Jemz/xLeq/w==",
+      "tags": [
+        "マップ",
+        "16x16",
+        "タイル",
+        "トラップ",
+        "危険"
       ]
     }
   ]
