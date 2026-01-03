@@ -7,6 +7,10 @@ body {
   margin: 0;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .aq-topbar {
   position: sticky;
   top: 0;
@@ -253,6 +257,8 @@ body {
   padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
     max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
   z-index: 6000;
+  overscroll-behavior: contain;
+  touch-action: manipulation;
 }
 .aq-modal-card {
   width: min(980px, 100%);
@@ -262,6 +268,7 @@ body {
   border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  -webkit-overflow-scrolling: touch;
 }
 .aq-modal-head {
   position: sticky;

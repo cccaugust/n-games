@@ -1140,6 +1140,8 @@ function openPicker(mode) {
   pickerSearchInput.value = '';
   pickerOnly32.checked = true;
   pickerModal.hidden = false;
+  pickerModal.removeAttribute('hidden');
+  pickerModal.style.display = '';
   document.body.classList.add('modal-open');
   pickerTitle.textContent = mode === 'samples' ? 'サンプルから追加' : '作品から追加';
   pickerNote.textContent = mode === 'samples' ? 'タップで追加（自分の作品として保存されます）' : 'タップで水槽に追加';
@@ -1148,6 +1150,9 @@ function openPicker(mode) {
 
 function closePicker() {
   pickerModal.hidden = true;
+  pickerModal.setAttribute('hidden', '');
+  // Belt & suspenders: some mobile browsers can get odd with [hidden] + flex.
+  pickerModal.style.display = 'none';
   document.body.classList.remove('modal-open');
 }
 
@@ -1204,14 +1209,20 @@ function renderPickerGrid() {
     btn.addEventListener('click', () => {
       void (async () => {
         if (pickerMode === 'samples') {
+          // Close first so it never feels "stuck" while saving.
+          closePicker();
           // Save as "my" asset so it shows in pixel-art-maker too
           const base = it.asset;
-          const saved = await duplicatePixelAsset(
-            { ...base, ownerId, name: `${base.name}（水槽）` },
-            { ownerId, name: `${base.name}（水槽）` }
-          );
-          closePicker();
-          addFishFromAsset(saved, { name: saved.name });
+          try {
+            const saved = await duplicatePixelAsset(
+              { ...base, ownerId, name: `${base.name}（水槽）` },
+              { ownerId, name: `${base.name}（水槽）` }
+            );
+            addFishFromAsset(saved, { name: saved.name });
+          } catch (e) {
+            console.warn('Sample duplicate failed:', e);
+            alert('保存に失敗したかも。もう一回ためしてね。');
+          }
           return;
         }
         closePicker();
@@ -1224,9 +1235,30 @@ function renderPickerGrid() {
 
 // Events
 pickerCloseBtn.addEventListener('click', closePicker);
-pickerModal.addEventListener('click', (e) => {
-  if (e.target === pickerModal) closePicker();
+pickerCloseBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  closePicker();
 });
+pickerModal.addEventListener(
+  'pointerdown',
+  (e) => {
+    if (e.target === pickerModal) {
+      e.preventDefault();
+      closePicker();
+    }
+  },
+  { capture: true }
+);
+pickerModal.addEventListener(
+  'touchstart',
+  (e) => {
+    if (e.target === pickerModal) {
+      e.preventDefault();
+      closePicker();
+    }
+  },
+  { capture: true, passive: false }
+);
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (!pickerModal.hidden) closePicker();
