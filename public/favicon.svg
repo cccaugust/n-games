@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="N-Games">
+  <title>N-Games</title>
+
+  <!-- Background (pixel-ish, high contrast) -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#1f2937"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#bg)"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#4f46e5" stroke-width="4"/>
+
+  <!-- Stylized "N" made of blocks -->
+  <g fill="#ffffff">
+    <rect x="18" y="18" width="8" height="28" rx="2"/>
+    <rect x="38" y="18" width="8" height="28" rx="2"/>
+    <rect x="26" y="22" width="6" height="6" rx="1"/>
+    <rect x="30" y="28" width="6" height="6" rx="1"/>
+    <rect x="34" y="34" width="6" height="6" rx="1"/>
+    <rect x="26" y="40" width="6" height="6" rx="1"/>
+  </g>
+
+  <!-- Small accent dot -->
+  <circle cx="46" cy="46" r="3" fill="#22c55e"/>
+</svg>
