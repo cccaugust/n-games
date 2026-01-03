@@ -202,6 +202,245 @@ function makeFishPixels({ w = 32, h = 32, body = '#38bdf8', stripe = '#0ea5e9', 
   return pixels;
 }
 
+function makeMask(w, h) {
+  return new Uint8Array(w * h);
+}
+
+function maskIdx(w, x, y) {
+  return y * w + x;
+}
+
+function fillEllipse(mask, w, h, cx, cy, rx, ry) {
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / rx;
+      const dy = (y - cy) / ry;
+      if (dx * dx + dy * dy <= 1) mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function fillRect(mask, w, x0, y0, x1, y1) {
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (x < 0 || y < 0 || x >= w) continue;
+      mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function fillTriangle(mask, w, h, ax, ay, bx, by, cx, cy) {
+  const minX = Math.max(0, Math.floor(Math.min(ax, bx, cx)));
+  const maxX = Math.min(w - 1, Math.ceil(Math.max(ax, bx, cx)));
+  const minY = Math.max(0, Math.floor(Math.min(ay, by, cy)));
+  const maxY = Math.min(h - 1, Math.ceil(Math.max(ay, by, cy)));
+  const area = (x1, y1, x2, y2, x3, y3) => (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+  const A = area(ax, ay, bx, by, cx, cy);
+  if (A === 0) return;
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      const a1 = area(x, y, bx, by, cx, cy) / A;
+      const a2 = area(ax, ay, x, y, cx, cy) / A;
+      const a3 = area(ax, ay, bx, by, x, y) / A;
+      if (a1 >= -0.02 && a2 >= -0.02 && a3 >= -0.02) mask[maskIdx(w, x, y)] = 1;
+    }
+  }
+}
+
+function maskToPixels(mask, w, h, { fill = '#60a5fa', outline = '#0b1220' } = {}) {
+  const fillC = hexToRgbaInt(fill) >>> 0;
+  const outlineC = hexToRgbaInt(outline) >>> 0;
+  const pixels = new Uint32Array(w * h);
+  const idx = (x, y) => y * w + x;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = idx(x, y);
+      if (!mask[i]) continue;
+      const isEdge =
+        (x > 0 && !mask[idx(x - 1, y)]) ||
+        (x < w - 1 && !mask[idx(x + 1, y)]) ||
+        (y > 0 && !mask[idx(x, y - 1)]) ||
+        (y < h - 1 && !mask[idx(x, y + 1)]);
+      pixels[i] = isEdge ? outlineC : fillC;
+    }
+  }
+  return pixels;
+}
+
+function setPixel(pixels, w, x, y, hex) {
+  if (x < 0 || y < 0) return;
+  if (x >= w) return;
+  const i = y * w + x;
+  if (i < 0 || i >= pixels.length) return;
+  pixels[i] = hexToRgbaInt(hex) >>> 0;
+}
+
+function makeSeafoodPixels({ type, w = 32, h = 32, body = '#93c5fd', accent = '#60a5fa', outline = '#0b1220' } = {}) {
+  const mask = makeMask(w, h);
+
+  if (type === 'shrimp') {
+    // Curved segments
+    fillEllipse(mask, w, h, 15, 16, 8.2, 5.2);
+    fillEllipse(mask, w, h, 19, 15, 6.8, 4.6);
+    fillEllipse(mask, w, h, 22, 14, 5.2, 3.8);
+    // Tail fan
+    fillTriangle(mask, w, h, 27, 14, 31, 16, 27, 18);
+    // Head bump + antenna base
+    fillEllipse(mask, w, h, 9, 16, 4.4, 3.8);
+  } else if (type === 'crab') {
+    fillEllipse(mask, w, h, 16, 16, 7.6, 5.8);
+    // Claws
+    fillEllipse(mask, w, h, 6, 16, 3.2, 2.6);
+    fillEllipse(mask, w, h, 26, 16, 3.2, 2.6);
+    fillTriangle(mask, w, h, 3, 16, 6, 14, 6, 18);
+    fillTriangle(mask, w, h, 29, 16, 26, 14, 26, 18);
+    // Legs
+    fillRect(mask, w, 9, 21, 10, 24);
+    fillRect(mask, w, 13, 22, 14, 25);
+    fillRect(mask, w, 18, 22, 19, 25);
+    fillRect(mask, w, 22, 21, 23, 24);
+  } else if (type === 'octopus') {
+    fillEllipse(mask, w, h, 16, 13, 7.2, 6.8);
+    // Tentacles
+    for (let i = 0; i < 7; i++) {
+      const x = 10 + i * 2;
+      fillRect(mask, w, x, 18, x, 26);
+      if (i % 2 === 0) fillRect(mask, w, x + 1, 20, x + 1, 25);
+    }
+    fillRect(mask, w, 10, 26, 22, 27);
+  } else if (type === 'squid') {
+    // Mantle + fins
+    fillTriangle(mask, w, h, 16, 7, 9, 20, 23, 20);
+    fillEllipse(mask, w, h, 11, 12, 3.2, 2.2);
+    fillEllipse(mask, w, h, 21, 12, 3.2, 2.2);
+    // Arms
+    for (let i = 0; i < 6; i++) {
+      const x = 11 + i * 2;
+      fillRect(mask, w, x, 20, x, 27);
+    }
+  } else if (type === 'jellyfish') {
+    // Dome
+    fillEllipse(mask, w, h, 16, 12, 8.0, 6.2);
+    // Skirt
+    fillRect(mask, w, 9, 15, 23, 16);
+    // Tentacles
+    for (let i = 0; i < 7; i++) {
+      const x = 10 + i * 2;
+      fillRect(mask, w, x, 17, x, 27);
+      if (i % 3 === 0) fillRect(mask, w, x, 22, x + 1, 22);
+    }
+  } else if (type === 'starfish') {
+    // 5-point star: union of triangles
+    fillTriangle(mask, w, h, 16, 6, 14, 16, 18, 16);
+    fillTriangle(mask, w, h, 8, 12, 16, 14, 12, 18);
+    fillTriangle(mask, w, h, 24, 12, 16, 14, 20, 18);
+    fillTriangle(mask, w, h, 12, 26, 16, 18, 20, 26);
+    fillEllipse(mask, w, h, 16, 16, 5.4, 5.2);
+  } else if (type === 'clam') {
+    fillEllipse(mask, w, h, 16, 18, 9.2, 6.4);
+    fillRect(mask, w, 7, 18, 25, 23);
+  } else if (type === 'scallop') {
+    // Fan shell
+    fillEllipse(mask, w, h, 16, 19, 9.2, 7.2);
+    fillTriangle(mask, w, h, 16, 10, 8, 20, 24, 20);
+  } else if (type === 'urchin') {
+    fillEllipse(mask, w, h, 16, 16, 6.2, 6.2);
+    // Spines (simple rays)
+    for (let a = 0; a < 12; a++) {
+      const ang = (Math.PI * 2 * a) / 12;
+      const x = Math.round(16 + Math.cos(ang) * 9);
+      const y = Math.round(16 + Math.sin(ang) * 9);
+      fillTriangle(mask, w, h, 16, 16, x, y, Math.round(16 + Math.cos(ang) * 7), Math.round(16 + Math.sin(ang) * 7));
+    }
+  } else if (type === 'lobster') {
+    // Body segments
+    fillEllipse(mask, w, h, 16, 16, 6.6, 4.8);
+    fillEllipse(mask, w, h, 20, 16, 6.0, 4.4);
+    fillEllipse(mask, w, h, 23, 16, 4.6, 3.8);
+    // Tail
+    fillTriangle(mask, w, h, 27, 13, 31, 16, 27, 19);
+    // Claws
+    fillEllipse(mask, w, h, 8, 15, 3.8, 2.8);
+    fillTriangle(mask, w, h, 4, 15, 8, 13, 8, 17);
+  } else {
+    // Fallback: fish
+    return makeFishPixels({ w, h, body, stripe: accent, outline });
+  }
+
+  const pixels = maskToPixels(mask, w, h, { fill: body, outline });
+
+  // Accents / details
+  if (type === 'shrimp') {
+    // Eye + antenna
+    setPixel(pixels, w, 9, 14, '#ffffff');
+    setPixel(pixels, w, 9, 15, '#111827');
+    for (let k = 0; k < 6; k++) setPixel(pixels, w, 6 + k, 12 - Math.floor(k / 2), outline);
+    // Segment lines
+    const a = accent;
+    for (let x = 14; x <= 24; x += 3) {
+      setPixel(pixels, w, x, 16, a);
+      setPixel(pixels, w, x, 17, a);
+    }
+  } else if (type === 'crab') {
+    setPixel(pixels, w, 13, 14, '#ffffff');
+    setPixel(pixels, w, 13, 15, '#111827');
+    setPixel(pixels, w, 19, 14, '#ffffff');
+    setPixel(pixels, w, 19, 15, '#111827');
+    // Shell line
+    for (let x = 12; x <= 20; x++) setPixel(pixels, w, x, 18, accent);
+  } else if (type === 'octopus') {
+    setPixel(pixels, w, 13, 12, '#ffffff');
+    setPixel(pixels, w, 13, 13, '#111827');
+    setPixel(pixels, w, 18, 12, '#ffffff');
+    setPixel(pixels, w, 18, 13, '#111827');
+    // Suckers dots
+    for (let x = 10; x <= 22; x += 2) {
+      setPixel(pixels, w, x, 23, accent);
+      if (x % 4 === 0) setPixel(pixels, w, x, 26, accent);
+    }
+  } else if (type === 'squid') {
+    setPixel(pixels, w, 14, 14, '#ffffff');
+    setPixel(pixels, w, 14, 15, '#111827');
+    setPixel(pixels, w, 18, 14, '#ffffff');
+    setPixel(pixels, w, 18, 15, '#111827');
+  } else if (type === 'jellyfish') {
+    for (let x = 12; x <= 20; x++) setPixel(pixels, w, x, 14, accent);
+    setPixel(pixels, w, 14, 11, '#ffffff');
+    setPixel(pixels, w, 14, 12, '#111827');
+    setPixel(pixels, w, 18, 11, '#ffffff');
+    setPixel(pixels, w, 18, 12, '#111827');
+  } else if (type === 'starfish') {
+    // Dots
+    const dots = [
+      [16, 12],
+      [12, 16],
+      [20, 16],
+      [16, 20],
+      [14, 14],
+      [18, 14],
+      [14, 18],
+      [18, 18]
+    ];
+    dots.forEach(([x, y]) => setPixel(pixels, w, x, y, accent));
+  } else if (type === 'clam' || type === 'scallop') {
+    for (let x = 10; x <= 22; x += 2) setPixel(pixels, w, x, 19, accent);
+    for (let x = 11; x <= 21; x += 2) setPixel(pixels, w, x, 21, accent);
+  } else if (type === 'urchin') {
+    setPixel(pixels, w, 14, 16, '#ffffff');
+    setPixel(pixels, w, 14, 17, '#111827');
+    setPixel(pixels, w, 18, 16, '#ffffff');
+    setPixel(pixels, w, 18, 17, '#111827');
+  } else if (type === 'lobster') {
+    // Segment bands
+    for (let x = 14; x <= 25; x += 3) setPixel(pixels, w, x, 16, accent);
+    setPixel(pixels, w, 10, 15, '#ffffff');
+    setPixel(pixels, w, 10, 16, '#111827');
+  }
+
+  return pixels;
+}
+
 /**
  * @returns {import('../../js/pixelAssets.js').PixelAsset[]}
  */
@@ -209,8 +448,7 @@ function buildSampleFishAssets() {
   const w = 32;
   const h = 32;
   const now = new Date().toISOString();
-  const mk = (id, name, colors) => {
-    const pixels = makeFishPixels({ w, h, ...colors });
+  const mk = (id, name, pixels) => {
     return {
       id: `sample_aquarium_${id}`,
       ownerId,
@@ -227,14 +465,27 @@ function buildSampleFishAssets() {
   };
 
   return [
-    mk('blue', 'あおいさかな', { body: '#38bdf8', stripe: '#0ea5e9', stripeMode: 'double' }),
-    mk('green', 'みどりさかな', { body: '#4ade80', stripe: '#22c55e', stripeMode: 'double' }),
-    mk('pink', 'ももいろさかな', { body: '#fb7185', stripe: '#f43f5e', stripeMode: 'double' }),
-    mk('gold', 'きんいろさかな', { body: '#fbbf24', stripe: '#f59e0b', stripeMode: 'double' }),
-    mk('purple', 'むらさきさかな', { body: '#a78bfa', stripe: '#7c3aed', stripeMode: 'single' }),
-    mk('teal', 'みずいろさかな', { body: '#22d3ee', stripe: '#06b6d4', stripeMode: 'single' }),
-    mk('clown', 'カクレさかな', { body: '#fb923c', stripe: '#ffffff', stripeMode: 'clown', outline: '#111827' }),
-    mk('zebra', 'しましまさかな', { body: '#e5e7eb', stripe: '#111827', stripeMode: 'zebra', outline: '#111827' })
+    // fish
+    mk('blue', 'あおいさかな', makeFishPixels({ w, h, body: '#38bdf8', stripe: '#0ea5e9', stripeMode: 'double' })),
+    mk('green', 'みどりさかな', makeFishPixels({ w, h, body: '#4ade80', stripe: '#22c55e', stripeMode: 'double' })),
+    mk('pink', 'ももいろさかな', makeFishPixels({ w, h, body: '#fb7185', stripe: '#f43f5e', stripeMode: 'double' })),
+    mk('gold', 'きんいろさかな', makeFishPixels({ w, h, body: '#fbbf24', stripe: '#f59e0b', stripeMode: 'double' })),
+    mk('purple', 'むらさきさかな', makeFishPixels({ w, h, body: '#a78bfa', stripe: '#7c3aed', stripeMode: 'single' })),
+    mk('teal', 'みずいろさかな', makeFishPixels({ w, h, body: '#22d3ee', stripe: '#06b6d4', stripeMode: 'single' })),
+    mk('clown', 'カクレさかな', makeFishPixels({ w, h, body: '#fb923c', stripe: '#ffffff', stripeMode: 'clown', outline: '#111827' })),
+    mk('zebra', 'しましまさかな', makeFishPixels({ w, h, body: '#e5e7eb', stripe: '#111827', stripeMode: 'zebra', outline: '#111827' })),
+
+    // seafood (non-fish) ~10
+    mk('shrimp', 'えび', makeSeafoodPixels({ type: 'shrimp', w, h, body: '#fb7185', accent: '#f43f5e', outline: '#111827' })),
+    mk('crab', 'かに', makeSeafoodPixels({ type: 'crab', w, h, body: '#ef4444', accent: '#fb7185', outline: '#111827' })),
+    mk('octopus', 'たこ', makeSeafoodPixels({ type: 'octopus', w, h, body: '#c084fc', accent: '#a855f7', outline: '#111827' })),
+    mk('squid', 'いか', makeSeafoodPixels({ type: 'squid', w, h, body: '#e5e7eb', accent: '#94a3b8', outline: '#111827' })),
+    mk('jellyfish', 'くらげ', makeSeafoodPixels({ type: 'jellyfish', w, h, body: '#93c5fd', accent: '#60a5fa', outline: '#111827' })),
+    mk('starfish', 'ひとで', makeSeafoodPixels({ type: 'starfish', w, h, body: '#fb923c', accent: '#f97316', outline: '#111827' })),
+    mk('clam', 'あさり', makeSeafoodPixels({ type: 'clam', w, h, body: '#d1d5db', accent: '#9ca3af', outline: '#111827' })),
+    mk('scallop', 'ほたて', makeSeafoodPixels({ type: 'scallop', w, h, body: '#fde68a', accent: '#f59e0b', outline: '#111827' })),
+    mk('urchin', 'うに', makeSeafoodPixels({ type: 'urchin', w, h, body: '#111827', accent: '#6b7280', outline: '#0b1220' })),
+    mk('lobster', 'ロブスター', makeSeafoodPixels({ type: 'lobster', w, h, body: '#dc2626', accent: '#fb7185', outline: '#111827' }))
   ];
 }
 
@@ -613,7 +864,7 @@ function renderFishList() {
     grid.style.gap = '8px';
     grid.style.padding = '10px';
 
-    SAMPLE_ASSETS.slice(0, 8).forEach((a) => {
+    SAMPLE_ASSETS.slice(0, 16).forEach((a) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'aq-btn';
