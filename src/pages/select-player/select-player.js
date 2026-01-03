@@ -1,7 +1,8 @@
 import { selectPlayer, requireAuth } from '../../js/auth.js';
-import { navigateTo } from '../../js/config.js';
 import { supabase } from '../../js/supabaseClient.js';
 import { isImageAvatar, makeImageAvatar, renderAvatarInto } from '../../js/avatar.js';
+import { pokemonData } from '../../data/pokemonData.js';
+import { assetPreviewDataUrl, listPixelAssets } from '../../js/pixelAssets.js';
 
 requireAuth();
 
@@ -20,10 +21,8 @@ const tabPokedex = document.getElementById('tabPokedex');
 const panelEmoji = document.getElementById('panelEmoji');
 const panelDot = document.getElementById('panelDot');
 const panelPokedex = document.getElementById('panelPokedex');
-const openPixelArtMakerBtn = document.getElementById('openPixelArtMakerBtn');
-const openPokedexBtn = document.getElementById('openPokedexBtn');
-const useUploadedImageBtn = document.getElementById('useUploadedImageBtn');
-const uploadAvatarInput = document.getElementById('uploadAvatarInput');
+const dotAvatarGrid = document.getElementById('dotAvatarGrid');
+const pokemonAvatarGrid = document.getElementById('pokemonAvatarGrid');
 
 const AVATARS = [
     '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐙',
@@ -31,35 +30,17 @@ const AVATARS = [
     '👦', '👧', '👨‍💻', '👩‍🔬', '🧙‍♂️', '🧚‍♀️', '🧛‍♂️', '🧜‍♀️', '🧞‍♂️', '🧟‍♀️', '🤖', '👾', '👽', '👻', '💀'
 ];
 
-const AVATAR_PICK_KEY = 'ngames.avatar.pick.v1';
-const AVATAR_CTX_KEY = 'ngames.avatar.ctx.v1';
+const POKEMON_IMAGE_SET = new Set((pokemonData || []).map((p) => String(p.image || '')));
 
 let editingPlayerId = null; // null means creating new
 let selectedAvatar = AVATARS[0];
 let activeTab = 'emoji';
 
-function readJson(key) {
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
-    } catch {
-        return null;
-    }
-}
-
-function writeJson(key, value) {
-    try {
-        localStorage.setItem(key, JSON.stringify(value));
-    } catch {
-        // ignore
-    }
-}
-
 function guessTabForAvatar(avatar) {
     if (!isImageAvatar(avatar)) return 'emoji';
     const src = String(avatar || '').slice('img:'.length);
+    if (POKEMON_IMAGE_SET.has(src)) return 'pokedex';
     if (src.startsWith('data:image/')) return 'dot';
-    if (src.includes('/pokedex/') || src.includes('pokedex')) return 'pokedex';
     return 'dot';
 }
 
@@ -80,28 +61,35 @@ function setActiveTab(tab) {
     panelDot.hidden = !isDot;
     panelPokedex.hidden = !isDex;
 
-    // When switching back to emoji, ensure selection UI matches.
-    if (isEmoji) updateEmojiSelectionUI();
+    updateAllSelectionUI();
 }
 
 // Initialize Avatar Grid
 function initAvatarGrid() {
     avatarGrid.innerHTML = '';
     AVATARS.forEach(emoji => {
-        const div = document.createElement('div');
-        div.className = 'avatar-option';
-        div.textContent = emoji;
-        div.onclick = () => selectAvatarValue(emoji);
-        avatarGrid.appendChild(div);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'avatar-option';
+        btn.textContent = emoji;
+        btn.dataset.value = emoji;
+        btn.onclick = () => selectAvatarValue(emoji);
+        avatarGrid.appendChild(btn);
     });
 }
 
-function updateEmojiSelectionUI() {
-    const options = avatarGrid.children;
-    for (let bg of options) {
-        if (bg.textContent === selectedAvatar) bg.classList.add('selected');
-        else bg.classList.remove('selected');
-    }
+function updateSelectionUI(gridEl) {
+    if (!gridEl) return;
+    gridEl.querySelectorAll('.avatar-option').forEach((el) => {
+        const v = el.dataset.value || '';
+        el.classList.toggle('selected', v === selectedAvatar);
+    });
+}
+
+function updateAllSelectionUI() {
+    updateSelectionUI(avatarGrid);
+    updateSelectionUI(dotAvatarGrid);
+    updateSelectionUI(pokemonAvatarGrid);
 }
 
 function updateAvatarPreview() {
@@ -111,13 +99,66 @@ function updateAvatarPreview() {
 function selectAvatarValue(value) {
     selectedAvatar = value;
     updateAvatarPreview();
-    if (!isImageAvatar(value)) {
-        setActiveTab('emoji');
-        updateEmojiSelectionUI();
-    } else {
-        setActiveTab(guessTabForAvatar(value));
-        updateEmojiSelectionUI();
+    setActiveTab(guessTabForAvatar(value));
+    updateAllSelectionUI();
+}
+
+function renderImageOption(gridEl, { value, title = '', pixelated = false }) {
+    if (!gridEl || !value) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'avatar-option';
+    btn.dataset.value = value;
+    btn.title = title;
+    btn.onclick = () => selectAvatarValue(value);
+    renderAvatarInto(btn, value, { size: 44, className: 'avatar-option-visual', alt: '' });
+    if (pixelated) {
+        const img = btn.querySelector('img');
+        if (img) img.style.imageRendering = 'pixelated';
     }
+    gridEl.appendChild(btn);
+}
+
+function initPokemonAvatarGrid() {
+    if (!pokemonAvatarGrid) return;
+    pokemonAvatarGrid.innerHTML = '';
+    (pokemonData || []).forEach((p) => {
+        const value = makeImageAvatar(p.image);
+        renderImageOption(pokemonAvatarGrid, { value, title: p.name || '', pixelated: false });
+    });
+}
+
+async function refreshDotAvatarGrid() {
+    if (!dotAvatarGrid) return;
+    dotAvatarGrid.innerHTML = '';
+    const note = document.createElement('div');
+    note.className = 'tiny-help';
+    note.textContent = '読み込み中…';
+    dotAvatarGrid.appendChild(note);
+
+    let assets = [];
+    try {
+        assets = await listPixelAssets();
+    } catch (e) {
+        console.warn('Failed to load dot avatars:', e);
+        assets = [];
+    }
+
+    dotAvatarGrid.innerHTML = '';
+    if (!assets.length) {
+        const empty = document.createElement('div');
+        empty.className = 'tiny-help';
+        empty.textContent = 'まだドット絵がないよ。ドット絵メーカーで作ってみてね。';
+        dotAvatarGrid.appendChild(empty);
+        return;
+    }
+
+    assets.slice(0, 60).forEach((asset) => {
+        const preview = assetPreviewDataUrl(asset, 72);
+        const value = makeImageAvatar(preview);
+        renderImageOption(dotAvatarGrid, { value, title: asset.name || '', pixelated: true });
+    });
+    updateAllSelectionUI();
 }
 
 // Modal Control
@@ -140,6 +181,10 @@ function openModal(player = null) {
         selectAvatarValue(AVATARS[Math.floor(Math.random() * AVATARS.length)]);
     }
 
+    // Make sure the other grids are ready (and dot-art is up-to-date).
+    initPokemonAvatarGrid();
+    refreshDotAvatarGrid();
+
     nameInput.focus();
 }
 
@@ -156,51 +201,6 @@ modal.onclick = (e) => {
 tabEmoji.onclick = () => setActiveTab('emoji');
 tabDot.onclick = () => setActiveTab('dot');
 tabPokedex.onclick = () => setActiveTab('pokedex');
-
-function startAvatarPicker(source) {
-    const ctx = {
-        source,
-        mode: editingPlayerId ? 'edit' : 'new',
-        playerId: editingPlayerId || null,
-        returnTo: '/pages/select-player/select-player.html',
-        at: new Date().toISOString()
-    };
-    writeJson(AVATAR_CTX_KEY, ctx);
-
-    if (source === 'pixel') {
-        navigateTo('/pages/pixel-art-maker/?pickAvatar=1');
-        return;
-    }
-    if (source === 'pokedex') {
-        navigateTo('/pages/pokedex/?pickAvatar=1');
-        return;
-    }
-}
-
-openPixelArtMakerBtn.onclick = () => startAvatarPicker('pixel');
-openPokedexBtn.onclick = () => startAvatarPicker('pokedex');
-
-useUploadedImageBtn.onclick = () => uploadAvatarInput.click();
-uploadAvatarInput.addEventListener('change', async () => {
-    const file = uploadAvatarInput.files?.[0] || null;
-    uploadAvatarInput.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        alert('画像ファイルをえらんでね！');
-        return;
-    }
-    const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ''));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-    }).catch(() => '');
-    if (!dataUrl) {
-        alert('画像の読み込みに失敗しました。別の画像で試してみてね。');
-        return;
-    }
-    selectAvatarValue(makeImageAvatar(dataUrl));
-});
 
 saveBtn.onclick = async () => {
     const name = nameInput.value.trim();
@@ -315,38 +315,5 @@ function choosePlayer(player) {
 
 // Initial render
 renderPlayers();
-
-async function applyPendingAvatarIfAny() {
-    const pick = readJson(AVATAR_PICK_KEY);
-    if (!pick?.avatar) return;
-    const ctx = readJson(AVATAR_CTX_KEY);
-    localStorage.removeItem(AVATAR_PICK_KEY);
-
-    const avatar = String(pick.avatar || '');
-    if (!avatar) return;
-
-    // If a modal is already open, just apply.
-    if (modal.style.display === 'flex') {
-        selectAvatarValue(avatar);
-        return;
-    }
-
-    if (ctx?.mode === 'edit' && ctx?.playerId) {
-        const players = await fetchPlayers();
-        const target = players.find((p) => String(p.id) === String(ctx.playerId));
-        if (target) {
-            openModal(target);
-            selectAvatarValue(avatar);
-            return;
-        }
-    }
-
-    openModal(null);
-    selectAvatarValue(avatar);
-}
-
-window.addEventListener('focus', () => applyPendingAvatarIfAny());
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') applyPendingAvatarIfAny();
-});
-applyPendingAvatarIfAny();
+// Ensure auxiliary grids are ready even before opening modal.
+initPokemonAvatarGrid();

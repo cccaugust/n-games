@@ -16,8 +16,10 @@
 ## 仕様（MVP）
 - **種類**: UI上は区別しません（内部の互換性のため、保存データは既存の `kind` を保持します）
 - **サイズ**: **新規は 16×16**。編集画面の **「横+16」「縦+16」** でキャンバスを拡張（最大256）
+- **ギャラリー**: **みんなの作品が一覧に出ます**（共通）
 - **保存**: Supabase（DB）に保存（ネットワーク不調時はIndexedDBにローカル保存して後で読み込み可能）
 - **書き出し**: PNGとしてダウンロード可能
+- **他人の作品**: 読み込みはできますが **読み取り専用** です（「複製」で自分の作品にしてから編集・保存）
 
 ## サンプル素材（NEW）
 - サンプルは **DBではなくリポジトリ内JSON** に保存します（GitHub管理）
@@ -48,7 +50,7 @@
 ### データ形式（ローカル）
 `PixelAsset`（IndexedDBの `pixel_assets` ストア）:
 - `id`: string（assetId）
-- `ownerId`: string（player.id）
+- `ownerId`: string（作成者player.id。ギャラリーは共通だが、編集可否の判定に使う）
 - `kind`: `"character" | "object" | "tile"`（※ UIでは区別しないが、互換性のため保持）
 - `width/height`: number
 - `pixels`: `Uint32Array`（`0xAARRGGBB`、`0` は透明）

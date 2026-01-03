@@ -222,6 +222,27 @@ let gallerySearchText = '';
 /** @type {'updated_desc'|'updated_asc'|'name_asc'|'name_desc'|'size_desc'|'size_asc'} */
 let gallerySortMode = 'updated_desc';
 
+let isReadOnly = false;
+
+function setReadOnly(next) {
+  isReadOnly = Boolean(next);
+
+  // Disable editing affordances (but keep export / avatar pick / duplicate).
+  const disableEdit = isReadOnly;
+  if (nameInput) nameInput.disabled = disableEdit;
+  if (saveBtn) saveBtn.disabled = disableEdit;
+  if (deleteBtn) deleteBtn.disabled = disableEdit;
+  if (clearBtn) clearBtn.disabled = disableEdit;
+  if (expandWidthBtn) expandWidthBtn.disabled = disableEdit;
+  if (expandHeightBtn) expandHeightBtn.disabled = disableEdit;
+  if (importImageBtn) importImageBtn.disabled = disableEdit;
+  if (undoBtn) undoBtn.disabled = disableEdit || undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = disableEdit || redoStack.length === 0;
+
+  // Prevent pointer edits entirely in read-only.
+  if (canvas) canvas.style.pointerEvents = disableEdit ? 'none' : '';
+}
+
 function maxHistoryForPixels(pixelCount) {
   if (pixelCount <= 16 * 16) return 60;
   if (pixelCount <= 64 * 64) return 40;
@@ -510,6 +531,7 @@ function setAsset(asset, { persisted }) {
   currentAsset = asset;
   isPersisted = Boolean(persisted);
   setDirty(false);
+  setReadOnly(Boolean(asset?.ownerId) && String(asset.ownerId) !== String(ownerId));
 
   // Sync UI fields
   nameInput.value = asset.name || '';
@@ -531,8 +553,8 @@ function setAsset(asset, { persisted }) {
 }
 
 function updateUndoRedoButtons() {
-  undoBtn.disabled = undoStack.length === 0;
-  redoBtn.disabled = redoStack.length === 0;
+  undoBtn.disabled = isReadOnly || undoStack.length === 0;
+  redoBtn.disabled = isReadOnly || redoStack.length === 0;
 }
 
 function snapshotCurrentPixels() {
@@ -758,7 +780,8 @@ async function refreshGalleryList() {
   galleryList.innerHTML = '';
   if (gallerySummary) gallerySummary.textContent = '読み込み中…';
 
-  const list = await listPixelAssets({ ownerId });
+  // Shared gallery: list all assets (created by anyone).
+  const list = await listPixelAssets();
   const filtered = applyGalleryFiltersAndSort(list);
 
   galleryList.innerHTML = '';
@@ -813,9 +836,11 @@ async function refreshGalleryList() {
       if (dirty && !confirm('いまの変更は保存されていません。読み込みますか？')) return;
       const loaded = await getPixelAsset(asset.id);
       if (!loaded) return;
+      // If this is someone else's work, open read-only by default (avoid accidental overwrite).
+      // You can still "複製" to make your own editable copy.
       setAsset(loaded, { persisted: true });
       setView('editor');
-      updateStatus('読み込んだ');
+      updateStatus(loaded.ownerId && String(loaded.ownerId) !== String(ownerId) ? '読み込んだ（読み取り専用）' : '読み込んだ');
     });
 
     galleryList.appendChild(btn);
@@ -938,6 +963,7 @@ document.addEventListener('click', (e) => {
 
 nameInput.addEventListener('input', () => {
   if (!currentAsset) return;
+  if (isReadOnly) return;
   currentAsset.name = nameInput.value;
   setDirty(true);
 });
@@ -1091,6 +1117,7 @@ document.addEventListener('keydown', (e) => {
 
 undoBtn.addEventListener('click', () => {
   if (!currentAsset) return;
+  if (isReadOnly) return;
   if (undoStack.length === 0) return;
   const prev = undoStack.pop();
   redoStack.push(snapshotCurrentPixels());
@@ -1102,6 +1129,7 @@ undoBtn.addEventListener('click', () => {
 
 redoBtn.addEventListener('click', () => {
   if (!currentAsset) return;
+  if (isReadOnly) return;
   if (redoStack.length === 0) return;
   const next = redoStack.pop();
   undoStack.push(snapshotCurrentPixels());
@@ -1113,6 +1141,7 @@ redoBtn.addEventListener('click', () => {
 
 clearBtn.addEventListener('click', () => {
   if (!currentAsset) return;
+  if (isReadOnly) return;
   if (!confirm('ぜんぶ消しますか？（もどすで元に戻せるよ）')) return;
   const snapshot = snapshotCurrentPixels();
   currentAsset.pixels.fill(0);
@@ -1146,6 +1175,10 @@ if (importImageBtn && importImageInput) {
 
 saveBtn.addEventListener('click', async () => {
   if (!currentAsset) return;
+  if (isReadOnly) {
+    alert('これは ほかの人の作品です。まず「複製」して、自分の作品にしてから保存してね！');
+    return;
+  }
   const name = nameInput.value.trim();
   if (!name) {
     alert('なまえをいれてね！');
@@ -1172,7 +1205,11 @@ saveBtn.addEventListener('click', async () => {
 duplicateBtn.addEventListener('click', async () => {
   if (!currentAsset) return;
   const baseName = (nameInput.value.trim() || currentAsset.name || 'ドット') + '（コピー）';
-  const next = await duplicatePixelAsset({ ...currentAsset, name: baseName }, { name: baseName });
+  // Always duplicate as "my" asset, so you can safely copy others' works too.
+  const next = await duplicatePixelAsset(
+    { ...currentAsset, ownerId, name: baseName },
+    { ownerId, name: baseName }
+  );
   setAsset(next, { persisted: true });
   await refreshGalleryList();
   updateStatus('複製した');
@@ -1180,6 +1217,10 @@ duplicateBtn.addEventListener('click', async () => {
 
 deleteBtn.addEventListener('click', async () => {
   if (!currentAsset) return;
+  if (isReadOnly) {
+    alert('これは ほかの人の作品です。削除はできません。');
+    return;
+  }
 
   if (!isPersisted) {
     if (!confirm('この新規作品はまだ保存されていません。破棄してギャラリーに戻りますか？')) return;
@@ -1195,6 +1236,7 @@ deleteBtn.addEventListener('click', async () => {
   await deletePixelAsset(currentAsset.id);
   currentAsset = null;
   isPersisted = false;
+  setReadOnly(false);
   setDirty(false);
   setView('gallery');
   await refreshGalleryList();

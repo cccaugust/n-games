@@ -278,6 +278,10 @@
             padding: 5px;
             border-radius: 8px;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
         }
 
         .avatar-option:hover {
@@ -355,19 +359,13 @@
                 </div>
 
                 <div class="avatar-panel" id="panelDot" hidden>
-                    <div class="tiny-help">ドット絵メーカーで「アバターにする」を押すと、ここに戻ってくるよ。</div>
-                    <div class="picker-actions">
-                        <button class="btn-primary" id="openPixelArtMakerBtn" type="button">ドット絵メーカーをひらく</button>
-                        <button class="btn-secondary" id="useUploadedImageBtn" type="button">画像をアップロードしてつかう</button>
-                        <input class="sr-only" id="uploadAvatarInput" type="file" accept="image/*" />
-                    </div>
+                    <div class="avatar-grid" id="dotAvatarGrid" aria-label="ドット絵アイコン"></div>
+                    <div class="tiny-help">みんなのドット絵から えらべるよ。</div>
                 </div>
 
                 <div class="avatar-panel" id="panelPokedex" hidden>
-                    <div class="tiny-help">ポケモン図鑑で「アイコンにする」を押すと、ここに戻ってくるよ。</div>
-                    <div class="picker-actions">
-                        <button class="btn-primary" id="openPokedexBtn" type="button">ポケモン図鑑をひらく</button>
-                    </div>
+                    <div class="avatar-grid" id="pokemonAvatarGrid" aria-label="ポケモンアイコン"></div>
+                    <div class="tiny-help">ポケモンの絵から えらべるよ。</div>
                 </div>
             </div>
 
