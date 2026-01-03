@@ -2007,6 +2007,271 @@ function makePlItemSpring16() {
   return c;
 }
 
+// --- Dreamy/cute vibe (Kirby-like feel, but original designs) ---
+function makeDwTilePastelSky16() {
+  const c = makeCanvas(16, 16);
+  // soft sky gradient (opaque)
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const t = y / 15;
+      // blend between light blue and light pink
+      const r = Math.round(191 + (255 - 191) * t);
+      const g = Math.round(232 + (220 - 232) * t);
+      const b = Math.round(255 + (235 - 255) * t);
+      setPx(c, x, y, rgba(r, g, b, 255));
+    }
+  }
+  // sparkly dots
+  for (let i = 0; i < 30; i++) {
+    const x = h2(i, 1, 71) % 16;
+    const y = h2(i, 2, 72) % 16;
+    setPx(c, x, y, rgba(255, 255, 255, 255));
+    if (i % 4 === 0 && inBounds(c, x + 1, y)) setPx(c, x + 1, y, rgba(255, 255, 255, 200));
+  }
+  return c;
+}
+
+function makeDwTileStarBlock16() {
+  const c = makeCanvas(16, 16);
+  const base = rgba(255, 210, 235, 255);
+  const hi = rgba(255, 235, 248, 255);
+  const edge = rgba(210, 140, 180, 255);
+  fillRect(c, 0, 0, 16, 16, base);
+  // bevel
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, hi);
+    setPx(c, x, 1, hi);
+    setPx(c, x, 15, edge);
+  }
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, hi);
+    setPx(c, 1, y, hi);
+    setPx(c, 15, y, edge);
+  }
+  // star emboss
+  const star = [
+    [8, 3],
+    [7, 5],
+    [9, 5],
+    [6, 6],
+    [10, 6],
+    [5, 8],
+    [11, 8],
+    [6, 10],
+    [10, 10],
+    [8, 12]
+  ];
+  for (const [x, y] of star) setPx(c, x, y, PALETTE.yellow2);
+  for (const [x, y] of star) if (inBounds(c, x + 1, y + 1)) setPx(c, x + 1, y + 1, PALETTE.orange2);
+  // shine
+  setPx(c, 4, 4, PALETTE.white);
+  setPx(c, 5, 4, PALETTE.white);
+  return c;
+}
+
+function makeDwTileCandyStripe16() {
+  const c = makeCanvas(16, 16);
+  const a = rgba(255, 210, 235, 255);
+  const b = rgba(190, 232, 255, 255);
+  const edge = rgba(255, 255, 255, 255);
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const band = ((x + y) / 3) | 0;
+      setPx(c, x, y, band % 2 === 0 ? a : b);
+      if ((x + y) % 6 === 0) setPx(c, x, y, edge);
+    }
+  }
+  return c;
+}
+
+function makeDwTileDreamGrass16() {
+  const c = makeCanvas(16, 16);
+  const grassHi = rgba(220, 255, 240, 255);
+  const grass = rgba(120, 230, 190, 255);
+  const dirt = rgba(255, 200, 210, 255);
+  const dirtDark = rgba(210, 140, 180, 255);
+  // grass top
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, grassHi);
+    setPx(c, x, 1, (x % 3 === 0 ? grass : grassHi));
+    setPx(c, x, 2, grass);
+  }
+  // candy dirt body
+  fillRect(c, 0, 3, 16, 13, dirt);
+  for (let y = 3; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 73);
+      if (v % 17 === 0) setPx(c, x, y, dirtDark);
+      else if (v % 29 === 0) setPx(c, x, y, rgba(255, 230, 240, 255));
+    }
+  }
+  // grass teeth into dirt
+  for (let x = 0; x < 16; x++) if (h2(x, 0, 74) % 4 === 0) setPx(c, x, 3, grass);
+  return c;
+}
+
+function makeDwTilePuffyCloud16() {
+  const c = makeCanvas(16, 16);
+  // transparent background cloud
+  const white = rgba(255, 255, 255, 230);
+  const shade = rgba(245, 245, 255, 210);
+  fillCircle(c, 5, 10, 5, white);
+  fillCircle(c, 10, 9, 5, white);
+  fillCircle(c, 12, 11, 3, white);
+  for (let y = 11; y < 16; y++) for (let x = 0; x < 16; x++) if (getPx(c, x, y)) setPx(c, x, y, shade);
+  outlineFromFill(c, rgba(140, 170, 210, 255));
+  return c;
+}
+
+function makeDwItemSparkle16() {
+  const c = makeCanvas(16, 16);
+  // transparent background: sparkles
+  const w = rgba(255, 255, 255, 255);
+  const y = PALETTE.yellow2;
+  const b = rgba(190, 232, 255, 255);
+  const pts = [
+    [4, 5],
+    [10, 4],
+    [12, 9],
+    [6, 12]
+  ];
+  for (const [cx, cy] of pts) {
+    setPx(c, cx, cy, w);
+    setPx(c, cx - 1, cy, b);
+    setPx(c, cx + 1, cy, b);
+    setPx(c, cx, cy - 1, y);
+    setPx(c, cx, cy + 1, y);
+  }
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 35) });
+  return c;
+}
+
+function makeDwItemStarWand16() {
+  const c = makeCanvas(16, 16);
+  // handle
+  for (let i = 0; i < 8; i++) {
+    setPx(c, 4 + i, 13 - i, rgba(210, 140, 180, 255));
+    if (i % 2 === 0) setPx(c, 4 + i, 14 - i, rgba(255, 230, 240, 255));
+  }
+  // star tip
+  const star = [
+    [12, 2],
+    [11, 4],
+    [13, 4],
+    [10, 5],
+    [14, 5],
+    [11, 7],
+    [13, 7],
+    [12, 9]
+  ];
+  for (const [x, y] of star) setPx(c, x, y, PALETTE.yellow2);
+  for (const [x, y] of star) if (inBounds(c, x + 1, y + 1)) setPx(c, x + 1, y + 1, PALETTE.orange2);
+  setPx(c, 12, 3, PALETTE.white);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 40) });
+  return c;
+}
+
+function makeDwItemLollipop16() {
+  const c = makeCanvas(16, 16);
+  // stick
+  fillRect(c, 7, 9, 2, 6, rgba(255, 255, 255, 255));
+  fillRect(c, 8, 9, 1, 6, rgba(220, 220, 220, 255));
+  // candy
+  fillCircle(c, 8, 6, 4, rgba(255, 210, 235, 255));
+  fillCircle(c, 8, 6, 3, rgba(190, 232, 255, 255));
+  // swirl hint
+  for (let i = 0; i < 6; i++) setPx(c, 6 + i, 6, rgba(255, 255, 255, 255));
+  setPx(c, 7, 4, rgba(255, 255, 255, 255));
+  setPx(c, 9, 8, rgba(255, 255, 255, 255));
+  outlineFromFill(c, rgba(140, 170, 210, 255));
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 40) });
+  return c;
+}
+
+function makeDwItemDreamDoor16() {
+  const c = makeCanvas(16, 16);
+  // door body
+  fillRect(c, 4, 3, 8, 12, rgba(190, 232, 255, 255));
+  fillRect(c, 5, 4, 6, 10, rgba(255, 210, 235, 255));
+  // arch
+  fillEllipse(c, 8, 4, 4, 3, rgba(190, 232, 255, 255));
+  fillEllipse(c, 8, 5, 3, 2, rgba(255, 210, 235, 255));
+  // star knob
+  setPx(c, 10, 10, PALETTE.yellow2);
+  setPx(c, 10, 11, PALETTE.orange2);
+  setPx(c, 9, 10, PALETTE.yellow2);
+  setPx(c, 11, 10, PALETTE.yellow2);
+  // border + shadow
+  outlineFromFill(c, rgba(140, 170, 210, 255));
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
+function makeDwItemBubble16() {
+  const c = makeCanvas(16, 16);
+  // transparent bubble (alpha)
+  fillCircle(c, 8, 8, 6, rgba(190, 232, 255, 60));
+  // rim
+  for (let a = 0; a < 360; a += 20) {
+    const rad = (a * Math.PI) / 180;
+    const x = Math.round(8 + Math.cos(rad) * 6);
+    const y = Math.round(8 + Math.sin(rad) * 6);
+    setPx(c, x, y, rgba(190, 232, 255, 140));
+  }
+  // highlight
+  fillEllipse(c, 6, 6, 2, 3, rgba(255, 255, 255, 140));
+  return c;
+}
+
+function makeDwItemStrawberry16() {
+  const c = makeCanvas(16, 16);
+  // body
+  fillEllipse(c, 8, 10, 5, 5, rgba(255, 120, 160, 255));
+  fillEllipse(c, 8, 11, 5, 4, rgba(210, 60, 100, 255));
+  // seeds
+  for (let i = 0; i < 10; i++) {
+    const x = (h2(i, 1, 75) % 8) + 4;
+    const y = (h2(i, 2, 76) % 7) + 6;
+    if (getPx(c, x, y)) setPx(c, x, y, rgba(255, 235, 248, 255));
+  }
+  // leaves
+  fillCircle(c, 6, 5, 2, rgba(120, 230, 190, 255));
+  fillCircle(c, 10, 5, 2, rgba(120, 230, 190, 255));
+  setPx(c, 8, 4, rgba(220, 255, 240, 255));
+  outlineFromFill(c, rgba(140, 60, 90, 255));
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 40) });
+  return c;
+}
+
+function makeDwMascotRound16() {
+  const c = makeCanvas(16, 16);
+  // Original mascot: mint body, tiny crown tuft, no signature feet.
+  const body1 = rgba(120, 230, 190, 255);
+  const body2 = rgba(80, 200, 165, 255);
+  fillCircle(c, 8, 9, 6, body1);
+  fillCircle(c, 8, 10, 5, body2);
+  // tuft
+  setPx(c, 8, 2, rgba(255, 210, 235, 255));
+  setPx(c, 7, 3, rgba(255, 230, 240, 255));
+  setPx(c, 9, 3, rgba(255, 230, 240, 255));
+  // eyes
+  fillRect(c, 5, 8, 2, 3, PALETTE.ink);
+  fillRect(c, 10, 8, 2, 3, PALETTE.ink);
+  setPx(c, 6, 8, PALETTE.white);
+  setPx(c, 11, 8, PALETTE.white);
+  // blush
+  setPx(c, 4, 11, rgba(255, 180, 210, 255));
+  setPx(c, 12, 11, rgba(255, 180, 210, 255));
+  // tiny mouth
+  setPx(c, 8, 12, PALETTE.shadow);
+  setPx(c, 7, 12, PALETTE.shadow);
+  // outline + shadow
+  outlineFromFill(c, rgba(60, 120, 110, 255));
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -2104,7 +2369,21 @@ const samples = [
   toSample('pl_bush_16', 'しげみ', 'tile', makePlTileBush16(), ['プラットフォーマー', '16x16', 'タイル', '背景']),
   toSample('pl_oneway_platform_16', 'すりぬけ足場', 'tile', makePlTileOneWayPlatform16(), ['プラットフォーマー', '16x16', 'タイル', '足場', 'ギミック']),
   toSample('pl_flag_16', 'ゴールのはた', 'object', makePlItemFlag16(), ['プラットフォーマー', '16x16', '小物', 'ゴール']),
-  toSample('pl_spring_16', 'バネ', 'object', makePlItemSpring16(), ['プラットフォーマー', '16x16', '小物', 'ギミック'])
+  toSample('pl_spring_16', 'バネ', 'object', makePlItemSpring16(), ['プラットフォーマー', '16x16', '小物', 'ギミック']),
+
+  // dreamy/cute pack
+  toSample('dw_mascot_round_16', 'まんまるマスコット', 'character', makeDwMascotRound16(), ['ドリーミー', 'パステル', '16x16', 'キャラ']),
+  toSample('dw_pastel_sky_16', 'パステルそら', 'tile', makeDwTilePastelSky16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '背景']),
+  toSample('dw_puffy_cloud_16', 'ふわふわくも', 'tile', makeDwTilePuffyCloud16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '背景']),
+  toSample('dw_dream_grass_16', 'ゆめのくさつち', 'tile', makeDwTileDreamGrass16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '地面']),
+  toSample('dw_star_block_16', 'スターのブロック', 'tile', makeDwTileStarBlock16(), ['ドリーミー', 'パステル', '16x16', 'タイル', 'ブロック']),
+  toSample('dw_candy_stripe_16', 'キャンディしま', 'tile', makeDwTileCandyStripe16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '床']),
+  toSample('dw_sparkle_16', 'きらきら', 'object', makeDwItemSparkle16(), ['ドリーミー', 'パステル', '16x16', '小物', 'エフェクト']),
+  toSample('dw_star_wand_16', 'ほしのつえ', 'object', makeDwItemStarWand16(), ['ドリーミー', 'パステル', '16x16', '小物']),
+  toSample('dw_lollipop_16', 'ぺろぺろキャンディ', 'object', makeDwItemLollipop16(), ['ドリーミー', 'パステル', '16x16', '小物', '食べもの']),
+  toSample('dw_dream_door_16', 'ゆめのとびら', 'object', makeDwItemDreamDoor16(), ['ドリーミー', 'パステル', '16x16', '小物', 'ギミック']),
+  toSample('dw_bubble_16', 'しゃぼんだま', 'object', makeDwItemBubble16(), ['ドリーミー', 'パステル', '16x16', '小物', 'エフェクト']),
+  toSample('dw_strawberry_16', 'いちご', 'object', makeDwItemStrawberry16(), ['ドリーミー', 'パステル', '16x16', '小物', '食べもの'])
 ];
 
 const output = {

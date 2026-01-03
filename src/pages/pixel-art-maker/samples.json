@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-01-03T02:16:57.752Z",
+  "updatedAt": "2026-01-03T02:19:24.272Z",
   "note": "ドット絵メーカー用のサンプル素材です。サンプルはDBに保存されず、ユーザーが「コピーして編集」することで自分の作品として保存できます。",
   "samples": [
     {
@@ -1047,6 +1047,184 @@
         "16x16",
         "小物",
         "ギミック"
+      ]
+    },
+    {
+      "id": "dw_mascot_round_16",
+      "name": "まんまるマスコット",
+      "kind": "character",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbng8/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbng8/+vS//9ueDz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/bng8//Dm//++5nj/8Ob//254PP9ueDz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/254PP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP++5nj/vuZ4/6XIUP++5nj/vuZ4/77meP++5nj/bng8/wAAAAAAAAAAAAAAAAAAAABueDz/vuZ4/77meP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/vuZ4/77meP9ueDz/AAAAAAAAAAAAAAAAbng8/77meP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP++5nj/bng8/wAAAAAAAAAAAAAAAG54PP++5nj/pchQ/yobG///////pchQ/6XIUP+lyFD/Khsb//////+lyFD/vuZ4/254PP8AAAAtAAAAAG54PP++5nj/vuZ4/6XIUP8qGxv/Khsb/6XIUP+lyFD/pchQ/yobG/8qGxv/pchQ/77meP++5nj/bng8/wAAAAAAAAAAbng8/6XIUP+lyFD/Khsb/yobG/+lyFD/pchQ/6XIUP8qGxv/Khsb/6XIUP+lyFD/bng8/wAAAC0AAAAAAAAAAG54PP++5nj/0rT//6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP/StP//vuZ4/254PP8AAAAtAAAAAAAAAABueDz/vuZ4/6XIUP+lyFD/pchQ/0QrK/9EKyv/pchQ/6XIUP+lyFD/pchQ/77meP9ueDz/AAAALQAAAAAAAAAAAAAAAG54PP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP9ueDz/AAAALQAAAC0AAAAAAAAAAAAAAAAAAAAtbng8/6XIUP+lyFD/pchQ/6XIUP+lyFD/pchQ/6XIUP9ueDz/AAAALQAAAC0AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAC1ueDz/bng8/254PP+lyFD/bng8/254PP9ueDz/AAAALQAAAC0AAAAtAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "キャラ"
+      ]
+    },
+    {
+      "id": "dw_pastel_sky_16",
+      "name": "パステルそら",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/+i////ov///6L///+i////ov///6L///+i////ov///6L///+i////ov///6L///+i/////////////////yP7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw//+58P//ufD//7nw////////ObI//zmyP/85sj///////zmyP/85sj//ObI//zmyP/85sj//ObI//zmyP///////ObI//zmyP/85sj/++bM//vmzP/75sz/++bM//vmzP/75sz/++bM///////////I++bM//vmzP/75sz/++bM//vmzP/75sz////////////////I+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/65dD/+uXQ//rl0P/45NT/+OTU//jk1P/45NT/+OTU//jk1P/45NT/+OTU///////45NT///////jk1P/45NT/+OTU//jk1P/45NT/9+PZ///////349n///////fj2f/349n/9+PZ//fj2f/349n/9+PZ//fj2f/349n/9+PZ//fj2f/349n/9+PZ//bi3f/24t3/9uLd//bi3f/24t3/9uLd//bi3f/24t3///////bi3f/24t3/9uLd//bi3f//////////yPbi3f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/9OLh//Ti4f/04uH/8+Hl//Ph5f/z4eX/8+Hl///////////I8+Hl///////z4eX/8+Hl//Ph5f/z4eX/8+Hl//Ph5f/z4eX/8+Hl//Lg6v/y4Or/8uDq//Lg6v/y4Or/8uDq///////y4Or/8uDq///////////I8uDq//Lg6v/y4Or///////Lg6v/w3+7/8N/u//Df7v/w3+7///////Df7v/w3+7/8N/u//Df7v/w3+7/8N/u//Df7v/w3+7///////Df7v/w3+7/797y///////v3vL//////////8jv3vL/797y/+/e8v/v3vL/797y/+/e8v/v3vL/797y/+/e8v/v3vL/797y/+7e9v//////7t72/+7e9v/u3vb/7t72/+7e9v/u3vb/7t72///////u3vb/7t72/+7e9v/u3vb/7t72/+7e9v/s3fv/7N37/+zd+///////7N37/+zd+//s3fv/7N37///////s3fv/7N37/+zd+//s3fv/7N37/+zd+//s3fv/69z//+vc///r3P//69z//+vc///r3P//69z//+vc///r3P//69z////////////I69z//+vc///r3P//69z//w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "dw_puffy_cloud_16",
+      "name": "ふわふわくも",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/wAAAADSqoz/0qqM/9KqjP/////m0qqM/9KqjP/Sqoz/AAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/0qqM/////+bSqoz/////5v///+b////m////5v///+b////m////5tKqjP8AAAAAAAAAANKqjP/////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m0qqM/9KqjP/////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5tKqjP/Sqoz/////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+bSqoz/0qqM/////+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5v///+b////m////5tKqjP/Sqoz///X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS0qqM///19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS0qqM/9KqjP//9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10v/19dL/9fXS//X10tKqjP8AAAAA0qqM///19dL/9fXS//X10v/19dL/9fXS//X10v/19dLSqoz///X10tKqjP//9fXS0qqM/9KqjP8AAAAAAAAAAAAAAADSqoz/0qqM/9KqjP//9fXS0qqM/9KqjP/Sqoz/AAAAANKqjP8AAAAA0qqM/wAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "背景"
+      ]
+    },
+    {
+      "id": "dw_dream_grass_16",
+      "name": "ゆめのくさつち",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c//D/3P/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP/w/9z/8P/c/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/9LI///SyP//tIzS/9LI//++5nj/0sj//9LI///SyP//0sj//77meP/SyP//0sj//7SM0v/SyP//vuZ4/9LI///SyP//0sj//9LI//+0jNL/0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj///Dm///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/7SM0v/SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI//+0jNL/0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//9LI///SyP//0sj///Dm///SyP//0sj//9LI///SyP//0sj//9LI///SyP//8Ob//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//0sj//9LI///SyP//tIzS/9LI///SyP//0sj//w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "地面"
+      ]
+    },
+    {
+      "id": "dw_star_block_16",
+      "name": "スターのブロック",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///tIzS//jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov///jr///46///+Ov//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS/////////////+vS///r0v//69L//0ez///r0v//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//qPH//+vS//+o8f//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//qPH//+vS//9Hs///69L//0ez///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//+vS//9Hs///69L//+vS///r0v//R7P//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//6jx///r0v//69L//+vS///r0v//69L//6jx///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//R7P//+vS///r0v//69L//+vS///r0v//R7P//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//6jx///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//R7P//+vS///r0v//69L//0ez///r0v//69L//+vS//+0jNL/+Ov///jr///r0v//69L//+vS///r0v//69L//+vS//+o8f//69L//+vS///r0v//69L//+vS///r0v//tIzS//jr///46///69L//+vS///r0v//69L//+vS///r0v//69L//0ez///r0v//69L//+vS///r0v//69L//7SM0v/46///+Ov//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS///r0v//69L//+vS//+0jNL/+Ov///jr//+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/7SM0v+0jNL/tIzS/w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "ブロック"
+      ]
+    },
+    {
+      "id": "dw_candy_stripe_16",
+      "name": "キャンディしま",
+      "kind": "tile",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "/////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7////////ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS////6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7////////ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS////6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+/+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv/r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////+vS///r0v///+i+///ovv//6L7//////w==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "タイル",
+        "床"
+      ]
+    },
+    {
+      "id": "dw_sparkle_16",
+      "name": "きらきら",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAP/ovv///////+i+/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAqPH//wAAACMAAAAjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACo8f//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L7////////ovv8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKjx//8AAAAjAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "エフェクト"
+      ]
+    },
+    {
+      "id": "dw_star_wand_16",
+      "name": "ほしのつえ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+o8f//RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv//////0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/qPH//0QrK/+o8f//RCsr/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEKyv/qPH//0QrK/9Hs///RCsr/0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/9Hs///RCsr/0QrK/9EKyv/R7P//wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/qPH//0QrK/+o8f//RCsr/0QrK/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/9Hs///RCsr/0ez//9EKyv/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/9EKyv/qPH//0QrK/9EKyv/AAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/8AAAAoAAAAKEQrK/9Hs///RCsr/wAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/8AAAAoAAAAKAAAACgAAAAoRCsr/wAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAEQrK/+0jNL/8Ob//0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAACgAAAAoAAAAKAAAAAAAAAAAAAAAAEQrK/+0jNL/RCsr/0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAABEKyv/8Ob//0QrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEQrK/8AAAAoAAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物"
+      ]
+    },
+    {
+      "id": "dw_lollipop_16",
+      "name": "ぺろぺろキャンディ",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/0qqM/+vS///Sqoz/0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L//+vS////6L7/69L//+vS///Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L////ovv///////+i+///ovv//6L7/69L//9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7//+i+///ovv//6L7//+i+/+vS///Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7/////////////////////////////////69L//9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L////ovv//6L7//+i+///ovv//6L7/69L//9KqjP8AAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/+vS////6L7//+i+///ovv///////+i+/+vS///Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/69L//+vS////6L7/69L//+vS///Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKNKqjP//////69L//9KqjP/Sqoz/AAAAKAAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//////9zc3P/Sqoz/AAAAKAAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///////c3Nz/0qqM/wAAACgAAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//////3Nzc/9KqjP8AAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//////9zc3P/Sqoz/AAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "食べもの"
+      ]
+    },
+    {
+      "id": "dw_dream_door_16",
+      "name": "ゆめのとびら",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz//+i+/9KqjP/Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM/9KqjP//6L7//+i+///ovv//6L7//+i+/9KqjP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv//6L7//+i+///ovv/r0v///+i+///ovv//6L7/0qqM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7//+i+/+vS///r0v//69L//+vS///r0v///+i+///ovv/Sqoz/AAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//69L//+vS///Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAtAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//+vS///r0v///+i+/9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//69L////ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//6jx//+o8f//qPH//9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+/+vS///r0v//69L//+vS///r0v//R7P////ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAA0qqM///ovv/r0v//69L//+vS///r0v//69L//+vS////6L7/0qqM/wAAAC0AAAAAAAAAAAAAAAAAAAAAAAAAANKqjP//6L7/69L//+vS///r0v//69L//+vS///r0v///+i+/9KqjP8AAAAtAAAAAAAAAAAAAAAAAAAAAAAAAADSqoz//+i+///ovv//6L7//+i+///ovv//6L7//+i+///ovv/Sqoz/AAAALQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANKqjP/Sqoz/0qqM/9KqjP/Sqoz/0qqM/9KqjP/Sqoz/AAAALQAAAC0AAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "ギミック"
+      ]
+    },
+    {
+      "id": "dw_bubble_16",
+      "name": "しゃぼんだま",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L6M////jP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/ovoz/6L48////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAD/6L48/+i+PP///4z///+M////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PAAAAAAAAAAAAAAAAAAAAAD/6L6M/+i+PP///4z///+M////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAP/ovjz/6L48////jP///4z///+M/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48AAAAAAAAAAAAAAAAAAAAAP/ovoz/6L48/+i+PP///4z///+M////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovowAAAAAAAAAAAAAAAAAAAAA/+i+PP/ovjz/6L48////jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjwAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+jAAAAAAAAAAAAAAAAAAAAAD/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovjz/6L48/+i+PP/ovowAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L48/+i+PP/ovjz/6L48/+i+jAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/+i+jP/ovjz/6L6MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "エフェクト"
+      ]
+    },
+    {
+      "id": "dw_strawberry_16",
+      "name": "いちご",
+      "kind": "object",
+      "width": 16,
+      "height": 16,
+      "pixelsB64": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/AAAAAAAAAAAAAAAAWjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/1o8jP9aPIz/WjyM/77meP9aPIz/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/77meP++5nj/8P/c/77meP++5nj/vuZ4/1o8jP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPIz/vuZ4/77meP++5nj/vuZ4/77meP++5nj/vuZ4/77meP++5nj/WjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFo8jP++5nj/vuZ4/77meP+geP//vuZ4/77meP++5nj/WjyM/wAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAFo8jP+geP//oHj//77meP+geP//ZDzS/6B4//++5nj/oHj//6B4//9aPIz/AAAAKAAAAAAAAAAAAAAAAAAAAABaPIz/oHj///jr//9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v+geP//WjyM/wAAAAAAAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v/46///ZDzS//jr//9kPNL/+Ov//2Q80v9kPNL/ZDzS/1o8jP8AAAAoAAAAAAAAAAAAAAAAWjyM/6B4///46///ZDzS/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v+geP//WjyM/wAAAAAAAAAAAAAAAFo8jP9kPNL/ZDzS/2Q80v9kPNL/ZDzS//jr//9kPNL/ZDzS/2Q80v9kPNL/ZDzS/1o8jP8AAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v9kPNL/+Ov//2Q80v/46///ZDzS/2Q80v/46///ZDzS/1o8jP8AAAAoAAAAKAAAAAAAAAAAAAAAAFo8jP9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9aPIz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAWjyM/2Q80v9kPNL/ZDzS/2Q80v9kPNL/ZDzS/2Q80v9aPIz/AAAAKAAAACgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAChaPIz/WjyM/1o8jP9kPNL/WjyM/1o8jP9aPIz/AAAAKAAAACgAAAAoAAAAAA==",
+      "tags": [
+        "ドリーミー",
+        "パステル",
+        "16x16",
+        "小物",
+        "食べもの"
       ]
     }
   ]
