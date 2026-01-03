@@ -363,6 +363,94 @@ function makeSeafoodPixels({ type, w = 32, h = 32, body = '#93c5fd', accent = '#
     // Claws
     fillEllipse(mask, w, h, 8, 15, 3.8, 2.8);
     fillTriangle(mask, w, h, 4, 15, 8, 13, 8, 17);
+  } else if (type === 'seahorse') {
+    // Simple seahorse: head + belly + curled tail
+    fillEllipse(mask, w, h, 14, 12, 4.8, 4.2); // head
+    fillEllipse(mask, w, h, 15, 17, 4.8, 6.2); // body
+    // Snout
+    fillRect(mask, w, 8, 11, 11, 12);
+    // Tail curl
+    fillEllipse(mask, w, h, 18, 24, 4.4, 3.8);
+    fillEllipse(mask, w, h, 20, 22, 3.6, 3.2);
+    fillRect(mask, w, 16, 20, 18, 25);
+    // Dorsal fin
+    fillTriangle(mask, w, h, 18, 16, 22, 18, 18, 20);
+  } else if (type === 'puffer') {
+    // Round body + spikes
+    fillEllipse(mask, w, h, 16, 16, 7.2, 6.8);
+    // small tail
+    fillTriangle(mask, w, h, 24, 16, 30, 13, 30, 19);
+    // spikes rays
+    const spikes = [
+      [16, 7],
+      [10, 9],
+      [22, 9],
+      [8, 16],
+      [24, 12],
+      [24, 20],
+      [8, 20],
+      [16, 25]
+    ];
+    spikes.forEach(([x, y]) => fillTriangle(mask, w, h, 16, 16, x, y, Math.round((16 + x) / 2), Math.round((16 + y) / 2)));
+  } else if (type === 'manta') {
+    // Diamond wings + tail
+    fillTriangle(mask, w, h, 16, 10, 6, 16, 16, 22);
+    fillTriangle(mask, w, h, 16, 10, 26, 16, 16, 22);
+    fillEllipse(mask, w, h, 16, 16, 9.4, 5.2);
+    fillRect(mask, w, 15, 22, 16, 28); // tail
+  } else if (type === 'whaleshark') {
+    // Big fish silhouette (like shark) with tail
+    fillEllipse(mask, w, h, 14, 16, 9.0, 5.6);
+    fillTriangle(mask, w, h, 22, 14, 31, 16, 22, 18);
+    // dorsal fin
+    fillTriangle(mask, w, h, 14, 9, 16, 12, 12, 12);
+    // pectoral fin
+    fillTriangle(mask, w, h, 12, 18, 16, 20, 11, 22);
+  } else if (type === 'angler') {
+    // Chunky fish + lure
+    fillEllipse(mask, w, h, 14, 17, 8.6, 5.6);
+    fillTriangle(mask, w, h, 21, 15, 30, 17, 21, 19);
+    // lure stalk
+    fillRect(mask, w, 10, 8, 11, 11);
+    fillRect(mask, w, 9, 7, 10, 7);
+  } else if (type === 'eel') {
+    // Long body, slight wave
+    fillRect(mask, w, 6, 15, 26, 17);
+    fillRect(mask, w, 10, 13, 24, 14);
+    fillRect(mask, w, 10, 18, 24, 19);
+    // head
+    fillEllipse(mask, w, h, 6, 16, 3.8, 2.8);
+    // tail taper
+    fillTriangle(mask, w, h, 26, 15, 31, 16, 26, 17);
+  } else if (type === 'turtle') {
+    // Shell + head + flippers
+    fillEllipse(mask, w, h, 16, 16, 7.8, 6.4);
+    fillEllipse(mask, w, h, 8, 16, 2.8, 2.4); // head
+    fillEllipse(mask, w, h, 12, 10, 3.6, 2.2); // top-left flipper
+    fillEllipse(mask, w, h, 20, 10, 3.6, 2.2); // top-right flipper
+    fillEllipse(mask, w, h, 12, 22, 3.6, 2.2); // bottom-left flipper
+    fillEllipse(mask, w, h, 20, 22, 3.6, 2.2); // bottom-right flipper
+    fillTriangle(mask, w, h, 23, 16, 28, 14, 28, 18); // tail nub
+  } else if (type === 'dolphin') {
+    // Streamlined body + dorsal fin
+    fillEllipse(mask, w, h, 16, 16, 9.2, 4.6);
+    fillTriangle(mask, w, h, 22, 14, 31, 16, 22, 18);
+    fillTriangle(mask, w, h, 16, 10, 18, 13, 14, 13); // dorsal
+    // snout
+    fillRect(mask, w, 5, 15, 8, 16);
+  } else if (type === 'ray') {
+    // Stingray (smaller manta-like) with longer tail
+    fillTriangle(mask, w, h, 16, 11, 7, 16, 16, 20);
+    fillTriangle(mask, w, h, 16, 11, 25, 16, 16, 20);
+    fillEllipse(mask, w, h, 16, 15, 8.0, 4.6);
+    fillRect(mask, w, 15, 20, 16, 30);
+  } else if (type === 'seadragon') {
+    // Leafy seadragon-ish: thin body + leaf fins
+    fillRect(mask, w, 10, 10, 12, 25);
+    fillEllipse(mask, w, h, 12, 10, 3.4, 3.0); // head
+    fillTriangle(mask, w, h, 12, 22, 18, 24, 12, 26); // leaf fin right
+    fillTriangle(mask, w, h, 10, 16, 4, 18, 10, 20); // leaf fin left
+    fillTriangle(mask, w, h, 12, 25, 16, 30, 11, 29); // tail leaf
   } else {
     // Fallback: fish
     return makeFishPixels({ w, h, body, stripe: accent, outline });
@@ -436,6 +524,64 @@ function makeSeafoodPixels({ type, w = 32, h = 32, body = '#93c5fd', accent = '#
     for (let x = 14; x <= 25; x += 3) setPixel(pixels, w, x, 16, accent);
     setPixel(pixels, w, 10, 15, '#ffffff');
     setPixel(pixels, w, 10, 16, '#111827');
+  } else if (type === 'seahorse') {
+    setPixel(pixels, w, 12, 11, '#ffffff');
+    setPixel(pixels, w, 12, 12, '#111827');
+    // belly highlight
+    for (let y = 16; y <= 22; y += 2) setPixel(pixels, w, 14, y, accent);
+  } else if (type === 'puffer') {
+    setPixel(pixels, w, 12, 15, '#ffffff');
+    setPixel(pixels, w, 12, 16, '#111827');
+    setPixel(pixels, w, 15, 18, accent);
+    setPixel(pixels, w, 18, 14, accent);
+  } else if (type === 'manta' || type === 'ray') {
+    setPixel(pixels, w, 13, 15, '#ffffff');
+    setPixel(pixels, w, 13, 16, '#111827');
+    setPixel(pixels, w, 19, 15, '#ffffff');
+    setPixel(pixels, w, 19, 16, '#111827');
+    // center stripe
+    for (let y = 13; y <= 19; y++) setPixel(pixels, w, 16, y, accent);
+  } else if (type === 'whaleshark') {
+    // spots
+    const spots = [
+      [10, 15],
+      [12, 13],
+      [14, 17],
+      [16, 14],
+      [18, 17],
+      [20, 15]
+    ];
+    spots.forEach(([x, y]) => setPixel(pixels, w, x, y, accent));
+    setPixel(pixels, w, 8, 15, '#ffffff');
+    setPixel(pixels, w, 8, 16, '#111827');
+  } else if (type === 'angler') {
+    setPixel(pixels, w, 9, 16, '#ffffff');
+    setPixel(pixels, w, 9, 17, '#111827');
+    // lure bulb
+    setPixel(pixels, w, 8, 7, '#fde68a');
+    setPixel(pixels, w, 8, 8, '#f59e0b');
+  } else if (type === 'eel') {
+    setPixel(pixels, w, 5, 15, '#ffffff');
+    setPixel(pixels, w, 5, 16, '#111827');
+    // side stripe
+    for (let x = 8; x <= 26; x += 2) setPixel(pixels, w, x, 16, accent);
+  } else if (type === 'turtle') {
+    // shell pattern
+    for (let x = 12; x <= 20; x += 2) setPixel(pixels, w, x, 16, accent);
+    for (let y = 14; y <= 18; y += 2) setPixel(pixels, w, 16, y, accent);
+    setPixel(pixels, w, 7, 15, '#ffffff');
+    setPixel(pixels, w, 7, 16, '#111827');
+  } else if (type === 'dolphin') {
+    setPixel(pixels, w, 9, 15, '#ffffff');
+    setPixel(pixels, w, 9, 16, '#111827');
+    // belly light
+    for (let x = 12; x <= 20; x += 2) setPixel(pixels, w, x, 18, accent);
+  } else if (type === 'seadragon') {
+    setPixel(pixels, w, 11, 9, '#ffffff');
+    setPixel(pixels, w, 11, 10, '#111827');
+    // leaf accents
+    setPixel(pixels, w, 16, 24, accent);
+    setPixel(pixels, w, 6, 19, accent);
   }
 
   return pixels;
@@ -485,7 +631,19 @@ function buildSampleFishAssets() {
     mk('clam', 'あさり', makeSeafoodPixels({ type: 'clam', w, h, body: '#d1d5db', accent: '#9ca3af', outline: '#111827' })),
     mk('scallop', 'ほたて', makeSeafoodPixels({ type: 'scallop', w, h, body: '#fde68a', accent: '#f59e0b', outline: '#111827' })),
     mk('urchin', 'うに', makeSeafoodPixels({ type: 'urchin', w, h, body: '#111827', accent: '#6b7280', outline: '#0b1220' })),
-    mk('lobster', 'ロブスター', makeSeafoodPixels({ type: 'lobster', w, h, body: '#dc2626', accent: '#fb7185', outline: '#111827' }))
+    mk('lobster', 'ロブスター', makeSeafoodPixels({ type: 'lobster', w, h, body: '#dc2626', accent: '#fb7185', outline: '#111827' })),
+
+    // fun sea creatures ~10
+    mk('seahorse', 'タツノオトシゴ', makeSeafoodPixels({ type: 'seahorse', w, h, body: '#fbbf24', accent: '#f59e0b', outline: '#111827' })),
+    mk('puffer', 'ハリセンボン', makeSeafoodPixels({ type: 'puffer', w, h, body: '#a3e635', accent: '#65a30d', outline: '#111827' })),
+    mk('manta', 'マンタ', makeSeafoodPixels({ type: 'manta', w, h, body: '#94a3b8', accent: '#e2e8f0', outline: '#111827' })),
+    mk('ray', 'エイ', makeSeafoodPixels({ type: 'ray', w, h, body: '#64748b', accent: '#cbd5e1', outline: '#111827' })),
+    mk('whaleshark', 'ジンベエ', makeSeafoodPixels({ type: 'whaleshark', w, h, body: '#1e40af', accent: '#93c5fd', outline: '#111827' })),
+    mk('angler', 'チョウチンアンコウ', makeSeafoodPixels({ type: 'angler', w, h, body: '#111827', accent: '#6b7280', outline: '#0b1220' })),
+    mk('eel', 'うつぼ', makeSeafoodPixels({ type: 'eel', w, h, body: '#22c55e', accent: '#bbf7d0', outline: '#111827' })),
+    mk('turtle', 'ウミガメ', makeSeafoodPixels({ type: 'turtle', w, h, body: '#16a34a', accent: '#bbf7d0', outline: '#111827' })),
+    mk('dolphin', 'イルカ', makeSeafoodPixels({ type: 'dolphin', w, h, body: '#60a5fa', accent: '#dbeafe', outline: '#111827' })),
+    mk('seadragon', 'リーフィー', makeSeafoodPixels({ type: 'seadragon', w, h, body: '#34d399', accent: '#a7f3d0', outline: '#111827' }))
   ];
 }
 
