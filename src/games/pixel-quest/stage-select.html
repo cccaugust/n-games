@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ステージ選択 | ピクセルクエスト</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body class="pq-full pq-safe">
+    <div class="container">
+      <div class="pq-topbar">
+        <a class="pq-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+        <span class="pq-chip">ステージ選択</span>
+        <span class="pq-chip" id="stageCount">0こ</span>
+      </div>
+
+      <div class="pq-page">
+        <div class="pq-panel">
+          <div class="pq-row">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn-primary" id="newBtn">新規作成</button>
+              <button class="pq-tool-btn" id="refreshBtn">更新</button>
+            </div>
+            <div>
+              <span class="pq-chip">宝石をぜんぶ集めてゴール！</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px;">
+          <div class="pq-grid" id="stageList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pq-overlay" id="overlay">
+      <div class="pq-overlay-card">
+        <h2 class="pq-overlay-title" id="overlayTitle">ピクセルクエスト</h2>
+        <p class="pq-overlay-text" id="overlayText"></p>
+        <div class="pq-overlay-extra" id="overlayExtra"></div>
+        <button class="btn-primary" id="overlayClose" style="margin-top: 14px;">とじる</button>
+      </div>
+    </div>
+
+    <script type="module" src="./stage-select.js"></script>
+  </body>
+</html>
+
