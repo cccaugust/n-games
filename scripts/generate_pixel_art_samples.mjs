@@ -1560,6 +1560,263 @@ function makeTileSpikes16() {
   return c;
 }
 
+// --- Block-world ("craft") vibe tiles/items ---
+function makeTileStoneSmooth16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.gray2);
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 21);
+      if (v % 37 === 0) setPx(c, x, y, PALETTE.gray1);
+      else if (v % 41 === 0) setPx(c, x, y, PALETTE.gray3);
+    }
+  }
+  // subtle bevel so blocks read well
+  for (let x = 0; x < 16; x++) setPx(c, x, 0, PALETTE.gray3);
+  for (let y = 0; y < 16; y++) setPx(c, 0, y, PALETTE.gray3);
+  for (let x = 0; x < 16; x++) setPx(c, x, 15, PALETTE.gray1);
+  for (let y = 0; y < 16; y++) setPx(c, 15, y, PALETTE.gray1);
+  return c;
+}
+
+function makeOreOnStone16(oreColor1, oreColor2, seed = 0) {
+  const c = makeTileStoneSmooth16();
+  // ore clusters (2-tone)
+  for (let y = 1; y < 15; y++) {
+    for (let x = 1; x < 15; x++) {
+      const v = h2(x, y, 50 + seed);
+      if (v % 19 === 0 || (v % 23 === 0 && h2(x + 1, y - 1, 51 + seed) % 5 === 0)) {
+        setPx(c, x, y, oreColor1);
+        if (h2(x, y, 52 + seed) % 3 === 0) setPx(c, x + 1, y, oreColor2);
+      }
+    }
+  }
+  return c;
+}
+
+function makeTileOreCoal16() {
+  return makeOreOnStone16(PALETTE.ink, PALETTE.shadow, 1);
+}
+function makeTileOreIron16() {
+  return makeOreOnStone16(PALETTE.orange2, PALETTE.yellow1, 2);
+}
+function makeTileOreGold16() {
+  return makeOreOnStone16(PALETTE.yellow1, PALETTE.yellow2, 3);
+}
+function makeTileOreGemBlue16() {
+  return makeOreOnStone16(PALETTE.blue1, PALETTE.blue2, 4);
+}
+function makeTileOreRed16() {
+  return makeOreOnStone16(PALETTE.red1, PALETTE.red2, 5);
+}
+
+function makeTileLogOakSide16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.brown2);
+  // vertical grain stripes
+  for (let x = 0; x < 16; x++) {
+    const stripe = x % 4 === 0 || x % 7 === 0;
+    for (let y = 0; y < 16; y++) {
+      const v = h2(x, y, 31);
+      if (stripe && v % 3 === 0) setPx(c, x, y, PALETTE.brown1);
+      else if (!stripe && v % 29 === 0) setPx(c, x, y, PALETTE.brown3);
+    }
+  }
+  // bark edge darker
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, PALETTE.brown1);
+    setPx(c, 15, y, PALETTE.brown1);
+  }
+  // tiny knots
+  fillCircle(c, 6, 10, 1, PALETTE.brown1);
+  setPx(c, 6, 10, PALETTE.brown3);
+  fillCircle(c, 11, 5, 1, PALETTE.brown1);
+  setPx(c, 11, 5, PALETTE.brown3);
+  return c;
+}
+
+function makeTileLogOakTop16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.brown3);
+  // ring
+  fillEllipse(c, 8, 8, 6, 6, PALETTE.brown2);
+  fillEllipse(c, 8, 8, 4, 4, PALETTE.brown1);
+  fillEllipse(c, 8, 8, 2, 2, PALETTE.brown2);
+  // small ring noise
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 32);
+      if (v % 37 === 0) setPx(c, x, y, PALETTE.brown1);
+    }
+  }
+  // border
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, PALETTE.brown1);
+    setPx(c, x, 15, PALETTE.brown1);
+  }
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, PALETTE.brown1);
+    setPx(c, 15, y, PALETTE.brown1);
+  }
+  return c;
+}
+
+function makeTileLeaves16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.green2);
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 33);
+      if (v % 11 === 0) setPx(c, x, y, PALETTE.green3);
+      else if (v % 19 === 0) setPx(c, x, y, PALETTE.green1);
+      // small holes (transparent)
+      if (v % 47 === 0) setPx(c, x, y, 0);
+    }
+  }
+  return c;
+}
+
+function makeTileGlass16() {
+  const c = makeCanvas(16, 16);
+  // glass tint
+  fillRect(c, 0, 0, 16, 16, rgba(190, 232, 255, 90));
+  // frame
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, rgba(190, 232, 255, 140));
+    setPx(c, x, 15, rgba(190, 232, 255, 140));
+  }
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, rgba(190, 232, 255, 140));
+    setPx(c, 15, y, rgba(190, 232, 255, 140));
+  }
+  // shine
+  for (let i = 0; i < 10; i++) {
+    const x = (h2(i, 1, 34) % 12) + 2;
+    const y = (h2(i, 2, 35) % 12) + 2;
+    if ((x + y) % 3 === 0) setPx(c, x, y, rgba(255, 255, 255, 140));
+  }
+  // diagonal highlight
+  for (let i = 2; i < 14; i++) setPx(c, i, i - 1, rgba(255, 255, 255, 120));
+  return c;
+}
+
+function makeTileObsidian16() {
+  const c = makeCanvas(16, 16);
+  // dark base
+  fillRect(c, 0, 0, 16, 16, PALETTE.ink);
+  // purple-ish specks using blue/shadow
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 36);
+      if (v % 23 === 0) setPx(c, x, y, PALETTE.shadow);
+      else if (v % 41 === 0) setPx(c, x, y, PALETTE.blue1);
+      else if (v % 53 === 0) setPx(c, x, y, PALETTE.blue2);
+    }
+  }
+  // bevel
+  for (let x = 0; x < 16; x++) setPx(c, x, 0, PALETTE.shadow);
+  for (let y = 0; y < 16; y++) setPx(c, 0, y, PALETTE.shadow);
+  return c;
+}
+
+function makeTileCraftingTableTop16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.brown2);
+  // grid lines (top)
+  for (let x = 0; x < 16; x++) {
+    if (x % 5 === 0) for (let y = 0; y < 16; y++) setPx(c, x, y, PALETTE.brown1);
+  }
+  for (let y = 0; y < 16; y++) {
+    if (y % 5 === 0) for (let x = 0; x < 16; x++) setPx(c, x, y, PALETTE.brown1);
+  }
+  // corner screws (tiny)
+  setPx(c, 2, 2, PALETTE.gray3);
+  setPx(c, 13, 2, PALETTE.gray3);
+  setPx(c, 2, 13, PALETTE.gray3);
+  setPx(c, 13, 13, PALETTE.gray3);
+  // highlight
+  for (let x = 1; x < 15; x += 3) setPx(c, x, 1, PALETTE.brown3);
+  return c;
+}
+
+function makeTileFurnaceFront16() {
+  const c = makeCanvas(16, 16);
+  fillRect(c, 0, 0, 16, 16, PALETTE.gray2);
+  // blocks seams
+  for (let y = 0; y < 16; y += 4) for (let x = 0; x < 16; x++) setPx(c, x, y, PALETTE.gray1);
+  for (let x = 0; x < 16; x += 4) for (let y = 0; y < 16; y++) setPx(c, x, y, PALETTE.gray1);
+  // mouth (dark)
+  fillRect(c, 4, 9, 8, 4, PALETTE.ink);
+  // inner glow
+  fillRect(c, 5, 10, 6, 2, PALETTE.orange2);
+  fillRect(c, 6, 10, 4, 1, PALETTE.yellow2);
+  // top vent
+  fillRect(c, 5, 4, 6, 2, PALETTE.gray1);
+  // bevel
+  for (let x = 0; x < 16; x++) setPx(c, x, 0, PALETTE.gray3);
+  for (let y = 0; y < 16; y++) setPx(c, 0, y, PALETTE.gray3);
+  for (let x = 0; x < 16; x++) setPx(c, x, 15, PALETTE.gray1);
+  for (let y = 0; y < 16; y++) setPx(c, 15, y, PALETTE.gray1);
+  return c;
+}
+
+function makeItemTorch16() {
+  const c = makeCanvas(16, 16);
+  // handle
+  for (let i = 0; i < 8; i++) {
+    const x = 7 + (i >> 2);
+    const y = 14 - i;
+    setPx(c, x, y, PALETTE.brown2);
+    setPx(c, x + 1, y, PALETTE.brown1);
+  }
+  // flame
+  fillCircle(c, 8, 4, 2, PALETTE.yellow1);
+  fillCircle(c, 8, 5, 2, PALETTE.orange2);
+  setPx(c, 8, 3, PALETTE.yellow2);
+  // outline (simple)
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
+function makeItemPickaxe16() {
+  const c = makeCanvas(16, 16);
+  // handle diagonal
+  for (let i = 0; i < 9; i++) {
+    setPx(c, 5 + i, 13 - i, PALETTE.brown2);
+    if (i % 2 === 0) setPx(c, 5 + i, 14 - i, PALETTE.brown1);
+  }
+  // head
+  for (let i = 0; i < 6; i++) {
+    setPx(c, 8 - i, 6 + (i >> 1), PALETTE.gray3);
+    setPx(c, 8 + i, 6 + (i >> 1), PALETTE.gray3);
+  }
+  for (let i = 0; i < 4; i++) setPx(c, 8, 6 + i, PALETTE.gray2);
+  // highlight
+  setPx(c, 6, 6, PALETTE.white);
+  setPx(c, 10, 6, PALETTE.white);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeItemApple16() {
+  const c = makeCanvas(16, 16);
+  fillCircle(c, 8, 9, 5, PALETTE.red2);
+  fillCircle(c, 8, 10, 5, PALETTE.red1);
+  // shine
+  fillCircle(c, 6, 7, 2, PALETTE.white);
+  setPx(c, 7, 9, PALETTE.red2);
+  // stem + leaf
+  fillRect(c, 7, 3, 2, 2, PALETTE.brown1);
+  setPx(c, 10, 4, PALETTE.green2);
+  setPx(c, 11, 4, PALETTE.green2);
+  setPx(c, 11, 5, PALETTE.green3);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -1629,6 +1886,25 @@ const samples = [
   toSample('tile_ice_16', 'こおり', 'tile', makeTileIce16(), ['マップ', '16x16', 'タイル', 'ブロック', '床']),
   toSample('tile_grass_block_16', 'くさつちブロック', 'tile', makeTileGrassBlock16(), ['マップ', '16x16', 'タイル', 'ブロック', '足場']),
   toSample('tile_spikes_16', 'トゲ（わな）', 'tile', makeTileSpikes16(), ['マップ', '16x16', 'タイル', 'トラップ', '危険'])
+  ,
+  // block-world pack (minecraft-like vibe, original)
+  toSample('bw_stone_smooth_16', 'なめらかいし', 'tile', makeTileStoneSmooth16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '石']),
+  toSample('bw_log_oak_side_16', 'げんぼく（よこ）', 'tile', makeTileLogOakSide16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '木']),
+  toSample('bw_log_oak_top_16', 'げんぼく（うえ）', 'tile', makeTileLogOakTop16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '木']),
+  toSample('bw_leaves_16', 'はっぱブロック', 'tile', makeTileLeaves16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '自然']),
+  toSample('bw_glass_16', 'ガラス', 'tile', makeTileGlass16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '建材']),
+  toSample('bw_obsidian_16', 'くろいかたい石', 'tile', makeTileObsidian16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', 'レア']),
+  toSample('bw_crafting_top_16', 'さぎょうだい（うえ）', 'tile', makeTileCraftingTableTop16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', 'クラフト']),
+  toSample('bw_furnace_front_16', 'かまど（まえ）', 'tile', makeTileFurnaceFront16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', 'クラフト']),
+  toSample('bw_ore_coal_16', 'くろいこうせき', 'tile', makeTileOreCoal16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '鉱石']),
+  toSample('bw_ore_iron_16', 'てつこうせき', 'tile', makeTileOreIron16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '鉱石']),
+  toSample('bw_ore_gold_16', 'きんこうせき', 'tile', makeTileOreGold16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '鉱石']),
+  toSample('bw_ore_gemblue_16', 'あおこうせき', 'tile', makeTileOreGemBlue16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '鉱石']),
+  toSample('bw_ore_red_16', 'あかこうせき', 'tile', makeTileOreRed16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '鉱石']),
+
+  toSample('bw_torch_16', 'たいまつ', 'object', makeItemTorch16(), ['ブロックワールド', '16x16', '小物', 'クラフト']),
+  toSample('bw_pickaxe_16', 'つるはし', 'object', makeItemPickaxe16(), ['ブロックワールド', '16x16', '小物', 'クラフト']),
+  toSample('bw_apple_16', 'りんご', 'object', makeItemApple16(), ['ブロックワールド', '16x16', '小物', '食べもの'])
 ];
 
 const output = {
