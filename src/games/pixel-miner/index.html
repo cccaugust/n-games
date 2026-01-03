@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ピクセルマイナー | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div class="container pm-page">
+      <a class="pm-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+
+      <div class="pm-top">
+        <div class="pm-title">
+          <div class="pm-title-main">ピクセルマイナー</div>
+          <div class="pm-title-sub">2Dマイクラっぽい / 掘って→集めて→置く</div>
+        </div>
+
+        <div class="pm-pill" id="playerPill" title="プレイヤー"></div>
+      </div>
+
+      <div class="pm-game">
+        <canvas id="gameCanvas" class="pm-canvas"></canvas>
+
+        <div class="pm-hud" aria-hidden="true">
+          <div class="pm-hud-row">
+            <div class="pm-chip">⛏ 掘る: 左クリック / タップ</div>
+            <div class="pm-chip">🧱 置く: 右クリック / 置くモード</div>
+            <div class="pm-chip">ズーム: ＋/−</div>
+          </div>
+        </div>
+
+        <div class="pm-hotbar" id="hotbar" aria-label="ホットバー"></div>
+
+        <div class="pm-touch" id="touchControls" aria-label="タッチ操作" hidden>
+          <div class="pm-pad">
+            <button class="pm-btn" data-act="left" aria-label="左">◀</button>
+            <button class="pm-btn" data-act="right" aria-label="右">▶</button>
+            <button class="pm-btn pm-btn-wide" data-act="jump" aria-label="ジャンプ">⤒</button>
+          </div>
+          <div class="pm-actions">
+            <button class="pm-btn" data-act="modeMine" aria-label="掘るモード">⛏</button>
+            <button class="pm-btn" data-act="modePlace" aria-label="置くモード">🧱</button>
+            <button class="pm-btn" data-act="zoomOut" aria-label="ズームアウト">−</button>
+            <button class="pm-btn" data-act="zoomIn" aria-label="ズームイン">＋</button>
+          </div>
+        </div>
+
+        <div class="pm-overlay" id="overlay">
+          <div class="pm-card">
+            <div class="pm-card-title">ピクセルマイナー</div>
+            <div class="pm-card-text">
+              地面を掘ってブロックを集めて、好きなところに置けるよ。<br />
+              まずは<strong>WASD / 矢印</strong>で動いてみよう！
+            </div>
+            <div class="pm-card-actions">
+              <button class="btn-primary" id="startBtn" type="button">はじめる</button>
+              <button class="btn" id="resetBtn" type="button">最初から</button>
+            </div>
+            <div class="pm-card-note">
+              素材: ドット絵メーカーのサンプル（タイル/アイテム/キャラ）
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

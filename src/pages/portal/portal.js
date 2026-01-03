@@ -222,6 +222,14 @@ const games = [
     color: '#0ea5e9',
     icon: '🐠',
     link: '/games/aquarium/'
+  },
+  {
+    id: 'pixel-miner',
+    title: 'ピクセルマイナー',
+    desc: '掘って→集めて→置く！2Dマイクラっぽい⛏️',
+    color: '#1a2456',
+    icon: '⛏️',
+    link: '/games/pixel-miner/'
   }
 ];
 
