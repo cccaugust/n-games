@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>水槽シミュレーター（編集） | N-Games</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="../../js/ui/pixelArtModal.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <header class="aq-topbar">
+    <div class="aq-topbar-left">
+      <a class="aq-back" id="backToPortal" href="#">← ポータルへ</a>
+      <div class="aq-title">
+        <div class="aq-title-main">水槽シミュレーター</div>
+        <div class="aq-title-sub">魚を追加して、性格や色を変えてみよう</div>
+      </div>
+    </div>
+    <div class="aq-topbar-right">
+      <div class="aq-chip" id="playerPill">Player</div>
+    </div>
+  </header>
+
+  <main class="aq-shell">
+    <section class="aq-aquarium">
+      <div class="aq-canvas-wrap">
+        <div id="phaserRoot" class="aq-phaser-root" aria-label="水槽"></div>
+      </div>
+      <div class="aq-hint">
+        ヒント：右の「＋追加」から魚をふやせるよ。スマホは縦でも横でもOK。
+      </div>
+    </section>
+
+    <aside class="aq-editor" aria-label="編集">
+      <div class="aq-panel">
+        <div class="aq-panel-head">
+          <div>
+            <div class="aq-panel-title">魚リスト</div>
+            <div class="aq-note">タップして選ぶ → 下で設定</div>
+          </div>
+          <div class="aq-panel-actions">
+            <button class="aq-btn" id="addSampleBtn" type="button">＋ サンプル</button>
+            <button class="aq-btn" id="addAssetBtn" type="button">＋ 作品</button>
+            <button class="aq-btn primary" id="createFishBtn" type="button">＋ 作る</button>
+          </div>
+        </div>
+
+        <div class="aq-fish-list" id="fishList" aria-label="追加した魚"></div>
+      </div>
+
+      <div class="aq-panel">
+        <div class="aq-panel-head">
+          <div>
+            <div class="aq-panel-title">選んだ魚の設定</div>
+            <div class="aq-note" id="selectedInfo">まだ選ばれていません</div>
+          </div>
+          <button class="aq-btn danger" id="deleteFishBtn" type="button" disabled>削除</button>
+        </div>
+
+        <div class="aq-form">
+          <label class="aq-field">
+            <span>名前</span>
+            <input id="fishNameInput" type="text" maxlength="40" placeholder="たとえば：あおさかな" disabled />
+          </label>
+
+          <label class="aq-field">
+            <span>性格</span>
+            <select id="personalitySelect" disabled>
+              <option value="calm">おだやか</option>
+              <option value="energetic">げんき</option>
+              <option value="shy">びびり</option>
+              <option value="lazy">マイペース</option>
+            </select>
+          </label>
+
+          <label class="aq-field">
+            <span>速さ</span>
+            <input id="speedRange" type="range" min="20" max="160" step="1" value="70" disabled />
+          </label>
+
+          <label class="aq-field">
+            <span>大きさ</span>
+            <input id="sizeRange" type="range" min="0.6" max="2.4" step="0.05" value="1" disabled />
+          </label>
+
+          <label class="aq-field">
+            <span>色相（Hue）</span>
+            <div class="aq-row">
+              <input id="hueRange" type="range" min="-180" max="180" step="1" value="0" disabled />
+              <span class="aq-chip" id="hueValue">0°</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Picker modal (samples / assets) -->
+  <div class="aq-modal-backdrop" id="pickerModal" hidden>
+    <div class="aq-modal-card">
+      <div class="aq-modal-head">
+        <div>
+          <div class="aq-modal-title" id="pickerTitle">選んで追加</div>
+          <div class="aq-note" id="pickerNote">タップで追加できます。</div>
+        </div>
+        <button class="aq-btn" id="pickerCloseBtn" type="button">× 閉じる</button>
+      </div>
+      <div class="aq-modal-body">
+        <div class="aq-picker-controls">
+          <input id="pickerSearchInput" type="search" placeholder="なまえで検索…" />
+          <label class="aq-chip">
+            32×32だけ
+            <input id="pickerOnly32" type="checkbox" checked />
+          </label>
+        </div>
+        <div class="aq-picker-grid" id="pickerGrid" aria-label="素材一覧"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
+
