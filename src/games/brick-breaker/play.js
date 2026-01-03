@@ -2,7 +2,7 @@ import { getCurrentPlayer } from '../../js/auth.js';
 import { getRankings, saveScore } from '../../js/score.js';
 import { avatarToHtml } from '../../js/avatar.js';
 import { initOverlay } from './overlay.js';
-import { applyCanvasDpr, clamp, ensureStages, escapeHtml, fitStageToWrap, normalizeStage, refreshStageCacheFromSupabase, TILE, STAGE_COLS, STAGE_ROWS } from './shared.js';
+import { applyCanvasDpr, clamp, ensureStages, escapeHtml, fitStageToWrap, normalizeStage, refreshStageCacheFromSupabase, TILE, STAGE_COLS, STAGE_ROWS, tileParam, tileType } from './shared.js';
 
 // =========================================================
 // Play page (fullscreen) - Brick Breaker
@@ -96,7 +96,9 @@ function makeBall(x, y, speed, angleRad) {
     vx: Math.cos(angleRad) * speed,
     vy: Math.sin(angleRad) * speed,
     color: '#ffffff',
-    portalCd: 0 // 🌀 連続ワープ防止（秒）
+    portalCd: 0, // 🌀 連続ワープ防止（秒）
+    bigTimeLeft: 0,
+    baseR: r
   };
 }
 
@@ -126,15 +128,18 @@ function makeBricksFromStage(stage) {
   const bricks = [];
   for (let row = 0; row < STAGE_ROWS; row++) {
     for (let col = 0; col < STAGE_COLS; col++) {
-      const t = s.grid[gridIndex(col, row)];
+      const v = s.grid[gridIndex(col, row)];
+      const t = tileType(v);
+      const p = tileParam(v);
       if (t === TILE.EMPTY) continue;
       const hp =
-        t === TILE.TOUGH ? 3
+        t === TILE.TOUGH ? (p || 3)
           : (t === TILE.WALL || t === TILE.PORTAL ? Number.POSITIVE_INFINITY : 1);
       bricks.push({
         col,
         row,
         type: t,
+        param: p,
         hp,
         alive: true
       });
@@ -159,6 +164,8 @@ function brickBaseColor(brick) {
   if (brick.type === TILE.BOMB) return '#ff7675';
   if (brick.type === TILE.PORTAL) return '#74f8ff';
   if (brick.type === TILE.REVERSE) return '#55efc4';
+  if (brick.type === TILE.BIG) return '#81ecec';
+  if (brick.type === TILE.ONE_WAY) return '#fab1a0';
   return '#74b9ff';
 }
 
@@ -167,6 +174,8 @@ function brickPoints(brick) {
   if (brick.type === TILE.TOUGH) return 35;
   if (brick.type === TILE.BOMB) return 20;
   if (brick.type === TILE.REVERSE) return 15;
+  if (brick.type === TILE.BIG) return 18;
+  if (brick.type === TILE.ONE_WAY) return 8;
   if (brick.type === TILE.WALL) return 0;
   if (brick.type === TILE.PORTAL) return 0;
   return 10;
@@ -257,8 +266,8 @@ function nextStageName() {
   return names[(idx + 1) % names.length] ?? names[0];
 }
 
-function spawnSplitBalls(fromBall, atX, atY) {
-  // ぶんれつ: 1つのボールが「合計5こ」になる（= +4）
+function spawnSplitBalls(fromBall, atX, atY, { desiredTotal = 5 } = {}) {
+  // ぶんれつ: 1つのボールが「合計Nこ」になる（= +N-1）
   const MAX_BALLS = 15;
   if (balls.length >= MAX_BALLS) return;
 
@@ -266,8 +275,8 @@ function spawnSplitBalls(fromBall, atX, atY) {
   const base = Math.atan2(fromBall.vy, fromBall.vx);
 
   // 最大5方向にばらける（全部ちがう角度）
-  const desiredTotal = 5;
-  const canAdd = Math.max(0, Math.min(desiredTotal - 1, MAX_BALLS - balls.length));
+  const dtot = clamp(Number(desiredTotal) || 5, 2, 50);
+  const canAdd = Math.max(0, Math.min(dtot - 1, MAX_BALLS - balls.length));
   const total = 1 + canAdd;
   if (total <= 1) return;
 
@@ -468,7 +477,7 @@ function updateGame(dt) {
       score += brickPoints(brick);
       if (brick.type === TILE.SPLIT) {
         const rect = brickRect(brick);
-        spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2);
+        spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2, { desiredTotal: brick.param || 5 });
       }
       if (brick.type === TILE.REVERSE) {
         reverseTimeLeft = Math.max(reverseTimeLeft, 6.0);
@@ -501,7 +510,7 @@ function updateGame(dt) {
         score += brickPoints(b);
         if (!spawnedFromSplit && b.type === TILE.SPLIT) {
           const rect = brickRect(b);
-          spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2);
+          spawnSplitBalls(fromBall, rect.x + rect.w / 2, rect.y + rect.h / 2, { desiredTotal: b.param || 5 });
           spawnedFromSplit = true;
         }
         if (b.type === TILE.REVERSE) reverseTimeLeft = Math.max(reverseTimeLeft, 6.0);
@@ -512,6 +521,16 @@ function updateGame(dt) {
   const nextBalls = [];
   for (const b of balls) {
     if ((b.portalCd || 0) > 0) b.portalCd = Math.max(0, b.portalCd - dt);
+    if ((b.bigTimeLeft || 0) > 0) {
+      b.bigTimeLeft = Math.max(0, b.bigTimeLeft - dt);
+      const targetR = (b.baseR || b.r) * 1.9;
+      b.r = clamp(targetR, 8, 18);
+      if (b.bigTimeLeft <= 0) {
+        b.r = b.baseR || b.r;
+      }
+    } else {
+      b.baseR = b.baseR || b.r;
+    }
 
     const prevX = b.x;
     const prevY = b.y;
@@ -553,9 +572,11 @@ function updateGame(dt) {
       const isSoft = brick.type === TILE.SOFT;
       const isWall = brick.type === TILE.WALL;
       const isPortal = brick.type === TILE.PORTAL;
+      const isOneWay = brick.type === TILE.ONE_WAY;
+      const isBigBall = (b.bigTimeLeft || 0) > 0;
 
       // Reflect (ざっくり) ※やわらかは反射しない
-      if (!isSoft && !isPortal) {
+      if (!isSoft && !isPortal && !isOneWay) {
         const cameFromTop = prevY + b.r <= rect.y && b.y + b.r > rect.y;
         const cameFromBottom = prevY - b.r >= rect.y + rect.h && b.y - b.r < rect.y + rect.h;
         const cameFromLeft = prevX + b.r <= rect.x && b.x + b.r > rect.x;
@@ -566,6 +587,20 @@ function updateGame(dt) {
         else if (cameFromLeft) b.vx = -Math.abs(b.vx);
         else if (cameFromRight) b.vx = Math.abs(b.vx);
         else b.vy = -b.vy;
+      }
+
+      // ⬇️ 片方向壁：
+      // - 上から（落下中 vy>0）は通れない＝壁として反射
+      // - 下から（上昇中 vy<0）は倒れる＝壊れて通過
+      if (isOneWay) {
+        if (b.vy > 0) {
+          b.vy = -Math.abs(b.vy);
+        } else {
+          brick.alive = false;
+          score += brickPoints(brick);
+        }
+        hitSomething = true;
+        break;
       }
 
       // Portal: warp (壊れない)
@@ -582,7 +617,38 @@ function updateGame(dt) {
 
       // Hit brick
       if (!isWall) {
-        if (brick.type === TILE.BOMB) {
+        if (brick.type === TILE.BIG) {
+          // 🔵 でかボール（5秒）
+          brick.alive = false;
+          score += brickPoints(brick);
+          b.baseR = b.baseR || b.r;
+          b.bigTimeLeft = Math.max(b.bigTimeLeft || 0, 5.0);
+        } else if (isBigBall && brick.type === TILE.TOUGH) {
+          // でかボールは「硬いブロックだけ反射」＆一気に2減る
+          b.vy = -b.vy;
+          brick.hp -= 2;
+          if (brick.hp <= 0) {
+            brick.alive = false;
+            score += brickPoints(brick);
+          } else {
+            score += 2;
+          }
+        } else if (isBigBall && (
+          brick.type === TILE.NORMAL ||
+          brick.type === TILE.SOFT ||
+          brick.type === TILE.SPLIT ||
+          brick.type === TILE.BOMB ||
+          brick.type === TILE.REVERSE
+        )) {
+          // 普通ブロックは貫通（反射しない）
+          if (brick.type === TILE.BOMB) {
+            brick.alive = false;
+            score += brickPoints(brick);
+            explodeAt(brick, b);
+          } else {
+            killBrick(brick, b);
+          }
+        } else if (brick.type === TILE.BOMB) {
           // 💣 ばくはつ：自分＋周りをまとめて
           brick.alive = false;
           score += brickPoints(brick);
@@ -615,7 +681,7 @@ function updateGame(dt) {
   }
 
   // かべ（壊れない）はクリア判定から除外
-  const remaining = bricks.some(b => b.alive && b.type !== TILE.WALL);
+  const remaining = bricks.some(b => b.alive && b.type !== TILE.WALL && b.type !== TILE.PORTAL);
   if (!remaining) {
     stageCleared();
   }
@@ -654,7 +720,8 @@ function drawGame() {
       ctx.font = `${Math.max(12, Math.floor(rect.h * 0.72))}px Outfit, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('✶', rect.x + rect.w / 2, rect.y + rect.h / 2);
+      const n = clamp(brick.param || 5, 2, 50);
+      ctx.fillText(`✶${n}`, rect.x + rect.w / 2, rect.y + rect.h / 2);
     }
 
     if (brick.type === TILE.SOFT) {
@@ -707,6 +774,22 @@ function drawGame() {
       ctx.textBaseline = 'middle';
       ctx.fillText('🙃', rect.x + rect.w / 2, rect.y + rect.h / 2);
     }
+
+    if (brick.type === TILE.BIG) {
+      ctx.fillStyle = 'rgba(0,0,0,0.40)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🔵', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
+
+    if (brick.type === TILE.ONE_WAY) {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⬇', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
   }
   ctx.globalAlpha = 1;
 
@@ -728,6 +811,14 @@ function drawGame() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText(`🙃 さかさ中… ${reverseTimeLeft.toFixed(1)}s`, viewW / 2, 12);
+  }
+
+  if (balls.some(bb => (bb.bigTimeLeft || 0) > 0)) {
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = `${Math.max(12, Math.floor(viewH * 0.030))}px Outfit, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText('🔵 でかボール中！', viewW / 2, reverseTimeLeft > 0 ? 42 : 12);
   }
 }
 

@@ -1,5 +1,6 @@
 import { initOverlay } from './overlay.js';
 import {
+  encodeTile,
   applyCanvasDpr,
   clamp,
   countBlocks,
@@ -42,6 +43,8 @@ const eWrap = editorCanvas?.closest('.bb-canvas-wrap');
 const eStageBox = qs('editorStage');
 const toolButtons = Array.from(document.querySelectorAll('.bb-tool-btn[data-tool]'));
 const stageNameEl = qs('stageName');
+const toughHpEl = qs('toughHp');
+const splitTotalEl = qs('splitTotal');
 const saveBtn = qs('saveBtn');
 const loadBtn = qs('loadBtn');
 const clearBtn = qs('clearBtn');
@@ -123,12 +126,25 @@ function toolToTile(tool) {
   if (tool === 'bomb') return TILE.BOMB;
   if (tool === 'portal') return TILE.PORTAL;
   if (tool === 'reverse') return TILE.REVERSE;
+  if (tool === 'big') return TILE.BIG;
+  if (tool === 'oneway') return TILE.ONE_WAY;
   return TILE.NORMAL;
 }
 
 function applyToolAt(x, y) {
   const idx = gridIndex(x, y);
-  currentStage.grid[idx] = toolToTile(currentTool);
+  const t = toolToTile(currentTool);
+  if (t === TILE.TOUGH) {
+    const hp = clamp(Number(toughHpEl?.value || 3), 1, 50);
+    currentStage.grid[idx] = encodeTile(t, hp);
+    return;
+  }
+  if (t === TILE.SPLIT) {
+    const total = clamp(Number(splitTotalEl?.value || 5), 2, 50);
+    currentStage.grid[idx] = encodeTile(t, total);
+    return;
+  }
+  currentStage.grid[idx] = encodeTile(t, 0);
 }
 
 function tileColor(t) {
@@ -140,6 +156,8 @@ function tileColor(t) {
   if (t === TILE.BOMB) return '#ff7675';
   if (t === TILE.PORTAL) return '#74f8ff';
   if (t === TILE.REVERSE) return '#55efc4';
+  if (t === TILE.BIG) return '#81ecec';
+  if (t === TILE.ONE_WAY) return '#fab1a0';
   return '#ffffff';
 }
 
@@ -158,7 +176,9 @@ function drawEditor() {
   // タイル
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      const t = currentStage.grid[gridIndex(x, y)];
+      const raw = currentStage.grid[gridIndex(x, y)];
+      const t = (Number(raw) || 0) & 0xff;
+      const p = ((Number(raw) || 0) >> 8) & 0xff;
       if (t === TILE.EMPTY) continue;
       ectx.fillStyle = tileColor(t);
       const px = x * cellW;
@@ -170,13 +190,15 @@ function drawEditor() {
       ectx.font = `${Math.max(12, Math.floor(Math.min(cellW, cellH) * 0.42))}px Outfit, sans-serif`;
       ectx.textAlign = 'center';
       ectx.textBaseline = 'middle';
-      if (t === TILE.TOUGH) ectx.fillText('2', px + cellW / 2, py + cellH / 2);
-      if (t === TILE.SPLIT) ectx.fillText('✶', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.TOUGH) ectx.fillText(String(p || 3), px + cellW / 2, py + cellH / 2);
+      if (t === TILE.SPLIT) ectx.fillText(`✶${p || 5}`, px + cellW / 2, py + cellH / 2);
       if (t === TILE.SOFT) ectx.fillText('≈', px + cellW / 2, py + cellH / 2);
       if (t === TILE.WALL) ectx.fillText('■', px + cellW / 2, py + cellH / 2);
       if (t === TILE.BOMB) ectx.fillText('💣', px + cellW / 2, py + cellH / 2);
       if (t === TILE.PORTAL) ectx.fillText('🌀', px + cellW / 2, py + cellH / 2);
       if (t === TILE.REVERSE) ectx.fillText('🙃', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.BIG) ectx.fillText('🔵', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.ONE_WAY) ectx.fillText('⬇', px + cellW / 2, py + cellH / 2);
     }
   }
 

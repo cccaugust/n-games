@@ -77,8 +77,37 @@ export const TILE = {
   WALL: 5, // 壊れない
   BOMB: 6, // 💣 周りもまとめて壊す
   PORTAL: 7, // 🌀 ふれるとワープ（基本は壊れない）
-  REVERSE: 8 // 🙃 しばらく操作がさかさになる
+  REVERSE: 8, // 🙃 しばらく操作がさかさになる
+  BIG: 9, // 🔵 でかボール（5秒）
+  ONE_WAY: 10 // ⬇️ 下からは倒せる/上からは通れない
 };
+
+// =========================================================
+// Tile encoding (type + param)
+// - 互換性: 旧ステージは「typeのみ(0..255)」なのでそのまま読める
+// - 新形式: (param << 8) | type
+// =========================================================
+
+export function encodeTile(type, param = 0) {
+  const t = (Number(type) || 0) & 0xff;
+  const p = (Number(param) || 0) & 0xff;
+  return (p << 8) | t;
+}
+
+export function decodeTile(v) {
+  const n = (Number(v) || 0) | 0;
+  const type = n & 0xff;
+  const param = (n >> 8) & 0xff;
+  return { type, param, raw: n };
+}
+
+export function tileType(v) {
+  return decodeTile(v).type;
+}
+
+export function tileParam(v) {
+  return decodeTile(v).param;
+}
 
 export function makeEmptyStage(name = '新しいステージ') {
   return {
@@ -95,19 +124,37 @@ export function normalizeStage(stage) {
   const rows = STAGE_ROWS;
   const raw = Array.isArray(stage?.grid) ? stage.grid : [];
   const grid = new Array(cols * rows);
+  const validTypes = new Set([
+    TILE.EMPTY,
+    TILE.NORMAL,
+    TILE.TOUGH,
+    TILE.SPLIT,
+    TILE.SOFT,
+    TILE.WALL,
+    TILE.BOMB,
+    TILE.PORTAL,
+    TILE.REVERSE,
+    TILE.BIG,
+    TILE.ONE_WAY
+  ]);
   for (let i = 0; i < grid.length; i++) {
     const v = raw[i];
-    grid[i] =
-      v === TILE.NORMAL ||
-      v === TILE.TOUGH ||
-      v === TILE.SPLIT ||
-      v === TILE.SOFT ||
-      v === TILE.WALL ||
-      v === TILE.BOMB ||
-      v === TILE.PORTAL ||
-      v === TILE.REVERSE
-        ? v
-        : TILE.EMPTY;
+    const { type, param } = decodeTile(v);
+    if (!validTypes.has(type)) {
+      grid[i] = TILE.EMPTY;
+      continue;
+    }
+
+    // paramの意味を持つタイルだけ範囲を丸める（それ以外は0）
+    if (type === TILE.TOUGH) {
+      const hp = clamp(param || 0, 0, 50);
+      grid[i] = encodeTile(type, hp);
+    } else if (type === TILE.SPLIT) {
+      const total = clamp(param || 0, 0, 50);
+      grid[i] = encodeTile(type, total);
+    } else {
+      grid[i] = encodeTile(type, 0);
+    }
   }
   const name = typeof stage?.name === 'string' && stage.name.trim() ? stage.name.trim() : 'ななしのステージ';
   return { version: 1, name, cols, rows, grid };
@@ -293,7 +340,7 @@ export function uniqueName(baseName, existingNames) {
 export function countBlocks(stage) {
   const s = normalizeStage(stage);
   let n = 0;
-  for (const t of s.grid) if (t !== TILE.EMPTY) n++;
+  for (const v of s.grid) if (tileType(v) !== TILE.EMPTY) n++;
   return n;
 }
 
