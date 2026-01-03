@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>配置選択 | 将棋スタジオ</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+    .ss-safe {
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+
+    .ss-page {
+      max-width: 980px;
+      margin: 14px auto;
+      padding: 0 14px;
+    }
+
+    .ss-topbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .ss-left,
+    .ss-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .ss-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 700;
+      padding: 10px 6px;
+    }
+
+    .ss-chip {
+      background: #f1f2f6;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      font-weight: 900;
+    }
+
+    .ss-panel {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .ss-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ss-tool-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f1f2f6;
+      font-weight: 900;
+      min-width: 96px;
+    }
+
+    .ss-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .ss-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .ss-preview-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #111827;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .ss-preview {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .ss-muted {
+      color: var(--text-light);
+      font-size: 0.92rem;
+      font-weight: 800;
+    }
+
+    .ss-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .ss-mini-btn {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #f1f2f6;
+      font-weight: 900;
+    }
+
+    .ss-mini-btn.danger {
+      background: rgba(255, 118, 117, 0.16);
+      border: 1px solid rgba(255, 118, 117, 0.35);
+    }
+  </style>
+</head>
+
+<body class="ss-safe">
+  <div class="container">
+    <div class="ss-page" style="padding: 0;">
+      <div class="ss-topbar">
+        <div class="ss-left">
+          <a class="ss-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+          <span class="ss-chip">将棋スタジオ：配置えらび</span>
+          <span class="ss-chip" id="layoutCount">0こ</span>
+        </div>
+        <div class="ss-right">
+          <button class="btn-primary" id="newBtn">新しく作る</button>
+          <button class="ss-tool-btn" id="importBtn">読みこみ</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none;">
+        </div>
+      </div>
+
+      <div class="ss-panel">
+        <div class="ss-row">
+          <div class="ss-muted">
+            「プレイ」で対局スタート。「編集」でペイントみたいに配置を作れます。
+          </div>
+          <div class="ss-muted">
+            ※ 保存した配置はこの端末の中（localStorage）に入ります
+          </div>
+        </div>
+      </div>
+
+      <div class="ss-grid" id="layoutList"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./setup.js"></script>
+</body>
+
+</html>
+
