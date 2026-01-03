@@ -287,27 +287,30 @@ export async function getPixelAsset(id) {
  * @param {{ownerId:string, kind?:PixelAssetKind}} params
  */
 export async function listPixelAssets({ ownerId, kind } = {}) {
-  if (!ownerId) return [];
   // Prefer Supabase as source of truth, and cache locally.
   let metaQuery = supabase
     .from('pixel_assets')
     .select('id, owner_id, name, kind, width, height, created_at, updated_at, frame_count')
-    .eq('owner_id', ownerId)
     .order('updated_at', { ascending: false });
+  if (ownerId) metaQuery = metaQuery.eq('owner_id', ownerId);
   if (kind) metaQuery = metaQuery.eq('kind', kind);
 
   const { data: metas, error: metaErr } = await metaQuery;
   if (metaErr) {
     // Fallback to local-only
     const raws = await withStore('readonly', (store) => {
-      if (kind) {
+      if (ownerId && kind) {
         const index = store.index('ownerId_kind');
         return reqToPromise(index.getAll([ownerId, kind]));
       }
-      const index = store.index('ownerId');
-      return reqToPromise(index.getAll(ownerId));
+      if (ownerId) {
+        const index = store.index('ownerId');
+        return reqToPromise(index.getAll(ownerId));
+      }
+      return reqToPromise(store.getAll());
     });
-    const list = (raws || []).map(normalizeAsset).filter(Boolean);
+    let list = (raws || []).map(normalizeAsset).filter(Boolean);
+    if (kind) list = list.filter((a) => a.kind === kind);
     list.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
     return list;
   }
