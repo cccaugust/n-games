@@ -962,6 +962,17 @@ const SAMPLE_ASSETS = buildSampleFishAssets();
 const MAX_FISH = 48;
 const REPRO_TICK_MS = 2400;
 
+let renderScheduled = false;
+function scheduleRender() {
+  if (renderScheduled) return;
+  renderScheduled = true;
+  requestAnimationFrame(() => {
+    renderScheduled = false;
+    renderFishList();
+    renderSelectedForm();
+  });
+}
+
 function setSelectedFish(id) {
   selectedFishId = id;
   renderFishList();
@@ -1106,6 +1117,14 @@ function syncToScene(fish) {
 }
 
 function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, select = true } = {}) {
+  if (!asset) {
+    alert('素材が見つからず、魚を追加できませんでした。');
+    return;
+  }
+  if (fishes.length >= MAX_FISH) {
+    alert(`魚が多すぎるため追加できません（最大 ${MAX_FISH} 匹）。`);
+    return;
+  }
   const fish = {
     id: createId('fish'),
     name: String(name || asset?.name || 'さかな'),
@@ -1118,6 +1137,7 @@ function addFishFromAsset(asset, { name, personality, speed, size, hueDeg, selec
   fishes = [fish, ...fishes];
   syncToScene(fish);
   if (select) setSelectedFish(fish.id);
+  else scheduleRender(); // reproduction等で追加した場合もリストに反映する
 }
 
 function deleteSelectedFish() {
@@ -1382,6 +1402,8 @@ aquariumScene.events.on('ready', () => {
   renderFishList();
   renderSelectedForm();
   scene.setEmptyHintVisible(fishes.length === 0);
+  // If fishes were added before Phaser finished booting, sync them now.
+  fishes.forEach((f) => syncToScene(f));
 });
 
 aquariumScene.events.on('fishTapped', (fishId) => {
