@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>将棋スタジオ | N-Games</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+    body {
+      overflow: hidden;
+      /* 盤面ドラッグ中のスクロール暴発防止（ゲーム部分だけ） */
+    }
+
+    .shogi-page {
+      height: 100svh;
+      padding:
+        calc(14px + env(safe-area-inset-top))
+        calc(14px + env(safe-area-inset-right))
+        calc(14px + env(safe-area-inset-bottom))
+        calc(14px + env(safe-area-inset-left));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .title {
+      font-weight: 900;
+      color: var(--primary-color);
+      font-size: 1.2rem;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .pill {
+      background: white;
+      padding: 8px 10px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .pill select,
+    .pill input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      max-width: 170px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .tab-btn {
+      background: white;
+      color: var(--text-dark);
+      padding: 10px 12px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .tab-btn[aria-selected="true"] {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .board-area {
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .board-wrap {
+      width: var(--boardPx, 360px);
+      height: var(--boardPx, 360px);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffe9b9, #f8d898);
+      box-shadow: var(--shadow);
+      padding: 6px;
+      position: relative;
+      touch-action: none; /* 盤面だけ */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .board {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(var(--n, 9), 1fr);
+      grid-template-rows: repeat(var(--n, 9), 1fr);
+      gap: 1px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .cell {
+      background: rgba(255, 255, 255, 0.22);
+      display: grid;
+      place-items: center;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+
+    .cell:focus-visible {
+      outline: 3px solid rgba(108, 92, 231, 0.45);
+      outline-offset: -3px;
+    }
+
+    .cell[data-highlight="move"] {
+      background: rgba(0, 206, 201, 0.22);
+    }
+
+    .cell[data-highlight="capture"] {
+      background: rgba(253, 121, 168, 0.18);
+    }
+
+    .cell[data-highlight="select"]::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 10px;
+      border: 2px solid rgba(108, 92, 231, 0.6);
+      pointer-events: none;
+    }
+
+    .piece {
+      width: 88%;
+      height: 92%;
+      display: grid;
+      place-items: center;
+      color: #111827;
+      background: linear-gradient(180deg, #fffaf0, #f3dfb5);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      clip-path: polygon(50% 0%, 86% 12%, 100% 100%, 0% 100%, 14% 12%);
+      font-weight: 900;
+      line-height: 1;
+      font-size: clamp(10px, calc(var(--cellPx, 40px) * 0.55), 20px);
+      letter-spacing: 0.02em;
+      transform-origin: center;
+    }
+
+    .piece[data-owner="GOTE"] {
+      transform: rotate(180deg);
+    }
+
+    .piece small {
+      display: none;
+    }
+
+    .piece[data-promoted="true"] {
+      background: linear-gradient(180deg, #fff1f2, #f7c6d0);
+      border-color: rgba(253, 121, 168, 0.35);
+    }
+
+    .bottombar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .hand {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      min-height: 54px;
+    }
+
+    .hand-title {
+      font-weight: 900;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    .hand-piece {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f2f6;
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-weight: 900;
+      min-width: 64px;
+      justify-content: center;
+    }
+
+    .hand-piece[data-active="true"] {
+      background: rgba(108, 92, 231, 0.14);
+      border: 1px solid rgba(108, 92, 231, 0.35);
+    }
+
+    .hand-piece .count {
+      opacity: 0.8;
+      font-weight: 900;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    /* Modal */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal {
+      width: min(980px, 96vw);
+      max-height: min(90svh, 860px);
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .modal-header {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .modal-title {
+      font-weight: 900;
+      color: var(--text-dark);
+    }
+
+    .modal-body {
+      padding: 12px 14px;
+      overflow: auto;
+    }
+
+    .modal-footer {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 820px) {
+      .grid2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card2 {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .row + .row {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .segmented {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seg {
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #f1f2f6;
+      font-weight: 900;
+      min-width: 96px;
+    }
+
+    .seg.active {
+      background: rgba(108, 92, 231, 0.14);
+      border: 1px solid rgba(108, 92, 231, 0.35);
+    }
+
+    .dex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+
+    .dex-item {
+      border-radius: 16px;
+      background: white;
+      box-shadow: var(--shadow);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .dex-badge {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: #f1f2f6;
+      font-weight: 900;
+      font-size: 1.4rem;
+    }
+
+    .dex-name {
+      font-weight: 900;
+    }
+
+    .dex-desc {
+      color: var(--text-light);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    .dex-move {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      width: 130px;
+    }
+
+    .dex-cell {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    .dex-cell[data-kind="self"] {
+      background: rgba(108, 92, 231, 0.2);
+    }
+
+    .dex-cell[data-kind="move"] {
+      background: rgba(0, 206, 201, 0.18);
+    }
+
+    .dex-cell[data-kind="slide"] {
+      background: rgba(0, 206, 201, 0.12);
+      outline: 2px dashed rgba(0, 206, 201, 0.45);
+      outline-offset: -2px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container shogi-page">
+    <div class="topbar">
+      <div class="topbar-left">
+        <a href="../../pages/portal/portal.html"
+          style="display:inline-block; color: var(--text-light); text-decoration: none;">&larr; もどる</a>
+        <div class="title">将棋スタジオ</div>
+        <div class="pill" id="turnPill">手番: <strong id="turnLabel">先手</strong></div>
+        <div class="pill">
+          盤:
+          <select id="boardPreset">
+            <option value="9">9×9（将棋）</option>
+            <option value="19">19×19（摩訶大大将棋）</option>
+            <option value="custom">自由</option>
+          </select>
+          <input id="boardCustom" type="number" min="5" max="25" step="1" value="9"
+            style="display:none; width: 80px;" />
+        </div>
+        <div class="pill">
+          駒:
+          <select id="piecePack">
+            <option value="standard">通常（将棋）</option>
+            <option value="makadaidai-lite">拡張（摩訶大大将棋から一部）</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="モード">
+        <button class="tab-btn" id="tabPlay" aria-selected="true">🕹️ 対局</button>
+        <button class="tab-btn" id="tabEdit" aria-selected="false">✏️ 配置編集</button>
+        <button class="tab-btn" id="tabDex" aria-selected="false">📖 図鑑</button>
+      </div>
+    </div>
+
+    <div class="board-area" id="boardArea">
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board" style="--n: 9;"></div>
+      </div>
+    </div>
+
+    <div class="bottombar">
+      <div class="hand" id="hand">
+        <div class="hand-title">持ち駒</div>
+        <div id="handList" style="display:flex; gap: 8px; flex-wrap: wrap;"></div>
+      </div>
+      <div class="actions">
+        <button class="ghost-btn" id="btnUndo">↩️ 1手戻す</button>
+        <button class="ghost-btn" id="btnFlip">🔁 盤面回転</button>
+        <button class="btn-primary" id="btnReset">リセット</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor Modal -->
+  <div class="overlay" id="editOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="配置編集">
+      <div class="modal-header">
+        <div class="modal-title">✏️ 配置編集</div>
+        <div style="display:flex; gap: 8px; flex-wrap: wrap; align-items:center;">
+          <button class="ghost-btn" id="btnEditClose">とじる</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="grid2">
+          <div class="card2">
+            <div class="row">
+              <div style="font-weight:900;">配置プリセット</div>
+              <div class="segmented" id="presetPicker">
+                <button class="seg active" data-preset="standard">将棋（9×9）</button>
+                <button class="seg" data-preset="empty">空盤</button>
+              </div>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">置くもの</div>
+              <div class="segmented" id="ownerPicker">
+                <button class="seg active" data-owner="SENTE">先手</button>
+                <button class="seg" data-owner="GOTE">後手</button>
+              </div>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">駒</div>
+              <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+                <select id="editPieceSelect" style="padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.12); background: white;"></select>
+                <button class="seg" id="btnErase" style="min-width: 110px;">消しゴム</button>
+              </div>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">持ち駒</div>
+              <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+                <button class="seg" id="btnClearHands">ぜんぶ0</button>
+                <button class="seg" id="btnFillHands">全部+1</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card2">
+            <div class="row">
+              <div style="font-weight:900;">保存 / 読みこみ</div>
+              <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+                <button class="seg" id="btnExport">書き出し</button>
+                <button class="seg" id="btnImport">読みこみ</button>
+                <input id="importFile" type="file" accept="application/json" style="display:none;">
+              </div>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">表示</div>
+              <label style="display:flex; align-items:center; gap: 10px; font-weight: 900;">
+                <input id="toggleMoveCheck" type="checkbox" />
+                移動チェック（対応している駒だけ）
+              </label>
+            </div>
+            <div class="row">
+              <div style="font-weight:900;">ヒント</div>
+              <div style="color: var(--text-light); font-size: 0.95rem;">
+                盤面をタップして配置します。対局モードに戻ると、その配置で遊べます。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div style="color: var(--text-light); font-size: 0.95rem;">※ 盤面はスクロールなしで画面に収まるよう自動で縮尺します</div>
+        <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+          <button class="ghost-btn" id="btnApplyPreset">プリセット適用</button>
+          <button class="btn-primary" id="btnDoneEdit">対局に戻る</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dex Modal -->
+  <div class="overlay" id="dexOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="駒図鑑">
+      <div class="modal-header">
+        <div class="modal-title">📖 駒の図鑑</div>
+        <div style="display:flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+          <label class="pill" style="box-shadow:none;">
+            表示:
+            <select id="dexFilter">
+              <option value="current">いまの駒パック</option>
+              <option value="all">全部</option>
+            </select>
+          </label>
+          <button class="ghost-btn" id="btnDexClose">とじる</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="dex-grid" id="dexGrid"></div>
+      </div>
+      <div class="modal-footer">
+        <div style="color: var(--text-light); font-size: 0.95rem;">
+          移動の図は「先手視点（上が相手側）」です。
+        </div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
+

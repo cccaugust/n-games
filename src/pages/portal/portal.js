@@ -206,6 +206,14 @@ const games = [
     color: '#111827',
     icon: '💎',
     link: '/games/pixel-quest/'
+  },
+  {
+    id: 'shogi-studio',
+    title: '将棋スタジオ',
+    desc: '盤サイズ自由！配置編集＆対人戦＆図鑑',
+    color: '#ffeaa7',
+    icon: '♟️',
+    link: '/games/shogi-studio/'
   }
 ];
 
