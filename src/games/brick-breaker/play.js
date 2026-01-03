@@ -2,7 +2,7 @@ import { getCurrentPlayer } from '../../js/auth.js';
 import { getRankings, saveScore } from '../../js/score.js';
 import { avatarToHtml } from '../../js/avatar.js';
 import { initOverlay } from './overlay.js';
-import { clamp, ensureStages, escapeHtml, normalizeStage, refreshStageCacheFromSupabase, TILE, STAGE_COLS, STAGE_ROWS } from './shared.js';
+import { applyCanvasDpr, clamp, ensureStages, escapeHtml, fitStageToWrap, normalizeStage, refreshStageCacheFromSupabase, TILE, STAGE_COLS, STAGE_ROWS } from './shared.js';
 
 // =========================================================
 // Play page (fullscreen) - Brick Breaker
@@ -23,6 +23,8 @@ function getStageFromUrl() {
 // --------------------
 const canvas = qs('gameCanvas');
 const ctx = canvas.getContext('2d');
+const wrap = canvas?.closest('.bb-canvas-wrap');
+const stageBox = qs('gameStage');
 const stageLabel = qs('stageLabel');
 
 const scoreEl = qs('score');
@@ -41,19 +43,19 @@ const { showOverlay, closeOverlay } = initOverlay();
 let viewW = 600;
 let viewH = 500;
 
-function applyDpr(canvasEl, context2d) {
-  const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
-  const rect = canvasEl.getBoundingClientRect();
-  const w = Math.max(1, Math.round(rect.width));
-  const h = Math.max(1, Math.round(rect.height));
-  canvasEl.width = Math.round(w * dpr);
-  canvasEl.height = Math.round(h * dpr);
-  context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { w, h };
+function getDesignSize() {
+  // HTMLの width/height（設計比率）を基準に、画面に収まる最大サイズでフィットさせる
+  const dw = Number(canvas?.getAttribute('width')) || 600;
+  const dh = Number(canvas?.getAttribute('height')) || 500;
+  return { dw, dh };
 }
 
 function resizeGameCanvas() {
-  const { w, h } = applyDpr(canvas, ctx);
+  const { dw, dh } = getDesignSize();
+  if (wrap && stageBox) {
+    fitStageToWrap({ wrapEl: wrap, stageEl: stageBox, designW: dw, designH: dh });
+  }
+  const { w, h } = applyCanvasDpr(canvas, ctx);
   viewW = w;
   viewH = h;
   layoutPaddleToBottom();

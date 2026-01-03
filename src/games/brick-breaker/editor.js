@@ -1,10 +1,12 @@
 import { initOverlay } from './overlay.js';
 import {
+  applyCanvasDpr,
   clamp,
   countBlocks,
   downloadJson,
   ensureStages,
   escapeHtml,
+  fitStageToWrap,
   makeEmptyStage,
   normalizeStage,
   refreshStageCacheFromSupabase,
@@ -36,6 +38,8 @@ function getStageFromUrl() {
 // --------------------
 const editorCanvas = qs('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
+const eWrap = editorCanvas?.closest('.bb-canvas-wrap');
+const eStageBox = qs('editorStage');
 const toolButtons = Array.from(document.querySelectorAll('.bb-tool-btn[data-tool]'));
 const stageNameEl = qs('stageName');
 const saveBtn = qs('saveBtn');
@@ -60,19 +64,12 @@ const { showOverlay } = initOverlay();
 let eViewW = 800;
 let eViewH = 420;
 
-function applyDpr(canvasEl, context2d) {
-  const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
-  const rect = canvasEl.getBoundingClientRect();
-  const w = Math.max(1, Math.round(rect.width));
-  const h = Math.max(1, Math.round(rect.height));
-  canvasEl.width = Math.round(w * dpr);
-  canvasEl.height = Math.round(h * dpr);
-  context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { w, h };
-}
-
 function resizeEditorCanvas() {
-  const { w, h } = applyDpr(editorCanvas, ectx);
+  // ステージ(14×10)と同じ比率で、画面に収まる最大サイズにする
+  if (eWrap && eStageBox) {
+    fitStageToWrap({ wrapEl: eWrap, stageEl: eStageBox, designW: STAGE_COLS, designH: STAGE_ROWS });
+  }
+  const { w, h } = applyCanvasDpr(editorCanvas, ectx);
   eViewW = w;
   eViewH = h;
 }

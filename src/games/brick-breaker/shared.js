@@ -9,6 +9,38 @@ export function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
+// =========================================================
+// Canvas fit helpers (固定アスペクト + DPR対応)
+// =========================================================
+
+export function fitStageToWrap({ wrapEl, stageEl, designW, designH } = {}) {
+  if (!wrapEl || !stageEl) return { w: 0, h: 0, scale: 1 };
+  const rect = wrapEl.getBoundingClientRect();
+  const availW = Math.max(1, Math.floor(rect.width));
+  const availH = Math.max(1, Math.floor(rect.height));
+
+  const baseW = Math.max(1, Number(designW) || 1);
+  const baseH = Math.max(1, Number(designH) || 1);
+  const scale = Math.max(0.01, Math.min(availW / baseW, availH / baseH));
+
+  const w = Math.max(1, Math.floor(baseW * scale));
+  const h = Math.max(1, Math.floor(baseH * scale));
+  stageEl.style.width = `${w}px`;
+  stageEl.style.height = `${h}px`;
+  return { w, h, scale };
+}
+
+export function applyCanvasDpr(canvasEl, context2d) {
+  const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+  const rect = canvasEl.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  canvasEl.width = Math.round(w * dpr);
+  canvasEl.height = Math.round(h * dpr);
+  context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w, h, dpr };
+}
+
 export function escapeHtml(str) {
   return String(str)
     .replaceAll('&', '&amp;')
