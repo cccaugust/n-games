@@ -29,10 +29,14 @@ export default defineConfig({
                 const parts = cleanPath ? cleanPath.split('/').filter(Boolean) : [];
                 const depth = Math.max(0, parts.length - 1);
                 const prefix = depth > 0 ? '../'.repeat(depth) : '';
-                const faviconHref = `${prefix}favicon.svg`;
+                const faviconSvgHref = `${prefix}favicon.svg`;
+                const faviconIcoHref = `${prefix}favicon.ico`;
+                const appleTouchIconHref = `${prefix}apple-touch-icon.png`;
 
                 const tags = [
-                    { tag: 'link', attrs: { rel: 'icon', type: 'image/svg+xml', href: faviconHref } },
+                    { tag: 'link', attrs: { rel: 'icon', type: 'image/svg+xml', href: faviconSvgHref } },
+                    { tag: 'link', attrs: { rel: 'icon', type: 'image/x-icon', href: faviconIcoHref } },
+                    { tag: 'link', attrs: { rel: 'apple-touch-icon', sizes: '180x180', href: appleTouchIconHref } },
                     // Optional, but helps unify browser UI colors.
                     { tag: 'meta', attrs: { name: 'theme-color', content: '#4f46e5' } }
                 ];
