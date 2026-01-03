@@ -47,6 +47,8 @@ const toughHpEl = qs('toughHp');
 const splitTotalEl = qs('splitTotal');
 const toughHpWrap = qs('toughHpWrap');
 const splitTotalWrap = qs('splitTotalWrap');
+const boingHpEl = qs('boingHp');
+const boingHpWrap = qs('boingHpWrap');
 const saveBtn = qs('saveBtn');
 const loadBtn = qs('loadBtn');
 const clearBtn = qs('clearBtn');
@@ -106,6 +108,7 @@ function setTool(tool) {
   // UIをすっきり：必要なパラメータだけ見せる
   if (toughHpWrap) toughHpWrap.style.display = tool === 'tough' ? 'inline-flex' : 'none';
   if (splitTotalWrap) splitTotalWrap.style.display = tool === 'split' ? 'inline-flex' : 'none';
+  if (boingHpWrap) boingHpWrap.style.display = tool === 'boingx' ? 'inline-flex' : 'none';
 }
 setTool('normal');
 
@@ -137,6 +140,7 @@ function toolToTile(tool) {
   if (tool === 'fast') return TILE.FAST;
   if (tool === 'sticky') return TILE.STICKY;
   if (tool === 'invincible') return TILE.INVINCIBLE;
+  if (tool === 'boingx') return TILE.BOING_X;
   return TILE.NORMAL;
 }
 
@@ -151,6 +155,11 @@ function applyToolAt(x, y) {
   if (t === TILE.SPLIT) {
     const total = clamp(Number(splitTotalEl?.value || 5), 2, 50);
     currentStage.grid[idx] = encodeTile(t, total);
+    return;
+  }
+  if (t === TILE.BOING_X) {
+    const hp = clamp(Number(boingHpEl?.value || 2), 1, 10);
+    currentStage.grid[idx] = encodeTile(t, hp);
     return;
   }
   currentStage.grid[idx] = encodeTile(t, 0);
@@ -171,6 +180,7 @@ function tileColor(t) {
   if (t === TILE.FAST) return '#ff5252';
   if (t === TILE.STICKY) return '#b388ff';
   if (t === TILE.INVINCIBLE) return '#ffe66d';
+  if (t === TILE.BOING_X) return '#fd79a8';
   return '#ffffff';
 }
 
@@ -216,6 +226,7 @@ function drawEditor() {
       if (t === TILE.FAST) ectx.fillText('⚡', px + cellW / 2, py + cellH / 2);
       if (t === TILE.STICKY) ectx.fillText('🩹', px + cellW / 2, py + cellH / 2);
       if (t === TILE.INVINCIBLE) ectx.fillText('🌈', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.BOING_X) ectx.fillText(`↔${p || 2}`, px + cellW / 2, py + cellH / 2);
     }
   }
 

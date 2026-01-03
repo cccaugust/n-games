@@ -162,6 +162,11 @@ function createSfx({ enabled = true, volume = 0.18 } = {}) {
     noise({ dur: 0.10, gain: 0.14, filterFreq: 1200, q: 0.6 });
     tone({ type: 'sine', freq: 120, freqTo: 70, dur: 0.18, gain: 0.12, release: 0.18 });
   }
+  function boing() {
+    // ぷるんっ（横ポヨーン向け）
+    tone({ type: 'sine', freq: 260, freqTo: 520, dur: 0.06, gain: 0.10, release: 0.08 });
+    tone({ type: 'triangle', freq: 620, freqTo: 420, dur: 0.05, gain: 0.06, release: 0.07, detune: 8 });
+  }
 
   return {
     unlock,
@@ -177,7 +182,8 @@ function createSfx({ enabled = true, volume = 0.18 } = {}) {
     powerUp,
     reverse,
     portal,
-    bomb
+    bomb,
+    boing
   };
 }
 
@@ -498,7 +504,8 @@ function makeBricksFromStage(stage) {
       if (t === TILE.EMPTY) continue;
       const hp =
         t === TILE.TOUGH ? (p || 3)
-          : (t === TILE.WALL || t === TILE.PORTAL ? Number.POSITIVE_INFINITY : 1);
+          : (t === TILE.BOING_X ? clamp(p || 2, 1, 10)
+            : (t === TILE.WALL || t === TILE.PORTAL ? Number.POSITIVE_INFINITY : 1));
       bricks.push({
         col,
         row,
@@ -506,7 +513,10 @@ function makeBricksFromStage(stage) {
         param: p,
         hp,
         alive: true,
-        flash: 0
+        flash: 0,
+        // ↔️ 横にポヨーン（見た目用）
+        boingPow: 0,
+        boingT: 0
       });
     }
   }
@@ -535,6 +545,7 @@ function brickBaseColor(brick) {
   if (brick.type === TILE.FAST) return '#ff5252';
   if (brick.type === TILE.STICKY) return '#b388ff';
   if (brick.type === TILE.INVINCIBLE) return '#ffe66d';
+  if (brick.type === TILE.BOING_X) return '#fd79a8';
   return '#74b9ff';
 }
 
@@ -549,6 +560,7 @@ function brickPoints(brick) {
   if (brick.type === TILE.FAST) return 15;
   if (brick.type === TILE.STICKY) return 15;
   if (brick.type === TILE.INVINCIBLE) return 18;
+  if (brick.type === TILE.BOING_X) return 16;
   if (brick.type === TILE.WALL) return 0;
   if (brick.type === TILE.PORTAL) return 0;
   return 10;
@@ -832,6 +844,10 @@ function updateGame(dt) {
   // brick flash decay
   for (const br of bricks) {
     if ((br.flash || 0) > 0) br.flash = Math.max(0, (br.flash || 0) - dt);
+    if ((br.boingPow || 0) > 0) {
+      br.boingT = (br.boingT || 0) + dt;
+      br.boingPow = Math.max(0, (br.boingPow || 0) - dt * 2.8);
+    }
   }
 
   const aliveBricks = bricks.filter(b => b.alive);
@@ -887,6 +903,12 @@ function updateGame(dt) {
     const hp = hitPointOnRect(ballObj, rect);
     brick.flash = Math.max(brick.flash || 0, strong ? 0.14 : 0.10);
 
+    if (brick.type === TILE.BOING_X) {
+      sfx.boing();
+      fxSpawnBurst(hp.x, hp.y, 'rgba(253,121,168,0.95)', { count: strong ? 16 : 12, speedMin: 90, speedMax: 260, lifeMin: 0.12, lifeMax: 0.32, sizeMin: 1.1, sizeMax: 3.1, gravity: 640, glow: true });
+      return;
+    }
+
     if (brick.type === TILE.WALL) {
       sfx.wall();
       fxSpawnBurst(hp.x, hp.y, 'rgba(255,255,255,0.95)', { count: 8, speedMin: 80, speedMax: 220, lifeMin: 0.10, lifeMax: 0.25, sizeMin: 1.0, sizeMax: 2.4, gravity: 620, glow: true });
@@ -915,6 +937,15 @@ function updateGame(dt) {
     const c = brickFxColor(brick);
     const cx = rect.x + rect.w / 2;
     const cy = rect.y + rect.h / 2;
+
+    if (brick.type === TILE.BOING_X) {
+      sfx.boing();
+      fxSpawnRing(cx, cy, 'rgba(253,121,168,0.95)', { r0: 10, r1: 72, life: 0.26, width: 4 });
+      fxSpawnBurst(cx, cy, 'rgba(255,255,255,0.95)', { count: 16, speedMin: 120, speedMax: 360, lifeMin: 0.12, lifeMax: 0.38, sizeMin: 1.1, sizeMax: 3.4, gravity: 520, glow: true });
+      fxSpawnBurst(cx, cy, c, { count: 14, speedMin: 110, speedMax: 320, lifeMin: 0.14, lifeMax: 0.45, sizeMin: 1.1, sizeMax: 3.2, gravity: 620 });
+      if (!byBomb) fxAddShake(3, 0.10);
+      return;
+    }
 
     if (brick.type === TILE.SPLIT) {
       sfx.breakSplit();
@@ -1230,6 +1261,36 @@ function updateGame(dt) {
         break;
       }
 
+      // ↔️ 横にポヨーン：反射＋横方向に「ばね加速」＆ブロックが横にぷるん
+      if (brick.type === TILE.BOING_X) {
+        // ぷるん（描画用）
+        brick.boingPow = Math.max(brick.boingPow || 0, 1.0);
+        brick.boingT = 0;
+        brick.flash = Math.max(brick.flash || 0, 0.14);
+
+        // ボールに横方向のクセをつける（縦ループ防止にもなる）
+        const v = Math.max(80, Math.hypot(b.vx, b.vy));
+        const cx = rect.x + rect.w / 2;
+        const rel = clamp((b.x - cx) / Math.max(1, rect.w / 2), -1, 1);
+        const add = rel * v * 0.55 + ((Math.random() * 2 - 1) * v * 0.06);
+        b.vx += add;
+        const nv = Math.max(0.0001, Math.hypot(b.vx, b.vy));
+        b.vx = (b.vx / nv) * v;
+        b.vy = (b.vy / nv) * v;
+
+        // ダメージ
+        brick.hp -= 1;
+        if (brick.hp <= 0) {
+          brick.alive = false;
+          score += brickPoints(brick);
+          fxBreakBrick(brick, rect);
+        } else {
+          fxHitBrick(brick, rect, b, { strong: false });
+        }
+        hitSomething = true;
+        break;
+      }
+
       // Hit brick
       if (!isWall) {
         if (brick.type === TILE.BIG) {
@@ -1330,8 +1391,43 @@ function drawGame() {
   for (const brick of bricks) {
     if (!brick.alive) continue;
     const rect = brickRect(brick);
-    ctx.fillStyle = brickBaseColor(brick);
     ctx.globalAlpha = 1;
+    const base = brickBaseColor(brick);
+    const isBoing = brick.type === TILE.BOING_X;
+
+    // ↔️ 横ポヨーンだけ「横にぷるぷる」変形して描く
+    if (isBoing && (brick.boingPow || 0) > 0) {
+      const p = clamp(brick.boingPow || 0, 0, 1);
+      const t = brick.boingT || 0;
+      const wob = Math.sin(t * 22) * p;
+      const xoff = wob * clamp(rect.w * 0.10, 5, 10);
+      const sx = 1 + (Math.sin(t * 18 + 0.9) * p) * 0.22;
+      const sy = 1 - p * 0.08;
+      ctx.save();
+      ctx.translate(rect.x + rect.w / 2 + xoff, rect.y + rect.h / 2);
+      ctx.scale(sx, sy);
+      ctx.translate(-rect.w / 2, -rect.h / 2);
+      ctx.fillStyle = base;
+      ctx.fillRect(0, 0, rect.w, rect.h);
+
+      // ヒット時フラッシュ（変形に追従）
+      if ((brick.flash || 0) > 0) {
+        const a = clamp(brick.flash / 0.14, 0, 1) * 0.55;
+        ctx.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
+        ctx.fillRect(0, 0, rect.w, rect.h);
+      }
+
+      // アイコン
+      ctx.fillStyle = 'rgba(0,0,0,0.48)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`↔${clamp(brick.hp || 1, 1, 10)}`, rect.w / 2, rect.h / 2);
+      ctx.restore();
+      continue;
+    }
+
+    ctx.fillStyle = base;
     ctx.fillRect(rect.x, rect.y, rect.w, rect.h);
 
     // ヒット時フラッシュ
@@ -1457,6 +1553,14 @@ function drawGame() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('🌈', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
+
+    if (brick.type === TILE.BOING_X) {
+      ctx.fillStyle = 'rgba(0,0,0,0.48)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`↔${clamp(brick.hp || 1, 1, 10)}`, rect.x + rect.w / 2, rect.y + rect.h / 2);
     }
   }
   ctx.globalAlpha = 1;

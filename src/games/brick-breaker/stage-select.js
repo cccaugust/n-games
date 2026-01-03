@@ -42,6 +42,7 @@ function tileColor(t) {
   if (t === TILE.FAST) return '#ff5252';
   if (t === TILE.STICKY) return '#b388ff';
   if (t === TILE.INVINCIBLE) return '#ffe66d';
+  if (t === TILE.BOING_X) return '#fd79a8';
   return '#000000';
 }
 

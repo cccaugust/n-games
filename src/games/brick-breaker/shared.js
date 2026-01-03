@@ -83,7 +83,8 @@ export const TILE = {
   SLOW: 11, // 🐌 のろのろ（5秒：スロー + ボール青）
   FAST: 12, // ⚡ はやはや（5秒：ハイスピード + ボール赤）
   STICKY: 13, // 🩹 ベタベタ（5秒：ボールがブロックにくっつく→ぼとっと落ちる）
-  INVINCIBLE: 14 // 🌈 無敵モード（5秒：バーが虹色、タップで追加ボール）
+  INVINCIBLE: 14, // 🌈 無敵モード（5秒：バーが虹色、タップで追加ボール）
+  BOING_X: 15 // ↔️ 横にポヨーン（param = 耐久/1..10、未指定は 2）
 };
 
 // =========================================================
@@ -143,7 +144,8 @@ export function normalizeStage(stage) {
     TILE.SLOW,
     TILE.FAST,
     TILE.STICKY,
-    TILE.INVINCIBLE
+    TILE.INVINCIBLE,
+    TILE.BOING_X
   ]);
   for (let i = 0; i < grid.length; i++) {
     const v = raw[i];
@@ -160,6 +162,9 @@ export function normalizeStage(stage) {
     } else if (type === TILE.SPLIT) {
       const total = clamp(param || 0, 0, 50);
       grid[i] = encodeTile(type, total);
+    } else if (type === TILE.BOING_X) {
+      const hp = clamp(param || 0, 0, 10);
+      grid[i] = encodeTile(type, hp);
     } else {
       grid[i] = encodeTile(type, 0);
     }
@@ -246,7 +251,17 @@ export function getDefaultStages() {
     else e.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
   }
 
-  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d), normalizeStage(e)];
+  const f = makeEmptyStage('よこポヨーン');
+  // 2段に「ポヨーン」を並べて、間に普通ブロック（見た目も楽しい）
+  for (let col = 0; col < STAGE_COLS; col++) {
+    f.grid[1 * STAGE_COLS + col] = encodeTile(TILE.BOING_X, 2);
+    f.grid[3 * STAGE_COLS + col] = (col % 2 === 0) ? TILE.NORMAL : TILE.SOFT;
+  }
+  // 端にかべ（安全）
+  f.grid[0 * STAGE_COLS + 0] = TILE.WALL;
+  f.grid[0 * STAGE_COLS + (STAGE_COLS - 1)] = TILE.WALL;
+
+  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d), normalizeStage(e), normalizeStage(f)];
 }
 
 export function ensureStages() {
