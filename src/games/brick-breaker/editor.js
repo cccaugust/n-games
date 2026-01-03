@@ -120,6 +120,9 @@ function toolToTile(tool) {
   if (tool === 'split') return TILE.SPLIT;
   if (tool === 'soft') return TILE.SOFT;
   if (tool === 'wall') return TILE.WALL;
+  if (tool === 'bomb') return TILE.BOMB;
+  if (tool === 'portal') return TILE.PORTAL;
+  if (tool === 'reverse') return TILE.REVERSE;
   return TILE.NORMAL;
 }
 
@@ -134,6 +137,9 @@ function tileColor(t) {
   if (t === TILE.SPLIT) return '#00cec9';
   if (t === TILE.SOFT) return '#ffeaa7';
   if (t === TILE.WALL) return '#636e72';
+  if (t === TILE.BOMB) return '#ff7675';
+  if (t === TILE.PORTAL) return '#74f8ff';
+  if (t === TILE.REVERSE) return '#55efc4';
   return '#ffffff';
 }
 
@@ -168,6 +174,9 @@ function drawEditor() {
       if (t === TILE.SPLIT) ectx.fillText('✶', px + cellW / 2, py + cellH / 2);
       if (t === TILE.SOFT) ectx.fillText('≈', px + cellW / 2, py + cellH / 2);
       if (t === TILE.WALL) ectx.fillText('■', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.BOMB) ectx.fillText('💣', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.PORTAL) ectx.fillText('🌀', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.REVERSE) ectx.fillText('🙃', px + cellW / 2, py + cellH / 2);
     }
   }
 

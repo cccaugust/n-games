@@ -33,6 +33,9 @@ function tileColor(t) {
   if (t === TILE.SPLIT) return '#00cec9';
   if (t === TILE.SOFT) return '#ffeaa7';
   if (t === TILE.WALL) return '#636e72';
+  if (t === TILE.BOMB) return '#ff7675';
+  if (t === TILE.PORTAL) return '#74f8ff';
+  if (t === TILE.REVERSE) return '#55efc4';
   return '#000000';
 }
 

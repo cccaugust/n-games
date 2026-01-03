@@ -74,7 +74,10 @@ export const TILE = {
   TOUGH: 2,
   SPLIT: 3,
   SOFT: 4, // 壊れるが反射しない
-  WALL: 5 // 壊れない
+  WALL: 5, // 壊れない
+  BOMB: 6, // 💣 周りもまとめて壊す
+  PORTAL: 7, // 🌀 ふれるとワープ（基本は壊れない）
+  REVERSE: 8 // 🙃 しばらく操作がさかさになる
 };
 
 export function makeEmptyStage(name = '新しいステージ') {
@@ -99,7 +102,10 @@ export function normalizeStage(stage) {
       v === TILE.TOUGH ||
       v === TILE.SPLIT ||
       v === TILE.SOFT ||
-      v === TILE.WALL
+      v === TILE.WALL ||
+      v === TILE.BOMB ||
+      v === TILE.PORTAL ||
+      v === TILE.REVERSE
         ? v
         : TILE.EMPTY;
   }
@@ -173,7 +179,19 @@ export function getDefaultStages() {
   for (let col = 0; col < STAGE_COLS; col++) d.grid[2 * STAGE_COLS + col] = TILE.SOFT;
   for (let col = 0; col < STAGE_COLS; col++) d.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
 
-  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d)];
+  const e = makeEmptyStage('なにこれ？');
+  // ポータル2つ + ばくはつ + さかさ を混ぜる（子ども向けおもしろ枠）
+  for (let col = 1; col < STAGE_COLS - 1; col++) e.grid[0 * STAGE_COLS + col] = TILE.NORMAL;
+  e.grid[1 * STAGE_COLS + 2] = TILE.PORTAL;
+  e.grid[1 * STAGE_COLS + (STAGE_COLS - 3)] = TILE.PORTAL;
+  e.grid[2 * STAGE_COLS + Math.floor(STAGE_COLS / 2)] = TILE.BOMB;
+  e.grid[3 * STAGE_COLS + Math.floor(STAGE_COLS / 2)] = TILE.REVERSE;
+  for (let col = 0; col < STAGE_COLS; col++) {
+    if (col % 3 === 0) e.grid[4 * STAGE_COLS + col] = TILE.SPLIT;
+    else e.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
+  }
+
+  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d), normalizeStage(e)];
 }
 
 export function ensureStages() {
