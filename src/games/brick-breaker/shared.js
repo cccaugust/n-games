@@ -9,6 +9,38 @@ export function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
+// =========================================================
+// Canvas fit helpers (固定アスペクト + DPR対応)
+// =========================================================
+
+export function fitStageToWrap({ wrapEl, stageEl, designW, designH } = {}) {
+  if (!wrapEl || !stageEl) return { w: 0, h: 0, scale: 1 };
+  const rect = wrapEl.getBoundingClientRect();
+  const availW = Math.max(1, Math.floor(rect.width));
+  const availH = Math.max(1, Math.floor(rect.height));
+
+  const baseW = Math.max(1, Number(designW) || 1);
+  const baseH = Math.max(1, Number(designH) || 1);
+  const scale = Math.max(0.01, Math.min(availW / baseW, availH / baseH));
+
+  const w = Math.max(1, Math.floor(baseW * scale));
+  const h = Math.max(1, Math.floor(baseH * scale));
+  stageEl.style.width = `${w}px`;
+  stageEl.style.height = `${h}px`;
+  return { w, h, scale };
+}
+
+export function applyCanvasDpr(canvasEl, context2d) {
+  const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+  const rect = canvasEl.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  canvasEl.width = Math.round(w * dpr);
+  canvasEl.height = Math.round(h * dpr);
+  context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { w, h, dpr };
+}
+
 export function escapeHtml(str) {
   return String(str)
     .replaceAll('&', '&amp;')
@@ -42,8 +74,40 @@ export const TILE = {
   TOUGH: 2,
   SPLIT: 3,
   SOFT: 4, // 壊れるが反射しない
-  WALL: 5 // 壊れない
+  WALL: 5, // 壊れない
+  BOMB: 6, // 💣 周りもまとめて壊す
+  PORTAL: 7, // 🌀 ふれるとワープ（基本は壊れない）
+  REVERSE: 8, // 🙃 しばらく操作がさかさになる
+  BIG: 9, // 🔵 でかボール（5秒）
+  ONE_WAY: 10 // ⬇️ 下からは倒せる/上からは通れない
 };
+
+// =========================================================
+// Tile encoding (type + param)
+// - 互換性: 旧ステージは「typeのみ(0..255)」なのでそのまま読める
+// - 新形式: (param << 8) | type
+// =========================================================
+
+export function encodeTile(type, param = 0) {
+  const t = (Number(type) || 0) & 0xff;
+  const p = (Number(param) || 0) & 0xff;
+  return (p << 8) | t;
+}
+
+export function decodeTile(v) {
+  const n = (Number(v) || 0) | 0;
+  const type = n & 0xff;
+  const param = (n >> 8) & 0xff;
+  return { type, param, raw: n };
+}
+
+export function tileType(v) {
+  return decodeTile(v).type;
+}
+
+export function tileParam(v) {
+  return decodeTile(v).param;
+}
 
 export function makeEmptyStage(name = '新しいステージ') {
   return {
@@ -60,16 +124,37 @@ export function normalizeStage(stage) {
   const rows = STAGE_ROWS;
   const raw = Array.isArray(stage?.grid) ? stage.grid : [];
   const grid = new Array(cols * rows);
+  const validTypes = new Set([
+    TILE.EMPTY,
+    TILE.NORMAL,
+    TILE.TOUGH,
+    TILE.SPLIT,
+    TILE.SOFT,
+    TILE.WALL,
+    TILE.BOMB,
+    TILE.PORTAL,
+    TILE.REVERSE,
+    TILE.BIG,
+    TILE.ONE_WAY
+  ]);
   for (let i = 0; i < grid.length; i++) {
     const v = raw[i];
-    grid[i] =
-      v === TILE.NORMAL ||
-      v === TILE.TOUGH ||
-      v === TILE.SPLIT ||
-      v === TILE.SOFT ||
-      v === TILE.WALL
-        ? v
-        : TILE.EMPTY;
+    const { type, param } = decodeTile(v);
+    if (!validTypes.has(type)) {
+      grid[i] = TILE.EMPTY;
+      continue;
+    }
+
+    // paramの意味を持つタイルだけ範囲を丸める（それ以外は0）
+    if (type === TILE.TOUGH) {
+      const hp = clamp(param || 0, 0, 50);
+      grid[i] = encodeTile(type, hp);
+    } else if (type === TILE.SPLIT) {
+      const total = clamp(param || 0, 0, 50);
+      grid[i] = encodeTile(type, total);
+    } else {
+      grid[i] = encodeTile(type, 0);
+    }
   }
   const name = typeof stage?.name === 'string' && stage.name.trim() ? stage.name.trim() : 'ななしのステージ';
   return { version: 1, name, cols, rows, grid };
@@ -141,7 +226,19 @@ export function getDefaultStages() {
   for (let col = 0; col < STAGE_COLS; col++) d.grid[2 * STAGE_COLS + col] = TILE.SOFT;
   for (let col = 0; col < STAGE_COLS; col++) d.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
 
-  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d)];
+  const e = makeEmptyStage('なにこれ？');
+  // ポータル2つ + ばくはつ + さかさ を混ぜる（子ども向けおもしろ枠）
+  for (let col = 1; col < STAGE_COLS - 1; col++) e.grid[0 * STAGE_COLS + col] = TILE.NORMAL;
+  e.grid[1 * STAGE_COLS + 2] = TILE.PORTAL;
+  e.grid[1 * STAGE_COLS + (STAGE_COLS - 3)] = TILE.PORTAL;
+  e.grid[2 * STAGE_COLS + Math.floor(STAGE_COLS / 2)] = TILE.BOMB;
+  e.grid[3 * STAGE_COLS + Math.floor(STAGE_COLS / 2)] = TILE.REVERSE;
+  for (let col = 0; col < STAGE_COLS; col++) {
+    if (col % 3 === 0) e.grid[4 * STAGE_COLS + col] = TILE.SPLIT;
+    else e.grid[4 * STAGE_COLS + col] = TILE.NORMAL;
+  }
+
+  return [normalizeStage(a), normalizeStage(b), normalizeStage(c), normalizeStage(d), normalizeStage(e)];
 }
 
 export function ensureStages() {
@@ -243,7 +340,7 @@ export function uniqueName(baseName, existingNames) {
 export function countBlocks(stage) {
   const s = normalizeStage(stage);
   let n = 0;
-  for (const t of s.grid) if (t !== TILE.EMPTY) n++;
+  for (const v of s.grid) if (tileType(v) !== TILE.EMPTY) n++;
   return n;
 }
 

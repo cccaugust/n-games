@@ -1,4 +1,4 @@
-import { countBlocks, ensureStages, escapeHtml, refreshStageCacheFromSupabase, TILE, normalizeStage } from './shared.js';
+import { countBlocks, ensureStages, escapeHtml, refreshStageCacheFromSupabase, TILE, normalizeStage, tileType } from './shared.js';
 import { initOverlay } from './overlay.js';
 
 function qs(id) {
@@ -33,6 +33,11 @@ function tileColor(t) {
   if (t === TILE.SPLIT) return '#00cec9';
   if (t === TILE.SOFT) return '#ffeaa7';
   if (t === TILE.WALL) return '#636e72';
+  if (t === TILE.BOMB) return '#ff7675';
+  if (t === TILE.PORTAL) return '#74f8ff';
+  if (t === TILE.REVERSE) return '#55efc4';
+  if (t === TILE.BIG) return '#81ecec';
+  if (t === TILE.ONE_WAY) return '#fab1a0';
   return '#000000';
 }
 
@@ -67,7 +72,7 @@ function drawStagePreview(canvasEl, stage) {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const idx = y * cols + x;
-      const t = s.grid[idx];
+      const t = tileType(s.grid[idx]);
       if (t === TILE.EMPTY) continue;
       const px = pad + x * cellW;
       const py = pad + y * cellH;

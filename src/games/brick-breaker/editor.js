@@ -1,10 +1,13 @@
 import { initOverlay } from './overlay.js';
 import {
+  encodeTile,
+  applyCanvasDpr,
   clamp,
   countBlocks,
   downloadJson,
   ensureStages,
   escapeHtml,
+  fitStageToWrap,
   makeEmptyStage,
   normalizeStage,
   refreshStageCacheFromSupabase,
@@ -36,8 +39,14 @@ function getStageFromUrl() {
 // --------------------
 const editorCanvas = qs('editorCanvas');
 const ectx = editorCanvas.getContext('2d');
+const eWrap = editorCanvas?.closest('.bb-canvas-wrap');
+const eStageBox = qs('editorStage');
 const toolButtons = Array.from(document.querySelectorAll('.bb-tool-btn[data-tool]'));
 const stageNameEl = qs('stageName');
+const toughHpEl = qs('toughHp');
+const splitTotalEl = qs('splitTotal');
+const toughHpWrap = qs('toughHpWrap');
+const splitTotalWrap = qs('splitTotalWrap');
 const saveBtn = qs('saveBtn');
 const loadBtn = qs('loadBtn');
 const clearBtn = qs('clearBtn');
@@ -60,19 +69,12 @@ const { showOverlay } = initOverlay();
 let eViewW = 800;
 let eViewH = 420;
 
-function applyDpr(canvasEl, context2d) {
-  const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
-  const rect = canvasEl.getBoundingClientRect();
-  const w = Math.max(1, Math.round(rect.width));
-  const h = Math.max(1, Math.round(rect.height));
-  canvasEl.width = Math.round(w * dpr);
-  canvasEl.height = Math.round(h * dpr);
-  context2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-  return { w, h };
-}
-
 function resizeEditorCanvas() {
-  const { w, h } = applyDpr(editorCanvas, ectx);
+  // ステージ(14×10)と同じ比率で、画面に収まる最大サイズにする
+  if (eWrap && eStageBox) {
+    fitStageToWrap({ wrapEl: eWrap, stageEl: eStageBox, designW: STAGE_COLS, designH: STAGE_ROWS });
+  }
+  const { w, h } = applyCanvasDpr(editorCanvas, ectx);
   eViewW = w;
   eViewH = h;
 }
@@ -101,6 +103,9 @@ function setTool(tool) {
   toolButtons.forEach(btn => {
     btn.dataset.active = btn.dataset.tool === tool ? 'true' : 'false';
   });
+  // UIをすっきり：必要なパラメータだけ見せる
+  if (toughHpWrap) toughHpWrap.style.display = tool === 'tough' ? 'inline-flex' : 'none';
+  if (splitTotalWrap) splitTotalWrap.style.display = tool === 'split' ? 'inline-flex' : 'none';
 }
 setTool('normal');
 
@@ -123,12 +128,28 @@ function toolToTile(tool) {
   if (tool === 'split') return TILE.SPLIT;
   if (tool === 'soft') return TILE.SOFT;
   if (tool === 'wall') return TILE.WALL;
+  if (tool === 'bomb') return TILE.BOMB;
+  if (tool === 'portal') return TILE.PORTAL;
+  if (tool === 'reverse') return TILE.REVERSE;
+  if (tool === 'big') return TILE.BIG;
+  if (tool === 'oneway') return TILE.ONE_WAY;
   return TILE.NORMAL;
 }
 
 function applyToolAt(x, y) {
   const idx = gridIndex(x, y);
-  currentStage.grid[idx] = toolToTile(currentTool);
+  const t = toolToTile(currentTool);
+  if (t === TILE.TOUGH) {
+    const hp = clamp(Number(toughHpEl?.value || 3), 1, 50);
+    currentStage.grid[idx] = encodeTile(t, hp);
+    return;
+  }
+  if (t === TILE.SPLIT) {
+    const total = clamp(Number(splitTotalEl?.value || 5), 2, 50);
+    currentStage.grid[idx] = encodeTile(t, total);
+    return;
+  }
+  currentStage.grid[idx] = encodeTile(t, 0);
 }
 
 function tileColor(t) {
@@ -137,6 +158,11 @@ function tileColor(t) {
   if (t === TILE.SPLIT) return '#00cec9';
   if (t === TILE.SOFT) return '#ffeaa7';
   if (t === TILE.WALL) return '#636e72';
+  if (t === TILE.BOMB) return '#ff7675';
+  if (t === TILE.PORTAL) return '#74f8ff';
+  if (t === TILE.REVERSE) return '#55efc4';
+  if (t === TILE.BIG) return '#81ecec';
+  if (t === TILE.ONE_WAY) return '#fab1a0';
   return '#ffffff';
 }
 
@@ -155,7 +181,9 @@ function drawEditor() {
   // タイル
   for (let y = 0; y < STAGE_ROWS; y++) {
     for (let x = 0; x < STAGE_COLS; x++) {
-      const t = currentStage.grid[gridIndex(x, y)];
+      const raw = currentStage.grid[gridIndex(x, y)];
+      const t = (Number(raw) || 0) & 0xff;
+      const p = ((Number(raw) || 0) >> 8) & 0xff;
       if (t === TILE.EMPTY) continue;
       ectx.fillStyle = tileColor(t);
       const px = x * cellW;
@@ -167,10 +195,15 @@ function drawEditor() {
       ectx.font = `${Math.max(12, Math.floor(Math.min(cellW, cellH) * 0.42))}px Outfit, sans-serif`;
       ectx.textAlign = 'center';
       ectx.textBaseline = 'middle';
-      if (t === TILE.TOUGH) ectx.fillText('2', px + cellW / 2, py + cellH / 2);
-      if (t === TILE.SPLIT) ectx.fillText('✶', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.TOUGH) ectx.fillText(String(p || 3), px + cellW / 2, py + cellH / 2);
+      if (t === TILE.SPLIT) ectx.fillText(`✶${p || 5}`, px + cellW / 2, py + cellH / 2);
       if (t === TILE.SOFT) ectx.fillText('≈', px + cellW / 2, py + cellH / 2);
       if (t === TILE.WALL) ectx.fillText('■', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.BOMB) ectx.fillText('💣', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.PORTAL) ectx.fillText('🌀', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.REVERSE) ectx.fillText('🙃', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.BIG) ectx.fillText('🔵', px + cellW / 2, py + cellH / 2);
+      if (t === TILE.ONE_WAY) ectx.fillText('⬇', px + cellW / 2, py + cellH / 2);
     }
   }
 

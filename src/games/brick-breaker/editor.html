@@ -30,8 +30,23 @@
           <button class="bb-tool-btn" data-tool="tough">🪨 かたい</button>
           <button class="bb-tool-btn" data-tool="split">✨ ぶんれつ</button>
           <button class="bb-tool-btn" data-tool="wall">🧱 かべ</button>
+          <button class="bb-tool-btn" data-tool="bomb">💣 ばくはつ</button>
+          <button class="bb-tool-btn" data-tool="portal">🌀 ワープ</button>
+          <button class="bb-tool-btn" data-tool="reverse">🙃 さかさ</button>
+          <button class="bb-tool-btn" data-tool="big">🔵 でかボール</button>
+          <button class="bb-tool-btn" data-tool="oneway">⬇️ 片方向壁</button>
         </div>
         <div class="right">
+          <label class="bb-chip" id="toughHpWrap" style="display:none; gap: 8px; align-items:center;">
+            かたいHP:
+            <input id="toughHp" type="number" min="1" max="50" value="3"
+              style="border:none; background:transparent; outline:none; width: 70px;" />
+          </label>
+          <label class="bb-chip" id="splitTotalWrap" style="display:none; gap: 8px; align-items:center;">
+            分裂数:
+            <input id="splitTotal" type="number" min="2" max="50" value="5"
+              style="border:none; background:transparent; outline:none; width: 70px;" />
+          </label>
           <label class="bb-chip" style="display:inline-flex; gap: 8px; align-items:center;">
             名前:
             <input id="stageName" maxlength="24" placeholder="たとえば：うちのステージ"
@@ -45,7 +60,9 @@
     </div>
 
     <div class="bb-canvas-wrap">
-      <canvas id="editorCanvas" class="bb-canvas bb-grid-canvas" width="800" height="420"></canvas>
+      <div class="bb-stage" id="editorStage">
+        <canvas id="editorCanvas" class="bb-canvas bb-grid-canvas" width="800" height="420"></canvas>
+      </div>
     </div>
 
     <div class="bb-hint">
