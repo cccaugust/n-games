@@ -21,12 +21,14 @@ const hotbarEl = document.getElementById('hotbar');
 const touchControls = document.getElementById('touchControls');
 const playerPill = document.getElementById('playerPill');
 const hpPill = document.getElementById('hpPill');
+const soundBtn = document.getElementById('soundBtn');
 
 const TILE_SIZE = 16;
 const WORLD_W = 256;
 const WORLD_H = 128;
 
 const SAVE_KEY = 'ngames.pixel_miner.save.v1';
+const SOUND_KEY = 'ngames.pixel_miner.sound.v1';
 
 const TILE = {
   AIR: 0,
@@ -298,6 +300,193 @@ function updateHpPill() {
   hpPill.textContent = `${'♥'.repeat(full)}${'♡'.repeat(empty)} ${hp}/${max}`;
 }
 
+// ---- SFX (WebAudio / no asset files) ----
+/** @type {{ctx: AudioContext|null, master: GainNode|null, enabled: boolean, unlocked: boolean}} */
+const sfx = {
+  ctx: null,
+  master: null,
+  enabled: true,
+  unlocked: false
+};
+
+function readSoundPref() {
+  try {
+    const raw = localStorage.getItem(SOUND_KEY);
+    if (raw == null) return true;
+    return raw === '1';
+  } catch {
+    return true;
+  }
+}
+
+function writeSoundPref(v) {
+  try {
+    localStorage.setItem(SOUND_KEY, v ? '1' : '0');
+  } catch {
+    // ignore
+  }
+}
+
+function updateSoundBtn() {
+  if (!soundBtn) return;
+  soundBtn.textContent = sfx.enabled ? '🔊' : '🔇';
+  soundBtn.setAttribute('aria-pressed', sfx.enabled ? 'true' : 'false');
+  soundBtn.title = sfx.enabled ? 'サウンド: ON' : 'サウンド: OFF';
+}
+
+function ensureAudio() {
+  if (sfx.ctx && sfx.master) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  const ctx = new Ctx();
+  const master = ctx.createGain();
+  master.gain.value = 0.22;
+  master.connect(ctx.destination);
+  sfx.ctx = ctx;
+  sfx.master = master;
+}
+
+async function unlockAudio() {
+  if (!sfx.enabled) return;
+  ensureAudio();
+  const ctx = sfx.ctx;
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'suspended') await ctx.resume();
+    // tiny silent tick to "warm up"
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    g.gain.value = 0.0001;
+    o.frequency.value = 440;
+    o.connect(g);
+    g.connect(sfx.master);
+    o.start();
+    o.stop(ctx.currentTime + 0.01);
+    sfx.unlocked = true;
+  } catch {
+    // ignore
+  }
+}
+
+function playTone({ type = 'square', freq = 440, dur = 0.06, vol = 0.18, sweepTo = null }) {
+  if (!sfx.enabled) return;
+  ensureAudio();
+  const ctx = sfx.ctx;
+  const master = sfx.master;
+  if (!ctx || !master) return;
+  const t0 = ctx.currentTime;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t0);
+  if (sweepTo != null) o.frequency.exponentialRampToValueAtTime(Math.max(40, sweepTo), t0 + Math.max(0.01, dur));
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g);
+  g.connect(master);
+  o.start(t0);
+  o.stop(t0 + dur + 0.02);
+}
+
+function playNoise({ dur = 0.06, vol = 0.16, hp = 700, lp = 8000 }) {
+  if (!sfx.enabled) return;
+  ensureAudio();
+  const ctx = sfx.ctx;
+  const master = sfx.master;
+  if (!ctx || !master) return;
+  const t0 = ctx.currentTime;
+  const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const hpf = ctx.createBiquadFilter();
+  hpf.type = 'highpass';
+  hpf.frequency.value = hp;
+  const lpf = ctx.createBiquadFilter();
+  lpf.type = 'lowpass';
+  lpf.frequency.value = lp;
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0001, vol), t0 + 0.006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(hpf);
+  hpf.connect(lpf);
+  lpf.connect(g);
+  g.connect(master);
+  src.start(t0);
+  src.stop(t0 + dur + 0.02);
+}
+
+function sfxMineTick(tileId) {
+  const hard = tileId === TILE.STONE || tileId === TILE.BRICK || tileId === TILE.ICE;
+  playNoise({ dur: 0.03, vol: hard ? 0.12 : 0.08, hp: hard ? 1100 : 800, lp: 9000 });
+  playTone({ type: 'square', freq: hard ? 240 : 300, sweepTo: hard ? 180 : 240, dur: 0.035, vol: hard ? 0.08 : 0.06 });
+}
+
+function sfxBreak(tileId) {
+  const hard = tileId === TILE.STONE || tileId === TILE.BRICK || tileId === TILE.ICE;
+  playNoise({ dur: hard ? 0.09 : 0.075, vol: hard ? 0.18 : 0.14, hp: hard ? 650 : 520, lp: 10000 });
+  playTone({ type: hard ? 'square' : 'triangle', freq: hard ? 180 : 220, sweepTo: hard ? 120 : 160, dur: 0.09, vol: 0.1 });
+}
+
+function sfxPlace(tileId) {
+  const hard = tileId === TILE.STONE || tileId === TILE.BRICK || tileId === TILE.ICE;
+  playTone({ type: hard ? 'square' : 'triangle', freq: hard ? 420 : 360, sweepTo: hard ? 260 : 240, dur: 0.05, vol: 0.09 });
+  playNoise({ dur: 0.025, vol: 0.05, hp: 1200, lp: 9000 });
+}
+
+function sfxJump(inWater) {
+  playTone({ type: 'triangle', freq: inWater ? 260 : 360, sweepTo: inWater ? 310 : 520, dur: inWater ? 0.07 : 0.06, vol: 0.1 });
+}
+
+function sfxHurt() {
+  playNoise({ dur: 0.1, vol: 0.18, hp: 500, lp: 6500 });
+  playTone({ type: 'sawtooth', freq: 220, sweepTo: 90, dur: 0.12, vol: 0.12 });
+}
+
+// ---- FX particles / camera shake ----
+/** @type {Record<number, {dust: string[]}>} */
+const TILE_FX = {
+  [TILE.GRASS_BLOCK]: { dust: ['#6aa84f', '#8fce00', '#8b5a2b'] },
+  [TILE.DIRT]: { dust: ['#8b5a2b', '#a97142', '#6f4a2a'] },
+  [TILE.STONE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
+  [TILE.SAND]: { dust: ['#f6e27f', '#e6cc6a', '#cbb45b'] },
+  [TILE.WOOD]: { dust: ['#c68642', '#a96b36', '#7a4b2a'] },
+  [TILE.BRICK]: { dust: ['#b94a48', '#8a2b2a', '#d0706d'] },
+  [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] }
+};
+
+function randPick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function spawnDustAtWorld(wx, wy, tileId, strength = 1) {
+  const colors = TILE_FX[tileId]?.dust || ['#ffffff'];
+  const n = Math.max(2, Math.floor(10 * strength));
+  for (let i = 0; i < n; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = (40 + Math.random() * 120) * strength;
+    state.particles.push({
+      x: wx + (Math.random() * 6 - 3),
+      y: wy + (Math.random() * 6 - 3),
+      vx: Math.cos(ang) * sp * 0.6,
+      vy: Math.sin(ang) * sp * 0.6 - (70 + Math.random() * 90) * strength,
+      lifeMs: 0,
+      maxLifeMs: 340 + Math.random() * 260,
+      size: 1 + Math.random() * 2,
+      color: randPick(colors)
+    });
+  }
+}
+
+function addShake(power, ms) {
+  state.shakePower = Math.max(state.shakePower, power);
+  state.shakeMs = Math.max(state.shakeMs, ms);
+}
+
 /** @type {{samplesById: Map<string, any>, tileImg: Map<number, HTMLCanvasElement>, playerSprite: HTMLCanvasElement}} */
 const assets = {
   samplesById: new Map(),
@@ -548,6 +737,11 @@ function resetSave() {
  *  maxHp: number,
  *  invulnMs: number,
  *  damageFlashMs: number,
+ *  soundEnabled: boolean,
+ *  miningSfxMs: number,
+ *  particles: Array<{x:number,y:number,vx:number,vy:number,lifeMs:number,maxLifeMs:number,size:number,color:string}>,
+ *  shakeMs: number,
+ *  shakePower: number,
  *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number}>,
  *  lastSaveAt: number
  * }} */
@@ -569,6 +763,11 @@ const state = {
   maxHp: 5,
   invulnMs: 0,
   damageFlashMs: 0,
+  soundEnabled: true,
+  miningSfxMs: 0,
+  particles: [],
+  shakeMs: 0,
+  shakePower: 0,
   monsters: [],
   lastSaveAt: 0
 };
@@ -641,6 +840,10 @@ function initNewWorld() {
   state.spawn.x = state.player.x;
   state.spawn.y = state.player.y;
   state.mining.active = false;
+  state.miningSfxMs = 0;
+  state.particles = [];
+  state.shakeMs = 0;
+  state.shakePower = 0;
   state.maxHp = 5;
   state.hp = state.maxHp;
   state.invulnMs = 0;
@@ -669,6 +872,10 @@ function loadOrCreate() {
     state.hp = saved.hp > 0 ? saved.hp : state.maxHp;
     state.invulnMs = 0;
     state.damageFlashMs = 0;
+    state.miningSfxMs = 0;
+    state.particles = [];
+    state.shakeMs = 0;
+    state.shakePower = 0;
     spawnMonsters(state.world, state.seed);
     updateHpPill();
     return;
@@ -756,6 +963,8 @@ function tryPlace(tx, ty) {
   setTile(state.world, tx, ty, t);
   state.inventory[t] = count - 1;
   renderHotbar();
+  sfxPlace(t);
+  spawnDustAtWorld(tx * TILE_SIZE + TILE_SIZE * 0.5, ty * TILE_SIZE + TILE_SIZE * 0.5, t, 0.35);
   return true;
 }
 
@@ -772,6 +981,8 @@ function startMining(tx, ty) {
   state.mining.t = t;
   state.mining.progressMs = 0;
   state.mining.needMs = def.breakMs;
+  state.miningSfxMs = 0;
+  sfxMineTick(t);
   return true;
 }
 
@@ -782,12 +993,16 @@ function stopMining() {
   state.mining.t = TILE.AIR;
   state.mining.progressMs = 0;
   state.mining.needMs = 0;
+  state.miningSfxMs = 0;
 }
 
 function breakTile(tx, ty, t) {
   setTile(state.world, tx, ty, TILE.AIR);
   state.inventory[t] = (state.inventory[t] || 0) + 1;
   renderHotbar();
+  sfxBreak(t);
+  spawnDustAtWorld(tx * TILE_SIZE + TILE_SIZE * 0.5, ty * TILE_SIZE + TILE_SIZE * 0.5, t, 1);
+  addShake(0.8, 90);
 }
 
 function aabbIntersectsSolid(world, x, y, w, h) {
@@ -888,6 +1103,8 @@ function applyPlayerDamage(amount, fromX) {
   state.hp = Math.max(0, (state.hp || 0) - dmg);
   state.invulnMs = 850;
   state.damageFlashMs = 160;
+  sfxHurt();
+  addShake(1.2, 140);
 
   // knockback
   const p = state.player;
@@ -907,6 +1124,7 @@ function applyPlayerDamage(amount, fromX) {
     spawnMonsters(state.world, state.seed);
     state.invulnMs = 1000;
     state.damageFlashMs = 260;
+    addShake(1.6, 180);
   }
   updateHpPill();
 }
@@ -987,6 +1205,33 @@ function tickMonsters(dtMs) {
   }
 }
 
+function tickParticles(dtMs) {
+  const dt = Math.min(0.033, dtMs / 1000);
+  const gravity = 740;
+  const world = state.world;
+  /** @type {typeof state.particles} */
+  const next = [];
+  for (let i = 0; i < state.particles.length; i++) {
+    const p = state.particles[i];
+    p.lifeMs += dtMs;
+    if (p.lifeMs >= p.maxLifeMs) continue;
+    p.vy += gravity * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= Math.pow(0.002, dtMs); // friction-ish
+
+    // very cheap ground collision (bounce)
+    const below = tileIdAtWorldPx(world, p.x, p.y + 2);
+    if (isSolidTileId(below)) {
+      p.vy *= -0.25;
+      p.vx *= 0.55;
+      p.y -= 1;
+    }
+    next.push(p);
+  }
+  state.particles = next;
+}
+
 function tick(dtMs) {
   const dt = Math.min(0.033, dtMs / 1000);
   const p = state.player;
@@ -1047,6 +1292,12 @@ function tick(dtMs) {
       stopMining();
     } else {
       state.mining.progressMs += dtMs;
+      state.miningSfxMs += dtMs;
+      if (state.miningSfxMs >= 140) {
+        state.miningSfxMs = 0;
+        sfxMineTick(state.mining.t);
+        spawnDustAtWorld(tx * TILE_SIZE + TILE_SIZE * 0.5, ty * TILE_SIZE + TILE_SIZE * 0.5, state.mining.t, 0.25);
+      }
       if (state.mining.progressMs >= state.mining.needMs) {
         breakTile(state.mining.tx, state.mining.ty, state.mining.t);
         stopMining();
@@ -1057,9 +1308,14 @@ function tick(dtMs) {
   // monsters
   tickMonsters(dtMs);
 
+  // particles
+  tickParticles(dtMs);
+
   // invuln / flash timers
   state.invulnMs = Math.max(0, (state.invulnMs || 0) - dtMs);
   state.damageFlashMs = Math.max(0, (state.damageFlashMs || 0) - dtMs);
+  state.shakeMs = Math.max(0, (state.shakeMs || 0) - dtMs);
+  if (state.shakeMs <= 0) state.shakePower = 0;
 
   // autosave (not every frame)
   const now = performance.now();
@@ -1097,6 +1353,15 @@ function draw() {
   ctx.scale(scale, scale);
   ctx.translate(-wx0, -wy0);
 
+  // camera shake (world space)
+  if (state.shakeMs > 0 && state.shakePower > 0) {
+    const p = state.shakePower;
+    const k = clamp(state.shakeMs / 200, 0, 1);
+    const sx = (Math.random() * 2 - 1) * 2.2 * p * k;
+    const sy = (Math.random() * 2 - 1) * 2.2 * p * k;
+    ctx.translate(sx, sy);
+  }
+
   // background sky gradient in world space
   const bg = ctx.createLinearGradient(wx0, wy0, wx0, wy0 + worldViewH);
   bg.addColorStop(0, '#97c8ff');
@@ -1114,6 +1379,18 @@ function draw() {
       if (!img) continue;
       ctx.drawImage(img, tx * TILE_SIZE, ty * TILE_SIZE);
     }
+  }
+
+  // particles (between tiles and sprites)
+  if (state.particles.length) {
+    for (let i = 0; i < state.particles.length; i++) {
+      const p = state.particles[i];
+      const a = 1 - clamp(p.lifeMs / Math.max(1, p.maxLifeMs), 0, 1);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.15 + a * 0.75;
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
   }
 
   // monsters (behind player)
@@ -1234,6 +1511,7 @@ function applyTouchUiVisibility() {
 
 function bindKeyboard() {
   document.addEventListener('keydown', (e) => {
+    if (!sfx.unlocked) unlockAudio();
     if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') state.input.left = true;
     if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') state.input.right = true;
     if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w' || e.key === ' ') {
@@ -1295,6 +1573,7 @@ function applyPendingJump() {
   const can = inWater || isSolidTileId(below);
   if (!can) return;
   p.vy = inWater ? -165 : -285;
+  sfxJump(inWater);
 }
 
 function setMode(mode) {
@@ -1320,6 +1599,7 @@ function bindCanvasPointer() {
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   canvas.addEventListener('pointerdown', (e) => {
+    if (!sfx.unlocked) unlockAudio();
     state.pointer.down = true;
     canvas.setPointerCapture(e.pointerId);
     updatePointerTileFromEvent(e);
@@ -1378,6 +1658,7 @@ function bindTouchControls() {
   }
 
   touchControls.addEventListener('pointerdown', (e) => {
+    if (!sfx.unlocked) unlockAudio();
     const target = /** @type {HTMLElement} */ (e.target);
     const btn = target.closest('button');
     if (!btn) return;
@@ -1426,6 +1707,10 @@ function bindTouchControls() {
 
 function boot() {
   updatePlayerPill();
+  sfx.enabled = readSoundPref();
+  state.soundEnabled = sfx.enabled;
+  updateSoundBtn();
+
   loadAssetsFromSamples();
   loadMonsterSprites();
 
@@ -1448,7 +1733,16 @@ function boot() {
   bindCanvasPointer();
   bindTouchControls();
 
+  soundBtn?.addEventListener('click', async () => {
+    state.soundEnabled = !state.soundEnabled;
+    sfx.enabled = state.soundEnabled;
+    writeSoundPref(state.soundEnabled);
+    updateSoundBtn();
+    if (state.soundEnabled) await unlockAudio();
+  });
+
   startBtn?.addEventListener('click', () => {
+    unlockAudio();
     startGame();
   });
 
