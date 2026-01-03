@@ -7,6 +7,46 @@ export default class BootScene extends Phaser.Scene {
     }
 
     preload() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        const title = this.add.text(w / 2, h / 2 - 40, 'ポケモンのおせわ', {
+            fontSize: '28px',
+            color: '#ffffff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+
+        const loadingText = this.add.text(w / 2, h / 2 - 6, 'よみこみ中…', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+
+        const box = this.add.graphics();
+        box.fillStyle(0x000000, 0.25);
+        box.fillRoundedRect(w * 0.12, h / 2 + 20, w * 0.76, 18, 9);
+        box.lineStyle(1, 0xffffff, 0.2);
+        box.strokeRoundedRect(w * 0.12, h / 2 + 20, w * 0.76, 18, 9);
+
+        const bar = this.add.graphics();
+        const drawProgress = (value) => {
+            bar.clear();
+            bar.fillStyle(0xffffff, 0.9);
+            bar.fillRoundedRect(w * 0.12, h / 2 + 20, (w * 0.76) * value, 18, 9);
+        };
+
+        this.load.on('progress', drawProgress);
+        this.load.on('complete', () => {
+            bar.destroy();
+            box.destroy();
+            loadingText.destroy();
+            title.destroy();
+        });
+        this.load.on('loaderror', (file) => {
+            // eslint-disable-next-line no-console
+            console.warn('[poke-care] asset load error:', file?.key, file?.src);
+            loadingText.setText('よみこみ失敗…（もう一度ためしてね）');
+        });
+
         // Load Pokemon Images
         pokemonData.forEach(p => {
             this.load.image(p.id, p.image);
@@ -27,10 +67,15 @@ export default class BootScene extends Phaser.Scene {
 
         // Check if we have a saved Pokemon
         const savedPokemonId = localStorage.getItem('poke-care-id');
+        const isValidId = !!pokemonData.find((p) => p.id === savedPokemonId);
 
-        if (savedPokemonId) {
+        if (savedPokemonId && isValidId) {
             this.scene.start('MainScene', { pokemonId: savedPokemonId });
         } else {
+            if (savedPokemonId && !isValidId) {
+                localStorage.removeItem('poke-care-id');
+                localStorage.removeItem('poke-care-stats');
+            }
             this.scene.start('SelectionScene');
         }
     }

@@ -1,38 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Poke-Care: Pokemon Raising Sim</title>
+    <title>ポケモンのおせわ | N-Games</title>
+    <link rel="stylesheet" href="../../style.css">
     <style>
         body {
             margin: 0;
             padding: 0;
             background-color: #2c3e50;
             color: #ecf0f1;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Outfit', system-ui, -apple-system, Segoe UI, sans-serif;
             overflow: hidden;
             /* Prevent scrolling */
             touch-action: none;
             /* Prevent standard touch actions */
+            height: 100vh;
+            height: 100svh;
         }
 
         #game-container {
             width: 100vw;
             height: 100vh;
+            height: 100svh;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: fixed;
+            inset: 0;
         }
 
         canvas {
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: block;
+        }
+
+        .poke-care-overlay {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            z-index: 10;
+            padding: calc(env(safe-area-inset-top) + 10px) 12px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .poke-care-overlay a {
+            pointer-events: auto;
+        }
+
+        .poke-care-hint {
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.28);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(6px);
+        }
+
+        .poke-care-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-weight: 700;
         }
     </style>
 </head>
 
 <body>
+    <div class="poke-care-overlay">
+        <a class="poke-care-back" href="../../pages/portal/portal.html" aria-label="ゲーム一覧へもどる">← もどる</a>
+        <div class="poke-care-hint">タップで なでる / ボタンで おせわ</div>
+    </div>
     <div id="game-container"></div>
     <script type="module" src="./game.js"></script>
 </body>
