@@ -79,7 +79,11 @@ export const TILE = {
   PORTAL: 7, // 🌀 ふれるとワープ（基本は壊れない）
   REVERSE: 8, // 🙃 しばらく操作がさかさになる
   BIG: 9, // 🔵 でかボール（5秒）
-  ONE_WAY: 10 // ⬇️ 下からは倒せる/上からは通れない
+  ONE_WAY: 10, // ⬇️ 下からは倒せる/上からは通れない
+  SLOW: 11, // 🐌 のろのろ（5秒：スロー + ボール青）
+  FAST: 12, // ⚡ はやはや（5秒：ハイスピード + ボール赤）
+  STICKY: 13, // 🩹 ベタベタ（5秒：ボールがブロックにくっつく→ぼとっと落ちる）
+  INVINCIBLE: 14 // 🌈 無敵モード（5秒：バーが虹色、タップで追加ボール）
 };
 
 // =========================================================
@@ -135,7 +139,11 @@ export function normalizeStage(stage) {
     TILE.PORTAL,
     TILE.REVERSE,
     TILE.BIG,
-    TILE.ONE_WAY
+    TILE.ONE_WAY,
+    TILE.SLOW,
+    TILE.FAST,
+    TILE.STICKY,
+    TILE.INVINCIBLE
   ]);
   for (let i = 0; i < grid.length; i++) {
     const v = raw[i];

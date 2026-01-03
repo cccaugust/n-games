@@ -398,6 +398,45 @@ const paddle = {
 
 // 🙃 さかさ操作（残り秒）
 let reverseTimeLeft = 0;
+// 🐌/⚡ のろのろ・はやはや（残り秒）
+let speedMode = null; // 'slow' | 'fast' | null
+let speedTimeLeft = 0;
+let speedFactor = 1;
+// 🌈 無敵（残り秒）
+let invincibleTimeLeft = 0;
+let invincibleSpawnCd = 0;
+
+function currentBallSpeed() {
+  return ballSpeed() * speedFactor;
+}
+
+function applySpeedFactor(nextFactor) {
+  const f = clamp(Number(nextFactor) || 1, 0.15, 3.0);
+  if (Math.abs(f - speedFactor) < 1e-6) return;
+  const k = f / speedFactor;
+  for (const b of balls) {
+    // くっつき中は速度を持たないので無視
+    if ((b.stuckTimeLeft || 0) > 0) continue;
+    b.vx *= k;
+    b.vy *= k;
+  }
+  speedFactor = f;
+}
+
+function speedBallTint() {
+  if (speedMode === 'slow') return '#74f8ff'; // 青っぽく
+  if (speedMode === 'fast') return '#ff5252'; // 赤く
+  return null;
+}
+
+function syncBallColor(ballObj) {
+  if ((ballObj.stuckTimeLeft || 0) > 0) {
+    ballObj.color = '#b388ff'; // ベタベタ中
+    return;
+  }
+  const tint = speedBallTint();
+  ballObj.color = tint || ballObj.baseColor || '#ffffff';
+}
 
 function layoutPaddleToBottom() {
   paddle.w = clamp(viewW * 0.18, 70, 130);
@@ -415,9 +454,15 @@ function makeBall(x, y, speed, angleRad) {
     vx: Math.cos(angleRad) * speed,
     vy: Math.sin(angleRad) * speed,
     color: '#ffffff',
+    baseColor: '#ffffff',
     portalCd: 0, // 🌀 連続ワープ防止（秒）
     bigTimeLeft: 0,
-    baseR: r
+    baseR: r,
+    // 🩹 ベタベタ（ブロックにくっつく）
+    stuckTimeLeft: 0,
+    stuckX: 0,
+    stuckY: 0,
+    stuckReleaseSpeed: 0
   };
 }
 
@@ -486,6 +531,10 @@ function brickBaseColor(brick) {
   if (brick.type === TILE.REVERSE) return '#55efc4';
   if (brick.type === TILE.BIG) return '#81ecec';
   if (brick.type === TILE.ONE_WAY) return '#fab1a0';
+  if (brick.type === TILE.SLOW) return '#74f8ff';
+  if (brick.type === TILE.FAST) return '#ff5252';
+  if (brick.type === TILE.STICKY) return '#b388ff';
+  if (brick.type === TILE.INVINCIBLE) return '#ffe66d';
   return '#74b9ff';
 }
 
@@ -496,6 +545,10 @@ function brickPoints(brick) {
   if (brick.type === TILE.REVERSE) return 15;
   if (brick.type === TILE.BIG) return 18;
   if (brick.type === TILE.ONE_WAY) return 8;
+  if (brick.type === TILE.SLOW) return 15;
+  if (brick.type === TILE.FAST) return 15;
+  if (brick.type === TILE.STICKY) return 15;
+  if (brick.type === TILE.INVINCIBLE) return 18;
   if (brick.type === TILE.WALL) return 0;
   if (brick.type === TILE.PORTAL) return 0;
   return 10;
@@ -545,7 +598,7 @@ function resetPaddleAndBall({ keepBricks = true } = {}) {
   layoutPaddleToBottom();
   paddle.x = viewW / 2 - paddle.w / 2;
   balls = [];
-  const speed = ballSpeed();
+  const speed = currentBallSpeed();
   const angle = (-Math.PI / 2) + (Math.random() * 0.55 - 0.275);
   balls.push(makeBall(viewW / 2, paddle.y - 18, speed, angle));
   if (!keepBricks) {
@@ -570,6 +623,14 @@ function startStage(stageName, { resetStats = true } = {}) {
 
   if (resetStats) resetRunStats();
 
+  // 効果をリセット
+  reverseTimeLeft = 0;
+  speedMode = null;
+  speedTimeLeft = 0;
+  applySpeedFactor(1);
+  invincibleTimeLeft = 0;
+  invincibleSpawnCd = 0;
+
   bricks = makeBricksFromStage(stage);
   resetPaddleAndBall({ keepBricks: true });
   resizeGameCanvas();
@@ -591,7 +652,7 @@ function spawnSplitBalls(fromBall, atX, atY, { desiredTotal = 5 } = {}) {
   const MAX_BALLS = 15;
   if (balls.length >= MAX_BALLS) return;
 
-  const speed = Math.max(ballSpeed() * 0.95, Math.hypot(fromBall.vx, fromBall.vy));
+  const speed = Math.max(currentBallSpeed() * 0.95, Math.hypot(fromBall.vx, fromBall.vy));
   const base = Math.atan2(fromBall.vy, fromBall.vx);
 
   // 最大5方向にばらける（全部ちがう角度）
@@ -757,6 +818,16 @@ function updateGame(dt) {
   if (isPaused) return;
   fxUpdate(dt);
   reverseTimeLeft = Math.max(0, reverseTimeLeft - dt);
+  invincibleTimeLeft = Math.max(0, invincibleTimeLeft - dt);
+  invincibleSpawnCd = Math.max(0, invincibleSpawnCd - dt);
+
+  if (speedTimeLeft > 0) {
+    speedTimeLeft = Math.max(0, speedTimeLeft - dt);
+    if (speedTimeLeft <= 0) {
+      speedMode = null;
+      applySpeedFactor(1);
+    }
+  }
 
   // brick flash decay
   for (const br of bricks) {
@@ -873,6 +944,35 @@ function updateGame(dt) {
       return;
     }
 
+    if (brick.type === TILE.SLOW) {
+      sfx.powerUp();
+      fxSpawnRing(cx, cy, 'rgba(116,248,255,0.95)', { r0: 12, r1: 70, life: 0.30, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(116,248,255,0.95)', { count: 22, speedMin: 80, speedMax: 260, lifeMin: 0.18, lifeMax: 0.55, sizeMin: 1.2, sizeMax: 3.4, gravity: 180, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.FAST) {
+      sfx.powerUp();
+      fxSpawnRing(cx, cy, 'rgba(255,82,82,0.95)', { r0: 12, r1: 70, life: 0.30, width: 3 });
+      fxSpawnBurst(cx, cy, 'rgba(255,82,82,0.95)', { count: 22, speedMin: 160, speedMax: 520, lifeMin: 0.12, lifeMax: 0.40, sizeMin: 1.1, sizeMax: 3.2, gravity: 420, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.STICKY) {
+      // ベチャッ
+      sfx.powerUp();
+      fxSpawnRing(cx, cy, 'rgba(179,136,255,0.95)', { r0: 10, r1: 64, life: 0.28, width: 4 });
+      fxSpawnBurst(cx, cy, 'rgba(179,136,255,0.95)', { count: 20, speedMin: 60, speedMax: 200, lifeMin: 0.18, lifeMax: 0.70, sizeMin: 1.6, sizeMax: 5.2, gravity: 820, drag: 0.01, glow: true });
+      return;
+    }
+
+    if (brick.type === TILE.INVINCIBLE) {
+      sfx.powerUp();
+      fxSpawnRing(cx, cy, 'rgba(255,230,109,0.95)', { r0: 10, r1: 86, life: 0.34, width: 4 });
+      fxSpawnBurst(cx, cy, 'rgba(255,255,255,0.95)', { count: 22, speedMin: 140, speedMax: 420, lifeMin: 0.16, lifeMax: 0.55, sizeMin: 1.1, sizeMax: 3.4, gravity: 420, glow: true });
+      return;
+    }
+
     if (brick.type === TILE.ONE_WAY) {
       // 片方向は軽め（貫通破壊の爽快感）
       sfx.breakNormal();
@@ -922,6 +1022,20 @@ function updateGame(dt) {
       if (brick.type === TILE.REVERSE) {
         reverseTimeLeft = Math.max(reverseTimeLeft, 6.0);
       }
+      if (brick.type === TILE.SLOW) {
+        speedMode = 'slow';
+        speedTimeLeft = Math.max(speedTimeLeft, 5.0);
+        applySpeedFactor(0.55);
+      }
+      if (brick.type === TILE.FAST) {
+        speedMode = 'fast';
+        speedTimeLeft = Math.max(speedTimeLeft, 5.0);
+        applySpeedFactor(1.75);
+      }
+      if (brick.type === TILE.INVINCIBLE) {
+        invincibleTimeLeft = Math.max(invincibleTimeLeft, 5.0);
+        invincibleSpawnCd = 0;
+      }
       return true;
     }
     // かたいブロックは当てるだけでも少し加点
@@ -969,7 +1083,26 @@ function updateGame(dt) {
 
   const nextBalls = [];
   for (const b of balls) {
+    syncBallColor(b);
     if ((b.portalCd || 0) > 0) b.portalCd = Math.max(0, b.portalCd - dt);
+
+    // 🩹 ベタベタ中：その場に固定
+    if ((b.stuckTimeLeft || 0) > 0) {
+      b.stuckTimeLeft = Math.max(0, b.stuckTimeLeft - dt);
+      b.x = b.stuckX;
+      b.y = b.stuckY;
+      if (b.stuckTimeLeft <= 0) {
+        // ぼとっと落ちる
+        const drop = Math.max(120, Math.min(currentBallSpeed() * 0.55, (b.stuckReleaseSpeed || currentBallSpeed()) * 0.60));
+        b.vx = 0;
+        b.vy = Math.abs(drop);
+        fxSpawnBurst(b.x, b.y, 'rgba(179,136,255,0.95)', { count: 10, speedMin: 30, speedMax: 130, lifeMin: 0.14, lifeMax: 0.50, sizeMin: 1.6, sizeMax: 4.8, gravity: 980, drag: 0.01, glow: true });
+      }
+      // 固定中は落下判定などをしない
+      nextBalls.push(b);
+      continue;
+    }
+
     if ((b.bigTimeLeft || 0) > 0) {
       b.bigTimeLeft = Math.max(0, b.bigTimeLeft - dt);
       const targetR = (b.baseR || b.r) * 1.9;
@@ -1002,7 +1135,7 @@ function updateGame(dt) {
 
     if (hitPaddle) {
       b.y = paddle.y - b.r;
-      const speed = Math.max(ballSpeed() * 0.85, Math.hypot(b.vx, b.vy));
+      const speed = Math.max(currentBallSpeed() * 0.85, Math.hypot(b.vx, b.vy));
       const center = paddle.x + paddle.w / 2;
       const rel = clamp((b.x - center) / (paddle.w / 2), -1, 1);
       const vx = rel * speed * 0.92;
@@ -1080,6 +1213,23 @@ function updateGame(dt) {
         break;
       }
 
+      // 🩹 ベタベタ：当たるとくっつく（5秒）
+      if (brick.type === TILE.STICKY) {
+        brick.alive = false;
+        score += brickPoints(brick);
+        fxBreakBrick(brick, rect);
+        const hp = hitPointOnRect(b, rect);
+        b.stuckTimeLeft = 5.0;
+        b.stuckX = hp.x;
+        b.stuckY = hp.y;
+        b.stuckReleaseSpeed = Math.max(80, Math.hypot(b.vx, b.vy));
+        b.vx = 0;
+        b.vy = 0;
+        fxSpawnBurst(hp.x, hp.y, 'rgba(179,136,255,0.95)', { count: 18, speedMin: 40, speedMax: 180, lifeMin: 0.16, lifeMax: 0.70, sizeMin: 1.6, sizeMax: 5.6, gravity: 920, drag: 0.01, glow: true });
+        hitSomething = true;
+        break;
+      }
+
       // Hit brick
       if (!isWall) {
         if (brick.type === TILE.BIG) {
@@ -1106,7 +1256,10 @@ function updateGame(dt) {
           brick.type === TILE.SOFT ||
           brick.type === TILE.SPLIT ||
           brick.type === TILE.BOMB ||
-          brick.type === TILE.REVERSE
+          brick.type === TILE.REVERSE ||
+          brick.type === TILE.SLOW ||
+          brick.type === TILE.FAST ||
+          brick.type === TILE.INVINCIBLE
         )) {
           // 普通ブロックは貫通（反射しない）
           if (brick.type === TILE.BOMB) {
@@ -1273,6 +1426,38 @@ function drawGame() {
       ctx.textBaseline = 'middle';
       ctx.fillText('⬇', rect.x + rect.w / 2, rect.y + rect.h / 2);
     }
+
+    if (brick.type === TILE.SLOW) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🐌', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
+
+    if (brick.type === TILE.FAST) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚡', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
+
+    if (brick.type === TILE.STICKY) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🩹', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
+
+    if (brick.type === TILE.INVINCIBLE) {
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.font = `${Math.max(12, Math.floor(rect.h * 0.70))}px Outfit, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🌈', rect.x + rect.w / 2, rect.y + rect.h / 2);
+    }
   }
   ctx.globalAlpha = 1;
 
@@ -1280,8 +1465,25 @@ function drawGame() {
   fxDraw(ctx);
 
   // Paddle
-  ctx.fillStyle = paddle.color;
-  ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+  if (invincibleTimeLeft > 0) {
+    // 🌈 虹色に輝く（時間で色が流れる）
+    const t = performance.now() / 1000;
+    const g = ctx.createLinearGradient(paddle.x, paddle.y, paddle.x + paddle.w, paddle.y);
+    for (let i = 0; i <= 6; i++) {
+      const p = i / 6;
+      const h = (t * 120 + p * 360) % 360;
+      g.addColorStop(p, `hsl(${h} 90% 60%)`);
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+    // ふちのキラッ
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.lineWidth = Math.max(2, paddle.h * 0.22);
+    ctx.strokeRect(paddle.x + 0.5, paddle.y + 0.5, paddle.w - 1, paddle.h - 1);
+  } else {
+    ctx.fillStyle = paddle.color;
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+  }
 
   // Balls
   for (const b of balls) {
@@ -1305,6 +1507,25 @@ function drawGame() {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillText('🔵 でかボール中！', viewW / 2, reverseTimeLeft > 0 ? 42 : 12);
+  }
+
+  if (speedTimeLeft > 0 && speedMode) {
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = `${Math.max(12, Math.floor(viewH * 0.028))}px Outfit, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const y = (reverseTimeLeft > 0 ? 42 : 12) + (balls.some(bb => (bb.bigTimeLeft || 0) > 0) ? 30 : 0);
+    const label = speedMode === 'slow' ? '🐌 のろのろ中…' : '⚡ はやはや中…';
+    ctx.fillText(`${label} ${speedTimeLeft.toFixed(1)}s`, viewW / 2, y);
+  }
+
+  if (invincibleTimeLeft > 0) {
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = `${Math.max(12, Math.floor(viewH * 0.028))}px Outfit, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const y = 12 + (reverseTimeLeft > 0 ? 30 : 0) + (balls.some(bb => (bb.bigTimeLeft || 0) > 0) ? 30 : 0) + (speedTimeLeft > 0 ? 30 : 0);
+    ctx.fillText(`🌈 無敵！ タップでボール ${invincibleTimeLeft.toFixed(1)}s`, viewW / 2, y);
   }
 
   ctx.restore();
@@ -1337,6 +1558,26 @@ canvas.addEventListener('pointerdown', (e) => {
   paddlePointerId = e.pointerId;
   canvas.setPointerCapture?.(e.pointerId);
   movePaddleFromClientX(e.clientX);
+
+  // 🌈 無敵中：タップでボール発射（指の移動とは別でOK）
+  if (invincibleTimeLeft > 0 && !isPaused && isRunning && invincibleSpawnCd <= 0) {
+    const MAX_BALLS = 15;
+    if (balls.length < MAX_BALLS) {
+      const speed = currentBallSpeed();
+      const angle = (-Math.PI / 2) + (Math.random() * 0.75 - 0.375);
+      const bx = paddle.x + paddle.w / 2;
+      const by = paddle.y - 18;
+      const nb = makeBall(bx, by, speed, angle);
+      // 少しだけ散らして重なりを避ける
+      nb.x += (Math.random() * 10) - 5;
+      balls.push(nb);
+      invincibleSpawnCd = 0.12;
+      sfx.powerUp();
+      fxSpawnBurst(bx, paddle.y, 'rgba(255,255,255,0.95)', { count: 10, speedMin: 100, speedMax: 320, lifeMin: 0.10, lifeMax: 0.26, sizeMin: 1.0, sizeMax: 2.8, gravity: 720, glow: true });
+      updateHud();
+    }
+  }
+
   e.preventDefault();
 });
 canvas.addEventListener('pointermove', (e) => {
