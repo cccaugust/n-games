@@ -58,6 +58,23 @@ body {
   max-width: 52vw;
 }
 
+.pm-pill-btn {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.pm-pill-btn:active {
+  transform: translateY(1px);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pm-pill-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
+}
+
 .pm-game {
   position: relative;
   border-radius: 18px;
