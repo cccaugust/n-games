@@ -1817,6 +1817,196 @@ function makeItemApple16() {
   return c;
 }
 
+// --- Retro platformer vibe (Mario-like without using any copyrighted characters) ---
+function makePlTileBrickOrange16() {
+  const c = makeCanvas(16, 16);
+  const brick = PALETTE.orange2;
+  const brickDark = PALETTE.orange1;
+  const mortar = PALETTE.brown3;
+  fillRect(c, 0, 0, 16, 16, mortar);
+  for (let y = 0; y < 16; y++) {
+    const row = (y / 4) | 0;
+    const innerY = y % 4;
+    const offset = (row % 2) * 3;
+    for (let x = 0; x < 16; x++) {
+      const innerX = (x + offset) % 6;
+      const isMortar = innerY === 0 || innerX === 0;
+      if (isMortar) continue;
+      const v = h2(x, y, 61);
+      const base = v % 7 === 0 ? brickDark : brick;
+      setPx(c, x, y, base);
+      if (innerY === 3 && innerX >= 4) setPx(c, x, y, PALETTE.brown1);
+      if (innerY === 1 && innerX === 2) setPx(c, x, y, PALETTE.orange1);
+    }
+  }
+  // crisp outline/border helps in platformers
+  for (let x = 0; x < 16; x++) setPx(c, x, 0, PALETTE.brown1);
+  for (let y = 0; y < 16; y++) setPx(c, 0, y, PALETTE.brown1);
+  return c;
+}
+
+function makePlTileCoinBlock16() {
+  const c = makeCanvas(16, 16);
+  const base = PALETTE.yellow1;
+  const hi = PALETTE.yellow2;
+  const edge = PALETTE.orange1;
+  fillRect(c, 0, 0, 16, 16, base);
+  // bevel
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, hi);
+    setPx(c, x, 1, hi);
+    setPx(c, x, 15, edge);
+  }
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 0, y, hi);
+    setPx(c, 1, y, hi);
+    setPx(c, 15, y, edge);
+  }
+  // center coin emboss (no question mark)
+  fillCircle(c, 8, 8, 4, hi);
+  fillCircle(c, 8, 8, 3, base);
+  // rivet dots
+  setPx(c, 3, 3, hi);
+  setPx(c, 12, 3, hi);
+  setPx(c, 3, 12, hi);
+  setPx(c, 12, 12, hi);
+  // tiny shine
+  setPx(c, 6, 6, PALETTE.white);
+  setPx(c, 7, 6, PALETTE.white);
+  return c;
+}
+
+function makePlTilePipeGreen16() {
+  const c = makeCanvas(16, 16);
+  // body
+  fillRect(c, 0, 0, 16, 16, PALETTE.green1);
+  // rim (top band)
+  fillRect(c, 0, 0, 16, 5, PALETTE.green2);
+  fillRect(c, 0, 4, 16, 1, PALETTE.green1);
+  // inner opening hint
+  fillRect(c, 3, 1, 10, 3, PALETTE.shadow);
+  fillRect(c, 4, 2, 8, 1, rgba(0, 0, 0, 80));
+  // side highlight/shade
+  for (let y = 0; y < 16; y++) {
+    setPx(c, 3, y, PALETTE.green3);
+    setPx(c, 4, y, PALETTE.green2);
+    setPx(c, 11, y, PALETTE.green1);
+    setPx(c, 12, y, PALETTE.shadow);
+  }
+  // border
+  for (let x = 0; x < 16; x++) setPx(c, x, 15, PALETTE.shadow);
+  return c;
+}
+
+function makePlTileCloud16() {
+  const c = makeCanvas(16, 16);
+  // transparent background
+  // puffs
+  fillCircle(c, 5, 9, 4, PALETTE.white);
+  fillCircle(c, 9, 8, 5, PALETTE.white);
+  fillCircle(c, 12, 10, 3, PALETTE.white);
+  fillCircle(c, 4, 12, 3, PALETTE.white);
+  // underside shade
+  for (let y = 10; y < 16; y++) for (let x = 0; x < 16; x++) if (getPx(c, x, y)) setPx(c, x, y, PALETTE.light);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makePlTileBush16() {
+  const c = makeCanvas(16, 16);
+  // transparent background
+  fillCircle(c, 5, 10, 5, PALETTE.green2);
+  fillCircle(c, 10, 10, 5, PALETTE.green2);
+  fillCircle(c, 8, 7, 4, PALETTE.green2);
+  // highlights
+  fillCircle(c, 4, 8, 2, PALETTE.green3);
+  fillCircle(c, 11, 8, 2, PALETTE.green3);
+  // shade base
+  for (let y = 11; y < 16; y++) for (let x = 0; x < 16; x++) if (getPx(c, x, y)) setPx(c, x, y, PALETTE.green1);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makePlTileGroundGrass16() {
+  const c = makeCanvas(16, 16);
+  // sky is transparent; this is meant as a solid ground tile
+  // grass top
+  for (let x = 0; x < 16; x++) {
+    setPx(c, x, 0, PALETTE.green3);
+    setPx(c, x, 1, (x % 3 === 0 ? PALETTE.green2 : PALETTE.green3));
+    setPx(c, x, 2, PALETTE.green1);
+  }
+  // dirt body
+  fillRect(c, 0, 3, 16, 13, PALETTE.brown2);
+  for (let y = 3; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      const v = h2(x, y, 62);
+      if (v % 17 === 0) setPx(c, x, y, PALETTE.brown1);
+      else if (v % 29 === 0) setPx(c, x, y, PALETTE.brown3);
+    }
+  }
+  // little grass teeth into dirt
+  for (let x = 0; x < 16; x++) {
+    if (h2(x, 0, 63) % 5 === 0) setPx(c, x, 3, PALETTE.green1);
+  }
+  return c;
+}
+
+function makePlTileOneWayPlatform16() {
+  const c = makeCanvas(16, 16);
+  // transparent background; platform strip in middle
+  fillRect(c, 0, 7, 16, 4, PALETTE.brown2);
+  // top highlight
+  for (let x = 0; x < 16; x++) setPx(c, x, 7, PALETTE.brown3);
+  // underside shadow
+  for (let x = 0; x < 16; x++) setPx(c, x, 10, PALETTE.brown1);
+  // arrows
+  for (let x = 2; x < 16; x += 5) {
+    setPx(c, x, 8, PALETTE.yellow2);
+    setPx(c, x + 1, 8, PALETTE.yellow2);
+    setPx(c, x + 2, 8, PALETTE.yellow2);
+    setPx(c, x + 1, 9, PALETTE.yellow1);
+  }
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makePlItemFlag16() {
+  const c = makeCanvas(16, 16);
+  // pole
+  for (let y = 1; y < 16; y++) setPx(c, 4, y, PALETTE.gray2);
+  setPx(c, 4, 0, PALETTE.gray3);
+  // flag cloth
+  fillRect(c, 5, 2, 8, 5, PALETTE.green2);
+  fillRect(c, 5, 3, 7, 3, PALETTE.green3);
+  // notch
+  setPx(c, 12, 6, 0);
+  setPx(c, 12, 5, PALETTE.green2);
+  // base knob
+  fillCircle(c, 4, 15, 1, PALETTE.gray1);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makePlItemSpring16() {
+  const c = makeCanvas(16, 16);
+  // base
+  fillRect(c, 3, 12, 10, 3, PALETTE.red1);
+  fillRect(c, 3, 12, 10, 1, PALETTE.red2);
+  // spring coils
+  for (let y = 5; y < 12; y++) {
+    const x0 = y % 2 === 0 ? 6 : 5;
+    fillRect(c, x0, y, 5, 1, PALETTE.gray3);
+    if (y % 3 === 0) fillRect(c, x0, y, 5, 1, PALETTE.gray2);
+  }
+  // top cap
+  fillRect(c, 4, 4, 8, 2, PALETTE.gray2);
+  fillRect(c, 4, 4, 8, 1, PALETTE.gray3);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -1885,8 +2075,7 @@ const samples = [
   toSample('tile_lava_16', 'ようがん', 'tile', makeTileLava16(), ['マップ', '16x16', 'タイル', '危険', '床']),
   toSample('tile_ice_16', 'こおり', 'tile', makeTileIce16(), ['マップ', '16x16', 'タイル', 'ブロック', '床']),
   toSample('tile_grass_block_16', 'くさつちブロック', 'tile', makeTileGrassBlock16(), ['マップ', '16x16', 'タイル', 'ブロック', '足場']),
-  toSample('tile_spikes_16', 'トゲ（わな）', 'tile', makeTileSpikes16(), ['マップ', '16x16', 'タイル', 'トラップ', '危険'])
-  ,
+  toSample('tile_spikes_16', 'トゲ（わな）', 'tile', makeTileSpikes16(), ['マップ', '16x16', 'タイル', 'トラップ', '危険']),
   // block-world pack (minecraft-like vibe, original)
   toSample('bw_stone_smooth_16', 'なめらかいし', 'tile', makeTileStoneSmooth16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '石']),
   toSample('bw_log_oak_side_16', 'げんぼく（よこ）', 'tile', makeTileLogOakSide16(), ['ブロックワールド', '16x16', 'タイル', 'ブロック', '木']),
@@ -1904,7 +2093,18 @@ const samples = [
 
   toSample('bw_torch_16', 'たいまつ', 'object', makeItemTorch16(), ['ブロックワールド', '16x16', '小物', 'クラフト']),
   toSample('bw_pickaxe_16', 'つるはし', 'object', makeItemPickaxe16(), ['ブロックワールド', '16x16', '小物', 'クラフト']),
-  toSample('bw_apple_16', 'りんご', 'object', makeItemApple16(), ['ブロックワールド', '16x16', '小物', '食べもの'])
+  toSample('bw_apple_16', 'りんご', 'object', makeItemApple16(), ['ブロックワールド', '16x16', '小物', '食べもの']),
+
+  // retro platformer pack (bright, readable, game-ready)
+  toSample('pl_ground_grass_16', 'くさつち（だいち）', 'tile', makePlTileGroundGrass16(), ['プラットフォーマー', '16x16', 'タイル', '地面']),
+  toSample('pl_brick_orange_16', 'オレンジれんが', 'tile', makePlTileBrickOrange16(), ['プラットフォーマー', '16x16', 'タイル', 'ブロック']),
+  toSample('pl_coin_block_16', 'コインブロック', 'tile', makePlTileCoinBlock16(), ['プラットフォーマー', '16x16', 'タイル', 'ブロック', 'ギミック']),
+  toSample('pl_pipe_green_16', 'みどりパイプ', 'tile', makePlTilePipeGreen16(), ['プラットフォーマー', '16x16', 'タイル', 'ブロック', 'ギミック']),
+  toSample('pl_cloud_16', 'くも', 'tile', makePlTileCloud16(), ['プラットフォーマー', '16x16', 'タイル', '背景']),
+  toSample('pl_bush_16', 'しげみ', 'tile', makePlTileBush16(), ['プラットフォーマー', '16x16', 'タイル', '背景']),
+  toSample('pl_oneway_platform_16', 'すりぬけ足場', 'tile', makePlTileOneWayPlatform16(), ['プラットフォーマー', '16x16', 'タイル', '足場', 'ギミック']),
+  toSample('pl_flag_16', 'ゴールのはた', 'object', makePlItemFlag16(), ['プラットフォーマー', '16x16', '小物', 'ゴール']),
+  toSample('pl_spring_16', 'バネ', 'object', makePlItemSpring16(), ['プラットフォーマー', '16x16', '小物', 'ギミック'])
 ];
 
 const output = {
