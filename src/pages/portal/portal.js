@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'voice-beat-lab',
+    title: 'ボイスビートラボ',
+    desc: 'こえでドラム！ヘンテコ曲づくり🎤',
+    color: '#00cec9',
+    icon: '🎤',
+    link: '/games/voice-beat-lab/'
+  },
+  {
     id: 'japan-map-quest',
     title: '日本マップクエスト',
     desc: '奈良県をめざせ！県ミッションつき🗾',
