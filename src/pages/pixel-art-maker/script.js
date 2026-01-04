@@ -22,6 +22,7 @@ const ownerId = player?.id != null ? String(player.id) : 'unknown';
 
 const AVATAR_PICK_KEY = 'ngames.avatar.pick.v1';
 const AVATAR_CTX_KEY = 'ngames.avatar.ctx.v1';
+const RECENT_COLORS_KEY = 'ngames.pm.pixelArtMaker.recentColors.v1';
 
 function readJson(key) {
   try {
@@ -52,6 +53,9 @@ const gallerySearchInput = document.getElementById('gallerySearchInput');
 const gallerySortSelect = document.getElementById('gallerySortSelect');
 const editorView = document.getElementById('editorView');
 const backToGalleryBtn = document.getElementById('backToGalleryBtn');
+const editorLayout = document.querySelector('.editor-layout');
+const splitLeft = document.getElementById('splitLeft');
+const splitRight = document.getElementById('splitRight');
 
 const canvasMeta = document.getElementById('canvasMeta');
 const canvasScroll = document.getElementById('canvasScroll');
@@ -92,6 +96,8 @@ const colorBtn = document.getElementById('colorBtn');
 const colorDot = document.getElementById('colorDot');
 const colorPopover = document.getElementById('colorPopover');
 const colorPopoverCloseBtn = document.getElementById('colorPopoverCloseBtn');
+const recentColors = document.getElementById('recentColors');
+const recentClearBtn = document.getElementById('recentClearBtn');
 const hueBtn = document.getElementById('hueBtn');
 const huePopover = document.getElementById('huePopover');
 const huePopoverCloseBtn = document.getElementById('huePopoverCloseBtn');
@@ -303,6 +309,266 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+function normalizeHex(hex) {
+  const s = String(hex || '').trim().toLowerCase();
+  // #rgb -> #rrggbb
+  if (/^#[0-9a-f]{3}$/i.test(s)) {
+    return `#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}`.toLowerCase();
+  }
+  if (/^#[0-9a-f]{6}$/i.test(s)) return s.toLowerCase();
+  return '#333333';
+}
+
+function readRecentColors() {
+  try {
+    const raw = localStorage.getItem(RECENT_COLORS_KEY);
+    const json = raw ? JSON.parse(raw) : null;
+    const arr = Array.isArray(json) ? json : [];
+    return arr.map(normalizeHex).filter((v, i, a) => a.indexOf(v) === i).slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+function writeRecentColors(list) {
+  try {
+    localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(Array.isArray(list) ? list.slice(0, 20) : []));
+  } catch {
+    // ignore
+  }
+}
+
+function renderRecentColors() {
+  if (!recentColors) return;
+  const list = readRecentColors();
+  recentColors.innerHTML = '';
+  if (list.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'recent-empty';
+    empty.textContent = 'まだないよ（色を使うとここに出ます）';
+    recentColors.appendChild(empty);
+    return;
+  }
+  list.slice(0, 10).forEach((hex) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'recent-swatch';
+    btn.style.background = hex;
+    btn.setAttribute('aria-label', `最近の色 ${hex}`);
+    btn.addEventListener('click', () => {
+      setColorHex(hex);
+      updateStatus('最近の色');
+    });
+    recentColors.appendChild(btn);
+  });
+}
+
+function addRecentColor(hex) {
+  const h = normalizeHex(hex);
+  const list = readRecentColors();
+  const next = [h, ...list.filter((x) => x !== h)].slice(0, 20);
+  writeRecentColors(next);
+  renderRecentColors();
+}
+
+function clearRecentColors() {
+  writeRecentColors([]);
+  renderRecentColors();
+}
+
+// Popoverをツールボックス外（body直下）に出して、クリップされるのを防ぐ
+const popoverHomes = new WeakMap();
+function portalPopoverToBody(el) {
+  if (!el) return;
+  if (!popoverHomes.has(el)) {
+    popoverHomes.set(el, { parent: el.parentNode, next: el.nextSibling });
+  }
+  if (el.parentNode !== document.body) document.body.appendChild(el);
+}
+
+function restorePopoverHome(el) {
+  const home = popoverHomes.get(el);
+  if (!home || !home.parent) return;
+  if (el.parentNode === home.parent) return;
+  try {
+    home.parent.insertBefore(el, home.next || null);
+  } catch {
+    // ignore
+  }
+}
+
+// PCレイアウト: ツールボックス / キャンバス / フレームの境界をドラッグで調整
+const LAYOUT_PREF_KEY = 'ngames.pm.pixelArtMaker.layout.v1';
+const DEFAULT_LEFT_W = 300;
+const DEFAULT_RIGHT_W = 320;
+const SPLITTER_W = 12;
+const MIN_LEFT_W = 220;
+const MIN_RIGHT_W = 240;
+const MIN_CENTER_W = 320;
+
+function readLayoutPrefs() {
+  try {
+    const raw = localStorage.getItem(LAYOUT_PREF_KEY);
+    const json = raw ? JSON.parse(raw) : null;
+    if (!json || typeof json !== 'object') return null;
+    const left = Number(json.leftPx);
+    const right = Number(json.rightPx);
+    return {
+      leftPx: Number.isFinite(left) ? left : DEFAULT_LEFT_W,
+      rightPx: Number.isFinite(right) ? right : DEFAULT_RIGHT_W
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeLayoutPrefs(prefs) {
+  try {
+    localStorage.setItem(LAYOUT_PREF_KEY, JSON.stringify({ leftPx: prefs.leftPx, rightPx: prefs.rightPx }));
+  } catch {
+    // ignore
+  }
+}
+
+function applyEditorLayoutWidths({ leftPx, rightPx }) {
+  if (!editorLayout) return;
+  const rect = editorLayout.getBoundingClientRect();
+  const total = rect.width || 0;
+  if (!total) return;
+
+  const maxLeft = Math.max(MIN_LEFT_W, total - MIN_CENTER_W - MIN_RIGHT_W - SPLITTER_W * 2);
+  const maxRight = Math.max(MIN_RIGHT_W, total - MIN_CENTER_W - MIN_LEFT_W - SPLITTER_W * 2);
+
+  const left = clamp(Number(leftPx) || DEFAULT_LEFT_W, MIN_LEFT_W, maxLeft);
+  const right = clamp(Number(rightPx) || DEFAULT_RIGHT_W, MIN_RIGHT_W, maxRight);
+
+  editorLayout.style.setProperty('--pm-left-w', `${Math.round(left)}px`);
+  editorLayout.style.setProperty('--pm-right-w', `${Math.round(right)}px`);
+
+  return { leftPx: Math.round(left), rightPx: Math.round(right) };
+}
+
+function resetEditorLayoutWidths() {
+  const applied = applyEditorLayoutWidths({ leftPx: DEFAULT_LEFT_W, rightPx: DEFAULT_RIGHT_W });
+  if (applied) writeLayoutPrefs(applied);
+}
+
+function syncEditorLayoutFromPrefs() {
+  const prefs = readLayoutPrefs();
+  if (prefs) {
+    const applied = applyEditorLayoutWidths(prefs);
+    if (applied) writeLayoutPrefs(applied);
+  } else {
+    const applied = applyEditorLayoutWidths({ leftPx: DEFAULT_LEFT_W, rightPx: DEFAULT_RIGHT_W });
+    if (applied) writeLayoutPrefs(applied);
+  }
+}
+
+function initResizableEditorLayout() {
+  if (!editorLayout || !splitLeft || !splitRight) return;
+
+  const desktopMq = window.matchMedia?.('(min-width: 960px)');
+
+  function isDesktop() {
+    return desktopMq?.matches ?? false;
+  }
+
+  let dragging = null;
+
+  function beginDrag(which, e) {
+    if (!isDesktop()) return;
+    if (!(e instanceof PointerEvent)) return;
+    const rect = editorLayout.getBoundingClientRect();
+    dragging = {
+      which,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startLeft: parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-left-w')) || DEFAULT_LEFT_W,
+      startRight: parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-right-w')) || DEFAULT_RIGHT_W,
+      rectLeft: rect.left,
+      rectRight: rect.right
+    };
+    document.body.classList.add('pm-resizing');
+    try {
+      /** @type {HTMLElement} */ (e.currentTarget)?.setPointerCapture?.(e.pointerId);
+    } catch {
+      // ignore
+    }
+    e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    if (!(e instanceof PointerEvent)) return;
+    if (e.pointerId !== dragging.pointerId) return;
+
+    const x = e.clientX;
+    if (dragging.which === 'left') {
+      const nextLeft = x - dragging.rectLeft;
+      const applied = applyEditorLayoutWidths({ leftPx: nextLeft, rightPx: dragging.startRight });
+      if (applied) writeLayoutPrefs(applied);
+    } else {
+      const nextRight = dragging.rectRight - x;
+      const applied = applyEditorLayoutWidths({ leftPx: dragging.startLeft, rightPx: nextRight });
+      if (applied) writeLayoutPrefs(applied);
+    }
+    e.preventDefault();
+  }
+
+  function endDrag(e) {
+    if (!dragging) return;
+    if (!(e instanceof PointerEvent)) return;
+    if (e.pointerId !== dragging.pointerId) return;
+    dragging = null;
+    document.body.classList.remove('pm-resizing');
+  }
+
+  function onKey(which, e) {
+    if (!isDesktop()) return;
+    if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(e.key)) return;
+    e.preventDefault();
+
+    const step = e.shiftKey ? 40 : 10;
+    if (e.key === 'Home') {
+      resetEditorLayoutWidths();
+      return;
+    }
+
+    const curLeft = parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-left-w')) || DEFAULT_LEFT_W;
+    const curRight = parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-right-w')) || DEFAULT_RIGHT_W;
+
+    if (which === 'left') {
+      const delta = e.key === 'ArrowLeft' ? -step : step;
+      const applied = applyEditorLayoutWidths({ leftPx: curLeft + delta, rightPx: curRight });
+      if (applied) writeLayoutPrefs(applied);
+    } else {
+      // 右ペインは「左矢印 = 右ペインを広げる」だと直感的
+      const delta = e.key === 'ArrowLeft' ? step : -step;
+      const applied = applyEditorLayoutWidths({ leftPx: curLeft, rightPx: curRight + delta });
+      if (applied) writeLayoutPrefs(applied);
+    }
+  }
+
+  splitLeft.addEventListener('pointerdown', (e) => beginDrag('left', e));
+  splitRight.addEventListener('pointerdown', (e) => beginDrag('right', e));
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+
+  splitLeft.addEventListener('dblclick', resetEditorLayoutWidths);
+  splitRight.addEventListener('dblclick', resetEditorLayoutWidths);
+
+  splitLeft.addEventListener('keydown', (e) => onKey('left', e));
+  splitRight.addEventListener('keydown', (e) => onKey('right', e));
+
+  // 初期適用 & 画面サイズ変更追従
+  syncEditorLayoutFromPrefs();
+  window.addEventListener('resize', () => {
+    if (!isDesktop()) return;
+    syncEditorLayoutFromPrefs();
+  });
+}
+
 function updateHueUi() {
   if (hueValue) {
     const d = Math.round(huePreviewDeg);
@@ -321,12 +587,14 @@ function setHuePreview(deg) {
 
 function openHuePopover() {
   if (!huePopover) return;
+  portalPopoverToBody(huePopover);
   huePopover.hidden = false;
 }
 
 function closeHuePopover() {
   if (!huePopover) return;
   huePopover.hidden = true;
+  restorePopoverHome(huePopover);
 }
 
 function rgbaIntToRgba(rgba) {
@@ -623,6 +891,10 @@ function setView(view) {
   const showEditor = v === 'editor';
   editorView.hidden = !showEditor;
   galleryView.hidden = showEditor;
+  if (showEditor) {
+    // 表示されたタイミングで幅を再計算して、キャンバスを最大化する
+    requestAnimationFrame(() => syncEditorLayoutFromPrefs());
+  }
 }
 
 function updateCanvasLayout() {
@@ -648,10 +920,12 @@ function updateColorDot() {
 }
 
 function setColorHex(hex) {
-  colorInput.value = hex;
+  const safe = normalizeHex(hex);
+  colorInput.value = safe;
   currentColor = hexToRgbaInt(colorInput.value);
   updatePaletteSelection();
   updateColorDot();
+  addRecentColor(safe);
 }
 
 function formatDateShort(iso) {
@@ -1581,12 +1855,15 @@ if (zoomInBtn) zoomInBtn.addEventListener('click', () => nudgeZoom(2));
 
 function openColorPopover() {
   if (!colorPopover) return;
+  portalPopoverToBody(colorPopover);
+  renderRecentColors();
   colorPopover.hidden = false;
 }
 
 function closeColorPopover() {
   if (!colorPopover) return;
   colorPopover.hidden = true;
+  restorePopoverHome(colorPopover);
 }
 
 if (colorBtn) {
@@ -1599,6 +1876,13 @@ if (colorBtn) {
 
 if (colorPopoverCloseBtn) {
   colorPopoverCloseBtn.addEventListener('click', () => closeColorPopover());
+}
+
+if (recentClearBtn) {
+  recentClearBtn.addEventListener('click', () => {
+    clearRecentColors();
+    updateStatus('最近の色を消した');
+  });
 }
 
 if (hueBtn) {
@@ -2457,6 +2741,7 @@ canvas.addEventListener('pointerleave', () => {
   setHuePreview(0);
   updateRangeButtons();
   syncToolbarMoreForViewport();
+  initResizableEditorLayout();
 
   if (toolbarMenuBtn) {
     toolbarMenuBtn.addEventListener('click', () => {

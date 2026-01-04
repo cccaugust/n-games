@@ -94,6 +94,13 @@
                         <i class="fa-solid fa-xmark"></i>
                       </button>
                     </div>
+                    <div class="recent-wrap" aria-label="最近使った色">
+                      <div class="recent-head">
+                        <div class="recent-title">最近</div>
+                        <button class="btn-mini" id="recentClearBtn" type="button">消す</button>
+                      </div>
+                      <div class="recent-grid" id="recentColors"></div>
+                    </div>
                     <div class="palette-grid" id="paletteGrid"></div>
                     <div class="color-popover-foot">
                       <label class="field">
@@ -228,6 +235,15 @@
             </div>
           </aside>
 
+          <div
+            class="pm-splitter"
+            id="splitLeft"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="ツールボックスとキャンバスの境目"
+            tabindex="0"
+          ></div>
+
           <section class="card canvas-panel editor-center">
           <div class="canvas-head">
             <div class="canvas-head-left">
@@ -253,6 +269,15 @@
             </div>
           </div>
         </section>
+
+          <div
+            class="pm-splitter"
+            id="splitRight"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="キャンバスとフレームの境目"
+            tabindex="0"
+          ></div>
 
           <aside class="editor-right" aria-label="フレーム">
             <section class="frame-side card">
