@@ -60,6 +60,25 @@
       </section>
 
       <div class="workspace" id="editorView" hidden>
+        <header class="editor-headbar card" id="editorHeadbar" aria-label="エディターヘッダー">
+          <div class="editor-headbar-left">
+            <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
+          </div>
+
+          <div class="editor-headbar-center">
+            <label class="field field-inline editor-name" aria-label="名前を変える">
+              <span>なまえ</span>
+              <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
+            </label>
+          </div>
+
+          <div class="editor-headbar-right">
+            <button class="btn-primary-solid" id="saveBtn" type="button" aria-label="保存">
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> 保存
+            </button>
+          </div>
+        </header>
+
         <div class="editor-layout">
           <aside class="editor-left" aria-label="ツールボックス">
             <div class="editor-toolbar card" id="editorToolbar" aria-label="編集ツール">
@@ -132,12 +151,6 @@
                   </button>
                 </div>
 
-                <div class="toolbar-group" aria-label="保存">
-                  <button class="tool-icon primary" id="saveBtn" type="button" aria-label="保存">
-                    <i class="fa-solid fa-floppy-disk"></i><span>保存</span>
-                  </button>
-                </div>
-
                 <div class="toolbar-group" aria-label="メニュー">
                   <button class="tool-icon" id="toolbarMenuBtn" type="button" aria-label="メニューを開く" aria-expanded="false">
                     <i class="fa-solid fa-ellipsis"></i><span>メニュー</span>
@@ -172,34 +185,6 @@
                       <div class="tiny-note">※「適用」で色を確定（もどすOK）</div>
                     </div>
                   </div>
-                </div>
-
-                <div class="toolbar-group" aria-label="キャンバス">
-                  <button class="tool-icon" id="expandWidthBtn" type="button" aria-label="横にひろげる（+16）">
-                    <i class="fa-solid fa-arrows-left-right"></i><span>横+16</span>
-                  </button>
-                  <button class="tool-icon" id="expandHeightBtn" type="button" aria-label="縦にひろげる（+16）">
-                    <i class="fa-solid fa-arrows-up-down"></i><span>縦+16</span>
-                  </button>
-                  <button class="tool-icon" id="shrinkWidthBtn" type="button" aria-label="横をちぢめる（-16）">
-                    <i class="fa-solid fa-minus"></i><span>横-16</span>
-                  </button>
-                  <button class="tool-icon" id="shrinkHeightBtn" type="button" aria-label="縦をちぢめる（-16）">
-                    <i class="fa-solid fa-minus"></i><span>縦-16</span>
-                  </button>
-                  <button class="tool-icon" id="gridToggleBtn" type="button" aria-label="グリッドON/OFF">
-                    <i class="fa-solid fa-border-all"></i><span>線</span>
-                  </button>
-                  <div class="zoom-mini" aria-label="ズーム">
-                    <button class="tool-icon" id="zoomOutBtn" type="button" aria-label="ズームアウト">
-                      <i class="fa-solid fa-magnifying-glass-minus"></i><span>-</span>
-                    </button>
-                    <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" aria-label="ズーム" />
-                    <button class="tool-icon" id="zoomInBtn" type="button" aria-label="ズームイン">
-                      <i class="fa-solid fa-magnifying-glass-plus"></i><span>+</span>
-                    </button>
-                  </div>
-                  <input class="sr-only" id="gridToggle" type="checkbox" checked />
                 </div>
 
                 <div class="toolbar-group" aria-label="操作">
@@ -252,15 +237,37 @@
             </div>
 
             <div class="canvas-head-right">
-              <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
+              <div class="canvas-head-actions" aria-label="キャンバス操作">
+                <button class="btn-mini" id="expandWidthBtn" type="button" aria-label="横にひろげる（+16）">
+                  <i class="fa-solid fa-arrows-left-right" aria-hidden="true"></i> 横+16
+                </button>
+                <button class="btn-mini" id="expandHeightBtn" type="button" aria-label="縦にひろげる（+16）">
+                  <i class="fa-solid fa-arrows-up-down" aria-hidden="true"></i> 縦+16
+                </button>
+                <button class="btn-mini" id="shrinkWidthBtn" type="button" aria-label="横をちぢめる（-16）">
+                  <i class="fa-solid fa-minus" aria-hidden="true"></i> 横-16
+                </button>
+                <button class="btn-mini" id="shrinkHeightBtn" type="button" aria-label="縦をちぢめる（-16）">
+                  <i class="fa-solid fa-minus" aria-hidden="true"></i> 縦-16
+                </button>
+              </div>
             </div>
           </div>
 
-          <div class="canvas-subhead">
-            <label class="field field-inline">
-              <span>なまえ</span>
-              <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
-            </label>
+          <div class="canvas-subhead canvas-subhead-actions" aria-label="表示">
+            <button class="btn-mini" id="gridToggleBtn" type="button" aria-label="グリッドON/OFF">
+              <i class="fa-solid fa-border-all" aria-hidden="true"></i> 線
+            </button>
+            <div class="zoom-mini" aria-label="ズーム">
+              <button class="btn-mini" id="zoomOutBtn" type="button" aria-label="ズームアウト">
+                <i class="fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i>
+              </button>
+              <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" aria-label="ズーム" />
+              <button class="btn-mini" id="zoomInBtn" type="button" aria-label="ズームイン">
+                <i class="fa-solid fa-magnifying-glass-plus" aria-hidden="true"></i>
+              </button>
+            </div>
+            <input class="sr-only" id="gridToggle" type="checkbox" checked />
           </div>
 
           <div class="canvas-scroll" id="canvasScroll">

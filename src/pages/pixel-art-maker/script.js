@@ -42,6 +42,16 @@ playerPill.innerHTML = `${avatarToHtml(player?.avatar, { size: 18, className: 'p
 const backToPortal = document.getElementById('backToPortal');
 backToPortal.href = resolvePath('/pages/portal/portal.html');
 
+// Keep editor view within viewport height (account for topbar)
+const topbarEl = document.querySelector('.topbar');
+function syncTopbarHeightVar() {
+  if (!(topbarEl instanceof HTMLElement)) return;
+  const h = Math.ceil(topbarEl.getBoundingClientRect().height || 0);
+  if (!h) return;
+  document.documentElement.style.setProperty('--pm-topbar-h', `${h}px`);
+}
+syncTopbarHeightVar();
+
 // DOM
 const appRoot = document.getElementById('appRoot');
 const galleryView = document.getElementById('galleryView');
@@ -895,6 +905,8 @@ function setView(view) {
     // 表示されたタイミングで幅を再計算して、キャンバスを最大化する
     requestAnimationFrame(() => syncEditorLayoutFromPrefs());
   }
+  // topbar の高さが変わっても editor を画面内に収める
+  requestAnimationFrame(() => syncTopbarHeightVar());
 }
 
 function updateCanvasLayout() {
@@ -2752,6 +2764,7 @@ canvas.addEventListener('pointerleave', () => {
   window.addEventListener('resize', () => {
     // keep simple; this only controls open/close, not layout itself
     syncToolbarMoreForViewport();
+    syncTopbarHeightVar();
   });
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
