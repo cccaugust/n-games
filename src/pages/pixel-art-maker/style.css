@@ -192,32 +192,44 @@ img.pm-pill-avatar {
   gap: 12px;
 }
 
-.gallery-item {
+/* Gallery cards (edit/duplicate/delete actions) */
+.gallery-card {
+  border-radius: 16px;
+  border: 1px solid var(--pm-border);
+  background: white;
+  box-shadow: none;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gallery-card:hover {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.gallery-card-top {
   display: grid;
   grid-template-columns: 72px 1fr;
   gap: 12px;
   align-items: center;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid var(--pm-border);
-  background: white;
-  text-align: left;
-  width: 100%;
-  transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
-.gallery-item:focus-visible {
-  outline: 3px solid rgba(108, 92, 231, 0.55);
-  outline-offset: 2px;
+.gallery-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.gallery-item:hover {
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-}
-
-.gallery-item:active {
-  transform: translateY(1px);
+/* Editor containers: no rounded corners */
+#editorView .editor-toolbar.card,
+#editorView .canvas-panel.card,
+#editorView .frame-side.card {
+  border-radius: 0;
 }
 
 .gallery-thumb {
