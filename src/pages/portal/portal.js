@@ -238,6 +238,14 @@ const games = [
     color: '#1a2456',
     icon: '⛏️',
     link: '/games/pixel-miner/'
+  },
+  {
+    id: 'battle-arena',
+    title: 'バトルアリーナ',
+    desc: 'ふっとばして勝て！2人対戦🥊',
+    color: '#ff6b6b',
+    icon: '🥊',
+    link: '/games/battle-arena/'
   }
 ];
 
