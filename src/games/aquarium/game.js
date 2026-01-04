@@ -1204,6 +1204,17 @@ void loadPalette();
 // -----------------------
 const aquariumScene = new AquariumScene();
 
+aquariumScene.events.on('ready', () => {
+  scene = aquariumScene;
+  scene.setEmptyHintVisible(fishes.length === 0);
+  // If fishes were added before Phaser finished booting, sync them now.
+  fishes.forEach((f) => syncToScene(f));
+});
+
+aquariumScene.events.on('fishTapped', (fishId) => {
+  openFishModal(String(fishId));
+});
+
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'phaserRoot',
@@ -1215,16 +1226,5 @@ new Phaser.Game({
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   scene: [aquariumScene]
-});
-
-aquariumScene.events.on('ready', () => {
-  scene = aquariumScene;
-  scene.setEmptyHintVisible(fishes.length === 0);
-  // If fishes were added before Phaser finished booting, sync them now.
-  fishes.forEach((f) => syncToScene(f));
-});
-
-aquariumScene.events.on('fishTapped', (fishId) => {
-  openFishModal(String(fishId));
 });
 
