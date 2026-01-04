@@ -654,6 +654,68 @@ function makeRobotHead16() {
   return c;
 }
 
+// --- NEW: character-ish + kanji-ish (2 frames) ---
+function makeHeroChibi16() {
+  // Simple original hero (no copyrighted design).
+  const c = makeFromAscii(
+    [
+      '................',
+      '......KKK.......',
+      '.....KdddK......',
+      '....KdDDDDK.....',
+      '....KdB..BDK....',
+      '....KdBwwBDK....',
+      '.....KDDDDK.....',
+      '......K.K.......',
+      '....22222222....',
+      '....22122212....',
+      '....22222222....',
+      '.....2....2.....',
+      '.....2....2.....',
+      '.....s....s.....',
+      '................',
+      '................'
+    ],
+    ASCII_COLORS
+  );
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 45) });
+  return c;
+}
+
+function makeKanjiFire16Frames() {
+  // Kanji-like "火" with a tiny flicker dot (2 frames).
+  const base = [
+    '................',
+    '.......K........',
+    '......KKK.......',
+    '.....K.K.K......',
+    '.......K........',
+    '....K..K..K.....',
+    '.....K.K.K......',
+    '......KKK.......',
+    '.......K........',
+    '......K.K.......',
+    '.....K...K......',
+    '....K.....K.....',
+    '................',
+    '................',
+    '................',
+    '................'
+  ];
+  const baseC = makeFromAscii(base, ASCII_COLORS);
+  const f1 = makeCanvas(baseC.w, baseC.h);
+  f1.p.set(baseC.p);
+  setPx(f1, 6, 1, PALETTE.red2);
+
+  const f2 = makeCanvas(baseC.w, baseC.h);
+  f2.p.set(baseC.p);
+  setPx(f2, 9, 1, PALETTE.yellow1);
+
+  // Keep crisp (no outline) so it reads like a character/glyph.
+  return [f1, f2];
+}
+
 // --- 16x16 enemies (game-ready starters) ---
 function makeEnemyBat16() {
   const c = makeFromAscii(
@@ -2284,6 +2346,22 @@ function toSample(id, name, kind, canvas, tags) {
   };
 }
 
+function toSampleFrames(id, name, kind, canvases, tags, durationsMs = []) {
+  const first = canvases?.[0] || makeCanvas(16, 16);
+  return {
+    id,
+    name,
+    kind,
+    width: first.w,
+    height: first.h,
+    frames: canvases.map((c, i) => ({
+      pixelsB64: pixelsToBase64(c.p),
+      durationMs: Number(durationsMs[i] ?? 100) || 100
+    })),
+    tags
+  };
+}
+
 const samples = [
   toSample('slime_blue', 'ぷるぷるスライム', 'character', makeSlimeBlue(), ['モンスター', '32x32', 'キャラ']),
   toSample('cat_orange', 'みかんねこ', 'character', makeCatOrange(), ['どうぶつ', '32x32', 'キャラ']),
@@ -2297,6 +2375,15 @@ const samples = [
   toSample('house_red', 'ちいさなおうち', 'tile', makeHouse(), ['マップ', '32x32', 'タイル']),
 
   // 16x16 pack (about 20)
+  toSample('hero_chibi_16', 'ちびゆうしゃ', 'character', makeHeroChibi16(), ['キャラ', '16x16', 'キャラっぽい', '主人公']),
+  toSampleFrames(
+    'kanji_fire_16',
+    'かんじっぽい「火」',
+    'object',
+    makeKanjiFire16Frames(),
+    ['漢字', '16x16', '2フレーム', 'アニメ'],
+    [120, 120]
+  ),
   toSample('slime_mini_16', 'ちびスライム', 'character', makeSlimeMini16(), ['モンスター', '16x16', 'キャラ']),
   toSample('cat_face_16', 'ねこかお', 'character', makeCatFace16(), ['どうぶつ', '16x16', 'キャラ']),
   toSample('ghost_16', 'おばけ', 'character', makeGhost16(), ['モンスター', '16x16', 'キャラ']),

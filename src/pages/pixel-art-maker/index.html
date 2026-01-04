@@ -77,6 +77,26 @@
               <span>なまえ</span>
               <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
             </label>
+
+            <div class="frame-panel" aria-label="フレーム">
+              <div class="frame-panel-head">
+                <div class="frame-panel-title">
+                  <span class="small-label">フレーム</span>
+                  <strong class="frame-counter" id="frameCounter">1/1</strong>
+                </div>
+
+                <div class="frame-actions">
+                  <button class="btn-mini" id="framePrevBtn" type="button" aria-label="前のフレーム">◀</button>
+                  <button class="btn-mini" id="frameNextBtn" type="button" aria-label="次のフレーム">▶</button>
+                  <button class="btn-mini primary" id="frameAddBtn" type="button" aria-label="フレームを追加">＋ 追加</button>
+                  <button class="btn-mini" id="frameDuplicateBtn" type="button" aria-label="フレームを複製">複製</button>
+                  <button class="btn-mini btn-mini-danger" id="frameDeleteBtn" type="button" aria-label="フレームを削除">削除</button>
+                </div>
+              </div>
+
+              <div class="frame-list" id="frameList" aria-label="フレーム一覧"></div>
+              <div class="tiny-note" id="frameHint">※ フレームを切り替えてアニメ素材を作れます</div>
+            </div>
           </div>
 
           <div class="canvas-scroll" id="canvasScroll">

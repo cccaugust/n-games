@@ -181,6 +181,21 @@ async function upsertRemoteAsset(asset) {
   // NOTE: This project currently uses open RLS policies for a family app.
   const now = new Date().toISOString();
 
+  const framesRaw =
+    Array.isArray(asset.frames) && asset.frames.length > 0
+      ? asset.frames
+      : [{ index: 0, width: asset.width, height: asset.height, pixels: asset.pixels, durationMs: 100 }];
+  const frames = framesRaw
+    .slice()
+    .sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0))
+    .map((f, i) => ({
+      index: i,
+      width: Number(f.width ?? asset.width),
+      height: Number(f.height ?? asset.height),
+      pixels: f.pixels instanceof Uint32Array ? f.pixels : new Uint32Array(f.pixels || []),
+      durationMs: Number(f.durationMs ?? 100) || 100
+    }));
+
   const { error: assetErr } = await supabase.from('pixel_assets').upsert(
     {
       id: asset.id,
@@ -189,7 +204,7 @@ async function upsertRemoteAsset(asset) {
       kind: asset.kind,
       width: asset.width,
       height: asset.height,
-      frame_count: Array.isArray(asset.frames) ? asset.frames.length : 1,
+      frame_count: frames.length,
       data_version: 1,
       updated_at: now
     },
@@ -197,24 +212,27 @@ async function upsertRemoteAsset(asset) {
   );
   if (assetErr) throw assetErr;
 
-  const frames = Array.isArray(asset.frames) && asset.frames.length > 0 ? asset.frames : null;
-  const frame0 = frames
-    ? frames.find((f) => (f.index ?? 0) === 0) || frames[0]
-    : { index: 0, width: asset.width, height: asset.height, pixels: asset.pixels, durationMs: 100 };
+  const frameRows = frames.map((f) => ({
+    asset_id: asset.id,
+    frame_index: f.index,
+    width: f.width,
+    height: f.height,
+    pixels_b64: pixelsToBase64(f.pixels),
+    duration_ms: f.durationMs,
+    updated_at: now
+  }));
 
-  const { error: frameErr } = await supabase.from('pixel_asset_frames').upsert(
-    {
-      asset_id: asset.id,
-      frame_index: 0,
-      width: frame0.width ?? asset.width,
-      height: frame0.height ?? asset.height,
-      pixels_b64: pixelsToBase64(frame0.pixels ?? asset.pixels),
-      duration_ms: frame0.durationMs ?? 100,
-      updated_at: now
-    },
-    { onConflict: 'asset_id,frame_index' }
-  );
+  const { error: frameErr } = await supabase.from('pixel_asset_frames').upsert(frameRows, {
+    onConflict: 'asset_id,frame_index'
+  });
   if (frameErr) throw frameErr;
+
+  // Clean up old extra frames if frame count shrunk (best effort).
+  try {
+    await supabase.from('pixel_asset_frames').delete().eq('asset_id', asset.id).gte('frame_index', frameRows.length);
+  } catch (e) {
+    console.warn('Frame cleanup failed:', e);
+  }
 }
 
 /**
@@ -392,7 +410,16 @@ export async function duplicatePixelAsset(asset, overrides = {}) {
     id: createId(),
     createdAt: now,
     updatedAt: now,
-    pixels: new Uint32Array(asset.pixels) // clone
+    pixels: new Uint32Array(asset.pixels), // clone
+    frames: Array.isArray(asset.frames)
+      ? asset.frames.map((f, i) => ({
+          index: Number(f.index ?? i),
+          width: Number(f.width ?? asset.width),
+          height: Number(f.height ?? asset.height),
+          pixels: new Uint32Array(f.pixels instanceof Uint32Array ? f.pixels : new Uint32Array(f.pixels || [])),
+          durationMs: Number(f.durationMs ?? 100) || 100
+        }))
+      : undefined
   };
   await putPixelAsset(next);
   return next;

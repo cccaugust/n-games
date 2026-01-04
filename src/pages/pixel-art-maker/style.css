@@ -294,6 +294,95 @@ img.pm-pill-avatar {
   flex: 1;
 }
 
+.frame-panel {
+  width: 100%;
+  border: 1px solid var(--pm-border);
+  border-radius: 14px;
+  padding: 10px;
+  background: #fafafa;
+}
+
+.frame-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.frame-panel-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.frame-counter {
+  font-weight: 1000;
+  color: var(--text-dark);
+}
+
+.frame-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn-mini-danger {
+  background: #ffe8e8;
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, 0.2);
+}
+
+.frame-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 10px 2px 4px 2px;
+  scroll-snap-type: x proximity;
+}
+
+.frame-item {
+  appearance: none;
+  border: 1px solid var(--pm-border);
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 8px;
+  min-width: 84px;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  scroll-snap-align: start;
+}
+
+.frame-item.selected {
+  border-color: rgba(108, 92, 231, 0.5);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+.frame-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  border: 1px solid var(--pm-border);
+  background: #f5f5f5;
+  image-rendering: pixelated;
+  background-size: 18px 18px;
+  background-position: 0 0;
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%);
+}
+
+.frame-label {
+  font-weight: 900;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
 .inline {
   display: flex;
   align-items: center;
@@ -990,6 +1079,9 @@ input[type='color'] {
   }
   .row-2 {
     grid-template-columns: 1fr;
+  }
+  .frame-actions .btn-mini {
+    padding: 8px 9px;
   }
   .gallery-grid {
     grid-template-columns: 1fr;
