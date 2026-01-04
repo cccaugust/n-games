@@ -106,6 +106,7 @@ const colorBtn = document.getElementById('colorBtn');
 const colorDot = document.getElementById('colorDot');
 const colorPopover = document.getElementById('colorPopover');
 const colorPopoverCloseBtn = document.getElementById('colorPopoverCloseBtn');
+const toolbarPalette = document.getElementById('toolbarPalette');
 const recentColors = document.getElementById('recentColors');
 const recentClearBtn = document.getElementById('recentClearBtn');
 const hueBtn = document.getElementById('hueBtn');
@@ -280,6 +281,34 @@ const FIXED_PALETTE_64 = [
   '#333c57'
 ];
 
+// ツールボックス常設: 基本24色（DB64から厳選）
+const BASE_PALETTE_24 = [
+  '#000000',
+  '#222034',
+  '#45283c',
+  '#663931',
+  '#8f563b',
+  '#df7126',
+  '#d9a066',
+  '#fbf236',
+  '#99e550',
+  '#6abe30',
+  '#37946e',
+  '#5fcde4',
+  '#306082',
+  '#5b6ee1',
+  '#639bff',
+  '#cbdbfc',
+  '#ffffff',
+  '#c2c3c7',
+  '#847e87',
+  '#696a6a',
+  '#ac3232',
+  '#d95763',
+  '#d77bba',
+  '#76428a'
+];
+
 let gallerySearchText = '';
 /** @type {'updated_desc'|'updated_asc'|'name_asc'|'name_desc'|'size_desc'|'size_asc'} */
 let gallerySortMode = 'updated_desc';
@@ -379,11 +408,13 @@ function addRecentColor(hex) {
   const next = [h, ...list.filter((x) => x !== h)].slice(0, 20);
   writeRecentColors(next);
   renderRecentColors();
+  renderToolbarPalette();
 }
 
 function clearRecentColors() {
   writeRecentColors([]);
   renderRecentColors();
+  renderToolbarPalette();
 }
 
 // Popoverをツールボックス外（body直下）に出して、クリップされるのを防ぐ
@@ -936,6 +967,7 @@ function setColorHex(hex) {
   colorInput.value = safe;
   currentColor = hexToRgbaInt(colorInput.value);
   updatePaletteSelection();
+  updateToolbarPaletteSelection();
   updateColorDot();
   addRecentColor(safe);
 }
@@ -1808,9 +1840,68 @@ function renderPalette() {
   updateColorDot();
 }
 
+function renderToolbarPalette() {
+  if (!toolbarPalette) return;
+  const currentHex = String(colorInput.value || '').toLowerCase();
+  const recent = readRecentColors().slice(0, 8);
+
+  toolbarPalette.innerHTML = '';
+
+  // Recent (always 8 slots)
+  for (let i = 0; i < 8; i++) {
+    const hex = recent[i] || null;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toolbar-swatch';
+    if (!hex) {
+      btn.classList.add('empty');
+      btn.disabled = true;
+      btn.setAttribute('aria-label', '最近の色（空）');
+      btn.title = '最近の色（空）';
+    } else {
+      btn.style.background = hex;
+      btn.dataset.hex = hex.toLowerCase();
+      btn.classList.toggle('selected', btn.dataset.hex === currentHex);
+      btn.setAttribute('aria-label', `最近の色 ${hex}`);
+      btn.title = `最近の色 ${hex}`;
+      btn.addEventListener('click', () => {
+        setColorHex(hex);
+        updateStatus('最近の色');
+      });
+    }
+    toolbarPalette.appendChild(btn);
+  }
+
+  // Base 24
+  BASE_PALETTE_24.forEach((hex) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toolbar-swatch';
+    btn.style.background = hex;
+    btn.dataset.hex = hex.toLowerCase();
+    btn.classList.toggle('selected', btn.dataset.hex === currentHex);
+    btn.setAttribute('aria-label', `基本の色 ${hex}`);
+    btn.title = `基本の色 ${hex}`;
+    btn.addEventListener('click', () => {
+      setColorHex(hex);
+      updateStatus('基本の色');
+    });
+    toolbarPalette.appendChild(btn);
+  });
+}
+
 function updatePaletteSelection() {
   const currentHex = String(colorInput.value || '').toLowerCase();
   paletteGrid.querySelectorAll('.swatch').forEach((el) => {
+    const btn = /** @type {HTMLButtonElement} */ (el);
+    btn.classList.toggle('selected', btn.dataset.hex === currentHex);
+  });
+}
+
+function updateToolbarPaletteSelection() {
+  if (!toolbarPalette) return;
+  const currentHex = String(colorInput.value || '').toLowerCase();
+  toolbarPalette.querySelectorAll('.toolbar-swatch').forEach((el) => {
     const btn = /** @type {HTMLButtonElement} */ (el);
     btn.classList.toggle('selected', btn.dataset.hex === currentHex);
   });
@@ -2750,6 +2841,7 @@ canvas.addEventListener('pointerleave', () => {
   setTool('pen');
   canvasFrame.classList.toggle('grid', gridToggle.checked);
   renderPalette();
+  renderToolbarPalette();
   setHuePreview(0);
   updateRangeButtons();
   syncToolbarMoreForViewport();
