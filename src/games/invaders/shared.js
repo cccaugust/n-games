@@ -1,5 +1,6 @@
 import { getCurrentPlayer } from '../../js/auth.js';
-import { assetPreviewDataUrl, assetToPngDataUrl, getPixelAsset, listPixelAssets } from '../../js/pixelAssets.js';
+import { assetPreviewDataUrl, getPixelAsset, listPixelAssets, renderPixelsToCanvas } from '../../js/pixelAssets.js';
+import samplePack from '../../pages/pixel-art-maker/samples.json';
 
 export const GAME_ID = 'invaders';
 export const STAGE_COLS = 14;
@@ -193,25 +194,165 @@ export function getOwnerId() {
   return p?.id != null ? String(p.id) : 'unknown';
 }
 
+function base64ToArrayBuffer(b64) {
+  const binary = atob(String(b64 || ''));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function decodePixelsB64(b64) {
+  try {
+    return new Uint32Array(base64ToArrayBuffer(b64));
+  } catch {
+    return new Uint32Array();
+  }
+}
+
+function normalizePixelsSize(width, height, pixels) {
+  const w = Math.max(1, Number(width) || 1);
+  const h = Math.max(1, Number(height) || 1);
+  const expected = w * h;
+  if (pixels instanceof Uint32Array && pixels.length === expected) return pixels;
+  const out = new Uint32Array(expected);
+  if (!(pixels instanceof Uint32Array)) return out;
+  out.set(pixels.subarray(0, Math.min(expected, pixels.length)), 0);
+  return out;
+}
+
+function isSampleToken(token) {
+  return typeof token === 'string' && token.startsWith('sample_');
+}
+
+function sampleIdToToken(sampleId) {
+  return `sample_${String(sampleId || '').trim()}`;
+}
+
+function findSampleByToken(token) {
+  if (!isSampleToken(token)) return null;
+  const id = token.slice('sample_'.length);
+  const samples = Array.isArray(samplePack?.samples) ? samplePack.samples : [];
+  return samples.find((s) => String(s?.id || '') === id) || null;
+}
+
+function sampleToPixelAsset(sample) {
+  const w = Number(sample?.width) || 16;
+  const h = Number(sample?.height) || 16;
+  const now = new Date().toISOString();
+
+  const rawFrames = Array.isArray(sample?.frames) && sample.frames.length > 0 ? sample.frames : null;
+  const frames = rawFrames
+    ? rawFrames.map((f, i) => ({
+        index: i,
+        width: w,
+        height: h,
+        pixels: new Uint32Array(normalizePixelsSize(w, h, decodePixelsB64(f?.pixelsB64))),
+        durationMs: Number(f?.durationMs ?? 120) || 120
+      }))
+    : [
+        {
+          index: 0,
+          width: w,
+          height: h,
+          pixels: new Uint32Array(normalizePixelsSize(w, h, decodePixelsB64(sample?.pixelsB64))),
+          durationMs: 120
+        }
+      ];
+
+  const frame0 = frames[0];
+  return {
+    id: sampleIdToToken(sample?.id),
+    ownerId: 'sample',
+    name: sample?.name || 'サンプル',
+    kind: sample?.kind || 'character',
+    width: w,
+    height: h,
+    pixels: frame0?.pixels ? new Uint32Array(frame0.pixels) : new Uint32Array(w * h),
+    frames,
+    version: 1,
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
 export async function listEnemyAssetsForCurrentPlayer() {
   const ownerId = getOwnerId();
   const assets = await listPixelAssets({ ownerId, kind: 'character' });
-  return assets || [];
+  const user = Array.isArray(assets) ? assets : [];
+
+  const samples = Array.isArray(samplePack?.samples) ? samplePack.samples : [];
+  const sampleChars = samples.filter((s) => (s?.kind || 'character') === 'character').map(sampleToPixelAsset);
+
+  return [...sampleChars, ...user];
 }
 
 export function previewUrlForAsset(asset) {
   return assetPreviewDataUrl(asset, 72);
 }
 
-export async function loadEnemySpriteImage(enemyToken) {
-  if (!enemyToken || enemyToken === ENEMY_DEFAULT) return { kind: 'default', id: ENEMY_DEFAULT, img: null };
-  const asset = await getPixelAsset(enemyToken);
-  if (!asset) return { kind: 'missing', id: enemyToken, img: null };
-  const url = assetToPngDataUrl(asset);
-  const img = new Image();
-  img.decoding = 'async';
-  img.src = url;
-  await img.decode().catch(() => {});
-  return { kind: 'asset', id: enemyToken, img, width: asset.width, height: asset.height };
+function framePixelsToDataUrl(pixels, width, height) {
+  const c = document.createElement('canvas');
+  renderPixelsToCanvas(c, pixels, width, height);
+  return c.toDataURL('image/png');
+}
+
+/**
+ * @typedef {{img:HTMLImageElement,width:number,height:number,durationMs:number}} EnemySpriteFrame
+ * @typedef {{kind:'default'|'missing'|'asset',id:string,frames:EnemySpriteFrame[],totalDurationMs:number}} EnemySprite
+ */
+
+export async function loadEnemySprite(enemyToken) {
+  if (!enemyToken || enemyToken === ENEMY_DEFAULT) {
+    return { kind: 'default', id: ENEMY_DEFAULT, frames: [], totalDurationMs: 0 };
+  }
+
+  let asset = null;
+  if (isSampleToken(enemyToken)) {
+    const s = findSampleByToken(enemyToken);
+    if (s) asset = sampleToPixelAsset(s);
+  } else {
+    asset = await getPixelAsset(enemyToken);
+  }
+
+  if (!asset) return { kind: 'missing', id: enemyToken, frames: [], totalDurationMs: 0 };
+
+  const rawFrames = Array.isArray(asset.frames) && asset.frames.length > 0 ? asset.frames : null;
+  const frames = rawFrames
+    ? rawFrames
+        .slice()
+        .sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0))
+        .map((f, i) => ({
+          index: i,
+          width: Number(f.width ?? asset.width) || asset.width,
+          height: Number(f.height ?? asset.height) || asset.height,
+          pixels: f.pixels instanceof Uint32Array ? f.pixels : new Uint32Array(f.pixels || []),
+          durationMs: Number(f.durationMs ?? 120) || 120
+        }))
+    : [
+        {
+          index: 0,
+          width: asset.width,
+          height: asset.height,
+          pixels: asset.pixels instanceof Uint32Array ? asset.pixels : new Uint32Array(asset.pixels || []),
+          durationMs: 120
+        }
+      ];
+
+  /** @type {EnemySpriteFrame[]} */
+  const outFrames = [];
+  let totalDurationMs = 0;
+  for (const f of frames) {
+    const url = framePixelsToDataUrl(f.pixels, f.width, f.height);
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    await img.decode().catch(() => {});
+    const durationMs = Number(f.durationMs ?? 120) || 120;
+    totalDurationMs += durationMs;
+    outFrames.push({ img, width: f.width, height: f.height, durationMs });
+  }
+  totalDurationMs = Math.max(1, totalDurationMs);
+
+  return { kind: 'asset', id: enemyToken, frames: outFrames, totalDurationMs };
 }
 

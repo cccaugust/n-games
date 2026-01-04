@@ -13,7 +13,7 @@ import {
   ensureStages,
   escapeHtml,
   getStageFromUrl,
-  loadEnemySpriteImage,
+  loadEnemySprite,
   normalizeStage
 } from './shared.js';
 
@@ -107,7 +107,7 @@ if (btnFire) {
 // Stage
 let playingStageName = null;
 let stage = null;
-let spriteCache = new Map(); // token -> {img|null, kind}
+let spriteCache = new Map(); // token -> EnemySprite
 
 function setStageLabel(name) {
   if (stageLabel) stageLabel.textContent = `ステージ：${name || '—'}`;
@@ -124,7 +124,7 @@ async function prepareSpritesForStage(s) {
     if (spriteCache.has(t)) continue;
     tasks.push(
       (async () => {
-        const spr = await loadEnemySpriteImage(t);
+        const spr = await loadEnemySprite(t);
         spriteCache.set(t, spr);
       })()
     );
@@ -233,11 +233,26 @@ function buildEnemiesFromStage(s) {
         y0: top + row * (size + gapY),
         w: size,
         h: size,
-        alive: true
+        alive: true,
+        animOffsetMs: (col * 97 + row * 53) * 7
       });
     }
   }
   return list;
+}
+
+function pickAnimatedFrame(sprite, nowMs, offsetMs = 0) {
+  const frames = sprite?.frames || [];
+  if (frames.length === 0) return null;
+  if (frames.length === 1) return frames[0];
+  const total = Math.max(1, Number(sprite.totalDurationMs) || frames.reduce((s, f) => s + (f.durationMs || 120), 0) || 1);
+  let t = (nowMs + (Number(offsetMs) || 0)) % total;
+  for (const f of frames) {
+    const d = Math.max(1, Number(f.durationMs) || 120);
+    if (t < d) return f;
+    t -= d;
+  }
+  return frames[frames.length - 1];
 }
 
 function buildWallsFromStage(s) {
@@ -660,6 +675,7 @@ function drawWalls() {
 function draw() {
   ctx.clearRect(0, 0, viewW, viewH);
   ctx.imageSmoothingEnabled = false;
+  const nowMs = performance.now();
 
   // Background
   const g = ctx.createLinearGradient(0, 0, 0, viewH);
@@ -691,7 +707,8 @@ function draw() {
       continue;
     }
     const spr = spriteCache.get(e.token);
-    const img = spr?.img;
+    const frame = spr ? pickAnimatedFrame(spr, nowMs, e.animOffsetMs) : null;
+    const img = frame?.img;
     if (img) {
       ctx.drawImage(img, x, y, e.w, e.h);
     } else {

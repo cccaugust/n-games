@@ -67,6 +67,15 @@ const zoomInBtn = document.getElementById('zoomInBtn');
 
 const nameInput = document.getElementById('nameInput');
 
+// Frames UI
+const frameCounter = document.getElementById('frameCounter');
+const frameList = document.getElementById('frameList');
+const framePrevBtn = document.getElementById('framePrevBtn');
+const frameNextBtn = document.getElementById('frameNextBtn');
+const frameAddBtn = document.getElementById('frameAddBtn');
+const frameDuplicateBtn = document.getElementById('frameDuplicateBtn');
+const frameDeleteBtn = document.getElementById('frameDeleteBtn');
+
 const toolPen = document.getElementById('toolPen');
 const toolEraser = document.getElementById('toolEraser');
 const toolFill = document.getElementById('toolFill');
@@ -115,7 +124,8 @@ const sampleCloseBtn = document.getElementById('sampleCloseBtn');
 const sampleList = document.getElementById('sampleList');
 
 /**
- * @typedef {{id:string,name:string,kind:'character'|'object'|'tile',width:number,height:number,pixelsB64:string,tags?:string[]}} SampleAsset
+ * @typedef {{pixelsB64:string,durationMs?:number}} SampleFrame
+ * @typedef {{id:string,name:string,kind:'character'|'object'|'tile',width:number,height:number,pixelsB64?:string,frames?:SampleFrame[],tags?:string[]}} SampleAsset
  */
 
 /** @type {SampleAsset[]} */
@@ -130,9 +140,12 @@ let currentColor = hexToRgbaInt(colorInput.value);
 let currentAsset = null;
 let isPersisted = false;
 let dirty = false;
+let currentFrameIndex = 0;
 
 /**
- * @typedef {{width:number,height:number,pixels:Uint32Array}} PixelSnapshot
+ * @typedef {{type:'frame',frameIndex:number,width:number,height:number,pixels:Uint32Array}} FrameSnapshot
+ * @typedef {{type:'asset',frameIndex:number,width:number,height:number,frames:import('../../js/pixelAssets.js').PixelAssetFrame[]}} AssetSnapshot
+ * @typedef {FrameSnapshot|AssetSnapshot} PixelSnapshot
  */
 /** @type {PixelSnapshot[]} */
 let undoStack = [];
@@ -246,6 +259,9 @@ function setReadOnly(next) {
   if (importImageBtn) importImageBtn.disabled = disableEdit;
   if (undoBtn) undoBtn.disabled = disableEdit || undoStack.length === 0;
   if (redoBtn) redoBtn.disabled = disableEdit || redoStack.length === 0;
+  if (frameAddBtn) frameAddBtn.disabled = disableEdit;
+  if (frameDuplicateBtn) frameDuplicateBtn.disabled = disableEdit;
+  if (frameDeleteBtn) frameDeleteBtn.disabled = disableEdit;
 
   // Prevent pointer edits entirely in read-only.
   if (canvas) canvas.style.pointerEvents = disableEdit ? 'none' : '';
@@ -386,6 +402,24 @@ function decodePixelsB64(b64) {
 }
 
 /**
+ * @param {number} width
+ * @param {number} height
+ * @param {Uint32Array} pixels
+ */
+function normalizePixelsSize(width, height, pixels) {
+  const w = Math.max(1, Number(width) || 1);
+  const h = Math.max(1, Number(height) || 1);
+  const expected = w * h;
+  if (pixels instanceof Uint32Array && pixels.length === expected) return pixels;
+  const out = new Uint32Array(expected);
+  if (!(pixels instanceof Uint32Array)) return out;
+  // best-effort copy (top-left)
+  const min = Math.min(pixels.length, out.length);
+  out.set(pixels.subarray(0, min), 0);
+  return out;
+}
+
+/**
  * @param {SampleAsset} sample
  * @returns {import('../../js/pixelAssets.js').PixelAsset}
  */
@@ -393,8 +427,35 @@ function sampleToPixelAsset(sample) {
   const now = new Date().toISOString();
   const w = Number(sample.width) || 16;
   const h = Number(sample.height) || 16;
-  const pixels = decodePixelsB64(sample.pixelsB64);
-  const safePixels = pixels.length === w * h ? pixels : new Uint32Array(w * h);
+  /** @type {import('../../js/pixelAssets.js').PixelAssetFrame[]} */
+  let frames = [];
+
+  if (Array.isArray(sample.frames) && sample.frames.length > 0) {
+    frames = sample.frames.map((f, i) => {
+      const pixels = normalizePixelsSize(w, h, decodePixelsB64(f?.pixelsB64));
+      return {
+        index: i,
+        width: w,
+        height: h,
+        pixels: new Uint32Array(pixels),
+        durationMs: Number(f?.durationMs ?? 100) || 100
+      };
+    });
+  } else {
+    const pixels = normalizePixelsSize(w, h, decodePixelsB64(sample.pixelsB64));
+    frames = [
+      {
+        index: 0,
+        width: w,
+        height: h,
+        pixels: new Uint32Array(pixels),
+        durationMs: 100
+      }
+    ];
+  }
+
+  const frame0 = frames.find((f) => (f.index ?? 0) === 0) || frames[0];
+  const safePixels = frame0?.pixels ? new Uint32Array(frame0.pixels) : new Uint32Array(w * h);
   return {
     id: `sample_${sample.id}`,
     ownerId,
@@ -403,15 +464,7 @@ function sampleToPixelAsset(sample) {
     width: w,
     height: h,
     pixels: safePixels,
-    frames: [
-      {
-        index: 0,
-        width: w,
-        height: h,
-        pixels: new Uint32Array(safePixels),
-        durationMs: 100
-      }
-    ],
+    frames,
     version: 1,
     createdAt: now,
     updatedAt: now
@@ -464,7 +517,8 @@ function renderSampleList() {
 
     const info = document.createElement('div');
     info.className = 'asset-meta';
-    info.textContent = `${asset.width}×${asset.height} / ${sample.kind || DEFAULT_KIND}`;
+    const frameCount = Array.isArray(asset.frames) ? asset.frames.length : 1;
+    info.textContent = `${asset.width}×${asset.height} / ${sample.kind || DEFAULT_KIND}${frameCount > 1 ? ` / ${frameCount}フレーム` : ''}`;
 
     const tags = document.createElement('div');
     tags.className = 'asset-tags';
@@ -633,15 +687,199 @@ function renderNow() {
   ctx.putImageData(pixelsToImageData(currentAsset.pixels, currentAsset.width, currentAsset.height), 0, 0);
 }
 
+function normalizeFramesInCurrentAsset() {
+  if (!currentAsset) return;
+  const w = Number(currentAsset.width) || 16;
+  const h = Number(currentAsset.height) || 16;
+
+  if (!Array.isArray(currentAsset.frames) || currentAsset.frames.length === 0) {
+    const pixels = normalizePixelsSize(w, h, currentAsset.pixels instanceof Uint32Array ? currentAsset.pixels : new Uint32Array());
+    currentAsset.frames = [
+      {
+        index: 0,
+        width: w,
+        height: h,
+        pixels: new Uint32Array(pixels),
+        durationMs: 100
+      }
+    ];
+  }
+
+  const framesSorted = currentAsset.frames.slice().sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0));
+  currentAsset.frames = framesSorted.map((f, i) => {
+    const fp = f?.pixels instanceof Uint32Array ? f.pixels : new Uint32Array(f?.pixels || []);
+    const pixels = normalizePixelsSize(w, h, fp);
+    return {
+      index: i,
+      width: w,
+      height: h,
+      pixels: new Uint32Array(pixels),
+      durationMs: Number(f?.durationMs ?? 100) || 100
+    };
+  });
+
+  currentFrameIndex = clamp(currentFrameIndex, 0, currentAsset.frames.length - 1);
+  const active = currentAsset.frames[currentFrameIndex];
+  currentAsset.pixels = active?.pixels ? active.pixels : new Uint32Array(w * h);
+}
+
+function switchToFrame(index, { resetHistory = false } = {}) {
+  if (!currentAsset) return;
+  normalizeFramesInCurrentAsset();
+  const total = currentAsset.frames?.length || 1;
+  const next = clamp(Number(index) || 0, 0, total - 1);
+  if (next === currentFrameIndex) return;
+  if (isPointerDown) endStroke();
+  currentFrameIndex = next;
+  normalizeFramesInCurrentAsset();
+  if (resetHistory) {
+    undoStack = [];
+    redoStack = [];
+    updateUndoRedoButtons();
+  }
+  updateCanvasLayout();
+  scheduleRender();
+  updateFrameUi();
+  updateStatus(`フレーム ${next + 1}`);
+}
+
+function updateFrameUi() {
+  if (!currentAsset) return;
+  if (!frameCounter || !frameList) return;
+  normalizeFramesInCurrentAsset();
+
+  const frames = currentAsset.frames || [];
+  const total = frames.length || 1;
+  const cur = clamp(currentFrameIndex, 0, total - 1);
+  frameCounter.textContent = `${cur + 1}/${total}`;
+
+  if (framePrevBtn) framePrevBtn.disabled = cur <= 0;
+  if (frameNextBtn) frameNextBtn.disabled = cur >= total - 1;
+  if (frameDeleteBtn) frameDeleteBtn.disabled = isReadOnly || total <= 1;
+
+  frameList.innerHTML = '';
+  frames.forEach((f, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'frame-item';
+    btn.classList.toggle('selected', i === cur);
+    btn.setAttribute('aria-label', `フレーム ${i + 1}`);
+
+    const img = document.createElement('img');
+    img.className = 'frame-thumb';
+    img.alt = '';
+    img.src = assetPreviewDataUrl({ ...currentAsset, pixels: f.pixels }, 56);
+
+    const label = document.createElement('div');
+    label.className = 'frame-label';
+    label.textContent = `#${i + 1}`;
+
+    btn.appendChild(img);
+    btn.appendChild(label);
+    btn.addEventListener('click', () => {
+      switchToFrame(i);
+    });
+
+    frameList.appendChild(btn);
+  });
+}
+
+function snapshotCurrentFrame() {
+  if (!currentAsset) return { type: 'frame', frameIndex: 0, width: 0, height: 0, pixels: new Uint32Array() };
+  normalizeFramesInCurrentAsset();
+  return {
+    type: 'frame',
+    frameIndex: currentFrameIndex,
+    width: currentAsset.width,
+    height: currentAsset.height,
+    pixels: new Uint32Array(currentAsset.pixels)
+  };
+}
+
+function snapshotEntireAsset() {
+  if (!currentAsset) {
+    return { type: 'asset', frameIndex: 0, width: 0, height: 0, frames: [] };
+  }
+  normalizeFramesInCurrentAsset();
+  const frames = (currentAsset.frames || []).map((f) => ({
+    index: Number(f.index ?? 0),
+    width: Number(f.width ?? currentAsset.width),
+    height: Number(f.height ?? currentAsset.height),
+    pixels: new Uint32Array(f.pixels),
+    durationMs: Number(f.durationMs ?? 100) || 100
+  }));
+  return {
+    type: 'asset',
+    frameIndex: currentFrameIndex,
+    width: currentAsset.width,
+    height: currentAsset.height,
+    frames
+  };
+}
+
+function addFrame({ duplicate = false } = {}) {
+  if (!currentAsset) return;
+  if (isReadOnly) return;
+  normalizeFramesInCurrentAsset();
+  const before = snapshotEntireAsset();
+  pushUndoSnapshot(before);
+
+  const base = currentAsset.frames?.[currentFrameIndex];
+  const nextPixels = duplicate && base?.pixels ? new Uint32Array(base.pixels) : new Uint32Array(currentAsset.width * currentAsset.height);
+  const nextDuration = Number(base?.durationMs ?? 100) || 100;
+
+  currentAsset.frames.push({
+    index: currentAsset.frames.length,
+    width: currentAsset.width,
+    height: currentAsset.height,
+    pixels: nextPixels,
+    durationMs: nextDuration
+  });
+
+  currentFrameIndex = currentAsset.frames.length - 1;
+  normalizeFramesInCurrentAsset();
+  canvas.width = currentAsset.width;
+  canvas.height = currentAsset.height;
+  setDirty(true);
+  updateFrameUi();
+  scheduleRender();
+  updateStatus(duplicate ? 'フレームを複製した' : 'フレームを追加した');
+}
+
+function deleteCurrentFrame() {
+  if (!currentAsset) return;
+  if (isReadOnly) return;
+  normalizeFramesInCurrentAsset();
+  if ((currentAsset.frames?.length || 0) <= 1) return;
+  if (!confirm('このフレームを削除しますか？（もどすで戻せるよ）')) return;
+
+  const before = snapshotEntireAsset();
+  pushUndoSnapshot(before);
+
+  currentAsset.frames.splice(currentFrameIndex, 1);
+  currentFrameIndex = clamp(currentFrameIndex, 0, Math.max(0, currentAsset.frames.length - 1));
+  normalizeFramesInCurrentAsset();
+  canvas.width = currentAsset.width;
+  canvas.height = currentAsset.height;
+  setDirty(true);
+  updateFrameUi();
+  scheduleRender();
+  updateStatus('フレームを削除した');
+}
+
 function setAsset(asset, { persisted }) {
   currentAsset = asset;
   isPersisted = Boolean(persisted);
   setDirty(false);
   setReadOnly(Boolean(asset?.ownerId) && String(asset.ownerId) !== String(ownerId));
   setHuePreview(0);
+  currentFrameIndex = 0;
 
   // Sync UI fields
   nameInput.value = asset.name || '';
+
+  // Ensure frames exist and point pixels at active frame
+  normalizeFramesInCurrentAsset();
 
   // Canvas internal size
   canvas.width = asset.width;
@@ -656,6 +894,7 @@ function setAsset(asset, { persisted }) {
   updateCanvasLayout();
   scheduleRender();
   updateUndoRedoButtons();
+  updateFrameUi();
   updateStatus();
 }
 
@@ -665,23 +904,40 @@ function updateUndoRedoButtons() {
 }
 
 function snapshotCurrentPixels() {
-  if (!currentAsset) return { width: 0, height: 0, pixels: new Uint32Array() };
-  return {
-    width: currentAsset.width,
-    height: currentAsset.height,
-    pixels: new Uint32Array(currentAsset.pixels)
-  };
+  return snapshotCurrentFrame();
 }
 
 function restoreSnapshot(snapshot) {
   if (!currentAsset) return;
-  currentAsset.width = snapshot.width;
-  currentAsset.height = snapshot.height;
-  currentAsset.pixels = new Uint32Array(snapshot.pixels);
+  if (snapshot?.type === 'asset') {
+    currentAsset.width = snapshot.width;
+    currentAsset.height = snapshot.height;
+    currentAsset.frames = (snapshot.frames || []).map((f) => ({
+      index: Number(f.index ?? 0),
+      width: Number(f.width ?? snapshot.width),
+      height: Number(f.height ?? snapshot.height),
+      pixels: new Uint32Array(f.pixels),
+      durationMs: Number(f.durationMs ?? 100) || 100
+    }));
+    currentFrameIndex = clamp(snapshot.frameIndex ?? 0, 0, Math.max(0, currentAsset.frames.length - 1));
+    normalizeFramesInCurrentAsset();
+  } else {
+    currentFrameIndex = clamp(snapshot?.frameIndex ?? 0, 0, Math.max(0, (currentAsset.frames?.length ?? 1) - 1));
+    normalizeFramesInCurrentAsset();
+    const nextPixels = new Uint32Array(snapshot?.pixels || []);
+    if (Array.isArray(currentAsset.frames) && currentAsset.frames[currentFrameIndex]) {
+      currentAsset.frames[currentFrameIndex].pixels = nextPixels;
+      currentAsset.frames[currentFrameIndex].width = currentAsset.width;
+      currentAsset.frames[currentFrameIndex].height = currentAsset.height;
+    }
+    currentAsset.pixels = nextPixels;
+  }
+
   canvas.width = currentAsset.width;
   canvas.height = currentAsset.height;
   updateCanvasLayout();
   scheduleRender();
+  updateFrameUi();
 }
 
 function pushUndoSnapshot(snapshot) {
@@ -876,10 +1132,17 @@ async function importImageToCurrentAsset(file) {
   const nextPixels = imageDataToPixels(imgData, { alphaThreshold: 16 });
 
   const snapshot = snapshotCurrentPixels();
+  normalizeFramesInCurrentAsset();
   currentAsset.pixels = nextPixels;
+  if (Array.isArray(currentAsset.frames) && currentAsset.frames[currentFrameIndex]) {
+    currentAsset.frames[currentFrameIndex].pixels = nextPixels;
+    currentAsset.frames[currentFrameIndex].width = currentAsset.width;
+    currentAsset.frames[currentFrameIndex].height = currentAsset.height;
+  }
   pushUndoSnapshot(snapshot);
   setDirty(true);
   scheduleRender();
+  updateFrameUi();
   updateStatus('画像を読み込んだ');
 }
 
@@ -1140,6 +1403,43 @@ nameInput.addEventListener('input', () => {
   setDirty(true);
 });
 
+if (framePrevBtn) {
+  framePrevBtn.addEventListener('click', () => {
+    if (!currentAsset) return;
+    switchToFrame(currentFrameIndex - 1);
+  });
+}
+if (frameNextBtn) {
+  frameNextBtn.addEventListener('click', () => {
+    if (!currentAsset) return;
+    switchToFrame(currentFrameIndex + 1);
+  });
+}
+if (frameAddBtn) {
+  frameAddBtn.addEventListener('click', () => {
+    if (!currentAsset) {
+      alert('先に「新規作成」か、作品を開いてね！');
+      return;
+    }
+    addFrame({ duplicate: false });
+  });
+}
+if (frameDuplicateBtn) {
+  frameDuplicateBtn.addEventListener('click', () => {
+    if (!currentAsset) {
+      alert('先に「新規作成」か、作品を開いてね！');
+      return;
+    }
+    addFrame({ duplicate: true });
+  });
+}
+if (frameDeleteBtn) {
+  frameDeleteBtn.addEventListener('click', () => {
+    if (!currentAsset) return;
+    deleteCurrentFrame();
+  });
+}
+
 toolPen.addEventListener('click', () => setTool('pen'));
 toolEraser.addEventListener('click', () => setTool('eraser'));
 toolFill.addEventListener('click', () => setTool('fill'));
@@ -1162,24 +1462,36 @@ function expandCanvas({ addWidth = 0, addHeight = 0 } = {}) {
     return;
   }
 
-  const snapshot = snapshotCurrentPixels();
-  const nextPixels = new Uint32Array(nextW * nextH);
-  for (let y = 0; y < beforeH; y++) {
-    const srcStart = y * beforeW;
-    const dstStart = y * nextW;
-    nextPixels.set(currentAsset.pixels.subarray(srcStart, srcStart + beforeW), dstStart);
-  }
+  normalizeFramesInCurrentAsset();
+  const snapshot = snapshotEntireAsset();
+  pushUndoSnapshot(snapshot);
 
   currentAsset.width = nextW;
   currentAsset.height = nextH;
-  currentAsset.pixels = nextPixels;
+
+  // Resize all frames (keep top-left content).
+  (currentAsset.frames || []).forEach((f) => {
+    const beforePixels = normalizePixelsSize(beforeW, beforeH, f.pixels);
+    const nextPixels = new Uint32Array(nextW * nextH);
+    for (let y = 0; y < beforeH; y++) {
+      const srcStart = y * beforeW;
+      const dstStart = y * nextW;
+      nextPixels.set(beforePixels.subarray(srcStart, srcStart + beforeW), dstStart);
+    }
+    f.width = nextW;
+    f.height = nextH;
+    f.pixels = nextPixels;
+  });
+
+  currentFrameIndex = clamp(currentFrameIndex, 0, Math.max(0, (currentAsset.frames?.length ?? 1) - 1));
+  currentAsset.pixels = currentAsset.frames?.[currentFrameIndex]?.pixels || new Uint32Array(nextW * nextH);
   canvas.width = nextW;
   canvas.height = nextH;
 
-  pushUndoSnapshot(snapshot);
   setDirty(true);
   updateCanvasLayout();
   scheduleRender();
+  updateFrameUi();
   updateStatus('キャンバスをひろげた');
 }
 
@@ -1293,7 +1605,7 @@ undoBtn.addEventListener('click', () => {
   if (isReadOnly) return;
   if (undoStack.length === 0) return;
   const prev = undoStack.pop();
-  redoStack.push(snapshotCurrentPixels());
+  redoStack.push(prev?.type === 'asset' ? snapshotEntireAsset() : snapshotCurrentPixels());
   restoreSnapshot(prev);
   setDirty(true);
   updateUndoRedoButtons();
@@ -1305,7 +1617,7 @@ redoBtn.addEventListener('click', () => {
   if (isReadOnly) return;
   if (redoStack.length === 0) return;
   const next = redoStack.pop();
-  undoStack.push(snapshotCurrentPixels());
+  undoStack.push(next?.type === 'asset' ? snapshotEntireAsset() : snapshotCurrentPixels());
   restoreSnapshot(next);
   setDirty(true);
   updateUndoRedoButtons();
@@ -1318,9 +1630,13 @@ clearBtn.addEventListener('click', () => {
   if (!confirm('ぜんぶ消しますか？（もどすで元に戻せるよ）')) return;
   const snapshot = snapshotCurrentPixels();
   currentAsset.pixels.fill(0);
+  if (Array.isArray(currentAsset.frames) && currentAsset.frames[currentFrameIndex]) {
+    currentAsset.frames[currentFrameIndex].pixels = currentAsset.pixels;
+  }
   pushUndoSnapshot(snapshot);
   setDirty(true);
   scheduleRender();
+  updateFrameUi();
   updateStatus('全消し');
 });
 
@@ -1358,16 +1674,12 @@ saveBtn.addEventListener('click', async () => {
     return;
   }
   currentAsset.name = name;
-  // NOTE: current UI edits only `asset.pixels`. Keep frame0 in sync for saving.
-  if (Array.isArray(currentAsset.frames) && currentAsset.frames.length > 0) {
-    const f0 =
-      currentAsset.frames.find((f) => (f.index ?? 0) === 0) ||
-      currentAsset.frames[0];
-    if (f0) {
-      f0.width = currentAsset.width;
-      f0.height = currentAsset.height;
-      f0.pixels = new Uint32Array(currentAsset.pixels);
-    }
+  // Safety: keep active frame in sync (frames are the source of truth for saving).
+  normalizeFramesInCurrentAsset();
+  if (Array.isArray(currentAsset.frames) && currentAsset.frames[currentFrameIndex]) {
+    currentAsset.frames[currentFrameIndex].width = currentAsset.width;
+    currentAsset.frames[currentFrameIndex].height = currentAsset.height;
+    currentAsset.frames[currentFrameIndex].pixels = currentAsset.pixels;
   }
   const saved = await putPixelAsset(currentAsset);
   setAsset(saved, { persisted: true });
