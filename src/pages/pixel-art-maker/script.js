@@ -109,6 +109,7 @@ const colorDot = document.getElementById('colorDot');
 const colorPopover = document.getElementById('colorPopover');
 const colorPopoverCloseBtn = document.getElementById('colorPopoverCloseBtn');
 const toolbarPalette = document.getElementById('toolbarPalette');
+const pickColorBtn = document.getElementById('pickColorBtn');
 const recentColors = document.getElementById('recentColors');
 const recentClearBtn = document.getElementById('recentClearBtn');
 const hueBtn = document.getElementById('hueBtn');
@@ -136,7 +137,6 @@ const avatarPickBtn = document.getElementById('avatarPickBtn');
 const importImageBtn = document.getElementById('importImageBtn');
 const importImageInput = document.getElementById('importImageInput');
 
-const statusText = document.getElementById('statusText');
 const toolbarMenuBtn = document.getElementById('toolbarMenuBtn');
 const toolbarMore = document.getElementById('toolbarMore');
 const framesBtn = document.getElementById('framesBtn');
@@ -212,6 +212,7 @@ let huePreviewDeg = 0;
 let frameThumbTimer = null;
 
 const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
+// UIから「アイコン」ボタンは削除（将来復活する場合に備えてロジックは残す）
 if (avatarPickBtn) avatarPickBtn.hidden = !pickAvatarMode;
 
 const CANVAS_STEP = 16;
@@ -222,73 +223,80 @@ const DEFAULT_NEW_ASSET = {
   name: 'あたらしいドット'
 };
 
-const FIXED_PALETTE_64 = [
-  // DawnBringer 64 (DB64) palette (curated 64 colors)
-  '#140c1c',
-  '#442434',
-  '#30346d',
-  '#4e4a4e',
-  '#854c30',
-  '#346524',
-  '#d04648',
-  '#757161',
-  '#597dce',
-  '#d27d2c',
-  '#8595a1',
-  '#6daa2c',
-  '#d2aa99',
-  '#6dc2ca',
-  '#dad45e',
-  '#deeed6',
-  '#000000',
-  '#222034',
-  '#45283c',
-  '#663931',
-  '#8f563b',
-  '#df7126',
-  '#d9a066',
-  '#eec39a',
-  '#fbf236',
-  '#99e550',
-  '#6abe30',
-  '#37946e',
-  '#4b692f',
-  '#524b24',
-  '#323c39',
-  '#3f3f74',
-  '#306082',
-  '#5b6ee1',
-  '#639bff',
-  '#5fcde4',
-  '#cbdbfc',
-  '#ffffff',
-  '#9badb7',
-  '#847e87',
-  '#696a6a',
-  '#595652',
-  '#76428a',
-  '#ac3232',
-  '#d95763',
-  '#d77bba',
-  '#8f974a',
-  '#8a6f30',
-  '#c2c3c7',
-  '#5d275d',
-  '#b13e53',
-  '#ef7d57',
-  '#ffcd75',
-  '#a7f070',
-  '#38b764',
-  '#257179',
-  '#29366f',
-  '#3b5dc9',
-  '#41a6f6',
-  '#73eff7',
-  '#f4f4f4',
-  '#94b0c2',
-  '#566c86',
-  '#333c57'
-];
+// HSV色空間からRGBに変換
+function hsvToRgb(h, s, v) {
+  h = h % 360;
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let r, g, b;
+  if (h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h < 300) {
+    r = x; g = 0; b = c;
+  } else {
+    r = c; g = 0; b = x;
+  }
+  r = Math.round((r + m) * 255);
+  g = Math.round((g + m) * 255);
+  b = Math.round((b + m) * 255);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+// センスの良いカラーパレットを生成（8行 × 8列 = 64色）
+function generatePalette64() {
+  const palette = [];
+
+  // 1列目（ニュートラル）: 白→黒を必ず含める（子供が使いやすい）
+  const neutrals = [
+    '#ffffff',
+    '#eef2f7',
+    '#d7dde6',
+    '#b4bcc8',
+    '#8b95a3',
+    '#5f6772',
+    '#2f353d',
+    '#000000'
+  ];
+
+  // 明るさ（上ほど明るい）
+  const vSteps = [0.92, 0.86, 0.78, 0.70, 0.62, 0.52, 0.40, 0.28];
+
+  // 行ごとの彩度（上はパステル寄り、真ん中はポップ、下は深み）
+  const sSteps = [0.28, 0.42, 0.58, 0.72, 0.68, 0.58, 0.50, 0.42];
+
+  // 残り7列: 赤 / 肌色〜オレンジ（兼用） / 黄 / 緑 / 水色 / 青 / 紫寄り
+  const cols = [
+    { h: 8, sMul: 1.0 },    // red
+    { h: 28, sMul: 0.75 },  // skin/orange/brown（低彩度寄り）
+    { h: 52, sMul: 0.85 },  // yellow（ネオン回避）
+    { h: 135, sMul: 0.95 }, // green
+    { h: 185, sMul: 0.95 }, // cyan
+    { h: 215, sMul: 0.95 }, // blue
+    { h: 295, sMul: 0.90 }  // purple-magenta
+  ];
+
+  // 8x8 を作る（1列目ニュートラル + 7色相）
+  for (let row = 0; row < 8; row++) {
+    palette.push(neutrals[row]);
+    const v = vSteps[row];
+    const sBase = sSteps[row];
+    for (const { h, sMul } of cols) {
+      const s = clamp(sBase * sMul, 0.18, 0.78);
+      palette.push(hsvToRgb(h, s, v));
+    }
+  }
+
+  return palette;
+}
+
+const FIXED_PALETTE_64 = generatePalette64();
 
 // ツールボックス常設: 基本24色（DB64から厳選）
 const BASE_PALETTE_24 = [
@@ -372,7 +380,7 @@ function readRecentColors() {
     const raw = localStorage.getItem(RECENT_COLORS_KEY);
     const json = raw ? JSON.parse(raw) : null;
     const arr = Array.isArray(json) ? json : [];
-    return arr.map(normalizeHex).filter((v, i, a) => a.indexOf(v) === i).slice(0, 20);
+    return arr.map(normalizeHex).filter((v, i, a) => a.indexOf(v) === i).slice(0, 32);
   } catch {
     return [];
   }
@@ -380,7 +388,7 @@ function readRecentColors() {
 
 function writeRecentColors(list) {
   try {
-    localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(Array.isArray(list) ? list.slice(0, 20) : []));
+    localStorage.setItem(RECENT_COLORS_KEY, JSON.stringify(Array.isArray(list) ? list.slice(0, 32) : []));
   } catch {
     // ignore
   }
@@ -397,7 +405,7 @@ function renderRecentColors() {
     recentColors.appendChild(empty);
     return;
   }
-  list.slice(0, 10).forEach((hex) => {
+  list.slice(0, 20).forEach((hex) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'recent-swatch';
@@ -412,9 +420,11 @@ function renderRecentColors() {
 }
 
 function addRecentColor(hex) {
+  if (!hex) return;
   const h = normalizeHex(hex);
+  if (!h || h === '#333333') return; // デフォルト色は追加しない
   const list = readRecentColors();
-  const next = [h, ...list.filter((x) => x !== h)].slice(0, 20);
+  const next = [h, ...list.filter((x) => x !== h)].slice(0, 32);
   writeRecentColors(next);
   renderRecentColors();
   renderToolbarPalette();
@@ -788,12 +798,12 @@ function setDirty(nextDirty) {
 }
 
 function updateStatus(message) {
-  const parts = [];
-  if (message) parts.push(message);
-  if (dirty) parts.push('未保存');
-  if (!dirty && isPersisted) parts.push('保存済み');
-  if (!dirty && !isPersisted) parts.push('新規（未保存）');
-  statusText.textContent = parts.join(' / ') || '-';
+  // 保存ボタンの活性/非活性を制御
+  // 保存済み（!dirty && isPersisted）→ 非活性
+  // 未保存（dirty）または新規（!isPersisted）→ 活性
+  if (saveBtn) {
+    saveBtn.disabled = !dirty && isPersisted;
+  }
 }
 
 function base64ToArrayBuffer(b64) {
@@ -1039,14 +1049,21 @@ function updateColorDot() {
   colorDot.style.background = String(colorInput.value || '#333333');
 }
 
-function setColorHex(hex) {
+function setColorHex(hex, { addRecent = true } = {}) {
+  if (!hex) return;
   const safe = normalizeHex(hex);
-  colorInput.value = safe;
-  currentColor = hexToRgbaInt(colorInput.value);
+  const currentValue = String(colorInput.value || '').toLowerCase();
+  if (currentValue !== safe) {
+    colorInput.value = safe;
+  }
+  currentColor = hexToRgbaInt(safe);
   updatePaletteSelection();
   updateToolbarPaletteSelection();
   updateColorDot();
-  addRecentColor(safe);
+  if (addRecent) {
+    // 最近使った色に追加
+    addRecentColor(safe);
+  }
 }
 
 function formatDateShort(iso) {
@@ -1106,6 +1123,51 @@ function scheduleRender() {
     renderNow();
   });
   scheduleActiveFrameThumbUpdate();
+}
+
+// 範囲選択の点滅（マーチングアンツ）用：選択がある間だけ軽い描画ループを回す
+let selectionAnimRaf = null;
+function ensureSelectionAnim() {
+  if (selectionAnimRaf != null) return;
+  const tick = () => {
+    const needsAnim =
+      Boolean(selectionRect && selectionRect.w > 0 && selectionRect.h > 0) ||
+      Boolean(rangeGesture && (rangeGesture.mode === 'moving' || rangeGesture.mode === 'pasting'));
+    if (!needsAnim) {
+      selectionAnimRaf = null;
+      return;
+    }
+    renderNow();
+    selectionAnimRaf = requestAnimationFrame(tick);
+  };
+  selectionAnimRaf = requestAnimationFrame(tick);
+}
+
+function drawSelectionMarquee(rect) {
+  // マーチングアンツ（白黒の破線をずらして描く）
+  const x = rect.x + 0.5;
+  const y = rect.y + 0.5;
+  const w = Math.max(0, rect.w - 1);
+  const h = Math.max(0, rect.h - 1);
+  if (w <= 0 || h <= 0) return;
+
+  const t = performance.now();
+  const offset = -(t / 90);
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([3, 3]);
+
+  ctx.lineDashOffset = offset;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+  ctx.strokeRect(x, y, w, h);
+
+  ctx.lineDashOffset = offset + 3;
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+  ctx.strokeRect(x, y, w, h);
+
+  ctx.restore();
 }
 
 function scheduleActiveFrameThumbUpdate() {
@@ -1314,20 +1376,13 @@ function renderNow() {
   ctx.imageSmoothingEnabled = false;
   ctx.putImageData(pixelsToImageData(currentAsset.pixels, currentAsset.width, currentAsset.height), 0, 0);
 
-  // Range overlay (selection highlight)
-  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0) {
+  // 移動中は「元の場所」を一時的に抜いて、ドラッグ中に重なって見えないようにする（データは変更しない）
+  if (rangeGesture && rangeGesture.mode === 'moving' && rangeGesture.fromRect) {
+    const fr = rangeGesture.fromRect;
     ctx.save();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(108, 92, 231, 0.12)';
-    ctx.strokeStyle = 'rgba(108, 92, 231, 0.95)';
-    ctx.lineWidth = 1;
-    ctx.fillRect(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
-    ctx.strokeRect(
-      selectionRect.x + 0.5,
-      selectionRect.y + 0.5,
-      Math.max(0, selectionRect.w - 1),
-      Math.max(0, selectionRect.h - 1)
-    );
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = '#000';
+    ctx.fillRect(fr.x, fr.y, fr.w, fr.h);
     ctx.restore();
   }
 
@@ -1346,6 +1401,16 @@ function renderNow() {
       ctx.drawImage(rangePreviewCanvas, px, py);
       ctx.restore();
     }
+  }
+
+  // Range overlay (selection highlight) - 点滅する破線枠
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0) {
+    drawSelectionMarquee(selectionRect);
+  }
+
+  // 選択がある間は点滅アニメを回す
+  if ((selectionRect && selectionRect.w > 0 && selectionRect.h > 0) || (rangeGesture && (rangeGesture.mode === 'moving' || rangeGesture.mode === 'pasting'))) {
+    ensureSelectionAnim();
   }
 }
 
@@ -1900,6 +1965,7 @@ function createNewAsset({ name, kind, width, height }) {
 }
 
 function renderPalette() {
+  if (!paletteGrid) return; // paletteGridが存在しない場合は何もしない
   paletteGrid.innerHTML = '';
   FIXED_PALETTE_64.forEach((hex) => {
     const btn = document.createElement('button');
@@ -1924,12 +1990,14 @@ function renderToolbarPalette() {
 
   toolbarPalette.innerHTML = '';
 
-  // Recent (always 8 slots)
+  // 1行目: 最近使った色（常に8スロット、空きは空のまま）
+  const recentRow = document.createElement('div');
+  recentRow.className = 'toolbar-palette-row toolbar-palette-row-recent';
   for (let i = 0; i < 8; i++) {
     const hex = recent[i] || null;
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'toolbar-swatch';
+    btn.className = 'toolbar-swatch toolbar-swatch-recent';
     if (!hex) {
       btn.classList.add('empty');
       btn.disabled = true;
@@ -1940,34 +2008,44 @@ function renderToolbarPalette() {
       btn.dataset.hex = hex.toLowerCase();
       btn.classList.toggle('selected', btn.dataset.hex === currentHex);
       btn.setAttribute('aria-label', `最近の色 ${hex}`);
-      btn.title = `最近の色 ${hex}`;
+      btn.title = `最近: ${hex}`;
       btn.addEventListener('click', () => {
         setColorHex(hex);
         updateStatus('最近の色');
       });
     }
-    toolbarPalette.appendChild(btn);
+    recentRow.appendChild(btn);
   }
+  toolbarPalette.appendChild(recentRow);
 
-  // Base 24
-  BASE_PALETTE_24.forEach((hex) => {
+  // 区切り（ミニマル）
+  const divider = document.createElement('div');
+  divider.className = 'toolbar-palette-divider';
+  divider.setAttribute('aria-hidden', 'true');
+  toolbarPalette.appendChild(divider);
+
+  // 2行目以降: 固定パレット（24色）
+  const fixedRow = document.createElement('div');
+  fixedRow.className = 'toolbar-palette-row toolbar-palette-row-fixed';
+  FIXED_PALETTE_64.forEach((hex) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'toolbar-swatch';
     btn.style.background = hex;
     btn.dataset.hex = hex.toLowerCase();
     btn.classList.toggle('selected', btn.dataset.hex === currentHex);
-    btn.setAttribute('aria-label', `基本の色 ${hex}`);
-    btn.title = `基本の色 ${hex}`;
+    btn.setAttribute('aria-label', `色 ${hex}`);
+    btn.title = hex;
     btn.addEventListener('click', () => {
       setColorHex(hex);
-      updateStatus('基本の色');
     });
-    toolbarPalette.appendChild(btn);
+    fixedRow.appendChild(btn);
   });
+  toolbarPalette.appendChild(fixedRow);
 }
 
 function updatePaletteSelection() {
+  if (!paletteGrid) return; // paletteGridが存在しない場合は何もしない
   const currentHex = String(colorInput.value || '').toLowerCase();
   paletteGrid.querySelectorAll('.swatch').forEach((el) => {
     const btn = /** @type {HTMLButtonElement} */ (el);
@@ -2008,9 +2086,43 @@ gridToggle.addEventListener('change', () => {
   canvasFrame.classList.toggle('grid', gridToggle.checked);
 });
 
-colorInput.addEventListener('input', () => {
-  setColorHex(colorInput.value);
+// フルカラー: inputはプレビューのみ（最近色には追加しない）
+colorInput.addEventListener('input', (e) => {
+  const newValue = String(e.target.value || '').trim();
+  if (newValue) {
+    setColorHex(newValue, { addRecent: false });
+  }
 });
+// フルカラー: 確定時に最近色へ追加
+colorInput.addEventListener('change', (e) => {
+  const newValue = String(e.target.value || '').trim();
+  if (newValue) {
+    setColorHex(newValue, { addRecent: true });
+  }
+});
+
+// スポイト（画面全体 → 非対応はキャンバススポイト）
+if (pickColorBtn) {
+  pickColorBtn.addEventListener('click', async () => {
+    try {
+      if ('EyeDropper' in window) {
+        // @ts-ignore - EyeDropper is not in TS lib by default
+        const ed = new window.EyeDropper();
+        const res = await ed.open();
+        if (res && res.sRGBHex) {
+          setColorHex(res.sRGBHex, { addRecent: true });
+          updateStatus('スポイト（画面）');
+        }
+        return;
+      }
+    } catch {
+      // キャンセル等は無視してフォールバック
+    }
+    // fallback: canvas picker tool
+    if (toolPicker) toolPicker.click();
+    updateStatus('スポイト（キャンバス）');
+  });
+}
 
 if (gridToggleBtn) {
   gridToggleBtn.addEventListener('click', () => {
@@ -2036,7 +2148,6 @@ if (zoomInBtn) zoomInBtn.addEventListener('click', () => nudgeZoom(2));
 function openColorPopover() {
   if (!colorPopover) return;
   portalPopoverToBody(colorPopover);
-  renderRecentColors();
   colorPopover.hidden = false;
 }
 
@@ -2047,10 +2158,20 @@ function closeColorPopover() {
 }
 
 if (colorBtn) {
+  // 中間ダイアログは出さず、押した瞬間にネイティブのカラー選択を開く
   colorBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (!colorPopover) return;
-    colorPopover.hidden ? openColorPopover() : closeColorPopover();
+    if (!colorInput) return;
+    try {
+      // Chromium系: showPicker があれば優先
+      if (typeof colorInput.showPicker === 'function') {
+        colorInput.showPicker();
+        return;
+      }
+    } catch {
+      // ignore
+    }
+    colorInput.click();
   });
 }
 
@@ -2931,7 +3052,6 @@ canvas.addEventListener('pointerleave', () => {
 (async function init() {
   setTool('pen');
   canvasFrame.classList.toggle('grid', gridToggle.checked);
-  renderPalette();
   renderToolbarPalette();
   setHuePreview(0);
   updateRangeButtons();

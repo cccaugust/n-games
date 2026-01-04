@@ -69,13 +69,18 @@
           </div>
 
           <div class="editor-headbar-center">
-            <label class="field field-inline editor-name" aria-label="名前を変える">
-              <span>なまえ</span>
-              <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
-            </label>
+            <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" class="editor-name-input" aria-label="名前を変える" />
           </div>
 
           <div class="editor-headbar-right">
+            <div class="editor-headbar-actions">
+              <button class="btn-sub btn-icon" id="undoBtn" type="button" aria-label="もどす" title="もどす">
+                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+              </button>
+              <button class="btn-sub btn-icon" id="redoBtn" type="button" aria-label="やりなおし" title="やり直">
+                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+              </button>
+            </div>
             <button class="btn-primary-solid" id="saveBtn" type="button" aria-label="保存">
               <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
               <span class="btn-text">保存</span>
@@ -97,53 +102,33 @@
                   <button class="tool-icon" id="toolFill" type="button" aria-label="ベタ塗り">
                     <i class="fa-solid fa-fill-drip"></i><span>塗り</span>
                   </button>
-                  <button class="tool-icon" id="toolPicker" type="button" aria-label="スポイト">
-                    <i class="fa-solid fa-eye-dropper"></i><span>色</span>
-                  </button>
                   <button class="tool-icon" id="toolSelect" type="button" aria-label="範囲選択">
                     <i class="fa-regular fa-object-group"></i><span>範囲</span>
                   </button>
                 </div>
 
                 <div class="toolbar-group" aria-label="色">
-                  <button class="tool-icon color-btn" id="colorBtn" type="button" aria-label="色をえらぶ">
-                    <span class="color-dot" id="colorDot" aria-hidden="true"></span><span>色</span>
-                  </button>
+                  <div class="toolbar-palette" id="toolbarPalette" aria-label="色パレット（64色）"></div>
 
-                  <div class="toolbar-palette" id="toolbarPalette" aria-label="色パレット（最近8 + 基本24）"></div>
+                  <div class="pm-color-actions" aria-label="色の操作">
+                    <button class="tool-icon" id="pickColorBtn" type="button" aria-label="スポイト（画面から色を取る）" title="スポイト">
+                      <i class="fa-solid fa-eye-dropper" aria-hidden="true"></i>
+                      <span>スポイト</span>
+                    </button>
 
-                  <div class="color-popover card" id="colorPopover" hidden>
-                    <div class="color-popover-head">
-                      <div class="color-popover-title">色をえらぶ</div>
-                      <button class="btn-sub btn-icon" id="colorPopoverCloseBtn" type="button" aria-label="閉じる">
-                        <i class="fa-solid fa-xmark"></i>
-                      </button>
-                    </div>
-                    <div class="recent-wrap" aria-label="最近使った色">
-                      <div class="recent-head">
-                        <div class="recent-title">最近</div>
-                        <button class="btn-mini" id="recentClearBtn" type="button">消す</button>
-                      </div>
-                      <div class="recent-grid" id="recentColors"></div>
-                    </div>
-                    <div class="palette-grid" id="paletteGrid"></div>
-                    <div class="color-popover-foot">
-                      <label class="field">
-                        <span>フルカラー</span>
-                        <input id="colorInput" type="color" value="#333333" />
-                      </label>
-                    </div>
+                    <button class="tool-icon" id="colorBtn" type="button" aria-label="フルカラー" title="フルカラー">
+                      <i class="fa-solid fa-palette" aria-hidden="true"></i>
+                      <span>フルカラー</span>
+                    </button>
+
+                    <!-- フルカラー（ネイティブカラーピッカー）。ボタン押下で直接開く -->
+                    <input id="colorInput" class="pm-fullcolor-input" type="color" value="#333333" aria-label="フルカラー（色をえらぶ）" />
                   </div>
+
+                  <!-- 既存のキャンバススポイト（ショートカット/内部状態用） -->
+                  <button class="sr-only" id="toolPicker" type="button" aria-label="スポイト（キャンバス）"></button>
                 </div>
 
-                <div class="toolbar-group" aria-label="もどす・やりなおし">
-                  <button class="tool-icon" id="undoBtn" type="button" aria-label="もどす">
-                    <i class="fa-solid fa-rotate-left"></i><span>もどす</span>
-                  </button>
-                  <button class="tool-icon" id="redoBtn" type="button" aria-label="やりなおし">
-                    <i class="fa-solid fa-rotate-right"></i><span>やり直</span>
-                  </button>
-                </div>
 
                 <div class="toolbar-group" aria-label="範囲操作">
                   <button class="tool-icon" id="rangeCopyBtn" type="button" aria-label="コピー（範囲選択）">
@@ -204,9 +189,6 @@
                   <button class="tool-icon" id="exportBtn" type="button" aria-label="PNGを書き出す">
                     <i class="fa-solid fa-file-arrow-down"></i><span>PNG</span>
                   </button>
-                  <button class="tool-icon" id="avatarPickBtn" type="button" aria-label="アバターにする">
-                    <i class="fa-solid fa-user"></i><span>アイコン</span>
-                  </button>
                 </div>
 
                 <div class="toolbar-group" aria-label="フレーム">
@@ -228,7 +210,6 @@
                 </div>
               </div>
 
-              <div class="toolbar-status" id="statusText" aria-live="polite">-</div>
             </div>
           </aside>
 
