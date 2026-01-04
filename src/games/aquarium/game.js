@@ -42,10 +42,30 @@ function updateTopbarHeightVar() {
   document.documentElement.style.setProperty('--aq-topbar-h', `${h}px`);
 }
 updateTopbarHeightVar();
+
+// iOS Safari 対策: `100vh` 系が不安定なときでも、px の viewport 高さを CSS 変数で渡す
+function updateViewportHeightVar() {
+  const vv = globalThis.visualViewport;
+  const vh = Math.max(240, Math.round((vv?.height || window.innerHeight || 0)));
+  document.documentElement.style.setProperty('--aq-vh', `${vh}px`);
+}
+updateViewportHeightVar();
+
 window.addEventListener('resize', () => {
   // Defer to next frame to reflect font/layout changes
   requestAnimationFrame(updateTopbarHeightVar);
+  requestAnimationFrame(updateViewportHeightVar);
 });
+
+// VisualViewport はアドレスバー表示/非表示でも更新される（iOS Safari で重要）
+globalThis.visualViewport?.addEventListener?.(
+  'resize',
+  () => {
+    requestAnimationFrame(updateViewportHeightVar);
+    requestAnimationFrame(updateTopbarHeightVar);
+  },
+  { passive: true }
+);
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
