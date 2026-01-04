@@ -7,8 +7,11 @@
 
 body {
   background: radial-gradient(1000px 600px at 50% 0%, #1a2456 0%, var(--pm-bg) 55%, #050713 100%);
-  overflow: hidden;
-  touch-action: none;
+  /* 設定画面などでページがスクロールできるようにする */
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* 기본は縦スクロールOK。ゲーム操作が必要な要素は個別に touch-action を無効化する */
+  touch-action: pan-y;
 }
 
 .pm-page {

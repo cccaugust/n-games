@@ -513,6 +513,8 @@ const TILE_FX = {
   [TILE.DIRT]: { dust: ['#8b5a2b', '#a97142', '#6f4a2a'] },
   [TILE.STONE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
   [TILE.SAND]: { dust: ['#f6e27f', '#e6cc6a', '#cbb45b'] },
+  [TILE.WATER]: { dust: ['#74c0ff', '#4dabf7', '#228be6'] },
+  [TILE.LAVA]: { dust: ['#ff6b35', '#ff922b', '#e03131', '#ffd43b'] },
   [TILE.WOOD]: { dust: ['#c68642', '#a96b36', '#7a4b2a'] },
   [TILE.BRICK]: { dust: ['#b94a48', '#8a2b2a', '#d0706d'] },
   [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] }
@@ -915,6 +917,7 @@ const state = {
   shakePower: 0,
   monsters: [],
   monsterSpawnMs: 0,
+  lavaTickMs: 0,
   animMs: 0,
   lastSaveAt: 0
 };
@@ -1324,6 +1327,38 @@ function applyPlayerDamage(amount, fromX) {
   updateHpPill();
 }
 
+/**
+ * 地形ダメージ（ようがん等）: ノックバックなし/短め無敵
+ * @param {number} amount
+ */
+function applyTerrainDamage(amount) {
+  if (state.invulnMs > 0) return;
+  const dmg = Math.max(0, Math.floor(amount || 0));
+  if (dmg <= 0) return;
+  state.hp = Math.max(0, (state.hp || 0) - dmg);
+  state.invulnMs = 420;
+  state.damageFlashMs = 180;
+  sfxHurt();
+  addShake(0.9, 120);
+
+  if (state.hp <= 0) {
+    // 最小版: その場でリスポーン（ワールドは維持）
+    state.hp = state.maxHp;
+    const p = state.player;
+    p.x = state.spawn.x;
+    p.y = state.spawn.y;
+    p.vx = 0;
+    p.vy = 0;
+    state.cam.x = p.x;
+    state.cam.y = p.y;
+    spawnMonsters(state.world, state.seed);
+    state.invulnMs = 1000;
+    state.damageFlashMs = 260;
+    addShake(1.6, 180);
+  }
+  updateHpPill();
+}
+
 function tileIdAtWorldPx(world, wx, wy) {
   const tx = Math.floor(wx / TILE_SIZE);
   const ty = Math.floor(wy / TILE_SIZE);
@@ -1466,8 +1501,18 @@ function tick(dtMs) {
 
   // damage hint (lava): いまは演出だけ
   if (inLava) {
+    // マグマ/ようがん: 継続ダメージ（短い無敵つき）
+    state.lavaTickMs = (state.lavaTickMs || 0) + dtMs;
+    if (state.lavaTickMs >= 650) {
+      state.lavaTickMs = 0;
+      applyTerrainDamage(1);
+      // 火の粉っぽい粒
+      spawnDustAtWorld(p.x, p.y + p.h * 0.25, TILE.LAVA, 0.28);
+    }
     // tiny push upward so it feels "danger"
     p.vy -= 120 * dt;
+  } else {
+    state.lavaTickMs = 0;
   }
 
   // camera follow (smooth)
