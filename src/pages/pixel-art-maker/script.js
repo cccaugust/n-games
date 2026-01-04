@@ -104,6 +104,8 @@ const redoBtn = document.getElementById('redoBtn');
 const clearBtn = document.getElementById('clearBtn');
 const expandWidthBtn = document.getElementById('expandWidthBtn');
 const expandHeightBtn = document.getElementById('expandHeightBtn');
+const shrinkWidthBtn = document.getElementById('shrinkWidthBtn');
+const shrinkHeightBtn = document.getElementById('shrinkHeightBtn');
 
 const newBtn = document.getElementById('newBtn');
 const saveBtn = document.getElementById('saveBtn');
@@ -276,6 +278,8 @@ function setReadOnly(next) {
   if (clearBtn) clearBtn.disabled = disableEdit;
   if (expandWidthBtn) expandWidthBtn.disabled = disableEdit;
   if (expandHeightBtn) expandHeightBtn.disabled = disableEdit;
+  if (shrinkWidthBtn) shrinkWidthBtn.disabled = disableEdit;
+  if (shrinkHeightBtn) shrinkHeightBtn.disabled = disableEdit;
   if (importImageBtn) importImageBtn.disabled = disableEdit;
   if (undoBtn) undoBtn.disabled = disableEdit || undoStack.length === 0;
   if (redoBtn) redoBtn.disabled = disableEdit || redoStack.length === 0;
@@ -1752,6 +1756,104 @@ function expandCanvas({ addWidth = 0, addHeight = 0 } = {}) {
   updateStatus('キャンバスをひろげた');
 }
 
+function countPixelsOutside(nextW, nextH) {
+  if (!currentAsset) return 0;
+  normalizeFramesInCurrentAsset();
+  const frames = Array.isArray(currentAsset.frames) ? currentAsset.frames : [];
+  const beforeW = currentAsset.width;
+  const beforeH = currentAsset.height;
+
+  const w2 = Math.max(1, Math.min(beforeW, nextW));
+  const h2 = Math.max(1, Math.min(beforeH, nextH));
+  let lost = 0;
+
+  for (const f of frames) {
+    const px = normalizePixelsSize(beforeW, beforeH, f?.pixels instanceof Uint32Array ? f.pixels : new Uint32Array());
+    // right side columns (x >= w2) for y < h2
+    if (w2 < beforeW) {
+      for (let y = 0; y < h2; y++) {
+        const row = y * beforeW;
+        for (let x = w2; x < beforeW; x++) {
+          if ((px[row + x] >>> 0) !== 0) lost++;
+        }
+      }
+    }
+    // bottom rows (y >= h2) for all x
+    if (h2 < beforeH) {
+      for (let y = h2; y < beforeH; y++) {
+        const row = y * beforeW;
+        for (let x = 0; x < beforeW; x++) {
+          if ((px[row + x] >>> 0) !== 0) lost++;
+        }
+      }
+    }
+  }
+  return lost;
+}
+
+function shrinkCanvas({ subWidth = 0, subHeight = 0 } = {}) {
+  if (!currentAsset) return;
+  if (isReadOnly) return;
+
+  const beforeW = currentAsset.width;
+  const beforeH = currentAsset.height;
+  const nextW = Math.max(1, beforeW - (Number(subWidth) || 0));
+  const nextH = Math.max(1, beforeH - (Number(subHeight) || 0));
+
+  if (nextW === beforeW && nextH === beforeH) {
+    updateStatus('これ以上ちぢめられないよ');
+    return;
+  }
+
+  const lost = countPixelsOutside(nextW, nextH);
+  if (lost > 0) {
+    const ok = confirm(`縮小すると、右/下側のピクセルが消えます（合計 ${lost} 個）。\nそれでもちぢめますか？`);
+    if (!ok) {
+      updateStatus('縮小をキャンセルした');
+      return;
+    }
+  }
+
+  normalizeFramesInCurrentAsset();
+  const snapshot = snapshotEntireAsset();
+  pushUndoSnapshot(snapshot);
+
+  currentAsset.width = nextW;
+  currentAsset.height = nextH;
+
+  // Resize all frames (keep top-left content; crop right/bottom).
+  (currentAsset.frames || []).forEach((f) => {
+    const beforePixels = normalizePixelsSize(beforeW, beforeH, f.pixels);
+    const nextPixels = new Uint32Array(nextW * nextH);
+    const copyW = Math.min(beforeW, nextW);
+    const copyH = Math.min(beforeH, nextH);
+    for (let y = 0; y < copyH; y++) {
+      const srcStart = y * beforeW;
+      const dstStart = y * nextW;
+      nextPixels.set(beforePixels.subarray(srcStart, srcStart + copyW), dstStart);
+    }
+    f.width = nextW;
+    f.height = nextH;
+    f.pixels = nextPixels;
+  });
+
+  currentFrameIndex = clamp(currentFrameIndex, 0, Math.max(0, (currentAsset.frames?.length ?? 1) - 1));
+  currentAsset.pixels = currentAsset.frames?.[currentFrameIndex]?.pixels || new Uint32Array(nextW * nextH);
+  canvas.width = nextW;
+  canvas.height = nextH;
+
+  // Selection can become out of bounds after resize.
+  selectionRect = null;
+  rangeGesture = null;
+  updateRangeButtons();
+
+  setDirty(true);
+  updateCanvasLayout();
+  scheduleRender();
+  updateFrameUi();
+  updateStatus('キャンバスをちぢめた');
+}
+
 if (expandWidthBtn) {
   expandWidthBtn.addEventListener('click', () => {
     expandCanvas({ addWidth: CANVAS_STEP });
@@ -1760,6 +1862,16 @@ if (expandWidthBtn) {
 if (expandHeightBtn) {
   expandHeightBtn.addEventListener('click', () => {
     expandCanvas({ addHeight: CANVAS_STEP });
+  });
+}
+if (shrinkWidthBtn) {
+  shrinkWidthBtn.addEventListener('click', () => {
+    shrinkCanvas({ subWidth: CANVAS_STEP });
+  });
+}
+if (shrinkHeightBtn) {
+  shrinkHeightBtn.addEventListener('click', () => {
+    shrinkCanvas({ subHeight: CANVAS_STEP });
   });
 }
 
