@@ -22,7 +22,6 @@ backToPortal.href = resolvePath('/pages/portal/portal.html');
 const openCreateFishBtn = document.getElementById('openCreateFishBtn');
 const fishPaletteEl = document.getElementById('fishPalette');
 const aquariumDropEl = document.getElementById('aquariumDrop');
-const dropHintEl = document.getElementById('dropHint');
 
 // Fish edit modal
 const fishModal = document.getElementById('fishModal');
@@ -693,7 +692,7 @@ class AquariumScene extends Phaser.Scene {
     }
 
     this.emptyHint = this.add
-      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n上の魚をドラッグして追加してね', {
+      .text(this.scale.width / 2, this.scale.height / 2, 'まだ魚がいないよ\n上の魚をタップして追加してね', {
         fontFamily: 'system-ui, sans-serif',
         fontSize: '20px',
         color: '#ffffff',
@@ -1070,9 +1069,12 @@ function rectPointToLocal(rect, clientX, clientY) {
   return { x, y };
 }
 
-function setDropUi(on) {
-  aquariumDropEl.classList.toggle('is-drop-over', Boolean(on));
-  if (dropHintEl) dropHintEl.hidden = !on;
+function pickSpawnPointInAquarium() {
+  const rect = aquariumDropEl.getBoundingClientRect();
+  const margin = 56;
+  const x = clamp(rect.width * 0.5 + (Math.random() * 120 - 60), margin, Math.max(margin, rect.width - margin));
+  const y = clamp(rect.height * 0.55 + (Math.random() * 120 - 60), margin, Math.max(margin, rect.height - margin));
+  return { x, y };
 }
 
 async function loadPalette() {
@@ -1103,7 +1105,7 @@ function renderPalette(assets) {
     btn.className = 'aq-palette-item';
     btn.setAttribute('aria-label', String(a?.name || 'さかな'));
     btn.title = String(a?.name || 'さかな');
-    btn.draggable = true;
+    btn.draggable = false;
 
     const img = document.createElement('img');
     img.alt = '';
@@ -1111,104 +1113,10 @@ function renderPalette(assets) {
     btn.appendChild(img);
 
     btn.addEventListener('click', () => {
-      if (btn.dataset.suppressClick === '1') {
-        btn.dataset.suppressClick = '0';
-        return;
-      }
-      // クリック/タップでは名前表示（追加はドラッグ推奨）
-      showToast(a?.name || 'さかな');
+      const { x, y } = pickSpawnPointInAquarium();
+      addFishFromAsset(a, { name: a?.name, spawnX: x, spawnY: y, select: false });
+      showToast(`${a?.name || 'さかな'} を追加！`);
     });
-
-    btn.addEventListener('dragstart', (e) => {
-      try {
-        e.dataTransfer?.setData('text/plain', String(a.id));
-        e.dataTransfer.effectAllowed = 'copy';
-      } catch {
-        // ignore
-      }
-      setDropUi(true);
-    });
-    btn.addEventListener('dragend', () => setDropUi(false));
-
-    // Touch/pen: long-press to "drag"
-    let pressT = null;
-    let startX = 0;
-    let startY = 0;
-    let ghost = null;
-    let dragging = false;
-
-    const cleanup = () => {
-      if (pressT) clearTimeout(pressT);
-      pressT = null;
-      dragging = false;
-      if (ghost) ghost.remove();
-      ghost = null;
-      setDropUi(false);
-    };
-
-    const updateGhost = (clientX, clientY) => {
-      if (!ghost) return;
-      ghost.style.left = `${clientX}px`;
-      ghost.style.top = `${clientY}px`;
-      const rect = aquariumDropEl.getBoundingClientRect();
-      const inside = clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
-      setDropUi(inside);
-    };
-
-    const startDrag = (clientX, clientY) => {
-      if (dragging) return;
-      dragging = true;
-      ghost = document.createElement('div');
-      ghost.className = 'aq-drag-ghost';
-      const gi = document.createElement('img');
-      gi.alt = '';
-      gi.src = assetPreviewDataUrl(a, 48);
-      ghost.appendChild(gi);
-      document.body.appendChild(ghost);
-      updateGhost(clientX, clientY);
-    };
-
-    btn.addEventListener('pointerdown', (e) => {
-      if (!e.isPrimary) return;
-      // mouseはHTML5 D&Dに任せる
-      if (e.pointerType === 'mouse') return;
-      startX = e.clientX;
-      startY = e.clientY;
-      pressT = setTimeout(() => startDrag(e.clientX, e.clientY), 180);
-    });
-
-    btn.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'mouse') return;
-      const dx = Math.abs(e.clientX - startX);
-      const dy = Math.abs(e.clientY - startY);
-      if (!dragging && pressT && (dx > 8 || dy > 8)) {
-        clearTimeout(pressT);
-        pressT = null;
-        startDrag(e.clientX, e.clientY);
-      }
-      if (dragging) updateGhost(e.clientX, e.clientY);
-    });
-
-    btn.addEventListener('pointerup', (e) => {
-      if (e.pointerType === 'mouse') return;
-      const rect = aquariumDropEl.getBoundingClientRect();
-      const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
-      if (dragging && inside) {
-        const { x, y } = rectPointToLocal(rect, e.clientX, e.clientY);
-        addFishFromAsset(a, { name: a?.name, spawnX: x, spawnY: y, select: false });
-        btn.dataset.suppressClick = '1';
-        try {
-          e.preventDefault();
-        } catch {
-          // ignore
-        }
-      } else if (!dragging) {
-        showToast(a?.name || 'さかな');
-      }
-      cleanup();
-    });
-
-    btn.addEventListener('pointercancel', cleanup);
 
     fishPaletteEl.appendChild(btn);
   });
@@ -1286,38 +1194,6 @@ openCreateFishBtn?.addEventListener('click', () => {
       showToast('魚の作成に失敗しました');
     }
   })();
-});
-
-// Drop handlers (desktop)
-['dragenter', 'dragover'].forEach((t) => {
-  aquariumDropEl.addEventListener(t, (e) => {
-    e.preventDefault();
-    setDropUi(true);
-    try {
-      e.dataTransfer.dropEffect = 'copy';
-    } catch {
-      // ignore
-    }
-  });
-});
-aquariumDropEl.addEventListener('dragleave', (e) => {
-  // 子要素間の移動で消えないようにする
-  const rt = /** @type {any} */ (e).relatedTarget;
-  if (rt && aquariumDropEl.contains(rt)) return;
-  setDropUi(false);
-});
-aquariumDropEl.addEventListener('drop', (e) => {
-  e.preventDefault();
-  setDropUi(false);
-  const id = String(e.dataTransfer?.getData?.('text/plain') || '');
-  const asset = paletteMap.get(id);
-  if (!asset) {
-    showToast('素材が見つかりませんでした');
-    return;
-  }
-  const rect = aquariumDropEl.getBoundingClientRect();
-  const { x, y } = rectPointToLocal(rect, e.clientX, e.clientY);
-  addFishFromAsset(asset, { name: asset?.name, spawnX: x, spawnY: y, select: false });
 });
 
 // Init palette
