@@ -111,6 +111,38 @@ function pixelsToImageData(pixels, width, height) {
 }
 
 /**
+ * サンプルの「フレーム配列」/「単体pixelsB64」のどちらにも対応してフレーム一覧を返す
+ * @param {any} s
+ * @returns {Array<{pixelsB64?: string, durationMs?: number}>}
+ */
+function getSampleFrames(s) {
+  if (Array.isArray(s?.frames) && s.frames.length > 0) return s.frames;
+  if (typeof s?.pixelsB64 === 'string' && s.pixelsB64.length > 0) return [{ pixelsB64: s.pixelsB64, durationMs: 120 }];
+  return [];
+}
+
+/**
+ * @param {HTMLCanvasElement[]} frames
+ * @param {number[]} durationsMs
+ * @param {number} tMs
+ * @returns {HTMLCanvasElement|null}
+ */
+function pickAnimFrame(frames, durationsMs, tMs) {
+  if (!frames?.length) return null;
+  if (frames.length === 1) return frames[0];
+  const durs = Array.isArray(durationsMs) && durationsMs.length === frames.length ? durationsMs : frames.map(() => 120);
+  const total = durs.reduce((a, b) => a + Math.max(1, Number(b) || 0), 0) || 1;
+  let t = Number(tMs) || 0;
+  t = ((t % total) + total) % total;
+  let acc = 0;
+  for (let i = 0; i < frames.length; i++) {
+    acc += Math.max(1, Number(durs[i]) || 0);
+    if (t < acc) return frames[i];
+  }
+  return frames[0];
+}
+
+/**
  * サンプル素材IDから 16x16 のタイル画像(canvas)を作る
  * @param {Map<string, any>} samplesById
  * @param {string} sampleId
@@ -143,25 +175,41 @@ function makeTileCanvas(samplesById, sampleId) {
 }
 
 /**
- * サンプル素材IDからプレイヤー画像(canvas)を作る（16x16/32x32対応）
+ * サンプル素材IDからスプライト（フレーム配列）を作る（16x16/32x32対応）
  * @param {Map<string, any>} samplesById
  * @param {string} sampleId
  */
-function makeSpriteCanvas(samplesById, sampleId) {
+function makeSpriteFrames(samplesById, sampleId) {
   const s = samplesById.get(sampleId);
-  const c = document.createElement('canvas');
   const w = Number(s?.width) || 16;
   const h = Number(s?.height) || 16;
-  c.width = w;
-  c.height = h;
-  const cctx = c.getContext('2d');
-  cctx.imageSmoothingEnabled = false;
-  cctx.clearRect(0, 0, w, h);
-  if (!s) return c;
-  const pixels = decodePixelsB64(s.pixelsB64);
-  const safe = pixels.length === w * h ? pixels : new Uint32Array(w * h);
-  cctx.putImageData(pixelsToImageData(safe, w, h), 0, 0);
-  return c;
+  const frames = getSampleFrames(s);
+  if (!frames.length) {
+    const blank = document.createElement('canvas');
+    blank.width = w;
+    blank.height = h;
+    return { frames: [blank], durationsMs: [120] };
+  }
+
+  /** @type {HTMLCanvasElement[]} */
+  const out = [];
+  /** @type {number[]} */
+  const durs = [];
+  for (let i = 0; i < frames.length; i++) {
+    const f = frames[i];
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const cctx = c.getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    cctx.clearRect(0, 0, w, h);
+    const pixels = decodePixelsB64(f?.pixelsB64);
+    const safe = pixels.length === w * h ? pixels : new Uint32Array(w * h);
+    cctx.putImageData(pixelsToImageData(safe, w, h), 0, 0);
+    out.push(c);
+    durs.push(Math.max(1, Math.floor(Number(f?.durationMs) || 120)));
+  }
+  return { frames: out, durationsMs: durs };
 }
 
 function mulberry32(seed) {
@@ -491,7 +539,9 @@ function addShake(power, ms) {
 const assets = {
   samplesById: new Map(),
   tileImg: new Map(),
-  playerSprite: document.createElement('canvas')
+  playerSprite: document.createElement('canvas'),
+  playerFrames: /** @type {HTMLCanvasElement[]} */ ([]),
+  playerDurationsMs: /** @type {number[]} */ ([])
 };
 
 function loadAssetsFromSamples() {
@@ -516,7 +566,10 @@ function loadAssetsFromSamples() {
       : assets.samplesById.has('slime_mini_16')
         ? 'slime_mini_16'
         : 'cat_face_16';
-  assets.playerSprite = makeSpriteCanvas(assets.samplesById, playerSampleId);
+  const anim = makeSpriteFrames(assets.samplesById, playerSampleId);
+  assets.playerFrames = anim.frames;
+  assets.playerDurationsMs = anim.durationsMs;
+  assets.playerSprite = anim.frames[0] || document.createElement('canvas');
 }
 
 const MONSTER_KIND = {
@@ -535,7 +588,7 @@ const MONSTER_DEF = {
   }
 };
 
-/** @type {Map<string, HTMLCanvasElement>} */
+/** @type {Map<string, {frames: HTMLCanvasElement[], durationsMs: number[]}>} */
 const monsterSprites = new Map();
 
 function loadMonsterSprites() {
@@ -547,7 +600,7 @@ function loadMonsterSprites() {
     // サンプルに無ければ、プレイヤーと同じにしておく（確実に表示される）
     const useId = assets.samplesById.has(sid) ? sid : assets.samplesById.has('slime_mini_16') ? 'slime_mini_16' : null;
     if (!useId) return;
-    monsterSprites.set(k, makeSpriteCanvas(assets.samplesById, useId));
+    monsterSprites.set(k, makeSpriteFrames(assets.samplesById, useId));
   });
 }
 
@@ -743,6 +796,7 @@ function resetSave() {
  *  shakeMs: number,
  *  shakePower: number,
  *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number}>,
+ *  animMs: number,
  *  lastSaveAt: number
  * }} */
 const state = {
@@ -769,6 +823,7 @@ const state = {
   shakeMs: 0,
   shakePower: 0,
   monsters: [],
+  animMs: 0,
   lastSaveAt: 0
 };
 
@@ -1234,6 +1289,7 @@ function tickParticles(dtMs) {
 
 function tick(dtMs) {
   const dt = Math.min(0.033, dtMs / 1000);
+  state.animMs = (state.animMs + dtMs) % 600000; // 10分で周回（数値肥大を防ぐ）
   const p = state.player;
   p.onGround = false;
 
@@ -1396,10 +1452,11 @@ function draw() {
   // monsters (behind player)
   for (let i = 0; i < state.monsters.length; i++) {
     const m = state.monsters[i];
-    const spr = monsterSprites.get(m.kind);
+    const anim = monsterSprites.get(m.kind);
+    const spr = anim ? pickAnimFrame(anim.frames, anim.durationsMs, state.animMs) : null;
     if (spr) {
-      const mw = spr.width;
-      const mh = spr.height;
+      const mw = spr.width || 0;
+      const mh = spr.height || 0;
       ctx.save();
       if (m.dir < 0) {
         ctx.translate(Math.round(m.x), Math.round(m.y));
@@ -1436,9 +1493,9 @@ function draw() {
   }
 
   // player
-  const spr = assets.playerSprite;
-  const pw = spr.width;
-  const ph = spr.height;
+  const spr = pickAnimFrame(assets.playerFrames, assets.playerDurationsMs, state.animMs) || assets.playerSprite;
+  const pw = spr?.width || 0;
+  const ph = spr?.height || 0;
   const drawX = state.player.x - pw / 2;
   const drawY = state.player.y - ph / 2;
   if (state.invulnMs > 0 && Math.floor(state.invulnMs / 90) % 2 === 0) {
