@@ -937,12 +937,14 @@ class AquariumScene extends Phaser.Scene {
       if (sprite.y < pad) st.vy += (pad - sprite.y) * 2.8 * dt;
       if (sprite.y > H - pad) st.vy -= (sprite.y - (H - pad)) * 2.8 * dt;
 
+      // NOTE: iOS Safari/WebGL で負の scale を使うと描画が消えることがあるため、
+      // 反転は flipX のみで行う（scale は常に正）。
       sprite.flipX = st.vx < 0;
 
       // Deform animation (wobble)
       const wobble = Math.sin(st.t * 4.2 + seed) * 0.06;
       const s = clamp(Number(fish.size) || 1, 0.4, 3);
-      sprite.setScale(sprite.flipX ? -s : s, s * (1 + wobble));
+      sprite.setScale(s, s * (1 + wobble));
       sprite.setAngle(wobble * 6);
     });
   }
