@@ -23,6 +23,8 @@ const touchControls = document.getElementById('touchControls');
 const playerPill = document.getElementById('playerPill');
 const hpPill = document.getElementById('hpPill');
 const soundBtn = document.getElementById('soundBtn');
+const potionBtn = document.getElementById('potionBtn');
+const lootPill = document.getElementById('lootPill');
 
 const TILE_SIZE = 16;
 const WORLD_W = 256;
@@ -61,6 +63,31 @@ const TILE_DEF = {
 
 /** @type {number[]} */
 const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK];
+
+const ITEM = {
+  COIN: 'coin',
+  GEM: 'gem',
+  POTION: 'potion'
+};
+
+function makeDefaultItems() {
+  /** @type {Record<string, number>} */
+  const items = {};
+  items[ITEM.COIN] = 0;
+  items[ITEM.GEM] = 0;
+  items[ITEM.POTION] = 0;
+  return items;
+}
+
+function sanitizeItems(items) {
+  /** @type {Record<string, number>} */
+  const out = makeDefaultItems();
+  const src = items && typeof items === 'object' ? items : {};
+  Object.keys(out).forEach((k) => {
+    out[k] = Math.max(0, Math.floor(Number(src[k]) || 0));
+  });
+  return out;
+}
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -357,6 +384,21 @@ function updateHpPill() {
   const full = Math.max(0, Math.min(max, hp));
   const empty = Math.max(0, max - full);
   hpPill.textContent = `${'♥'.repeat(full)}${'♡'.repeat(empty)} ${hp}/${max}`;
+}
+
+function updateLootUi() {
+  const items = state.items || makeDefaultItems();
+  if (lootPill) {
+    const coin = Math.max(0, Math.floor(items[ITEM.COIN] || 0));
+    const gem = Math.max(0, Math.floor(items[ITEM.GEM] || 0));
+    lootPill.textContent = `🪙 ${coin} / 💎 ${gem}`;
+  }
+  if (potionBtn) {
+    const pot = Math.max(0, Math.floor(items[ITEM.POTION] || 0));
+    potionBtn.textContent = `🧪 ${pot}`;
+    potionBtn.setAttribute('aria-disabled', pot > 0 ? 'false' : 'true');
+    potionBtn.title = pot > 0 ? 'ポーションで回復' : 'ポーションがないよ';
+  }
 }
 
 // ---- SFX (WebAudio / no asset files) ----
@@ -820,6 +862,7 @@ function loadSave() {
       seed: String(data?.seed || 'seed'),
       world: worldU8,
       inventory: sanitizeInventory(data?.inventory),
+      items: sanitizeItems(data?.items),
       selectedSlot: clamp(Number(data?.selectedSlot) || 0, 0, HOTBAR_ORDER.length - 1),
       player: {
         x: Number(data?.player?.x) || 0,
@@ -841,6 +884,7 @@ function saveNow() {
       seed: state.seed,
       worldB64: encodeU8ToB64(state.world),
       inventory: state.inventory,
+      items: state.items,
       selectedSlot: state.selectedSlot,
       player: {
         x: state.player.x,
@@ -870,6 +914,7 @@ function resetSave() {
  *  seed: string,
  *  world: Uint8Array,
  *  inventory: Record<number, number>,
+ *  items: Record<string, number>,
  *  selectedSlot: number,
  *  mode: 'mine'|'place',
  *  zoom: number,
@@ -897,6 +942,7 @@ const state = {
   seed: 'seed',
   world: new Uint8Array(WORLD_W * WORLD_H),
   inventory: makeDefaultInventory(),
+  items: makeDefaultItems(),
   selectedSlot: 0,
   mode: 'mine',
   zoom: 3,
@@ -1023,6 +1069,7 @@ function initNewWorld() {
   state.seed = gen.seed;
   state.world = gen.world;
   state.inventory = makeDefaultInventory();
+  state.items = makeDefaultItems();
   state.selectedSlot = 0;
   state.mode = 'mine';
 
@@ -1046,6 +1093,7 @@ function initNewWorld() {
   state.hp = state.maxHp;
   state.invulnMs = 0;
   state.damageFlashMs = 0;
+  updateLootUi();
   spawnMonsters(state.world, state.seed);
   updateHpPill();
   saveNow();
@@ -1057,6 +1105,7 @@ function loadOrCreate() {
     state.seed = saved.seed;
     state.world = saved.world;
     state.inventory = { ...makeDefaultInventory(), ...saved.inventory };
+    state.items = { ...makeDefaultItems(), ...saved.items };
     state.selectedSlot = saved.selectedSlot;
     state.player.x = saved.player.x || state.player.x;
     state.player.y = saved.player.y || state.player.y;
@@ -1074,6 +1123,7 @@ function loadOrCreate() {
     state.particles = [];
     state.shakeMs = 0;
     state.shakePower = 0;
+    updateLootUi();
     spawnMonsters(state.world, state.seed);
     updateHpPill();
     return;
@@ -1201,6 +1251,51 @@ function breakTile(tx, ty, t) {
   sfxBreak(t);
   spawnDustAtWorld(tx * TILE_SIZE + TILE_SIZE * 0.5, ty * TILE_SIZE + TILE_SIZE * 0.5, t, 1);
   addShake(0.8, 90);
+
+  // おまけドロップ: アイテム（コイン/宝石/ポーション）
+  maybeDropItemsFromBrokenTile(t, tx, ty);
+}
+
+function giveItem(kind, amount, fxTileId, wx, wy) {
+  const items = state.items || makeDefaultItems();
+  const cur = Math.max(0, Math.floor(items[kind] || 0));
+  const add = Math.max(0, Math.floor(amount || 0));
+  if (add <= 0) return;
+  items[kind] = Math.min(999, cur + add);
+  state.items = items;
+  updateLootUi();
+  sfxPickup();
+  if (wx != null && wy != null) spawnDustAtWorld(wx, wy, fxTileId, 0.45);
+}
+
+function maybeDropItemsFromBrokenTile(tileId, tx, ty) {
+  const wx = tx * TILE_SIZE + TILE_SIZE * 0.5;
+  const wy = ty * TILE_SIZE + TILE_SIZE * 0.5;
+  const r = Math.random();
+
+  // 石はお宝が出やすい
+  if (tileId === TILE.STONE) {
+    if (r < 0.12) giveItem(ITEM.COIN, 1, TILE.STONE, wx, wy);
+    else if (r < 0.16) giveItem(ITEM.GEM, 1, TILE.ICE, wx, wy);
+    return;
+  }
+
+  // つちは回復が出やすい
+  if (tileId === TILE.DIRT || tileId === TILE.GRASS_BLOCK) {
+    if (r < 0.08) giveItem(ITEM.POTION, 1, TILE.GRASS_BLOCK, wx, wy);
+    return;
+  }
+
+  // すなはコインが出る
+  if (tileId === TILE.SAND) {
+    if (r < 0.1) giveItem(ITEM.COIN, 1, TILE.SAND, wx, wy);
+    return;
+  }
+
+  // レンガ/こおりは宝石チャンス
+  if (tileId === TILE.BRICK || tileId === TILE.ICE) {
+    if (r < 0.06) giveItem(ITEM.GEM, 1, tileId, wx, wy);
+  }
 }
 
 function aabbIntersectsSolid(world, x, y, w, h) {
@@ -1357,6 +1452,29 @@ function applyTerrainDamage(amount) {
     addShake(1.6, 180);
   }
   updateHpPill();
+}
+
+function healPlayer(amount) {
+  const heal = Math.max(0, Math.floor(amount || 0));
+  if (heal <= 0) return;
+  state.hp = Math.min(state.maxHp || 5, (state.hp || 0) + heal);
+  updateHpPill();
+}
+
+function sfxPickup() {
+  playTone({ type: 'triangle', freq: 860, sweepTo: 1240, dur: 0.07, vol: 0.08 });
+}
+
+function tryUsePotion() {
+  const items = state.items || makeDefaultItems();
+  const n = Math.max(0, Math.floor(items[ITEM.POTION] || 0));
+  if (n <= 0) return false;
+  items[ITEM.POTION] = n - 1;
+  state.items = items;
+  healPlayer(2);
+  updateLootUi();
+  sfxPickup();
+  return true;
 }
 
 function tileIdAtWorldPx(world, wx, wy) {
@@ -1769,6 +1887,10 @@ function bindKeyboard() {
       if (!jumpLatch) pendingJump = true;
       jumpLatch = true;
     }
+    if (e.key.toLowerCase() === 'f') {
+      // item: potion
+      tryUsePotion();
+    }
 
     if (e.key === '1') {
       state.selectedSlot = 0;
@@ -1973,6 +2095,7 @@ async function boot() {
   loadOrCreate();
   renderHotbar();
   updateHpPill();
+  updateLootUi();
 
   resizeCanvas();
   window.addEventListener('resize', () => {
@@ -1990,6 +2113,11 @@ async function boot() {
     writeSoundPref(state.soundEnabled);
     updateSoundBtn();
     if (state.soundEnabled) await unlockAudio();
+  });
+
+  potionBtn?.addEventListener('click', async () => {
+    if (!sfx.unlocked) await unlockAudio();
+    tryUsePotion();
   });
 
   startBtn?.addEventListener('click', () => {
