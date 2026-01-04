@@ -5,8 +5,14 @@
 
 body {
   margin: 0;
+  /* まずは広く互換のある vh をベースにし、対応ブラウザは svh を採用 */
+  height: 100vh;
   height: 100svh;
+  min-height: 100vh;
   overflow: hidden;
+  /* 共通CSSで body が flex になっているが、ここでも明示して安定させる */
+  display: flex;
+  flex-direction: column;
 }
 
 .aq-stage,
@@ -107,13 +113,20 @@ body {
 }
 
 .aq-stage {
+  /* `svh` 非対応などで height 計算が無効になっても、flex で下領域を確保する */
+  flex: 1 1 auto;
+  min-height: 0;
   height: calc(100svh - var(--aq-topbar-h, 64px));
   padding: 0;
+  display: flex;
 }
 
 .aq-aquarium {
+  flex: 1 1 auto;
+  min-height: 0;
   height: 100%;
   min-width: 0;
+  display: flex;
 }
 
 .aq-canvas-wrap {
@@ -124,6 +137,8 @@ body {
   overflow: hidden;
   height: 100%;
   position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .aq-phaser-root {
