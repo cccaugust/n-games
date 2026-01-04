@@ -218,6 +218,12 @@ img.pm-pill-avatar {
   gap: 12px;
 }
 
+.editor-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* `hidden` 属性が `.workspace { display: grid; }` に負けてしまうのを防ぐ */
 #editorView[hidden],
 .workspace[hidden] {
@@ -248,6 +254,16 @@ img.pm-pill-avatar {
   gap: 10px;
   min-height: 420px;
   min-width: 0;
+}
+
+.frame-side {
+  padding: 12px;
+}
+
+.frame-side .frame-panel {
+  border: none;
+  background: transparent;
+  padding: 0;
 }
 
 .canvas-head {
@@ -701,6 +717,10 @@ input[type='color'] {
   scroll-snap-type: x proximity;
 }
 
+.toolbar-row.toolbar-more[hidden] {
+  display: none !important;
+}
+
 .toolbar-row::-webkit-scrollbar {
   height: 10px;
 }
@@ -893,6 +913,107 @@ input[type='color'] {
   font-weight: 900;
   color: var(--text-dark);
   width: fit-content;
+}
+
+/* Desktop layout: left toolbox / center canvas / right frames */
+@media (min-width: 960px) {
+  .workspace {
+    gap: 12px;
+  }
+
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 320px;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .editor-left,
+  .editor-right {
+    min-width: 0;
+  }
+
+  .editor-toolbar {
+    position: sticky;
+    top: calc(88px + env(safe-area-inset-top));
+    bottom: auto;
+    z-index: 20;
+    box-shadow: var(--shadow);
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    padding-bottom: 10px;
+  }
+
+  .editor-toolbar .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    overflow: visible;
+    padding-bottom: 0;
+    scroll-snap-type: none;
+  }
+
+  .editor-toolbar .toolbar-group {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .editor-toolbar .toolbar-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .editor-toolbar .tool-icon {
+    min-width: 90px;
+    grid-auto-flow: column;
+    grid-template-columns: 18px 1fr;
+    justify-content: start;
+    align-items: center;
+    column-gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .editor-toolbar .tool-icon span {
+    font-size: 0.78rem;
+  }
+
+  .frame-side {
+    position: sticky;
+    top: calc(88px + env(safe-area-inset-top));
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+  }
+
+  .frame-list {
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 0 4px 0;
+  }
+
+  .frame-item {
+    min-width: 0;
+    width: 100%;
+    grid-template-columns: 56px 1fr;
+    justify-items: start;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .frame-label {
+    font-size: 0.9rem;
+  }
+
+  /* Desktop: always show "more" section and hide menu toggle */
+  #toolbarMore[hidden] {
+    display: flex !important;
+  }
+  #toolbarMenuBtn {
+    display: none;
+  }
 }
 
 .btn-primary-solid {

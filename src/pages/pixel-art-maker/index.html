@@ -60,7 +60,175 @@
       </section>
 
       <div class="workspace" id="editorView" hidden>
-        <section class="card canvas-panel">
+        <div class="editor-layout">
+          <aside class="editor-left" aria-label="ツールボックス">
+            <div class="editor-toolbar card" id="editorToolbar" aria-label="編集ツール">
+              <div class="toolbar-row toolbar-primary" aria-label="よく使う">
+                <div class="toolbar-group" aria-label="ツール">
+                  <button class="tool-icon active" id="toolPen" type="button" aria-label="ペン">
+                    <i class="fa-solid fa-pen"></i><span>ペン</span>
+                  </button>
+                  <button class="tool-icon" id="toolEraser" type="button" aria-label="消しゴム">
+                    <i class="fa-solid fa-eraser"></i><span>消し</span>
+                  </button>
+                  <button class="tool-icon" id="toolFill" type="button" aria-label="ベタ塗り">
+                    <i class="fa-solid fa-fill-drip"></i><span>塗り</span>
+                  </button>
+                  <button class="tool-icon" id="toolPicker" type="button" aria-label="スポイト">
+                    <i class="fa-solid fa-eye-dropper"></i><span>色</span>
+                  </button>
+                  <button class="tool-icon" id="toolSelect" type="button" aria-label="範囲選択">
+                    <i class="fa-regular fa-object-group"></i><span>範囲</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="色">
+                  <button class="tool-icon color-btn" id="colorBtn" type="button" aria-label="色をえらぶ">
+                    <span class="color-dot" id="colorDot" aria-hidden="true"></span><span>色</span>
+                  </button>
+
+                  <div class="color-popover card" id="colorPopover" hidden>
+                    <div class="color-popover-head">
+                      <div class="color-popover-title">色をえらぶ</div>
+                      <button class="btn-sub btn-icon" id="colorPopoverCloseBtn" type="button" aria-label="閉じる">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </div>
+                    <div class="palette-grid" id="paletteGrid"></div>
+                    <div class="color-popover-foot">
+                      <label class="field">
+                        <span>フルカラー</span>
+                        <input id="colorInput" type="color" value="#333333" />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="toolbar-group" aria-label="もどす・やりなおし">
+                  <button class="tool-icon" id="undoBtn" type="button" aria-label="もどす">
+                    <i class="fa-solid fa-rotate-left"></i><span>もどす</span>
+                  </button>
+                  <button class="tool-icon" id="redoBtn" type="button" aria-label="やりなおし">
+                    <i class="fa-solid fa-rotate-right"></i><span>やり直</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="範囲操作">
+                  <button class="tool-icon" id="rangeCopyBtn" type="button" aria-label="コピー（範囲選択）">
+                    <i class="fa-regular fa-copy"></i><span>コピー</span>
+                  </button>
+                  <button class="tool-icon" id="rangeCutBtn" type="button" aria-label="切り取り（範囲選択）">
+                    <i class="fa-solid fa-scissors"></i><span>切取</span>
+                  </button>
+                  <button class="tool-icon" id="rangePasteBtn" type="button" aria-label="ペースト（範囲選択）">
+                    <i class="fa-regular fa-clipboard"></i><span>貼付</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="保存">
+                  <button class="tool-icon primary" id="saveBtn" type="button" aria-label="保存">
+                    <i class="fa-solid fa-floppy-disk"></i><span>保存</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="メニュー">
+                  <button class="tool-icon" id="toolbarMenuBtn" type="button" aria-label="メニューを開く" aria-expanded="false">
+                    <i class="fa-solid fa-ellipsis"></i><span>メニュー</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="toolbar-row toolbar-more" id="toolbarMore" aria-label="その他" hidden>
+                <div class="toolbar-group" aria-label="色相">
+                  <button class="tool-icon" id="hueBtn" type="button" aria-label="色相を変える（プレビュー）">
+                    <i class="fa-solid fa-circle-half-stroke"></i><span>色相</span>
+                  </button>
+
+                  <div class="hue-popover card" id="huePopover" hidden>
+                    <div class="color-popover-head">
+                      <div class="color-popover-title">色相</div>
+                      <button class="btn-sub btn-icon" id="huePopoverCloseBtn" type="button" aria-label="閉じる">
+                        <i class="fa-solid fa-xmark"></i>
+                      </button>
+                    </div>
+
+                    <div class="hue-row">
+                      <div class="hue-label">
+                        <span>プレビュー</span>
+                        <strong id="hueValue">0°</strong>
+                      </div>
+                      <input id="hueRange" type="range" min="-180" max="180" step="1" value="0" aria-label="色相" />
+                      <div class="hue-actions">
+                        <button class="btn-mini" id="hueResetBtn" type="button">リセット</button>
+                        <button class="btn-mini primary" id="hueApplyBtn" type="button">適用</button>
+                      </div>
+                      <div class="tiny-note">※「適用」で色を確定（もどすOK）</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="toolbar-group" aria-label="キャンバス">
+                  <button class="tool-icon" id="expandWidthBtn" type="button" aria-label="横にひろげる（+16）">
+                    <i class="fa-solid fa-arrows-left-right"></i><span>横+16</span>
+                  </button>
+                  <button class="tool-icon" id="expandHeightBtn" type="button" aria-label="縦にひろげる（+16）">
+                    <i class="fa-solid fa-arrows-up-down"></i><span>縦+16</span>
+                  </button>
+                  <button class="tool-icon" id="shrinkWidthBtn" type="button" aria-label="横をちぢめる（-16）">
+                    <i class="fa-solid fa-minus"></i><span>横-16</span>
+                  </button>
+                  <button class="tool-icon" id="shrinkHeightBtn" type="button" aria-label="縦をちぢめる（-16）">
+                    <i class="fa-solid fa-minus"></i><span>縦-16</span>
+                  </button>
+                  <button class="tool-icon" id="gridToggleBtn" type="button" aria-label="グリッドON/OFF">
+                    <i class="fa-solid fa-border-all"></i><span>線</span>
+                  </button>
+                  <div class="zoom-mini" aria-label="ズーム">
+                    <button class="tool-icon" id="zoomOutBtn" type="button" aria-label="ズームアウト">
+                      <i class="fa-solid fa-magnifying-glass-minus"></i><span>-</span>
+                    </button>
+                    <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" aria-label="ズーム" />
+                    <button class="tool-icon" id="zoomInBtn" type="button" aria-label="ズームイン">
+                      <i class="fa-solid fa-magnifying-glass-plus"></i><span>+</span>
+                    </button>
+                  </div>
+                  <input class="sr-only" id="gridToggle" type="checkbox" checked />
+                </div>
+
+                <div class="toolbar-group" aria-label="操作">
+                  <button class="tool-icon" id="clearBtn" type="button" aria-label="全消し">
+                    <i class="fa-solid fa-trash-can"></i><span>全消</span>
+                  </button>
+                  <button class="tool-icon" id="importImageBtn" type="button" aria-label="画像を読み込む">
+                    <i class="fa-solid fa-image"></i><span>画像</span>
+                  </button>
+                  <input class="sr-only" id="importImageInput" type="file" accept="image/*" />
+                  <button class="tool-icon" id="exportBtn" type="button" aria-label="PNGを書き出す">
+                    <i class="fa-solid fa-file-arrow-down"></i><span>PNG</span>
+                  </button>
+                  <button class="tool-icon" id="avatarPickBtn" type="button" aria-label="アバターにする">
+                    <i class="fa-solid fa-user"></i><span>アイコン</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="保存など">
+                  <button class="tool-icon" id="newBtn" type="button" aria-label="新規">
+                    <i class="fa-solid fa-file-circle-plus"></i><span>新規</span>
+                  </button>
+                  <button class="tool-icon" id="duplicateBtn" type="button" aria-label="複製">
+                    <i class="fa-solid fa-clone"></i><span>複製</span>
+                  </button>
+                  <button class="tool-icon danger" id="deleteBtn" type="button" aria-label="削除">
+                    <i class="fa-solid fa-circle-xmark"></i><span>削除</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="toolbar-status" id="statusText" aria-live="polite">-</div>
+            </div>
+          </aside>
+
+          <section class="card canvas-panel editor-center">
           <div class="canvas-head">
             <div class="canvas-head-left">
               <div class="small-label">キャンバス</div>
@@ -77,26 +245,6 @@
               <span>なまえ</span>
               <input id="nameInput" type="text" maxlength="40" placeholder="なまえをつけよう" />
             </label>
-
-            <div class="frame-panel" aria-label="フレーム">
-              <div class="frame-panel-head">
-                <div class="frame-panel-title">
-                  <span class="small-label">フレーム</span>
-                  <strong class="frame-counter" id="frameCounter">1/1</strong>
-                </div>
-
-                <div class="frame-actions">
-                  <button class="btn-mini" id="framePrevBtn" type="button" aria-label="前のフレーム">◀</button>
-                  <button class="btn-mini" id="frameNextBtn" type="button" aria-label="次のフレーム">▶</button>
-                  <button class="btn-mini primary" id="frameAddBtn" type="button" aria-label="フレームを追加">＋ 追加</button>
-                  <button class="btn-mini" id="frameDuplicateBtn" type="button" aria-label="フレームを複製">複製</button>
-                  <button class="btn-mini btn-mini-danger" id="frameDeleteBtn" type="button" aria-label="フレームを削除">削除</button>
-                </div>
-              </div>
-
-              <div class="frame-list" id="frameList" aria-label="フレーム一覧"></div>
-              <div class="tiny-note" id="frameHint">※ フレームを切り替えてアニメ素材を作れます</div>
-            </div>
           </div>
 
           <div class="canvas-scroll" id="canvasScroll">
@@ -106,138 +254,30 @@
           </div>
         </section>
 
-        <footer class="editor-toolbar" id="editorToolbar" aria-label="編集ツール">
-          <div class="toolbar-row">
-            <div class="toolbar-group" aria-label="ツール">
-              <button class="tool-icon active" id="toolPen" type="button" aria-label="ペン">
-                <i class="fa-solid fa-pen"></i><span>ペン</span>
-              </button>
-              <button class="tool-icon" id="toolEraser" type="button" aria-label="消しゴム">
-                <i class="fa-solid fa-eraser"></i><span>消し</span>
-              </button>
-              <button class="tool-icon" id="toolFill" type="button" aria-label="ベタ塗り">
-                <i class="fa-solid fa-fill-drip"></i><span>塗り</span>
-              </button>
-              <button class="tool-icon" id="toolPicker" type="button" aria-label="スポイト">
-                <i class="fa-solid fa-eye-dropper"></i><span>色</span>
-              </button>
-            </div>
-
-            <div class="toolbar-group" aria-label="色">
-              <button class="tool-icon color-btn" id="colorBtn" type="button" aria-label="色をえらぶ">
-                <span class="color-dot" id="colorDot" aria-hidden="true"></span><span>色</span>
-              </button>
-
-              <div class="color-popover card" id="colorPopover" hidden>
-                <div class="color-popover-head">
-                  <div class="color-popover-title">色をえらぶ</div>
-                  <button class="btn-sub btn-icon" id="colorPopoverCloseBtn" type="button" aria-label="閉じる">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
-                <div class="palette-grid" id="paletteGrid"></div>
-                <div class="color-popover-foot">
-                  <label class="field">
-                    <span>フルカラー</span>
-                    <input id="colorInput" type="color" value="#333333" />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="toolbar-group" aria-label="色相">
-              <button class="tool-icon" id="hueBtn" type="button" aria-label="色相を変える（プレビュー）">
-                <i class="fa-solid fa-circle-half-stroke"></i><span>色相</span>
-              </button>
-
-              <div class="hue-popover card" id="huePopover" hidden>
-                <div class="color-popover-head">
-                  <div class="color-popover-title">色相</div>
-                  <button class="btn-sub btn-icon" id="huePopoverCloseBtn" type="button" aria-label="閉じる">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
-
-                <div class="hue-row">
-                  <div class="hue-label">
-                    <span>プレビュー</span>
-                    <strong id="hueValue">0°</strong>
+          <aside class="editor-right" aria-label="フレーム">
+            <section class="frame-side card">
+              <div class="frame-panel" aria-label="フレーム">
+                <div class="frame-panel-head">
+                  <div class="frame-panel-title">
+                    <span class="small-label">フレーム</span>
+                    <strong class="frame-counter" id="frameCounter">1/1</strong>
                   </div>
-                  <input id="hueRange" type="range" min="-180" max="180" step="1" value="0" aria-label="色相" />
-                  <div class="hue-actions">
-                    <button class="btn-mini" id="hueResetBtn" type="button">リセット</button>
-                    <button class="btn-mini primary" id="hueApplyBtn" type="button">適用</button>
+
+                  <div class="frame-actions">
+                    <button class="btn-mini" id="framePrevBtn" type="button" aria-label="前のフレーム">◀</button>
+                    <button class="btn-mini" id="frameNextBtn" type="button" aria-label="次のフレーム">▶</button>
+                    <button class="btn-mini primary" id="frameAddBtn" type="button" aria-label="フレームを追加">＋ 追加</button>
+                    <button class="btn-mini" id="frameDuplicateBtn" type="button" aria-label="フレームを複製">複製</button>
+                    <button class="btn-mini btn-mini-danger" id="frameDeleteBtn" type="button" aria-label="フレームを削除">削除</button>
                   </div>
-                  <div class="tiny-note">※「適用」で色を確定（もどすOK）</div>
                 </div>
+
+                <div class="frame-list" id="frameList" aria-label="フレーム一覧"></div>
+                <div class="tiny-note" id="frameHint">※ フレームを切り替えてアニメ素材を作れます</div>
               </div>
-            </div>
-
-            <div class="toolbar-group" aria-label="もどす・やりなおし">
-              <button class="tool-icon" id="undoBtn" type="button" aria-label="もどす">
-                <i class="fa-solid fa-rotate-left"></i><span>もどす</span>
-              </button>
-              <button class="tool-icon" id="redoBtn" type="button" aria-label="やりなおし">
-                <i class="fa-solid fa-rotate-right"></i><span>やり直</span>
-              </button>
-            </div>
-
-            <div class="toolbar-group" aria-label="キャンバス">
-              <button class="tool-icon" id="expandWidthBtn" type="button" aria-label="横にひろげる（+16）">
-                <i class="fa-solid fa-arrows-left-right"></i><span>横+16</span>
-              </button>
-              <button class="tool-icon" id="expandHeightBtn" type="button" aria-label="縦にひろげる（+16）">
-                <i class="fa-solid fa-arrows-up-down"></i><span>縦+16</span>
-              </button>
-              <button class="tool-icon" id="gridToggleBtn" type="button" aria-label="グリッドON/OFF">
-                <i class="fa-solid fa-border-all"></i><span>線</span>
-              </button>
-              <div class="zoom-mini" aria-label="ズーム">
-                <button class="tool-icon" id="zoomOutBtn" type="button" aria-label="ズームアウト">
-                  <i class="fa-solid fa-magnifying-glass-minus"></i><span>-</span>
-                </button>
-                <input id="zoomRange" type="range" min="8" max="48" step="1" value="24" aria-label="ズーム" />
-                <button class="tool-icon" id="zoomInBtn" type="button" aria-label="ズームイン">
-                  <i class="fa-solid fa-magnifying-glass-plus"></i><span>+</span>
-                </button>
-              </div>
-              <input class="sr-only" id="gridToggle" type="checkbox" checked />
-            </div>
-
-            <div class="toolbar-group" aria-label="操作">
-              <button class="tool-icon" id="clearBtn" type="button" aria-label="全消し">
-                <i class="fa-solid fa-trash-can"></i><span>全消</span>
-              </button>
-              <button class="tool-icon" id="importImageBtn" type="button" aria-label="画像を読み込む">
-                <i class="fa-solid fa-image"></i><span>画像</span>
-              </button>
-              <input class="sr-only" id="importImageInput" type="file" accept="image/*" />
-              <button class="tool-icon" id="exportBtn" type="button" aria-label="PNGを書き出す">
-                <i class="fa-solid fa-file-arrow-down"></i><span>PNG</span>
-              </button>
-              <button class="tool-icon" id="avatarPickBtn" type="button" aria-label="アバターにする">
-                <i class="fa-solid fa-user"></i><span>アイコン</span>
-              </button>
-            </div>
-
-            <div class="toolbar-group" aria-label="保存など">
-              <button class="tool-icon primary" id="saveBtn" type="button" aria-label="保存">
-                <i class="fa-solid fa-floppy-disk"></i><span>保存</span>
-              </button>
-              <button class="tool-icon" id="newBtn" type="button" aria-label="新規">
-                <i class="fa-solid fa-file-circle-plus"></i><span>新規</span>
-              </button>
-              <button class="tool-icon" id="duplicateBtn" type="button" aria-label="複製">
-                <i class="fa-solid fa-clone"></i><span>複製</span>
-              </button>
-              <button class="tool-icon danger" id="deleteBtn" type="button" aria-label="削除">
-                <i class="fa-solid fa-circle-xmark"></i><span>削除</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="toolbar-status" id="statusText" aria-live="polite">-</div>
-        </footer>
+            </section>
+          </aside>
+        </div>
       </div>
 
       <div class="modal-backdrop" id="newAssetModal" hidden>

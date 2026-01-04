@@ -80,6 +80,11 @@ const toolPen = document.getElementById('toolPen');
 const toolEraser = document.getElementById('toolEraser');
 const toolFill = document.getElementById('toolFill');
 const toolPicker = document.getElementById('toolPicker');
+const toolSelect = document.getElementById('toolSelect');
+
+const rangeCopyBtn = document.getElementById('rangeCopyBtn');
+const rangeCutBtn = document.getElementById('rangeCutBtn');
+const rangePasteBtn = document.getElementById('rangePasteBtn');
 
 const colorInput = document.getElementById('colorInput');
 const paletteGrid = document.getElementById('paletteGrid');
@@ -99,6 +104,8 @@ const redoBtn = document.getElementById('redoBtn');
 const clearBtn = document.getElementById('clearBtn');
 const expandWidthBtn = document.getElementById('expandWidthBtn');
 const expandHeightBtn = document.getElementById('expandHeightBtn');
+const shrinkWidthBtn = document.getElementById('shrinkWidthBtn');
+const shrinkHeightBtn = document.getElementById('shrinkHeightBtn');
 
 const newBtn = document.getElementById('newBtn');
 const saveBtn = document.getElementById('saveBtn');
@@ -111,6 +118,8 @@ const importImageBtn = document.getElementById('importImageBtn');
 const importImageInput = document.getElementById('importImageInput');
 
 const statusText = document.getElementById('statusText');
+const toolbarMenuBtn = document.getElementById('toolbarMenuBtn');
+const toolbarMore = document.getElementById('toolbarMore');
 
 // New asset modal
 const newAssetModal = document.getElementById('newAssetModal');
@@ -132,7 +141,7 @@ const sampleList = document.getElementById('sampleList');
 const SAMPLE_ASSETS = Array.isArray(samplePack?.samples) ? samplePack.samples : [];
 
 // State
-/** @type {'pen'|'eraser'|'fill'|'picker'} */
+/** @type {'pen'|'eraser'|'fill'|'picker'|'select'} */
 let currentTool = 'pen';
 let currentColor = hexToRgbaInt(colorInput.value);
 
@@ -141,6 +150,21 @@ let currentAsset = null;
 let isPersisted = false;
 let dirty = false;
 let currentFrameIndex = 0;
+
+/**
+ * @typedef {{x:number,y:number,w:number,h:number}} Rect
+ * @typedef {{w:number,h:number,pixels:Uint32Array}} PixelClipboard
+ */
+/** @type {Rect|null} */
+let selectionRect = null;
+/** @type {PixelClipboard|null} */
+let pixelClipboard = null;
+/** @type {{mode:'none'|'selecting'|'moving'|'pasting',startX:number,startY:number,anchorX:number,anchorY:number,offsetX:number,offsetY:number,buffer:PixelClipboard|null,fromRect:Rect|null}|null} */
+let rangeGesture = null;
+/** @type {{x:number,y:number,index:number}} */
+let lastHoverPixel = { x: -1, y: -1, index: -1 };
+const rangePreviewCanvas = document.createElement('canvas');
+const rangePreviewCtx = rangePreviewCanvas.getContext('2d');
 
 /**
  * @typedef {{type:'frame',frameIndex:number,width:number,height:number,pixels:Uint32Array}} FrameSnapshot
@@ -159,6 +183,7 @@ let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
 let huePreviewDeg = 0;
+let frameThumbTimer = null;
 
 const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
 if (avatarPickBtn) avatarPickBtn.hidden = !pickAvatarMode;
@@ -256,6 +281,8 @@ function setReadOnly(next) {
   if (clearBtn) clearBtn.disabled = disableEdit;
   if (expandWidthBtn) expandWidthBtn.disabled = disableEdit;
   if (expandHeightBtn) expandHeightBtn.disabled = disableEdit;
+  if (shrinkWidthBtn) shrinkWidthBtn.disabled = disableEdit;
+  if (shrinkHeightBtn) shrinkHeightBtn.disabled = disableEdit;
   if (importImageBtn) importImageBtn.disabled = disableEdit;
   if (undoBtn) undoBtn.disabled = disableEdit || undoStack.length === 0;
   if (redoBtn) redoBtn.disabled = disableEdit || redoStack.length === 0;
@@ -268,6 +295,8 @@ function setReadOnly(next) {
 
   // Hue "apply" is a destructive edit, but preview is OK.
   if (hueApplyBtn) hueApplyBtn.disabled = disableEdit;
+
+  updateRangeButtons();
 }
 
 function clamp(n, min, max) {
@@ -583,7 +612,9 @@ function setTool(tool) {
   toolEraser.classList.toggle('active', tool === 'eraser');
   toolFill.classList.toggle('active', tool === 'fill');
   toolPicker.classList.toggle('active', tool === 'picker');
-  canvas.style.cursor = tool === 'picker' ? 'copy' : 'crosshair';
+  if (toolSelect) toolSelect.classList.toggle('active', tool === 'select');
+  if (tool !== 'select' && rangeGesture?.mode === 'pasting') cancelPasteMode();
+  canvas.style.cursor = tool === 'picker' ? 'copy' : tool === 'select' ? 'cell' : 'crosshair';
 }
 
 function setView(view) {
@@ -679,12 +710,248 @@ function scheduleRender() {
     renderScheduled = false;
     renderNow();
   });
+  scheduleActiveFrameThumbUpdate();
+}
+
+function scheduleActiveFrameThumbUpdate() {
+  if (!currentAsset || !frameList) return;
+  if (frameThumbTimer != null) return;
+  const pixelCount = currentAsset?.pixels?.length || 0;
+  const delay = pixelCount > 64 * 64 ? 220 : pixelCount > 32 * 32 ? 140 : 80;
+  frameThumbTimer = window.setTimeout(() => {
+    frameThumbTimer = null;
+    updateActiveFrameThumb();
+  }, delay);
+}
+
+function updateActiveFrameThumb() {
+  if (!currentAsset || !frameList) return;
+  const selected = frameList.querySelector('.frame-item.selected');
+  const img = selected ? selected.querySelector('img.frame-thumb') : null;
+  if (!(img instanceof HTMLImageElement)) return;
+  try {
+    img.src = assetPreviewDataUrl({ ...currentAsset, pixels: currentAsset.pixels }, 56);
+  } catch {
+    // ignore
+  }
+}
+
+function hasSelection() {
+  return Boolean(selectionRect && selectionRect.w > 0 && selectionRect.h > 0);
+}
+
+function normalizeRect(x0, y0, x1, y1) {
+  const left = Math.min(x0, x1);
+  const top = Math.min(y0, y1);
+  const right = Math.max(x0, x1);
+  const bottom = Math.max(y0, y1);
+  return { x: left, y: top, w: Math.max(0, right - left + 1), h: Math.max(0, bottom - top + 1) };
+}
+
+function clampRectToCanvas(rect) {
+  if (!currentAsset) return rect;
+  const x = clamp(rect.x, 0, currentAsset.width - 1);
+  const y = clamp(rect.y, 0, currentAsset.height - 1);
+  const maxW = Math.max(0, currentAsset.width - x);
+  const maxH = Math.max(0, currentAsset.height - y);
+  return { x, y, w: clamp(rect.w, 0, maxW), h: clamp(rect.h, 0, maxH) };
+}
+
+function pointInRect(px, py, rect) {
+  if (!rect) return false;
+  return px >= rect.x && py >= rect.y && px < rect.x + rect.w && py < rect.y + rect.h;
+}
+
+function clearRangeGesture() {
+  rangeGesture = null;
+}
+
+function clearSelection({ keepClipboard = true } = {}) {
+  selectionRect = null;
+  clearRangeGesture();
+  if (!keepClipboard) pixelClipboard = null;
+  updateRangeButtons();
+  scheduleRender();
+}
+
+function updateRangeButtons() {
+  const canCopy = hasSelection();
+  const canPaste = Boolean(pixelClipboard);
+  if (rangeCopyBtn) rangeCopyBtn.disabled = !canCopy;
+  if (rangeCutBtn) rangeCutBtn.disabled = isReadOnly || !canCopy;
+  if (rangePasteBtn) rangePasteBtn.disabled = isReadOnly || !canPaste;
+}
+
+function readRectPixels(rect) {
+  if (!currentAsset) return { w: 0, h: 0, pixels: new Uint32Array() };
+  const r = clampRectToCanvas(rect);
+  const out = new Uint32Array(r.w * r.h);
+  const w = currentAsset.width;
+  for (let y = 0; y < r.h; y++) {
+    const srcRow = (r.y + y) * w + r.x;
+    const dstRow = y * r.w;
+    out.set(currentAsset.pixels.subarray(srcRow, srcRow + r.w), dstRow);
+  }
+  return { w: r.w, h: r.h, pixels: out };
+}
+
+function clearRectPixels(rect) {
+  if (!currentAsset) return 0;
+  const r = clampRectToCanvas(rect);
+  const w = currentAsset.width;
+  let changed = 0;
+  for (let y = 0; y < r.h; y++) {
+    const rowStart = (r.y + y) * w + r.x;
+    for (let x = 0; x < r.w; x++) {
+      const idx = rowStart + x;
+      if ((currentAsset.pixels[idx] >>> 0) !== 0) {
+        currentAsset.pixels[idx] = 0;
+        changed++;
+      }
+    }
+  }
+  return changed;
+}
+
+function writeRectPixels(dstX, dstY, clip, { transparentIsNoop = false } = {}) {
+  if (!currentAsset) return 0;
+  const w = currentAsset.width;
+  const maxX = currentAsset.width;
+  const maxY = currentAsset.height;
+  let changed = 0;
+  for (let y = 0; y < clip.h; y++) {
+    const yy = dstY + y;
+    if (yy < 0 || yy >= maxY) continue;
+    for (let x = 0; x < clip.w; x++) {
+      const xx = dstX + x;
+      if (xx < 0 || xx >= maxX) continue;
+      const v = clip.pixels[y * clip.w + x] >>> 0;
+      if (transparentIsNoop && v === 0) continue;
+      const idx = yy * w + xx;
+      const prev = currentAsset.pixels[idx] >>> 0;
+      if (prev === v) continue;
+      currentAsset.pixels[idx] = v;
+      changed++;
+    }
+  }
+  return changed;
+}
+
+function copySelectionToClipboard() {
+  if (!hasSelection()) {
+    updateStatus('範囲が選ばれていない');
+    return false;
+  }
+  pixelClipboard = readRectPixels(selectionRect);
+  updateRangeButtons();
+  if (pixelClipboard.w > 0 && pixelClipboard.h > 0) {
+    updateStatus(`コピー（${pixelClipboard.w}×${pixelClipboard.h}）`);
+    return true;
+  }
+  updateStatus('コピーできなかった');
+  return false;
+}
+
+function cutSelectionToClipboard() {
+  if (!currentAsset) return false;
+  if (isReadOnly) return false;
+  if (!copySelectionToClipboard()) return false;
+  const snapshot = snapshotCurrentPixels();
+  const changed = clearRectPixels(selectionRect);
+  if (changed > 0) {
+    pushUndoSnapshot(snapshot);
+    setDirty(true);
+    scheduleRender();
+    updateStatus('切り取り');
+  } else {
+    updateStatus('切り取り（変化なし）');
+  }
+  return changed > 0;
+}
+
+function startPasteMode(anchorX, anchorY) {
+  if (!pixelClipboard || pixelClipboard.w <= 0 || pixelClipboard.h <= 0) {
+    updateStatus('貼り付けるものがない');
+    return false;
+  }
+  if (!currentAsset) return false;
+  if (isReadOnly) return false;
+  rangeGesture = {
+    mode: 'pasting',
+    startX: anchorX,
+    startY: anchorY,
+    anchorX,
+    anchorY,
+    offsetX: 0,
+    offsetY: 0,
+    buffer: pixelClipboard,
+    fromRect: null
+  };
+  selectionRect = clampRectToCanvas({ x: anchorX, y: anchorY, w: pixelClipboard.w, h: pixelClipboard.h });
+  updateRangeButtons();
+  scheduleRender();
+  updateStatus('貼り付け位置をクリック（Escでキャンセル）');
+  return true;
+}
+
+function cancelPasteMode() {
+  if (rangeGesture?.mode !== 'pasting') return;
+  clearRangeGesture();
+  scheduleRender();
+}
+
+function commitPasteAt(x, y) {
+  if (!currentAsset || !pixelClipboard) return false;
+  if (isReadOnly) return false;
+  const snapshot = snapshotCurrentPixels();
+  const changed = writeRectPixels(x, y, pixelClipboard, { transparentIsNoop: false });
+  pushUndoSnapshot(snapshot);
+  setDirty(true);
+  selectionRect = clampRectToCanvas({ x, y, w: pixelClipboard.w, h: pixelClipboard.h });
+  updateRangeButtons();
+  scheduleRender();
+  updateStatus(changed > 0 ? '貼り付け' : '貼り付け（変化なし）');
+  return changed > 0;
 }
 
 function renderNow() {
   if (!currentAsset) return;
   ctx.imageSmoothingEnabled = false;
   ctx.putImageData(pixelsToImageData(currentAsset.pixels, currentAsset.width, currentAsset.height), 0, 0);
+
+  // Range overlay (selection highlight)
+  if (selectionRect && selectionRect.w > 0 && selectionRect.h > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(108, 92, 231, 0.12)';
+    ctx.strokeStyle = 'rgba(108, 92, 231, 0.95)';
+    ctx.lineWidth = 1;
+    ctx.fillRect(selectionRect.x, selectionRect.y, selectionRect.w, selectionRect.h);
+    ctx.strokeRect(
+      selectionRect.x + 0.5,
+      selectionRect.y + 0.5,
+      Math.max(0, selectionRect.w - 1),
+      Math.max(0, selectionRect.h - 1)
+    );
+    ctx.restore();
+  }
+
+  // Preview while moving / pasting
+  if (rangeGesture && (rangeGesture.mode === 'moving' || rangeGesture.mode === 'pasting') && rangeGesture.buffer && rangePreviewCtx) {
+    const clip = rangeGesture.buffer;
+    if (clip.w > 0 && clip.h > 0) {
+      if (rangePreviewCanvas.width !== clip.w) rangePreviewCanvas.width = clip.w;
+      if (rangePreviewCanvas.height !== clip.h) rangePreviewCanvas.height = clip.h;
+      rangePreviewCtx.putImageData(pixelsToImageData(clip.pixels, clip.w, clip.h), 0, 0);
+      const px = rangeGesture.anchorX + rangeGesture.offsetX;
+      const py = rangeGesture.anchorY + rangeGesture.offsetY;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(rangePreviewCanvas, px, py);
+      ctx.restore();
+    }
+  }
 }
 
 function normalizeFramesInCurrentAsset() {
@@ -732,6 +999,8 @@ function switchToFrame(index, { resetHistory = false } = {}) {
   if (isPointerDown) endStroke();
   currentFrameIndex = next;
   normalizeFramesInCurrentAsset();
+  selectionRect = null;
+  rangeGesture = null;
   if (resetHistory) {
     undoStack = [];
     redoStack = [];
@@ -740,6 +1009,7 @@ function switchToFrame(index, { resetHistory = false } = {}) {
   updateCanvasLayout();
   scheduleRender();
   updateFrameUi();
+  updateRangeButtons();
   updateStatus(`フレーム ${next + 1}`);
 }
 
@@ -874,6 +1144,8 @@ function setAsset(asset, { persisted }) {
   setReadOnly(Boolean(asset?.ownerId) && String(asset.ownerId) !== String(ownerId));
   setHuePreview(0);
   currentFrameIndex = 0;
+  selectionRect = null;
+  rangeGesture = null;
 
   // Sync UI fields
   nameInput.value = asset.name || '';
@@ -895,6 +1167,7 @@ function setAsset(asset, { persisted }) {
   scheduleRender();
   updateUndoRedoButtons();
   updateFrameUi();
+  updateRangeButtons();
   updateStatus();
 }
 
@@ -909,6 +1182,10 @@ function snapshotCurrentPixels() {
 
 function restoreSnapshot(snapshot) {
   if (!currentAsset) return;
+  // Selection / paste state can become inconsistent after undo/redo.
+  selectionRect = null;
+  rangeGesture = null;
+  updateRangeButtons();
   if (snapshot?.type === 'asset') {
     currentAsset.width = snapshot.width;
     currentAsset.height = snapshot.height;
@@ -1444,6 +1721,17 @@ toolPen.addEventListener('click', () => setTool('pen'));
 toolEraser.addEventListener('click', () => setTool('eraser'));
 toolFill.addEventListener('click', () => setTool('fill'));
 toolPicker.addEventListener('click', () => setTool('picker'));
+if (toolSelect) toolSelect.addEventListener('click', () => setTool('select'));
+
+if (rangeCopyBtn) rangeCopyBtn.addEventListener('click', () => copySelectionToClipboard());
+if (rangeCutBtn) rangeCutBtn.addEventListener('click', () => cutSelectionToClipboard());
+if (rangePasteBtn) {
+  rangePasteBtn.addEventListener('click', () => {
+    if (!currentAsset) return;
+    const anchor = lastHoverPixel?.index >= 0 ? lastHoverPixel : { x: 0, y: 0, index: 0 };
+    startPasteMode(anchor.x, anchor.y);
+  });
+}
 
 backToGalleryBtn.addEventListener('click', async () => {
   if (dirty && !confirm('いまの変更は保存されていません。ギャラリーに戻りますか？')) return;
@@ -1495,6 +1783,104 @@ function expandCanvas({ addWidth = 0, addHeight = 0 } = {}) {
   updateStatus('キャンバスをひろげた');
 }
 
+function countPixelsOutside(nextW, nextH) {
+  if (!currentAsset) return 0;
+  normalizeFramesInCurrentAsset();
+  const frames = Array.isArray(currentAsset.frames) ? currentAsset.frames : [];
+  const beforeW = currentAsset.width;
+  const beforeH = currentAsset.height;
+
+  const w2 = Math.max(1, Math.min(beforeW, nextW));
+  const h2 = Math.max(1, Math.min(beforeH, nextH));
+  let lost = 0;
+
+  for (const f of frames) {
+    const px = normalizePixelsSize(beforeW, beforeH, f?.pixels instanceof Uint32Array ? f.pixels : new Uint32Array());
+    // right side columns (x >= w2) for y < h2
+    if (w2 < beforeW) {
+      for (let y = 0; y < h2; y++) {
+        const row = y * beforeW;
+        for (let x = w2; x < beforeW; x++) {
+          if ((px[row + x] >>> 0) !== 0) lost++;
+        }
+      }
+    }
+    // bottom rows (y >= h2) for all x
+    if (h2 < beforeH) {
+      for (let y = h2; y < beforeH; y++) {
+        const row = y * beforeW;
+        for (let x = 0; x < beforeW; x++) {
+          if ((px[row + x] >>> 0) !== 0) lost++;
+        }
+      }
+    }
+  }
+  return lost;
+}
+
+function shrinkCanvas({ subWidth = 0, subHeight = 0 } = {}) {
+  if (!currentAsset) return;
+  if (isReadOnly) return;
+
+  const beforeW = currentAsset.width;
+  const beforeH = currentAsset.height;
+  const nextW = Math.max(1, beforeW - (Number(subWidth) || 0));
+  const nextH = Math.max(1, beforeH - (Number(subHeight) || 0));
+
+  if (nextW === beforeW && nextH === beforeH) {
+    updateStatus('これ以上ちぢめられないよ');
+    return;
+  }
+
+  const lost = countPixelsOutside(nextW, nextH);
+  if (lost > 0) {
+    const ok = confirm(`縮小すると、右/下側のピクセルが消えます（合計 ${lost} 個）。\nそれでもちぢめますか？`);
+    if (!ok) {
+      updateStatus('縮小をキャンセルした');
+      return;
+    }
+  }
+
+  normalizeFramesInCurrentAsset();
+  const snapshot = snapshotEntireAsset();
+  pushUndoSnapshot(snapshot);
+
+  currentAsset.width = nextW;
+  currentAsset.height = nextH;
+
+  // Resize all frames (keep top-left content; crop right/bottom).
+  (currentAsset.frames || []).forEach((f) => {
+    const beforePixels = normalizePixelsSize(beforeW, beforeH, f.pixels);
+    const nextPixels = new Uint32Array(nextW * nextH);
+    const copyW = Math.min(beforeW, nextW);
+    const copyH = Math.min(beforeH, nextH);
+    for (let y = 0; y < copyH; y++) {
+      const srcStart = y * beforeW;
+      const dstStart = y * nextW;
+      nextPixels.set(beforePixels.subarray(srcStart, srcStart + copyW), dstStart);
+    }
+    f.width = nextW;
+    f.height = nextH;
+    f.pixels = nextPixels;
+  });
+
+  currentFrameIndex = clamp(currentFrameIndex, 0, Math.max(0, (currentAsset.frames?.length ?? 1) - 1));
+  currentAsset.pixels = currentAsset.frames?.[currentFrameIndex]?.pixels || new Uint32Array(nextW * nextH);
+  canvas.width = nextW;
+  canvas.height = nextH;
+
+  // Selection can become out of bounds after resize.
+  selectionRect = null;
+  rangeGesture = null;
+  updateRangeButtons();
+
+  setDirty(true);
+  updateCanvasLayout();
+  scheduleRender();
+  updateFrameUi();
+  updateStatus('キャンバスをちぢめた');
+}
+
 if (expandWidthBtn) {
   expandWidthBtn.addEventListener('click', () => {
     expandCanvas({ addWidth: CANVAS_STEP });
@@ -1503,6 +1889,16 @@ if (expandWidthBtn) {
 if (expandHeightBtn) {
   expandHeightBtn.addEventListener('click', () => {
     expandCanvas({ addHeight: CANVAS_STEP });
+  });
+}
+if (shrinkWidthBtn) {
+  shrinkWidthBtn.addEventListener('click', () => {
+    shrinkCanvas({ subWidth: CANVAS_STEP });
+  });
+}
+if (shrinkHeightBtn) {
+  shrinkHeightBtn.addEventListener('click', () => {
+    shrinkCanvas({ subHeight: CANVAS_STEP });
   });
 }
 
@@ -1582,6 +1978,82 @@ document.addEventListener('keydown', (e) => {
   const typing = tag === 'input' || tag === 'textarea' || tag === 'select';
   if (typing) return;
 
+  const inEditor = appRoot?.dataset?.view === 'editor';
+  const key = e.key.toLowerCase();
+  const mod = e.ctrlKey || e.metaKey;
+
+  if (inEditor && currentAsset) {
+    if (e.key === 'Escape') {
+      if (rangeGesture?.mode === 'pasting') {
+        e.preventDefault();
+        cancelPasteMode();
+        updateStatus('貼り付けキャンセル');
+        return;
+      }
+      if (hasSelection()) {
+        e.preventDefault();
+        clearSelection({ keepClipboard: true });
+        updateStatus('範囲選択を解除');
+        return;
+      }
+    }
+
+    if (mod && key === 'c') {
+      e.preventDefault();
+      copySelectionToClipboard();
+      return;
+    }
+    if (mod && key === 'x') {
+      e.preventDefault();
+      cutSelectionToClipboard();
+      return;
+    }
+    if (mod && key === 'v') {
+      e.preventDefault();
+      const anchor = lastHoverPixel?.index >= 0 ? lastHoverPixel : { x: 0, y: 0, index: 0 };
+      startPasteMode(anchor.x, anchor.y);
+      return;
+    }
+
+    if ((e.key === 'Delete' || e.key === 'Backspace') && hasSelection()) {
+      if (isReadOnly) return;
+      e.preventDefault();
+      const snapshot = snapshotCurrentPixels();
+      const changed = clearRectPixels(selectionRect);
+      if (changed > 0) {
+        pushUndoSnapshot(snapshot);
+        setDirty(true);
+        scheduleRender();
+        updateStatus('範囲を消した');
+      } else {
+        updateStatus('範囲を消した（変化なし）');
+      }
+      return;
+    }
+
+    // Arrow keys: nudge selected pixels (Shift=8px)
+    if (hasSelection() && ['arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) {
+      if (isReadOnly) return;
+      e.preventDefault();
+      const step = e.shiftKey ? 8 : 1;
+      const dx = key === 'arrowleft' ? -step : key === 'arrowright' ? step : 0;
+      const dy = key === 'arrowup' ? -step : key === 'arrowdown' ? step : 0;
+      const clip = readRectPixels(selectionRect);
+      const from = { ...selectionRect };
+      const toX = from.x + dx;
+      const toY = from.y + dy;
+      const snapshot = snapshotCurrentPixels();
+      clearRectPixels(from);
+      writeRectPixels(toX, toY, clip, { transparentIsNoop: false });
+      pushUndoSnapshot(snapshot);
+      setDirty(true);
+      selectionRect = clampRectToCanvas({ x: toX, y: toY, w: from.w, h: from.h });
+      scheduleRender();
+      updateStatus('範囲を移動');
+      return;
+    }
+  }
+
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
     e.preventDefault();
     saveBtn.click();
@@ -1598,7 +2070,38 @@ document.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'e') setTool('eraser');
   if (e.key.toLowerCase() === 'f') setTool('fill');
   if (e.key.toLowerCase() === 'i') setTool('picker');
+  if (e.key.toLowerCase() === 'r') setTool('select');
 });
+
+function setToolbarMoreOpen(open) {
+  if (!toolbarMore) return;
+  const next = Boolean(open);
+  toolbarMore.hidden = !next;
+  if (toolbarMenuBtn) {
+    toolbarMenuBtn.setAttribute('aria-expanded', next ? 'true' : 'false');
+    toolbarMenuBtn.setAttribute('aria-label', next ? 'メニューを閉じる' : 'メニューを開く');
+  }
+  try {
+    localStorage.setItem('ngames.pm.toolbarMore.open', next ? '1' : '0');
+  } catch {
+    // ignore
+  }
+}
+
+function syncToolbarMoreForViewport() {
+  const wide = window.matchMedia?.('(min-width: 960px)')?.matches ?? false;
+  if (wide) {
+    setToolbarMoreOpen(true);
+    return;
+  }
+  let saved = null;
+  try {
+    saved = localStorage.getItem('ngames.pm.toolbarMore.open');
+  } catch {
+    saved = null;
+  }
+  setToolbarMoreOpen(saved === '1');
+}
 
 undoBtn.addEventListener('click', () => {
   if (!currentAsset) return;
@@ -1784,6 +2287,60 @@ if (avatarPickBtn) {
 canvas.addEventListener('pointerdown', (e) => {
   if (!currentAsset) return;
 
+  // Track hover for paste anchoring.
+  lastHoverPixel = eventToPixel(e);
+
+  // Range select tool
+  if (currentTool === 'select') {
+    if (rangeGesture?.mode === 'pasting') {
+      commitPasteAt(lastHoverPixel.x, lastHoverPixel.y);
+      clearRangeGesture();
+      scheduleRender();
+      return;
+    }
+
+    const p = lastHoverPixel;
+    const inside = hasSelection() && pointInRect(p.x, p.y, selectionRect);
+
+    isPointerDown = true;
+    canvas.setPointerCapture(e.pointerId);
+
+    if (inside && selectionRect) {
+      const buffer = readRectPixels(selectionRect);
+      rangeGesture = {
+        mode: 'moving',
+        startX: p.x,
+        startY: p.y,
+        anchorX: selectionRect.x,
+        anchorY: selectionRect.y,
+        offsetX: 0,
+        offsetY: 0,
+        buffer,
+        fromRect: { ...selectionRect }
+      };
+      updateStatus('ドラッグで移動（離すと確定 / Escで中止）');
+      scheduleRender();
+      return;
+    }
+
+    rangeGesture = {
+      mode: 'selecting',
+      startX: p.x,
+      startY: p.y,
+      anchorX: p.x,
+      anchorY: p.y,
+      offsetX: 0,
+      offsetY: 0,
+      buffer: null,
+      fromRect: null
+    };
+    selectionRect = clampRectToCanvas({ x: p.x, y: p.y, w: 1, h: 1 });
+    updateRangeButtons();
+    scheduleRender();
+    updateStatus('ドラッグして範囲選択');
+    return;
+  }
+
   if (currentTool === 'fill') {
     lastPaintedIndex = -1;
     applyToolAtEvent(e);
@@ -1805,6 +2362,42 @@ canvas.addEventListener('pointerdown', (e) => {
 });
 
 canvas.addEventListener('pointermove', (e) => {
+  if (!currentAsset) return;
+  lastHoverPixel = eventToPixel(e);
+
+  // Paste preview follows the pointer.
+  if (rangeGesture?.mode === 'pasting' && pixelClipboard) {
+    rangeGesture.anchorX = lastHoverPixel.x;
+    rangeGesture.anchorY = lastHoverPixel.y;
+    rangeGesture.offsetX = 0;
+    rangeGesture.offsetY = 0;
+    selectionRect = clampRectToCanvas({ x: lastHoverPixel.x, y: lastHoverPixel.y, w: pixelClipboard.w, h: pixelClipboard.h });
+    scheduleRender();
+    return;
+  }
+
+  if (currentTool === 'select' && rangeGesture && isPointerDown) {
+    const p = lastHoverPixel;
+    if (rangeGesture.mode === 'selecting') {
+      selectionRect = clampRectToCanvas(normalizeRect(rangeGesture.startX, rangeGesture.startY, p.x, p.y));
+      updateRangeButtons();
+      scheduleRender();
+      return;
+    }
+    if (rangeGesture.mode === 'moving') {
+      rangeGesture.offsetX = p.x - rangeGesture.startX;
+      rangeGesture.offsetY = p.y - rangeGesture.startY;
+      selectionRect = clampRectToCanvas({
+        x: rangeGesture.anchorX + rangeGesture.offsetX,
+        y: rangeGesture.anchorY + rangeGesture.offsetY,
+        w: rangeGesture.buffer?.w || 0,
+        h: rangeGesture.buffer?.h || 0
+      });
+      scheduleRender();
+      return;
+    }
+  }
+
   if (!isPointerDown) return;
   applyToolAtEvent(e);
 });
@@ -1813,6 +2406,35 @@ function endStroke() {
   if (!currentAsset) return;
   isPointerDown = false;
   lastPaintedIndex = -1;
+
+  if (currentTool === 'select' && rangeGesture) {
+    if (rangeGesture.mode === 'selecting') {
+      clearRangeGesture();
+      updateRangeButtons();
+      if (hasSelection()) {
+        updateStatus(`範囲選択（${selectionRect.w}×${selectionRect.h}）`);
+      }
+      scheduleRender();
+      return;
+    }
+
+    if (rangeGesture.mode === 'moving') {
+      const g = rangeGesture;
+      clearRangeGesture();
+      if (isReadOnly) return;
+      if (!g.buffer || !g.fromRect || !selectionRect) return;
+
+      const snapshot = snapshotCurrentPixels();
+      clearRectPixels(g.fromRect);
+      writeRectPixels(selectionRect.x, selectionRect.y, g.buffer, { transparentIsNoop: false });
+      pushUndoSnapshot(snapshot);
+      setDirty(true);
+      updateRangeButtons();
+      scheduleRender();
+      updateStatus('移動した');
+      return;
+    }
+  }
 
   if (strokeSnapshot && strokeChanged) {
     pushUndoSnapshot(strokeSnapshot);
@@ -1833,6 +2455,19 @@ canvas.addEventListener('pointerleave', () => {
   canvasFrame.classList.toggle('grid', gridToggle.checked);
   renderPalette();
   setHuePreview(0);
+  updateRangeButtons();
+  syncToolbarMoreForViewport();
+
+  if (toolbarMenuBtn) {
+    toolbarMenuBtn.addEventListener('click', () => {
+      const next = toolbarMore ? toolbarMore.hidden : true;
+      setToolbarMoreOpen(next);
+    });
+  }
+  window.addEventListener('resize', () => {
+    // keep simple; this only controls open/close, not layout itself
+    syncToolbarMoreForViewport();
+  });
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
   closeNewAssetModal();
