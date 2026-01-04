@@ -118,6 +118,8 @@ const importImageBtn = document.getElementById('importImageBtn');
 const importImageInput = document.getElementById('importImageInput');
 
 const statusText = document.getElementById('statusText');
+const toolbarMenuBtn = document.getElementById('toolbarMenuBtn');
+const toolbarMore = document.getElementById('toolbarMore');
 
 // New asset modal
 const newAssetModal = document.getElementById('newAssetModal');
@@ -181,6 +183,7 @@ let isPointerDown = false;
 let lastPaintedIndex = -1;
 let renderScheduled = false;
 let huePreviewDeg = 0;
+let frameThumbTimer = null;
 
 const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
 if (avatarPickBtn) avatarPickBtn.hidden = !pickAvatarMode;
@@ -707,6 +710,30 @@ function scheduleRender() {
     renderScheduled = false;
     renderNow();
   });
+  scheduleActiveFrameThumbUpdate();
+}
+
+function scheduleActiveFrameThumbUpdate() {
+  if (!currentAsset || !frameList) return;
+  if (frameThumbTimer != null) return;
+  const pixelCount = currentAsset?.pixels?.length || 0;
+  const delay = pixelCount > 64 * 64 ? 220 : pixelCount > 32 * 32 ? 140 : 80;
+  frameThumbTimer = window.setTimeout(() => {
+    frameThumbTimer = null;
+    updateActiveFrameThumb();
+  }, delay);
+}
+
+function updateActiveFrameThumb() {
+  if (!currentAsset || !frameList) return;
+  const selected = frameList.querySelector('.frame-item.selected');
+  const img = selected ? selected.querySelector('img.frame-thumb') : null;
+  if (!(img instanceof HTMLImageElement)) return;
+  try {
+    img.src = assetPreviewDataUrl({ ...currentAsset, pixels: currentAsset.pixels }, 56);
+  } catch {
+    // ignore
+  }
 }
 
 function hasSelection() {
@@ -2046,6 +2073,36 @@ document.addEventListener('keydown', (e) => {
   if (e.key.toLowerCase() === 'r') setTool('select');
 });
 
+function setToolbarMoreOpen(open) {
+  if (!toolbarMore) return;
+  const next = Boolean(open);
+  toolbarMore.hidden = !next;
+  if (toolbarMenuBtn) {
+    toolbarMenuBtn.setAttribute('aria-expanded', next ? 'true' : 'false');
+    toolbarMenuBtn.setAttribute('aria-label', next ? 'メニューを閉じる' : 'メニューを開く');
+  }
+  try {
+    localStorage.setItem('ngames.pm.toolbarMore.open', next ? '1' : '0');
+  } catch {
+    // ignore
+  }
+}
+
+function syncToolbarMoreForViewport() {
+  const wide = window.matchMedia?.('(min-width: 960px)')?.matches ?? false;
+  if (wide) {
+    setToolbarMoreOpen(true);
+    return;
+  }
+  let saved = null;
+  try {
+    saved = localStorage.getItem('ngames.pm.toolbarMore.open');
+  } catch {
+    saved = null;
+  }
+  setToolbarMoreOpen(saved === '1');
+}
+
 undoBtn.addEventListener('click', () => {
   if (!currentAsset) return;
   if (isReadOnly) return;
@@ -2399,6 +2456,18 @@ canvas.addEventListener('pointerleave', () => {
   renderPalette();
   setHuePreview(0);
   updateRangeButtons();
+  syncToolbarMoreForViewport();
+
+  if (toolbarMenuBtn) {
+    toolbarMenuBtn.addEventListener('click', () => {
+      const next = toolbarMore ? toolbarMore.hidden : true;
+      setToolbarMoreOpen(next);
+    });
+  }
+  window.addEventListener('resize', () => {
+    // keep simple; this only controls open/close, not layout itself
+    syncToolbarMoreForViewport();
+  });
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
   closeNewAssetModal();
