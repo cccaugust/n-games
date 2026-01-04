@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>ピクセルマイナー 設定 | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./settings.css" />
+  </head>
+
+  <body>
+    <div class="container pm-page pm-settings">
+      <a class="pm-back" href="./index.html">&larr; ゲームにもどる</a>
+
+      <div class="pm-top">
+        <div class="pm-title">
+          <div class="pm-title-main">設定</div>
+          <div class="pm-title-sub">プレイヤーの見た目を変えられるよ</div>
+        </div>
+
+        <div class="pm-top-actions">
+          <div class="pm-pill" id="playerPill" title="プレイヤー"></div>
+        </div>
+      </div>
+
+      <div class="pm-settings-grid">
+        <section class="pm-panel">
+          <div class="pm-panel-head">
+            <div>
+              <div class="pm-panel-title">いまの見た目</div>
+              <div class="pm-panel-sub">ゲームを開き直すと反映されます（戻ったらリロードでOK）</div>
+            </div>
+          </div>
+          <div class="pm-current">
+            <img id="currentPreview" class="pm-preview" alt="" />
+            <div class="pm-current-meta">
+              <div class="pm-current-name" id="currentName">-</div>
+              <div class="pm-current-note" id="currentNote">-</div>
+              <div class="pm-current-actions">
+                <a class="btn-primary-solid" href="./index.html">ゲームへ</a>
+                <button class="btn-sub" id="refreshBtn" type="button">一覧を更新</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="pm-panel">
+          <div class="pm-panel-head">
+            <div>
+              <div class="pm-panel-title">サンプルから選ぶ</div>
+              <div class="pm-panel-sub">ドット絵メーカーのサンプル（キャラ素材）</div>
+            </div>
+            <div class="pm-panel-actions">
+              <input id="sampleSearch" class="pm-search" type="search" inputmode="search" placeholder="サンプル検索…" />
+            </div>
+          </div>
+          <div class="pm-list" id="sampleList" aria-label="サンプル一覧"></div>
+        </section>
+
+        <section class="pm-panel">
+          <div class="pm-panel-head">
+            <div>
+              <div class="pm-panel-title">自作（ドット絵メーカー）から選ぶ</div>
+              <div class="pm-panel-sub">
+                自分の作品（character）を表示します。なければドット絵メーカーで作ってね。
+              </div>
+            </div>
+            <div class="pm-panel-actions">
+              <a class="btn-sub" href="../../pages/pixel-art-maker/index.html" target="_blank" rel="noreferrer">ドット絵メーカーを開く</a>
+            </div>
+          </div>
+          <div class="pm-tiny-note" id="assetHint"></div>
+          <div class="pm-list" id="assetList" aria-label="自作一覧"></div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="./settings.js"></script>
+  </body>
+</html>
+

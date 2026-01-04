@@ -1,5 +1,6 @@
 import { getCurrentPlayer } from '../../js/auth.js';
 import { avatarToHtml, escapeHtml } from '../../js/avatar.js';
+import { getPixelAsset } from '../../js/pixelAssets.js';
 import samplePack from '../../pages/pixel-art-maker/samples.json';
 
 /**
@@ -29,6 +30,7 @@ const WORLD_H = 128;
 
 const SAVE_KEY = 'ngames.pixel_miner.save.v1';
 const SOUND_KEY = 'ngames.pixel_miner.sound.v1';
+const PLAYER_SPRITE_KEY = 'ngames.pixel_miner.player_sprite.v1';
 
 const TILE = {
   AIR: 0,
@@ -119,6 +121,15 @@ function getSampleFrames(s) {
   if (Array.isArray(s?.frames) && s.frames.length > 0) return s.frames;
   if (typeof s?.pixelsB64 === 'string' && s.pixelsB64.length > 0) return [{ pixelsB64: s.pixelsB64, durationMs: 120 }];
   return [];
+}
+
+function readJson(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -557,19 +568,98 @@ function loadAssetsFromSamples() {
     assets.tileImg.set(t, makeTileCanvas(assets.samplesById, sid));
   });
 
-  // プレイヤー（ドット絵メーカーのサンプルから）
-  // ここは好みで差し替え可能
-  const playerSampleId = assets.samplesById.has('robot_head_16')
+  // プレイヤー（デフォルト。設定があれば boot で差し替え）
+  const fallbackId = assets.samplesById.has('robot_head_16')
     ? 'robot_head_16'
     : assets.samplesById.has('dw_mascot_round_16')
       ? 'dw_mascot_round_16'
       : assets.samplesById.has('slime_mini_16')
         ? 'slime_mini_16'
         : 'cat_face_16';
-  const anim = makeSpriteFrames(assets.samplesById, playerSampleId);
+  const anim = makeSpriteFrames(assets.samplesById, fallbackId);
   assets.playerFrames = anim.frames;
   assets.playerDurationsMs = anim.durationsMs;
   assets.playerSprite = anim.frames[0] || document.createElement('canvas');
+}
+
+function isSpriteSizeOk(w, h) {
+  const ww = Number(w) || 0;
+  const hh = Number(h) || 0;
+  if (ww <= 0 || hh <= 0) return false;
+  return ww <= 64 && hh <= 64;
+}
+
+/**
+ * PixelAsset からスプライトフレーム(canvas)を作る
+ * @param {import('../../js/pixelAssets.js').PixelAsset} asset
+ */
+function makeSpriteFramesFromPixelAsset(asset) {
+  const w = Number(asset?.width) || 16;
+  const h = Number(asset?.height) || 16;
+  const frames = Array.isArray(asset?.frames) && asset.frames.length > 0 ? asset.frames : null;
+
+  /** @type {HTMLCanvasElement[]} */
+  const out = [];
+  /** @type {number[]} */
+  const durs = [];
+
+  const srcFrames = frames
+    ? frames.slice().sort((a, b) => Number(a.index ?? 0) - Number(b.index ?? 0))
+    : [{ pixels: asset?.pixels, durationMs: 120 }];
+
+  for (let i = 0; i < srcFrames.length; i++) {
+    const f = srcFrames[i];
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const cctx = c.getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    cctx.clearRect(0, 0, w, h);
+
+    const px = f?.pixels instanceof Uint32Array ? f.pixels : new Uint32Array(f?.pixels || []);
+    const safe = px.length === w * h ? px : new Uint32Array(w * h);
+    cctx.putImageData(pixelsToImageData(safe, w, h), 0, 0);
+    out.push(c);
+    durs.push(Math.max(1, Math.floor(Number(f?.durationMs) || 120)));
+  }
+
+  if (!out.length) {
+    const blank = document.createElement('canvas');
+    blank.width = w;
+    blank.height = h;
+    return { frames: [blank], durationsMs: [120] };
+  }
+  return { frames: out, durationsMs: durs };
+}
+
+async function applyPlayerSpriteFromSettings() {
+  const pref = readJson(PLAYER_SPRITE_KEY);
+  if (pref?.source === 'sample' && typeof pref.sampleId === 'string') {
+    const sid = pref.sampleId;
+    if (assets.samplesById.has(sid)) {
+      const anim = makeSpriteFrames(assets.samplesById, sid);
+      assets.playerFrames = anim.frames;
+      assets.playerDurationsMs = anim.durationsMs;
+      assets.playerSprite = anim.frames[0] || document.createElement('canvas');
+      return;
+    }
+  }
+
+  if (pref?.source === 'asset' && typeof pref.assetId === 'string') {
+    try {
+      const asset = await getPixelAsset(pref.assetId);
+      if (asset && isSpriteSizeOk(asset.width, asset.height)) {
+        const anim = makeSpriteFramesFromPixelAsset(asset);
+        assets.playerFrames = anim.frames;
+        assets.playerDurationsMs = anim.durationsMs;
+        assets.playerSprite = anim.frames[0] || document.createElement('canvas');
+        return;
+      }
+    } catch (e) {
+      console.warn('applyPlayerSpriteFromSettings: getPixelAsset failed:', e);
+    }
+  }
+  // fallback stays as default (set by loadAssetsFromSamples)
 }
 
 const MONSTER_KIND = {
@@ -710,7 +800,8 @@ function findSurfaceY(world, x) {
   for (let y = 0; y < WORLD_H - 2; y++) {
     const t = getTile(world, x, y);
     if (t !== TILE.AIR && t !== TILE.WATER && t !== TILE.LAVA) {
-      return Math.max(0, y - 2);
+      // 「最初の地面(=solid)」の 1つ上(=air) を返す
+      return Math.max(0, y - 1);
     }
   }
   return 10;
@@ -823,11 +914,60 @@ const state = {
   shakeMs: 0,
   shakePower: 0,
   monsters: [],
+  monsterSpawnMs: 0,
   animMs: 0,
   lastSaveAt: 0
 };
 
 let monsterIdSeq = 1;
+
+function desiredMonsterCount() {
+  return isTouchLike() ? 10 : 14;
+}
+
+function trySpawnOneMonsterNearPlayer() {
+  const want = desiredMonsterCount();
+  if (state.monsters.length >= want) return false;
+
+  const randSide = Math.random() < 0.5 ? -1 : 1;
+  const distTiles = 18 + Math.floor(Math.random() * 18); // 18〜35
+  const baseTx = Math.floor(state.player.x / TILE_SIZE);
+  const tx = clamp(baseTx + randSide * distTiles, 2, WORLD_W - 3);
+  const ty = findSurfaceY(state.world, tx);
+
+  const tHere = getTile(state.world, tx, ty);
+  const tBelow = getTile(state.world, tx, ty + 1);
+  if (tHere !== TILE.AIR) return false;
+  if (!isSolidTileId(tBelow)) return false;
+
+  const kind = MONSTER_KIND.SLIME;
+  const def = MONSTER_DEF[kind];
+  if (!def) return false;
+
+  const wx = tx * TILE_SIZE + TILE_SIZE * 0.5;
+  const wy = ty * TILE_SIZE + TILE_SIZE * 0.5;
+
+  // プレイヤーに近すぎると理不尽なので避ける
+  if (Math.abs(wx - state.player.x) < TILE_SIZE * 9) return false;
+
+  // ブロック内に湧かないように軽くチェック
+  if (aabbIntersectsSolid(state.world, wx, wy, def.w, def.h)) return false;
+
+  state.monsters.push({
+    id: monsterIdSeq++,
+    kind,
+    x: wx,
+    y: wy,
+    vx: 0,
+    vy: 0,
+    w: def.w,
+    h: def.h,
+    onGround: false,
+    dir: Math.random() < 0.5 ? -1 : 1,
+    thinkMs: 150 + Math.floor(Math.random() * 450)
+  });
+  return true;
+}
 
 function spawnMonsters(world, seedStr) {
   const seed = (hashSeed(seedStr) ^ 0x9e3779b9) >>> 0;
@@ -836,7 +976,7 @@ function spawnMonsters(world, seedStr) {
   const out = [];
 
   // 敵の数（スマホは少し控えめ）
-  const want = isTouchLike() ? 10 : 14;
+  const want = desiredMonsterCount();
   let tries = 0;
   while (out.length < want && tries < 420) {
     tries++;
@@ -1364,6 +1504,14 @@ function tick(dtMs) {
   // monsters
   tickMonsters(dtMs);
 
+  // spawn (補充): 初期スポーンが少ない/見えない時でも、時間でちゃんと出るようにする
+  state.monsterSpawnMs = (state.monsterSpawnMs || 0) + dtMs;
+  if (state.monsterSpawnMs >= 1600) {
+    state.monsterSpawnMs = 0;
+    // 1回で増やしすぎない（負荷/理不尽防止）
+    trySpawnOneMonsterNearPlayer();
+  }
+
   // particles
   tickParticles(dtMs);
 
@@ -1762,13 +1910,14 @@ function bindTouchControls() {
   });
 }
 
-function boot() {
+async function boot() {
   updatePlayerPill();
   sfx.enabled = readSoundPref();
   state.soundEnabled = sfx.enabled;
   updateSoundBtn();
 
   loadAssetsFromSamples();
+  await applyPlayerSpriteFromSettings();
   loadMonsterSprites();
 
   // 初期ズーム（スマホは少し引き気味）
