@@ -1219,23 +1219,58 @@ aquariumScene.events.on('fishTapped', (fishId) => {
 
 const PHASER_PARENT_ID = 'phaserRoot';
 
-try {
-  new Phaser.Game({
-    type: Phaser.AUTO,
-    parent: PHASER_PARENT_ID,
-    backgroundColor: '#0b3555',
-    pixelArt: true,
-    antialias: false,
-    scale: {
-      // `RESIZE` は親要素のサイズ追従が命。iOS Safari 対策で parent を明示。
-      parent: PHASER_PARENT_ID,
-      mode: Phaser.Scale.RESIZE,
-      autoCenter: Phaser.Scale.CENTER_BOTH
-    },
-    scene: [aquariumScene]
-  });
-} catch (e) {
-  console.warn('Phaser init failed:', e);
+/** @type {Phaser.Game|null} */
+let phaserGame = null;
+/** @type {ResizeObserver|null} */
+let phaserResizeObserver = null;
+
+function getPhaserParentEl() {
+  return /** @type {HTMLElement|null} */ (document.getElementById(PHASER_PARENT_ID));
+}
+
+function getPhaserParentSize() {
+  const el = getPhaserParentEl();
+  const rect = el?.getBoundingClientRect?.();
+  const w = Math.floor(Number(rect?.width || 0));
+  const h = Math.floor(Number(rect?.height || 0));
+  return { w, h };
+}
+
+async function waitForNonZeroPhaserParentSize({ maxFrames = 90 } = {}) {
+  for (let i = 0; i < maxFrames; i++) {
+    const { w, h } = getPhaserParentSize();
+    if (w >= 8 && h >= 8) return { w, h };
+    await new Promise((r) => requestAnimationFrame(r));
+  }
+  // Fallback: even if size is still 0, try to boot with a safe default.
+  return { w: 800, h: 600 };
+}
+
+function attachPhaserResizeWatcher() {
+  const parentEl = getPhaserParentEl();
+  if (!parentEl) return;
+
+  const resizeNow = () => {
+    if (!phaserGame) return;
+    const { w, h } = getPhaserParentSize();
+    if (w >= 8 && h >= 8) {
+      // Some mobile browsers don't reliably propagate size changes to Phaser RESIZE.
+      phaserGame.scale.resize(w, h);
+    }
+  };
+
+  // ResizeObserver for iOS Safari / address-bar / safe-area changes.
+  if (typeof ResizeObserver !== 'undefined') {
+    phaserResizeObserver?.disconnect?.();
+    phaserResizeObserver = new ResizeObserver(() => resizeNow());
+    phaserResizeObserver.observe(parentEl);
+  }
+
+  window.addEventListener('resize', () => requestAnimationFrame(resizeNow), { passive: true });
+  window.addEventListener('orientationchange', () => requestAnimationFrame(resizeNow), { passive: true });
+}
+
+function showPhaserInitFallback() {
   showToast('水槽の描画に失敗しました（再読み込みしてね）');
   // Fallback message (canvas が作れない端末向け)
   try {
@@ -1259,4 +1294,45 @@ try {
     // ignore
   }
 }
+
+async function initPhaser() {
+  const parentEl = getPhaserParentEl();
+  if (!parentEl) {
+    console.warn('Phaser parent element not found:', PHASER_PARENT_ID);
+    showPhaserInitFallback();
+    return;
+  }
+
+  const { w, h } = await waitForNonZeroPhaserParentSize({ maxFrames: 120 });
+
+  try {
+    phaserGame = new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: parentEl,
+      backgroundColor: '#0b3555',
+      pixelArt: true,
+      antialias: false,
+      scale: {
+        // `RESIZE` は親要素のサイズ追従が命。初期0サイズ対策で width/height も与える。
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: w,
+        height: h
+      },
+      scene: [aquariumScene]
+    });
+
+    attachPhaserResizeWatcher();
+  } catch (e) {
+    console.warn('Phaser init failed:', e);
+    showPhaserInitFallback();
+  }
+}
+
+// iOS Safari で「初期レイアウト未確定→親が0サイズ→Phaserが0x0固定」になりがちなので、
+// 1フレーム待ってから起動（さらに非0サイズ待ちを入れている）。
+void (async () => {
+  await new Promise((r) => requestAnimationFrame(r));
+  await initPhaser();
+})();
 
