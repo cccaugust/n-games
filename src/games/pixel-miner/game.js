@@ -1169,10 +1169,12 @@ function initNewWorld() {
   const spawnX = Math.floor(WORLD_W * 0.5);
   const spawnY = findSpawnY(state.world, spawnX);
   state.player.x = spawnX * TILE_SIZE + TILE_SIZE * 0.5;
-  state.player.y = spawnY * TILE_SIZE;
+  // player の座標は「当たり判定の中心」基準なので、タイル中心へ
+  state.player.y = spawnY * TILE_SIZE + TILE_SIZE * 0.5;
   state.player.vx = 0;
   state.player.vy = 0;
   state.player.onGround = false;
+  ensureNotStuck(state.world, state.player);
   state.cam.x = state.player.x;
   state.cam.y = state.player.y;
   state.spawn.x = state.player.x;
@@ -1221,6 +1223,7 @@ function loadOrCreate() {
     state.player.y = saved.player.y || state.player.y;
     state.player.vx = saved.player.vx || 0;
     state.player.vy = saved.player.vy || 0;
+    ensureNotStuck(state.world, state.player);
     state.cam.x = state.player.x;
     state.cam.y = state.player.y;
     state.spawn.x = state.player.x;
@@ -1474,25 +1477,48 @@ function resolveCollisionsAxis(world, player, axis) {
       if (axis === 'x') {
         const pushLeft = bx1 - px0;
         const pushRight = px1 - bx0;
-        if (pushLeft < pushRight) player.x += pushLeft + 0.01;
-        else player.x -= pushRight + 0.01;
+        // 最小押し戻しだけだと、角で「はさまり」やすいので速度方向を優先する
+        const eps = 0.01;
+        if ((player.vx || 0) > 0) player.x -= pushRight + eps; // moving right -> push left
+        else if ((player.vx || 0) < 0) player.x += pushLeft + eps; // moving left -> push right
+        else if (pushLeft < pushRight) player.x += pushLeft + eps;
+        else player.x -= pushRight + eps;
       } else {
         const pushUp = by1 - py0;
         const pushDown = py1 - by0;
-        if (pushUp < pushDown) {
-          player.y += pushUp + 0.01;
-          // hit ceiling
-          if (player.vy < 0) player.vy = 0;
+        const eps = 0.01;
+        if ((player.vy || 0) > 0) {
+          // falling -> push up (land)
+          player.y -= pushDown + eps;
+          player.vy = 0;
+          player.onGround = true;
+        } else if ((player.vy || 0) < 0) {
+          // rising -> push down (hit ceiling)
+          player.y += pushUp + eps;
+          player.vy = 0;
+        } else if (pushUp < pushDown) {
+          player.y += pushUp + eps;
         } else {
-          player.y -= pushDown + 0.01;
-          // landed
-          if (player.vy > 0) {
-            player.vy = 0;
-            player.onGround = true;
-          }
+          player.y -= pushDown + eps;
+          player.onGround = true;
         }
       }
     }
+  }
+}
+
+/**
+ * セーブ復元やリスポーン直後など、「ブロック内にめり込んで動けない」状態を回避する。
+ * @param {Uint8Array} world
+ * @param {{x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean}} ent
+ */
+function ensureNotStuck(world, ent) {
+  if (!aabbIntersectsSolid(world, ent.x, ent.y, ent.w, ent.h)) return;
+  for (let i = 0; i < 24; i++) {
+    ent.y -= 2;
+    resolveCollisionsAxis(world, ent, 'y');
+    resolveCollisionsAxis(world, ent, 'x');
+    if (!aabbIntersectsSolid(world, ent.x, ent.y, ent.w, ent.h)) return;
   }
 }
 
@@ -1537,6 +1563,7 @@ function applyPlayerDamage(amount, fromX) {
     p.y = state.spawn.y;
     p.vx = 0;
     p.vy = 0;
+    ensureNotStuck(state.world, p);
     state.cam.x = p.x;
     state.cam.y = p.y;
     spawnMonsters(state.world, state.seed);
@@ -1569,6 +1596,7 @@ function applyTerrainDamage(amount) {
     p.y = state.spawn.y;
     p.vx = 0;
     p.vy = 0;
+    ensureNotStuck(state.world, p);
     state.cam.x = p.x;
     state.cam.y = p.y;
     spawnMonsters(state.world, state.seed);
@@ -2014,7 +2042,8 @@ function draw() {
   const pw = spr?.width || 0;
   const ph = spr?.height || 0;
   const drawX = state.player.x - pw / 2;
-  const drawY = state.player.y - ph / 2;
+  // 当たり判定（player.h）の「足元」にスプライトの足元を合わせる（サイズ違いでもズレにくい）
+  const drawY = state.player.y + state.player.h / 2 - ph;
   if (state.invulnMs > 0 && Math.floor(state.invulnMs / 90) % 2 === 0) {
     ctx.globalAlpha = 0.55;
     ctx.drawImage(spr, Math.round(drawX), Math.round(drawY));
