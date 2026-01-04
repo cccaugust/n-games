@@ -12,6 +12,7 @@ body {
 }
 
 .pm-page {
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   padding-left: calc(12px + env(safe-area-inset-left, 0px));
   padding-right: calc(12px + env(safe-area-inset-right, 0px));
@@ -19,7 +20,7 @@ body {
 
 .pm-back {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 0;
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
 }
@@ -30,6 +31,19 @@ body {
   justify-content: space-between;
   gap: 12px;
   margin: 10px 0 12px;
+  flex-wrap: wrap;
+}
+
+.pm-title {
+  min-width: min(520px, 100%);
+}
+
+.pm-top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .pm-title-main {
@@ -87,6 +101,8 @@ body {
 .pm-canvas {
   width: 100%;
   height: min(72vh, 620px);
+  height: min(72svh, 620px);
+  height: min(72dvh, 620px);
   display: block;
   background: linear-gradient(#8fbafc, #d6ecff 55%, #0a1020 100%);
   touch-action: none;
@@ -231,6 +247,8 @@ body {
 
 .pm-card {
   width: min(520px, 92vw);
+  max-height: calc(100% - 24px);
+  overflow: auto;
   background: rgba(16, 22, 45, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 18px;
@@ -265,11 +283,67 @@ body {
 }
 
 @media (max-width: 720px) {
+  .pm-top {
+    align-items: flex-start;
+  }
+
+  .pm-title {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pm-title-main {
+    font-size: 1.2rem;
+  }
+
+  .pm-title-sub {
+    font-size: 0.86rem;
+  }
+
+  .pm-top-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pm-pill {
+    min-height: 32px;
+    padding: 6px 9px;
+    max-width: 100%;
+  }
+
   .pm-hud {
     display: none;
   }
   .pm-touch {
     display: flex;
+  }
+}
+
+@media (max-width: 420px) {
+  .pm-slot {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  .pm-slot img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pm-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    font-size: 1.05rem;
+  }
+
+  .pm-btn-wide {
+    width: 78px;
+  }
+
+  .pm-touch {
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px));
   }
 }
 
