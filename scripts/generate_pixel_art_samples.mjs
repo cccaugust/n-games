@@ -2346,6 +2346,30 @@ function toSample(id, name, kind, canvas, tags) {
   };
 }
 
+function cloneCanvas(c) {
+  const out = makeCanvas(c.w, c.h);
+  out.p.set(c.p);
+  return out;
+}
+
+function shiftCanvas(c, dx = 0, dy = 0) {
+  const out = makeCanvas(c.w, c.h);
+  for (let y = 0; y < c.h; y++) {
+    for (let x = 0; x < c.w; x++) {
+      const v = getPx(c, x, y);
+      if (!v) continue;
+      setPx(out, x + dx, y + dy, v);
+    }
+  }
+  return out;
+}
+
+function toSampleAnimated2(id, name, kind, canvas, tags, { dx = 0, dy = 1, durationsMs = [120, 120] } = {}) {
+  const f0 = cloneCanvas(canvas);
+  const f1 = shiftCanvas(canvas, dx, dy);
+  return toSampleFrames(id, name, kind, [f0, f1], [...(tags || []), '2フレーム', 'アニメ'], durationsMs);
+}
+
 function toSampleFrames(id, name, kind, canvases, tags, durationsMs = []) {
   const first = canvases?.[0] || makeCanvas(16, 16);
   return {
@@ -2363,9 +2387,9 @@ function toSampleFrames(id, name, kind, canvases, tags, durationsMs = []) {
 }
 
 const samples = [
-  toSample('slime_blue', 'ぷるぷるスライム', 'character', makeSlimeBlue(), ['モンスター', '32x32', 'キャラ']),
-  toSample('cat_orange', 'みかんねこ', 'character', makeCatOrange(), ['どうぶつ', '32x32', 'キャラ']),
-  toSample('robot_buddy', 'ちびロボ', 'character', makeRobot(), ['メカ', '32x32', 'キャラ']),
+  toSampleAnimated2('slime_blue', 'ぷるぷるスライム', 'character', makeSlimeBlue(), ['モンスター', '32x32', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('cat_orange', 'みかんねこ', 'character', makeCatOrange(), ['どうぶつ', '32x32', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('robot_buddy', 'ちびロボ', 'character', makeRobot(), ['メカ', '32x32', 'キャラ'], { dy: 1 }),
   toSample('potion_red', 'あかポーション', 'object', makePotionRed(), ['アイテム', '32x32', '小物']),
   toSample('sword_steel', 'はがねのつるぎ', 'object', makeSword(), ['装備', '32x32', '小物']),
   toSample('shield_azure', 'あおのたて', 'object', makeShield(), ['装備', '32x32', '小物']),
@@ -2375,7 +2399,7 @@ const samples = [
   toSample('house_red', 'ちいさなおうち', 'tile', makeHouse(), ['マップ', '32x32', 'タイル']),
 
   // 16x16 pack (about 20)
-  toSample('hero_chibi_16', 'ちびゆうしゃ', 'character', makeHeroChibi16(), ['キャラ', '16x16', 'キャラっぽい', '主人公']),
+  toSampleAnimated2('hero_chibi_16', 'ちびゆうしゃ', 'character', makeHeroChibi16(), ['キャラ', '16x16', 'キャラっぽい', '主人公'], { dy: 1 }),
   toSampleFrames(
     'kanji_fire_16',
     'かんじっぽい「火」',
@@ -2384,22 +2408,22 @@ const samples = [
     ['漢字', '16x16', '2フレーム', 'アニメ'],
     [120, 120]
   ),
-  toSample('slime_mini_16', 'ちびスライム', 'character', makeSlimeMini16(), ['モンスター', '16x16', 'キャラ']),
-  toSample('cat_face_16', 'ねこかお', 'character', makeCatFace16(), ['どうぶつ', '16x16', 'キャラ']),
-  toSample('ghost_16', 'おばけ', 'character', makeGhost16(), ['モンスター', '16x16', 'キャラ']),
-  toSample('chick_16', 'ひよこ', 'character', makeChick16(), ['どうぶつ', '16x16', 'キャラ']),
-  toSample('frog_16', 'かえる', 'character', makeFrog16(), ['どうぶつ', '16x16', 'キャラ']),
-  toSample('robot_head_16', 'ロボのあたま', 'character', makeRobotHead16(), ['メカ', '16x16', 'キャラ']),
-  toSample('enemy_bat_16', 'こうもり', 'character', makeEnemyBat16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_goblin_16', 'ゴブリン', 'character', makeEnemyGoblin16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_skeleton_16', 'スケルトン', 'character', makeEnemySkeleton16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_eye_16', 'めだま', 'character', makeEnemyEye16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_slime_red_16', 'あかスライム', 'character', makeEnemySlimeRed16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_imp_16', 'こあくま', 'character', makeEnemyImp16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_spider_16', 'くも', 'character', makeEnemySpider16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_knight_16', 'よろい', 'character', makeEnemyKnight16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_mushroom_16', 'どくきのこ', 'character', makeEnemyMushroomBad16(), ['モンスター', '16x16', 'キャラ', '敵']),
-  toSample('enemy_slime_purple_16', 'どくスライム', 'character', makeEnemySlimePurple16(), ['モンスター', '16x16', 'キャラ', '敵']),
+  toSampleAnimated2('slime_mini_16', 'ちびスライム', 'character', makeSlimeMini16(), ['モンスター', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('cat_face_16', 'ねこかお', 'character', makeCatFace16(), ['どうぶつ', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('ghost_16', 'おばけ', 'character', makeGhost16(), ['モンスター', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('chick_16', 'ひよこ', 'character', makeChick16(), ['どうぶつ', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('frog_16', 'かえる', 'character', makeFrog16(), ['どうぶつ', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('robot_head_16', 'ロボのあたま', 'character', makeRobotHead16(), ['メカ', '16x16', 'キャラ'], { dy: 1 }),
+  toSampleAnimated2('enemy_bat_16', 'こうもり', 'character', makeEnemyBat16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_goblin_16', 'ゴブリン', 'character', makeEnemyGoblin16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_skeleton_16', 'スケルトン', 'character', makeEnemySkeleton16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_eye_16', 'めだま', 'character', makeEnemyEye16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_slime_red_16', 'あかスライム', 'character', makeEnemySlimeRed16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_imp_16', 'こあくま', 'character', makeEnemyImp16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_spider_16', 'くも', 'character', makeEnemySpider16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_knight_16', 'よろい', 'character', makeEnemyKnight16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_mushroom_16', 'どくきのこ', 'character', makeEnemyMushroomBad16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
+  toSampleAnimated2('enemy_slime_purple_16', 'どくスライム', 'character', makeEnemySlimePurple16(), ['モンスター', '16x16', 'キャラ', '敵'], { dy: 1 }),
 
   toSample('heart_16', 'ハート', 'object', makeHeart16(), ['アイコン', '16x16', '小物']),
   toSample('star_16', 'スター', 'object', makeStar16(), ['アイコン', '16x16', '小物']),
@@ -2459,7 +2483,7 @@ const samples = [
   toSample('pl_spring_16', 'バネ', 'object', makePlItemSpring16(), ['プラットフォーマー', '16x16', '小物', 'ギミック']),
 
   // dreamy/cute pack
-  toSample('dw_mascot_round_16', 'まんまるマスコット', 'character', makeDwMascotRound16(), ['ドリーミー', 'パステル', '16x16', 'キャラ']),
+  toSampleAnimated2('dw_mascot_round_16', 'まんまるマスコット', 'character', makeDwMascotRound16(), ['ドリーミー', 'パステル', '16x16', 'キャラ'], { dy: 1 }),
   toSample('dw_pastel_sky_16', 'パステルそら', 'tile', makeDwTilePastelSky16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '背景']),
   toSample('dw_puffy_cloud_16', 'ふわふわくも', 'tile', makeDwTilePuffyCloud16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '背景']),
   toSample('dw_dream_grass_16', 'ゆめのくさつち', 'tile', makeDwTileDreamGrass16(), ['ドリーミー', 'パステル', '16x16', 'タイル', '地面']),
