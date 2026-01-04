@@ -74,9 +74,7 @@ const els = {
   remaining: document.getElementById('remaining'),
   options: document.getElementById('options'),
   flagCard: document.getElementById('flagCard'),
-  flagImg: document.getElementById('flagImg'),
   flagEmoji: document.getElementById('flagEmoji'),
-  flagSkeleton: document.getElementById('flagSkeleton'),
   toast: document.getElementById('toast'),
   confettiLayer: document.getElementById('confettiLayer'),
   overlay: document.getElementById('overlay'),
@@ -103,7 +101,6 @@ let wrongCount = 0;
 
 let current = null; // { correct, options[] }
 let lastCorrectCode = null;
-let flagLoadId = 0;
 
 function shuffleInPlace(a) {
   for (let i = a.length - 1; i > 0; i--) {
@@ -121,11 +118,6 @@ function uniqByCode(arr) {
   const map = new Map();
   for (const it of arr) map.set(it.code, it);
   return [...map.values()];
-}
-
-function flagUrl(code) {
-  // FlagCDN: ISO 3166-1 alpha-2 (lowercase), PNG
-  return `https://flagcdn.com/w320/${code}.png`;
 }
 
 function countryCodeToEmoji(code) {
@@ -273,43 +265,8 @@ function buildQuestion() {
 }
 
 function setFlag(country) {
-  const loadId = (flagLoadId += 1);
   const emoji = countryCodeToEmoji(country.code);
   els.flagEmoji.textContent = emoji;
-  els.flagEmoji.style.display = 'none';
-
-  els.flagImg.style.display = 'none';
-  els.flagSkeleton.style.display = '';
-
-  const src = flagUrl(country.code);
-
-  const fallback = () => {
-    if (loadId !== flagLoadId) return;
-    els.flagImg.removeAttribute('src');
-    els.flagSkeleton.style.display = 'none';
-    els.flagEmoji.style.display = '';
-  };
-
-  // 画像ブロック環境などで load/error が来ないケースがあるので保険を入れる
-  window.clearTimeout(setFlag._t);
-  setFlag._t = window.setTimeout(fallback, 2500);
-
-  els.flagImg.onload = () => {
-    if (loadId !== flagLoadId) return;
-    window.clearTimeout(setFlag._t);
-    els.flagImg.alt = `${country.name} の国旗`;
-    els.flagSkeleton.style.display = 'none';
-    els.flagEmoji.style.display = 'none';
-    els.flagImg.style.display = '';
-  };
-  els.flagImg.onerror = () => {
-    window.clearTimeout(setFlag._t);
-    fallback();
-  };
-
-  // 再読み込み時に onload が走らないブラウザ対策で一度クリアしてからセット
-  els.flagImg.removeAttribute('src');
-  els.flagImg.src = src;
 }
 
 function renderOptions(options) {
@@ -337,8 +294,8 @@ function showOverlayStart() {
         <button class="btn-secondary" id="practiceBtn" type="button">ためしに 1もん</button>
       </div>
       <div class="overlay-note">
-        ※ 国旗画像はオンライン（FlagCDN）から読みこみます。<br />
-        オフラインのときは絵文字表示になることがあります。
+        ※ 国旗は「絵文字」で表示します。<br />
+        端末やブラウザによって、見え方が少し変わることがあります。
       </div>
     </div>
   `;
