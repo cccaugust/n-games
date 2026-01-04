@@ -23,6 +23,8 @@ const touchControls = document.getElementById('touchControls');
 const playerPill = document.getElementById('playerPill');
 const hpPill = document.getElementById('hpPill');
 const soundBtn = document.getElementById('soundBtn');
+const potionBtn = document.getElementById('potionBtn');
+const lootPill = document.getElementById('lootPill');
 
 const TILE_SIZE = 16;
 const WORLD_W = 256;
@@ -42,7 +44,28 @@ const TILE = {
   LAVA: 6,
   WOOD: 7,
   BRICK: 8,
-  ICE: 9
+  ICE: 9,
+
+  // --- 追加ブロック（マイクラっぽい素材） ---
+  COBBLE: 10,
+  STONE_BRICKS: 11,
+  MOSSY_COBBLE: 12,
+  BIRCH_PLANKS: 13,
+  SANDSTONE: 14,
+  RED_SAND: 15,
+  GRAVEL: 16,
+  CLAY: 17,
+  NETHERRACK: 18,
+  NETHER_BRICKS: 19,
+  QUARTZ: 20,
+  GLOWSTONE: 21,
+  BOOKSHELF: 22,
+  CRAFTING_TABLE: 23,
+  FURNACE: 24,
+  CHEST: 25,
+  ORE_COAL: 26,
+  ORE_IRON: 27,
+  ORE_DIAMOND: 28
 };
 
 /** @type {Record<number, {id: string, name: string, solid: boolean, breakMs: number}>} */
@@ -54,13 +77,59 @@ const TILE_DEF = {
   [TILE.SAND]: { id: 'tile_sand_16', name: 'すな', solid: true, breakMs: 210 },
   [TILE.WATER]: { id: 'tile_water_16', name: 'みず', solid: false, breakMs: 0 },
   [TILE.LAVA]: { id: 'tile_lava_16', name: 'ようがん', solid: false, breakMs: 0 },
-  [TILE.WOOD]: { id: 'tile_wood_plank_16', name: 'もくざい', solid: true, breakMs: 360 },
+  // 木材は新しいオーク板テクスチャに差し替え
+  [TILE.WOOD]: { id: 'pm_oak_planks_16', name: 'もくざい', solid: true, breakMs: 360 },
   [TILE.BRICK]: { id: 'tile_brick_red_16', name: 'レンガ', solid: true, breakMs: 520 },
-  [TILE.ICE]: { id: 'tile_ice_16', name: 'こおり', solid: true, breakMs: 380 }
+  [TILE.ICE]: { id: 'tile_ice_16', name: 'こおり', solid: true, breakMs: 380 },
+
+  [TILE.COBBLE]: { id: 'pm_cobblestone_16', name: 'まるいし', solid: true, breakMs: 560 },
+  [TILE.STONE_BRICKS]: { id: 'pm_stone_bricks_16', name: 'いしレンガ', solid: true, breakMs: 700 },
+  [TILE.MOSSY_COBBLE]: { id: 'pm_mossy_cobble_16', name: 'こけいし', solid: true, breakMs: 600 },
+  [TILE.BIRCH_PLANKS]: { id: 'pm_birch_planks_16', name: 'シラカバ板', solid: true, breakMs: 330 },
+  [TILE.SANDSTONE]: { id: 'pm_sandstone_16', name: 'させき', solid: true, breakMs: 420 },
+  [TILE.RED_SAND]: { id: 'pm_red_sand_16', name: 'あかいすな', solid: true, breakMs: 210 },
+  [TILE.GRAVEL]: { id: 'pm_gravel_16', name: 'じゃり', solid: true, breakMs: 190 },
+  [TILE.CLAY]: { id: 'pm_clay_16', name: 'ねんど', solid: true, breakMs: 260 },
+  [TILE.NETHERRACK]: { id: 'pm_netherrack_16', name: 'ネザーラック', solid: true, breakMs: 420 },
+  [TILE.NETHER_BRICKS]: { id: 'pm_nether_bricks_16', name: 'ネザーレンガ', solid: true, breakMs: 820 },
+  [TILE.QUARTZ]: { id: 'pm_quartz_block_16', name: 'クォーツ', solid: true, breakMs: 620 },
+  [TILE.GLOWSTONE]: { id: 'pm_glowstone_16', name: 'ひかるいし', solid: true, breakMs: 520 },
+  [TILE.BOOKSHELF]: { id: 'pm_bookshelf_16', name: 'ほんだな', solid: true, breakMs: 420 },
+  [TILE.CRAFTING_TABLE]: { id: 'pm_crafting_table_top_16', name: 'さぎょうだい', solid: true, breakMs: 420 },
+  [TILE.FURNACE]: { id: 'pm_furnace_front_16', name: 'かまど', solid: true, breakMs: 820 },
+  [TILE.CHEST]: { id: 'pm_chest_front_16', name: 'チェスト', solid: true, breakMs: 420 },
+  [TILE.ORE_COAL]: { id: 'pm_ore_coal_16', name: 'せきたんこうせき', solid: true, breakMs: 760 },
+  [TILE.ORE_IRON]: { id: 'pm_ore_iron_16', name: 'てっこうせき', solid: true, breakMs: 840 },
+  [TILE.ORE_DIAMOND]: { id: 'pm_ore_diamond_16', name: 'ダイヤこうせき', solid: true, breakMs: 980 }
 };
 
 /** @type {number[]} */
-const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK];
+const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK, TILE.COBBLE, TILE.STONE_BRICKS];
+
+const ITEM = {
+  COIN: 'coin',
+  GEM: 'gem',
+  POTION: 'potion'
+};
+
+function makeDefaultItems() {
+  /** @type {Record<string, number>} */
+  const items = {};
+  items[ITEM.COIN] = 0;
+  items[ITEM.GEM] = 0;
+  items[ITEM.POTION] = 0;
+  return items;
+}
+
+function sanitizeItems(items) {
+  /** @type {Record<string, number>} */
+  const out = makeDefaultItems();
+  const src = items && typeof items === 'object' ? items : {};
+  Object.keys(out).forEach((k) => {
+    out[k] = Math.max(0, Math.floor(Number(src[k]) || 0));
+  });
+  return out;
+}
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -359,6 +428,21 @@ function updateHpPill() {
   hpPill.textContent = `${'♥'.repeat(full)}${'♡'.repeat(empty)} ${hp}/${max}`;
 }
 
+function updateLootUi() {
+  const items = state.items || makeDefaultItems();
+  if (lootPill) {
+    const coin = Math.max(0, Math.floor(items[ITEM.COIN] || 0));
+    const gem = Math.max(0, Math.floor(items[ITEM.GEM] || 0));
+    lootPill.textContent = `🪙 ${coin} / 💎 ${gem}`;
+  }
+  if (potionBtn) {
+    const pot = Math.max(0, Math.floor(items[ITEM.POTION] || 0));
+    potionBtn.textContent = `🧪 ${pot}`;
+    potionBtn.setAttribute('aria-disabled', pot > 0 ? 'false' : 'true');
+    potionBtn.title = pot > 0 ? 'ポーションで回復' : 'ポーションがないよ';
+  }
+}
+
 // ---- SFX (WebAudio / no asset files) ----
 /** @type {{ctx: AudioContext|null, master: GainNode|null, enabled: boolean, unlocked: boolean}} */
 const sfx = {
@@ -513,9 +597,31 @@ const TILE_FX = {
   [TILE.DIRT]: { dust: ['#8b5a2b', '#a97142', '#6f4a2a'] },
   [TILE.STONE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
   [TILE.SAND]: { dust: ['#f6e27f', '#e6cc6a', '#cbb45b'] },
+  [TILE.WATER]: { dust: ['#74c0ff', '#4dabf7', '#228be6'] },
+  [TILE.LAVA]: { dust: ['#ff6b35', '#ff922b', '#e03131', '#ffd43b'] },
   [TILE.WOOD]: { dust: ['#c68642', '#a96b36', '#7a4b2a'] },
   [TILE.BRICK]: { dust: ['#b94a48', '#8a2b2a', '#d0706d'] },
-  [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] }
+  [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] },
+
+  [TILE.COBBLE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
+  [TILE.STONE_BRICKS]: { dust: ['#b7b7b7', '#9a9a9a', '#6d6d6d'] },
+  [TILE.MOSSY_COBBLE]: { dust: ['#6aa84f', '#3c7f40', '#8e8e8e'] },
+  [TILE.BIRCH_PLANKS]: { dust: ['#e4dcc4', '#cfc4a2', '#a9986e'] },
+  [TILE.SANDSTONE]: { dust: ['#e6d27a', '#cbb45b', '#a08a3e'] },
+  [TILE.RED_SAND]: { dust: ['#d27744', '#c36a3a', '#8b3f22'] },
+  [TILE.GRAVEL]: { dust: ['#8a857e', '#6e6a64', '#5f5b55'] },
+  [TILE.CLAY]: { dust: ['#a8bac2', '#9fb0b8', '#7f8f98'] },
+  [TILE.NETHERRACK]: { dust: ['#8b2c31', '#6e1d20', '#4a0d0f'] },
+  [TILE.NETHER_BRICKS]: { dust: ['#4a1215', '#2b090b', '#1b0506'] },
+  [TILE.QUARTZ]: { dust: ['#ffffff', '#e8e5dd', '#cfcac0'] },
+  [TILE.GLOWSTONE]: { dust: ['#fff3c6', '#ffd86a', '#f1a61a'] },
+  [TILE.BOOKSHELF]: { dust: ['#ff922b', '#ffd43b', '#845ef7'] },
+  [TILE.CRAFTING_TABLE]: { dust: ['#c08f54', '#a5743f', '#6e3f18'] },
+  [TILE.FURNACE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
+  [TILE.CHEST]: { dust: ['#c08f54', '#a5743f', '#6e3f18'] },
+  [TILE.ORE_COAL]: { dust: ['#1e1e1e', '#8e8e8e', '#5e5e5e'] },
+  [TILE.ORE_IRON]: { dust: ['#c18a5a', '#8e8e8e', '#5e5e5e'] },
+  [TILE.ORE_DIAMOND]: { dust: ['#3bc9db', '#8e8e8e', '#5e5e5e'] }
 };
 
 function randPick(arr) {
@@ -666,12 +772,13 @@ const MONSTER_KIND = {
   SLIME: 'slime'
 };
 
-/** @type {Record<string, {name: string, speed: number, contactDamage: number, spriteSampleId: string, w: number, h: number}>} */
+/** @type {Record<string, {name: string, speed: number, contactDamage: number, maxHp: number, spriteSampleId: string, w: number, h: number}>} */
 const MONSTER_DEF = {
   [MONSTER_KIND.SLIME]: {
     name: 'スライム',
     speed: 56,
     contactDamage: 1,
+    maxHp: 3,
     spriteSampleId: 'slime_mini_16',
     w: 14,
     h: 12
@@ -721,10 +828,35 @@ function generateWorld(seedStr) {
         continue;
       }
       const depth = y - h;
+      // 深いところは「ネザーっぽい層」
+      const deep = y / WORLD_H;
+      if (deep > 0.86) {
+        const r = rand();
+        if (r < 0.08) setTile(world, x, y, TILE.GLOWSTONE);
+        else if (r < 0.11) setTile(world, x, y, TILE.QUARTZ);
+        else if (r < 0.16) setTile(world, x, y, TILE.NETHER_BRICKS);
+        else setTile(world, x, y, TILE.NETHERRACK);
+        continue;
+      }
+
       if (depth === 0) setTile(world, x, y, TILE.GRASS_BLOCK);
       else if (depth < 5) setTile(world, x, y, TILE.DIRT);
-      else if (depth < 14) setTile(world, x, y, rand() < 0.08 ? TILE.SAND : TILE.STONE);
-      else setTile(world, x, y, TILE.STONE);
+      else if (depth < 14) {
+        const r = rand();
+        if (r < 0.04) setTile(world, x, y, TILE.GRAVEL);
+        else if (r < 0.07) setTile(world, x, y, TILE.CLAY);
+        else if (r < 0.11) setTile(world, x, y, TILE.SAND);
+        else if (r < 0.14) setTile(world, x, y, TILE.SANDSTONE);
+        else setTile(world, x, y, TILE.STONE);
+      } else {
+        const r = rand();
+        // 鉱石（深いほどいい鉱石が出やすい）
+        if (r < 0.018) setTile(world, x, y, TILE.ORE_COAL);
+        else if (r < 0.028) setTile(world, x, y, TILE.ORE_IRON);
+        else if (depth > 46 && r < 0.032) setTile(world, x, y, TILE.ORE_DIAMOND);
+        else if (r < 0.045) setTile(world, x, y, TILE.COBBLE);
+        else setTile(world, x, y, TILE.STONE);
+      }
     }
   }
 
@@ -818,6 +950,7 @@ function loadSave() {
       seed: String(data?.seed || 'seed'),
       world: worldU8,
       inventory: sanitizeInventory(data?.inventory),
+      items: sanitizeItems(data?.items),
       selectedSlot: clamp(Number(data?.selectedSlot) || 0, 0, HOTBAR_ORDER.length - 1),
       player: {
         x: Number(data?.player?.x) || 0,
@@ -839,6 +972,7 @@ function saveNow() {
       seed: state.seed,
       worldB64: encodeU8ToB64(state.world),
       inventory: state.inventory,
+      items: state.items,
       selectedSlot: state.selectedSlot,
       player: {
         x: state.player.x,
@@ -868,6 +1002,7 @@ function resetSave() {
  *  seed: string,
  *  world: Uint8Array,
  *  inventory: Record<number, number>,
+ *  items: Record<string, number>,
  *  selectedSlot: number,
  *  mode: 'mine'|'place',
  *  zoom: number,
@@ -886,7 +1021,7 @@ function resetSave() {
  *  particles: Array<{x:number,y:number,vx:number,vy:number,lifeMs:number,maxLifeMs:number,size:number,color:string}>,
  *  shakeMs: number,
  *  shakePower: number,
- *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number}>,
+ *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number, hp:number, hurtMs:number}>,
  *  animMs: number,
  *  lastSaveAt: number
  * }} */
@@ -895,6 +1030,7 @@ const state = {
   seed: 'seed',
   world: new Uint8Array(WORLD_W * WORLD_H),
   inventory: makeDefaultInventory(),
+  items: makeDefaultItems(),
   selectedSlot: 0,
   mode: 'mine',
   zoom: 3,
@@ -915,6 +1051,8 @@ const state = {
   shakePower: 0,
   monsters: [],
   monsterSpawnMs: 0,
+  lavaTickMs: 0,
+  attackCooldownMs: 0,
   animMs: 0,
   lastSaveAt: 0
 };
@@ -964,7 +1102,9 @@ function trySpawnOneMonsterNearPlayer() {
     h: def.h,
     onGround: false,
     dir: Math.random() < 0.5 ? -1 : 1,
-    thinkMs: 150 + Math.floor(Math.random() * 450)
+    thinkMs: 150 + Math.floor(Math.random() * 450),
+    hp: def.maxHp,
+    hurtMs: 0
   });
   return true;
 }
@@ -1005,7 +1145,9 @@ function spawnMonsters(world, seedStr) {
       h: def.h,
       onGround: false,
       dir: rand() < 0.5 ? -1 : 1,
-      thinkMs: 150 + Math.floor(rand() * 450)
+      thinkMs: 150 + Math.floor(rand() * 450),
+      hp: def.maxHp,
+      hurtMs: 0
     });
   }
   state.monsters = out;
@@ -1020,6 +1162,7 @@ function initNewWorld() {
   state.seed = gen.seed;
   state.world = gen.world;
   state.inventory = makeDefaultInventory();
+  state.items = makeDefaultItems();
   state.selectedSlot = 0;
   state.mode = 'mine';
 
@@ -1043,6 +1186,24 @@ function initNewWorld() {
   state.hp = state.maxHp;
   state.invulnMs = 0;
   state.damageFlashMs = 0;
+  state.attackCooldownMs = 0;
+  updateLootUi();
+
+  // スタート地点の近くに「マイクラっぽい」設備をちょい置き（壊して拾える）
+  {
+    const tx0 = spawnX;
+    const groundY = spawnY + 3; // findSpawnY の仕様に合わせてざっくり
+    const place = (dx, t) => {
+      const tx = clamp(tx0 + dx, 2, WORLD_W - 3);
+      const ty = clamp(groundY - 1, 2, WORLD_H - 3);
+      if (getTile(state.world, tx, ty) === TILE.AIR) setTile(state.world, tx, ty, t);
+    };
+    place(2, TILE.CRAFTING_TABLE);
+    place(3, TILE.FURNACE);
+    place(4, TILE.CHEST);
+    place(-3, TILE.BOOKSHELF);
+  }
+
   spawnMonsters(state.world, state.seed);
   updateHpPill();
   saveNow();
@@ -1054,6 +1215,7 @@ function loadOrCreate() {
     state.seed = saved.seed;
     state.world = saved.world;
     state.inventory = { ...makeDefaultInventory(), ...saved.inventory };
+    state.items = { ...makeDefaultItems(), ...saved.items };
     state.selectedSlot = saved.selectedSlot;
     state.player.x = saved.player.x || state.player.x;
     state.player.y = saved.player.y || state.player.y;
@@ -1071,6 +1233,7 @@ function loadOrCreate() {
     state.particles = [];
     state.shakeMs = 0;
     state.shakePower = 0;
+    updateLootUi();
     spawnMonsters(state.world, state.seed);
     updateHpPill();
     return;
@@ -1198,6 +1361,66 @@ function breakTile(tx, ty, t) {
   sfxBreak(t);
   spawnDustAtWorld(tx * TILE_SIZE + TILE_SIZE * 0.5, ty * TILE_SIZE + TILE_SIZE * 0.5, t, 1);
   addShake(0.8, 90);
+
+  // おまけドロップ: アイテム（コイン/宝石/ポーション）
+  maybeDropItemsFromBrokenTile(t, tx, ty);
+}
+
+function giveItem(kind, amount, fxTileId, wx, wy) {
+  const items = state.items || makeDefaultItems();
+  const cur = Math.max(0, Math.floor(items[kind] || 0));
+  const add = Math.max(0, Math.floor(amount || 0));
+  if (add <= 0) return;
+  items[kind] = Math.min(999, cur + add);
+  state.items = items;
+  updateLootUi();
+  sfxPickup();
+  if (wx != null && wy != null) spawnDustAtWorld(wx, wy, fxTileId, 0.45);
+}
+
+function maybeDropItemsFromBrokenTile(tileId, tx, ty) {
+  const wx = tx * TILE_SIZE + TILE_SIZE * 0.5;
+  const wy = ty * TILE_SIZE + TILE_SIZE * 0.5;
+  const r = Math.random();
+
+  // 鉱石はそれっぽくドロップ増やす
+  if (tileId === TILE.ORE_COAL) {
+    if (r < 0.6) giveItem(ITEM.COIN, 1, TILE.ORE_COAL, wx, wy);
+    return;
+  }
+  if (tileId === TILE.ORE_IRON) {
+    if (r < 0.5) giveItem(ITEM.COIN, 2, TILE.ORE_IRON, wx, wy);
+    return;
+  }
+  if (tileId === TILE.ORE_DIAMOND) {
+    if (r < 0.85) giveItem(ITEM.GEM, 1, TILE.ORE_DIAMOND, wx, wy);
+    else giveItem(ITEM.GEM, 2, TILE.ORE_DIAMOND, wx, wy);
+    return;
+  }
+
+  // 石はお宝が出やすい
+  if (tileId === TILE.STONE) {
+    if (r < 0.12) giveItem(ITEM.COIN, 1, TILE.STONE, wx, wy);
+    else if (r < 0.16) giveItem(ITEM.GEM, 1, TILE.ICE, wx, wy);
+    return;
+  }
+
+  // つちは回復が出やすい
+  if (tileId === TILE.DIRT || tileId === TILE.GRASS_BLOCK) {
+    if (r < 0.08) giveItem(ITEM.POTION, 1, TILE.GRASS_BLOCK, wx, wy);
+    return;
+  }
+
+  // すなはコインが出る
+  if (tileId === TILE.SAND) {
+    if (r < 0.1) giveItem(ITEM.COIN, 1, TILE.SAND, wx, wy);
+    return;
+  }
+
+  // レンガ/こおりは宝石チャンス
+  if (tileId === TILE.BRICK || tileId === TILE.ICE) {
+    if (r < 0.06) giveItem(ITEM.GEM, 1, tileId, wx, wy);
+  }
 }
 
 function aabbIntersectsSolid(world, x, y, w, h) {
@@ -1324,6 +1547,124 @@ function applyPlayerDamage(amount, fromX) {
   updateHpPill();
 }
 
+/**
+ * 地形ダメージ（ようがん等）: ノックバックなし/短め無敵
+ * @param {number} amount
+ */
+function applyTerrainDamage(amount) {
+  if (state.invulnMs > 0) return;
+  const dmg = Math.max(0, Math.floor(amount || 0));
+  if (dmg <= 0) return;
+  state.hp = Math.max(0, (state.hp || 0) - dmg);
+  state.invulnMs = 420;
+  state.damageFlashMs = 180;
+  sfxHurt();
+  addShake(0.9, 120);
+
+  if (state.hp <= 0) {
+    // 最小版: その場でリスポーン（ワールドは維持）
+    state.hp = state.maxHp;
+    const p = state.player;
+    p.x = state.spawn.x;
+    p.y = state.spawn.y;
+    p.vx = 0;
+    p.vy = 0;
+    state.cam.x = p.x;
+    state.cam.y = p.y;
+    spawnMonsters(state.world, state.seed);
+    state.invulnMs = 1000;
+    state.damageFlashMs = 260;
+    addShake(1.6, 180);
+  }
+  updateHpPill();
+}
+
+function healPlayer(amount) {
+  const heal = Math.max(0, Math.floor(amount || 0));
+  if (heal <= 0) return;
+  state.hp = Math.min(state.maxHp || 5, (state.hp || 0) + heal);
+  updateHpPill();
+}
+
+function sfxPickup() {
+  playTone({ type: 'triangle', freq: 860, sweepTo: 1240, dur: 0.07, vol: 0.08 });
+}
+
+function sfxHit() {
+  playNoise({ dur: 0.05, vol: 0.12, hp: 900, lp: 9000 });
+  playTone({ type: 'square', freq: 520, sweepTo: 320, dur: 0.06, vol: 0.06 });
+}
+
+function sfxDefeat() {
+  playNoise({ dur: 0.09, vol: 0.14, hp: 600, lp: 8000 });
+  playTone({ type: 'sawtooth', freq: 320, sweepTo: 140, dur: 0.1, vol: 0.07 });
+}
+
+function tryUsePotion() {
+  const items = state.items || makeDefaultItems();
+  const n = Math.max(0, Math.floor(items[ITEM.POTION] || 0));
+  if (n <= 0) return false;
+  items[ITEM.POTION] = n - 1;
+  state.items = items;
+  healPlayer(2);
+  updateLootUi();
+  sfxPickup();
+  return true;
+}
+
+function canMeleeHitMonsterAt(wx, wy) {
+  const dx = wx - state.player.x;
+  const dy = wy - state.player.y;
+  return dx * dx + dy * dy <= (TILE_SIZE * 4.2) * (TILE_SIZE * 4.2);
+}
+
+function pickMonsterAtWorld(wx, wy) {
+  for (let i = state.monsters.length - 1; i >= 0; i--) {
+    const m = state.monsters[i];
+    if (aabbOverlap(m.x, m.y, m.w, m.h, wx, wy, 2, 2)) return m;
+  }
+  return null;
+}
+
+function maybeDropItemsFromMonster(kind, wx, wy) {
+  const r = Math.random();
+  if (r < 0.55) giveItem(ITEM.COIN, 1, TILE.STONE, wx, wy);
+  else if (r < 0.7) giveItem(ITEM.POTION, 1, TILE.GRASS_BLOCK, wx, wy);
+  else if (r < 0.78) giveItem(ITEM.GEM, 1, TILE.ICE, wx, wy);
+}
+
+function attackMonsterAtWorld(wx, wy) {
+  if ((state.attackCooldownMs || 0) > 0) return false;
+  const m = pickMonsterAtWorld(wx, wy);
+  if (!m) return false;
+  if (!canMeleeHitMonsterAt(m.x, m.y)) return false;
+  const def = MONSTER_DEF[m.kind] || MONSTER_DEF[MONSTER_KIND.SLIME];
+
+  state.attackCooldownMs = 180;
+  m.hp = Math.max(0, Math.floor(m.hp || def.maxHp || 1));
+  m.hurtMs = 120;
+  m.hp = Math.max(0, m.hp - 1);
+
+  // knockback
+  const dir = state.player.x < m.x ? 1 : -1;
+  m.vx += dir * 140;
+  m.vy = Math.min(m.vy, -190);
+
+  sfxHit();
+  addShake(0.6, 90);
+  spawnDustAtWorld(m.x, m.y, TILE.DIRT, 0.25);
+
+  if (m.hp <= 0) {
+    const idx = state.monsters.indexOf(m);
+    if (idx >= 0) state.monsters.splice(idx, 1);
+    sfxDefeat();
+    addShake(1.0, 120);
+    spawnDustAtWorld(m.x, m.y, TILE.WOOD, 0.5);
+    maybeDropItemsFromMonster(m.kind, m.x, m.y);
+  }
+  return true;
+}
+
 function tileIdAtWorldPx(world, wx, wy) {
   const tx = Math.floor(wx / TILE_SIZE);
   const ty = Math.floor(wy / TILE_SIZE);
@@ -1371,6 +1712,7 @@ function tickMonsters(dtMs) {
     const def = MONSTER_DEF[m.kind];
     if (!def) continue;
     m.onGround = false;
+    m.hurtMs = Math.max(0, (m.hurtMs || 0) - dtMs);
 
     updateMonsterAi(m, dtMs);
 
@@ -1466,8 +1808,18 @@ function tick(dtMs) {
 
   // damage hint (lava): いまは演出だけ
   if (inLava) {
+    // マグマ/ようがん: 継続ダメージ（短い無敵つき）
+    state.lavaTickMs = (state.lavaTickMs || 0) + dtMs;
+    if (state.lavaTickMs >= 650) {
+      state.lavaTickMs = 0;
+      applyTerrainDamage(1);
+      // 火の粉っぽい粒
+      spawnDustAtWorld(p.x, p.y + p.h * 0.25, TILE.LAVA, 0.28);
+    }
     // tiny push upward so it feels "danger"
     p.vy -= 120 * dt;
+  } else {
+    state.lavaTickMs = 0;
   }
 
   // camera follow (smooth)
@@ -1520,6 +1872,7 @@ function tick(dtMs) {
   state.damageFlashMs = Math.max(0, (state.damageFlashMs || 0) - dtMs);
   state.shakeMs = Math.max(0, (state.shakeMs || 0) - dtMs);
   if (state.shakeMs <= 0) state.shakePower = 0;
+  state.attackCooldownMs = Math.max(0, (state.attackCooldownMs || 0) - dtMs);
 
   // autosave (not every frame)
   const now = performance.now();
@@ -1602,10 +1955,12 @@ function draw() {
     const m = state.monsters[i];
     const anim = monsterSprites.get(m.kind);
     const spr = anim ? pickAnimFrame(anim.frames, anim.durationsMs, state.animMs) : null;
+    const def = MONSTER_DEF[m.kind] || MONSTER_DEF[MONSTER_KIND.SLIME];
     if (spr) {
       const mw = spr.width || 0;
       const mh = spr.height || 0;
       ctx.save();
+      if ((m.hurtMs || 0) > 0) ctx.globalAlpha = 0.6;
       if (m.dir < 0) {
         ctx.translate(Math.round(m.x), Math.round(m.y));
         ctx.scale(-1, 1);
@@ -1618,6 +1973,20 @@ function draw() {
       ctx.fillStyle = 'rgba(255,0,255,0.85)';
       ctx.fillRect(Math.round(m.x - m.w / 2), Math.round(m.y - m.h / 2), m.w, m.h);
     }
+
+    // HPバー（小さく）
+    const maxHp = Math.max(1, Math.floor(def?.maxHp || 1));
+    const hp = Math.max(0, Math.min(maxHp, Math.floor(m.hp ?? maxHp)));
+    const barW = 18;
+    const barH = 3;
+    const bx = Math.round(m.x - barW / 2);
+    const by = Math.round(m.y - (spr?.height || m.h) / 2 - 6);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(bx, by, barW, barH);
+    ctx.fillStyle = hp <= 1 ? 'rgba(255, 90, 90, 0.95)' : 'rgba(255, 230, 120, 0.95)';
+    ctx.fillRect(bx, by, Math.round((barW * hp) / maxHp), barH);
+    ctx.restore();
   }
 
   // mining highlight
@@ -1724,6 +2093,10 @@ function bindKeyboard() {
       if (!jumpLatch) pendingJump = true;
       jumpLatch = true;
     }
+    if (e.key.toLowerCase() === 'f') {
+      // item: potion
+      tryUsePotion();
+    }
 
     if (e.key === '1') {
       state.selectedSlot = 0;
@@ -1743,6 +2116,14 @@ function bindKeyboard() {
     }
     if (e.key === '5') {
       state.selectedSlot = 4;
+      renderHotbar();
+    }
+    if (e.key === '6') {
+      state.selectedSlot = 5;
+      renderHotbar();
+    }
+    if (e.key === '7') {
+      state.selectedSlot = 6;
       renderHotbar();
     }
 
@@ -1815,6 +2196,10 @@ function bindCanvasPointer() {
       tryPlace(state.pointer.worldTx, state.pointer.worldTy);
       return;
     }
+
+    // 先に「叩く」を判定（モンスターを倒せるようにする）
+    const wp = screenToWorldPixel(e.clientX, e.clientY);
+    if (attackMonsterAtWorld(wp.wx, wp.wy)) return;
 
     if (state.mode === 'place') {
       tryPlace(state.pointer.worldTx, state.pointer.worldTy);
@@ -1928,6 +2313,7 @@ async function boot() {
   loadOrCreate();
   renderHotbar();
   updateHpPill();
+  updateLootUi();
 
   resizeCanvas();
   window.addEventListener('resize', () => {
@@ -1945,6 +2331,11 @@ async function boot() {
     writeSoundPref(state.soundEnabled);
     updateSoundBtn();
     if (state.soundEnabled) await unlockAudio();
+  });
+
+  potionBtn?.addEventListener('click', async () => {
+    if (!sfx.unlocked) await unlockAudio();
+    tryUsePotion();
   });
 
   startBtn?.addEventListener('click', () => {
