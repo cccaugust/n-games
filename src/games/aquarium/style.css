@@ -3,6 +3,10 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   /* まずは広く互換のある vh をベースにし、対応ブラウザは svh を採用 */
@@ -116,7 +120,12 @@ body {
   /* `svh` 非対応などで height 計算が無効になっても、flex で下領域を確保する */
   flex: 1 1 auto;
   min-height: 0;
+  /* フォールバック（対応ブラウザでは後続で上書きされる） */
+  height: calc(100vh - var(--aq-topbar-h, 64px));
   height: calc(100svh - var(--aq-topbar-h, 64px));
+  height: calc(100dvh - var(--aq-topbar-h, 64px));
+  /* iOS Safari の address-bar / safe-area で親高さが潰れる事故を避けるため、px を最優先 */
+  height: calc(var(--aq-vh, 100dvh) - var(--aq-topbar-h, 64px));
   padding: 0;
   display: flex;
 }
