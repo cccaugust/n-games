@@ -149,6 +149,12 @@ body {
   gap: 8px;
   z-index: 4;
   pointer-events: auto;
+  max-width: calc(100% - 20px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  padding: 6px;
 }
 
 .pm-slot {

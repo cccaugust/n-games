@@ -44,7 +44,28 @@ const TILE = {
   LAVA: 6,
   WOOD: 7,
   BRICK: 8,
-  ICE: 9
+  ICE: 9,
+
+  // --- 追加ブロック（マイクラっぽい素材） ---
+  COBBLE: 10,
+  STONE_BRICKS: 11,
+  MOSSY_COBBLE: 12,
+  BIRCH_PLANKS: 13,
+  SANDSTONE: 14,
+  RED_SAND: 15,
+  GRAVEL: 16,
+  CLAY: 17,
+  NETHERRACK: 18,
+  NETHER_BRICKS: 19,
+  QUARTZ: 20,
+  GLOWSTONE: 21,
+  BOOKSHELF: 22,
+  CRAFTING_TABLE: 23,
+  FURNACE: 24,
+  CHEST: 25,
+  ORE_COAL: 26,
+  ORE_IRON: 27,
+  ORE_DIAMOND: 28
 };
 
 /** @type {Record<number, {id: string, name: string, solid: boolean, breakMs: number}>} */
@@ -56,13 +77,34 @@ const TILE_DEF = {
   [TILE.SAND]: { id: 'tile_sand_16', name: 'すな', solid: true, breakMs: 210 },
   [TILE.WATER]: { id: 'tile_water_16', name: 'みず', solid: false, breakMs: 0 },
   [TILE.LAVA]: { id: 'tile_lava_16', name: 'ようがん', solid: false, breakMs: 0 },
-  [TILE.WOOD]: { id: 'tile_wood_plank_16', name: 'もくざい', solid: true, breakMs: 360 },
+  // 木材は新しいオーク板テクスチャに差し替え
+  [TILE.WOOD]: { id: 'pm_oak_planks_16', name: 'もくざい', solid: true, breakMs: 360 },
   [TILE.BRICK]: { id: 'tile_brick_red_16', name: 'レンガ', solid: true, breakMs: 520 },
-  [TILE.ICE]: { id: 'tile_ice_16', name: 'こおり', solid: true, breakMs: 380 }
+  [TILE.ICE]: { id: 'tile_ice_16', name: 'こおり', solid: true, breakMs: 380 },
+
+  [TILE.COBBLE]: { id: 'pm_cobblestone_16', name: 'まるいし', solid: true, breakMs: 560 },
+  [TILE.STONE_BRICKS]: { id: 'pm_stone_bricks_16', name: 'いしレンガ', solid: true, breakMs: 700 },
+  [TILE.MOSSY_COBBLE]: { id: 'pm_mossy_cobble_16', name: 'こけいし', solid: true, breakMs: 600 },
+  [TILE.BIRCH_PLANKS]: { id: 'pm_birch_planks_16', name: 'シラカバ板', solid: true, breakMs: 330 },
+  [TILE.SANDSTONE]: { id: 'pm_sandstone_16', name: 'させき', solid: true, breakMs: 420 },
+  [TILE.RED_SAND]: { id: 'pm_red_sand_16', name: 'あかいすな', solid: true, breakMs: 210 },
+  [TILE.GRAVEL]: { id: 'pm_gravel_16', name: 'じゃり', solid: true, breakMs: 190 },
+  [TILE.CLAY]: { id: 'pm_clay_16', name: 'ねんど', solid: true, breakMs: 260 },
+  [TILE.NETHERRACK]: { id: 'pm_netherrack_16', name: 'ネザーラック', solid: true, breakMs: 420 },
+  [TILE.NETHER_BRICKS]: { id: 'pm_nether_bricks_16', name: 'ネザーレンガ', solid: true, breakMs: 820 },
+  [TILE.QUARTZ]: { id: 'pm_quartz_block_16', name: 'クォーツ', solid: true, breakMs: 620 },
+  [TILE.GLOWSTONE]: { id: 'pm_glowstone_16', name: 'ひかるいし', solid: true, breakMs: 520 },
+  [TILE.BOOKSHELF]: { id: 'pm_bookshelf_16', name: 'ほんだな', solid: true, breakMs: 420 },
+  [TILE.CRAFTING_TABLE]: { id: 'pm_crafting_table_top_16', name: 'さぎょうだい', solid: true, breakMs: 420 },
+  [TILE.FURNACE]: { id: 'pm_furnace_front_16', name: 'かまど', solid: true, breakMs: 820 },
+  [TILE.CHEST]: { id: 'pm_chest_front_16', name: 'チェスト', solid: true, breakMs: 420 },
+  [TILE.ORE_COAL]: { id: 'pm_ore_coal_16', name: 'せきたんこうせき', solid: true, breakMs: 760 },
+  [TILE.ORE_IRON]: { id: 'pm_ore_iron_16', name: 'てっこうせき', solid: true, breakMs: 840 },
+  [TILE.ORE_DIAMOND]: { id: 'pm_ore_diamond_16', name: 'ダイヤこうせき', solid: true, breakMs: 980 }
 };
 
 /** @type {number[]} */
-const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK];
+const HOTBAR_ORDER = [TILE.DIRT, TILE.STONE, TILE.SAND, TILE.WOOD, TILE.BRICK, TILE.COBBLE, TILE.STONE_BRICKS];
 
 const ITEM = {
   COIN: 'coin',
@@ -559,7 +601,27 @@ const TILE_FX = {
   [TILE.LAVA]: { dust: ['#ff6b35', '#ff922b', '#e03131', '#ffd43b'] },
   [TILE.WOOD]: { dust: ['#c68642', '#a96b36', '#7a4b2a'] },
   [TILE.BRICK]: { dust: ['#b94a48', '#8a2b2a', '#d0706d'] },
-  [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] }
+  [TILE.ICE]: { dust: ['#d7f1ff', '#a9d7ff', '#7fbef2'] },
+
+  [TILE.COBBLE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
+  [TILE.STONE_BRICKS]: { dust: ['#b7b7b7', '#9a9a9a', '#6d6d6d'] },
+  [TILE.MOSSY_COBBLE]: { dust: ['#6aa84f', '#3c7f40', '#8e8e8e'] },
+  [TILE.BIRCH_PLANKS]: { dust: ['#e4dcc4', '#cfc4a2', '#a9986e'] },
+  [TILE.SANDSTONE]: { dust: ['#e6d27a', '#cbb45b', '#a08a3e'] },
+  [TILE.RED_SAND]: { dust: ['#d27744', '#c36a3a', '#8b3f22'] },
+  [TILE.GRAVEL]: { dust: ['#8a857e', '#6e6a64', '#5f5b55'] },
+  [TILE.CLAY]: { dust: ['#a8bac2', '#9fb0b8', '#7f8f98'] },
+  [TILE.NETHERRACK]: { dust: ['#8b2c31', '#6e1d20', '#4a0d0f'] },
+  [TILE.NETHER_BRICKS]: { dust: ['#4a1215', '#2b090b', '#1b0506'] },
+  [TILE.QUARTZ]: { dust: ['#ffffff', '#e8e5dd', '#cfcac0'] },
+  [TILE.GLOWSTONE]: { dust: ['#fff3c6', '#ffd86a', '#f1a61a'] },
+  [TILE.BOOKSHELF]: { dust: ['#ff922b', '#ffd43b', '#845ef7'] },
+  [TILE.CRAFTING_TABLE]: { dust: ['#c08f54', '#a5743f', '#6e3f18'] },
+  [TILE.FURNACE]: { dust: ['#b7b7b7', '#8e8e8e', '#5e5e5e'] },
+  [TILE.CHEST]: { dust: ['#c08f54', '#a5743f', '#6e3f18'] },
+  [TILE.ORE_COAL]: { dust: ['#1e1e1e', '#8e8e8e', '#5e5e5e'] },
+  [TILE.ORE_IRON]: { dust: ['#c18a5a', '#8e8e8e', '#5e5e5e'] },
+  [TILE.ORE_DIAMOND]: { dust: ['#3bc9db', '#8e8e8e', '#5e5e5e'] }
 };
 
 function randPick(arr) {
@@ -766,10 +828,35 @@ function generateWorld(seedStr) {
         continue;
       }
       const depth = y - h;
+      // 深いところは「ネザーっぽい層」
+      const deep = y / WORLD_H;
+      if (deep > 0.86) {
+        const r = rand();
+        if (r < 0.08) setTile(world, x, y, TILE.GLOWSTONE);
+        else if (r < 0.11) setTile(world, x, y, TILE.QUARTZ);
+        else if (r < 0.16) setTile(world, x, y, TILE.NETHER_BRICKS);
+        else setTile(world, x, y, TILE.NETHERRACK);
+        continue;
+      }
+
       if (depth === 0) setTile(world, x, y, TILE.GRASS_BLOCK);
       else if (depth < 5) setTile(world, x, y, TILE.DIRT);
-      else if (depth < 14) setTile(world, x, y, rand() < 0.08 ? TILE.SAND : TILE.STONE);
-      else setTile(world, x, y, TILE.STONE);
+      else if (depth < 14) {
+        const r = rand();
+        if (r < 0.04) setTile(world, x, y, TILE.GRAVEL);
+        else if (r < 0.07) setTile(world, x, y, TILE.CLAY);
+        else if (r < 0.11) setTile(world, x, y, TILE.SAND);
+        else if (r < 0.14) setTile(world, x, y, TILE.SANDSTONE);
+        else setTile(world, x, y, TILE.STONE);
+      } else {
+        const r = rand();
+        // 鉱石（深いほどいい鉱石が出やすい）
+        if (r < 0.018) setTile(world, x, y, TILE.ORE_COAL);
+        else if (r < 0.028) setTile(world, x, y, TILE.ORE_IRON);
+        else if (depth > 46 && r < 0.032) setTile(world, x, y, TILE.ORE_DIAMOND);
+        else if (r < 0.045) setTile(world, x, y, TILE.COBBLE);
+        else setTile(world, x, y, TILE.STONE);
+      }
     }
   }
 
@@ -1099,7 +1186,24 @@ function initNewWorld() {
   state.hp = state.maxHp;
   state.invulnMs = 0;
   state.damageFlashMs = 0;
+  state.attackCooldownMs = 0;
   updateLootUi();
+
+  // スタート地点の近くに「マイクラっぽい」設備をちょい置き（壊して拾える）
+  {
+    const tx0 = spawnX;
+    const groundY = spawnY + 3; // findSpawnY の仕様に合わせてざっくり
+    const place = (dx, t) => {
+      const tx = clamp(tx0 + dx, 2, WORLD_W - 3);
+      const ty = clamp(groundY - 1, 2, WORLD_H - 3);
+      if (getTile(state.world, tx, ty) === TILE.AIR) setTile(state.world, tx, ty, t);
+    };
+    place(2, TILE.CRAFTING_TABLE);
+    place(3, TILE.FURNACE);
+    place(4, TILE.CHEST);
+    place(-3, TILE.BOOKSHELF);
+  }
+
   spawnMonsters(state.world, state.seed);
   updateHpPill();
   saveNow();
@@ -1278,6 +1382,21 @@ function maybeDropItemsFromBrokenTile(tileId, tx, ty) {
   const wx = tx * TILE_SIZE + TILE_SIZE * 0.5;
   const wy = ty * TILE_SIZE + TILE_SIZE * 0.5;
   const r = Math.random();
+
+  // 鉱石はそれっぽくドロップ増やす
+  if (tileId === TILE.ORE_COAL) {
+    if (r < 0.6) giveItem(ITEM.COIN, 1, TILE.ORE_COAL, wx, wy);
+    return;
+  }
+  if (tileId === TILE.ORE_IRON) {
+    if (r < 0.5) giveItem(ITEM.COIN, 2, TILE.ORE_IRON, wx, wy);
+    return;
+  }
+  if (tileId === TILE.ORE_DIAMOND) {
+    if (r < 0.85) giveItem(ITEM.GEM, 1, TILE.ORE_DIAMOND, wx, wy);
+    else giveItem(ITEM.GEM, 2, TILE.ORE_DIAMOND, wx, wy);
+    return;
+  }
 
   // 石はお宝が出やすい
   if (tileId === TILE.STONE) {
@@ -1997,6 +2116,14 @@ function bindKeyboard() {
     }
     if (e.key === '5') {
       state.selectedSlot = 4;
+      renderHotbar();
+    }
+    if (e.key === '6') {
+      state.selectedSlot = 5;
+      renderHotbar();
+    }
+    if (e.key === '7') {
+      state.selectedSlot = 6;
       renderHotbar();
     }
 
