@@ -1987,14 +1987,16 @@ function draw() {
     if (spr) {
       const mw = spr.width || 0;
       const mh = spr.height || 0;
+      // 当たり判定（m.h）の「足元」にスプライトの足元を合わせる
+      const drawY = m.y + m.h / 2 - mh;
       ctx.save();
       if ((m.hurtMs || 0) > 0) ctx.globalAlpha = 0.6;
       if (m.dir < 0) {
         ctx.translate(Math.round(m.x), Math.round(m.y));
         ctx.scale(-1, 1);
-        ctx.drawImage(spr, -mw / 2, -mh / 2);
+        ctx.drawImage(spr, -mw / 2, Math.round(drawY - m.y));
       } else {
-        ctx.drawImage(spr, Math.round(m.x - mw / 2), Math.round(m.y - mh / 2));
+        ctx.drawImage(spr, Math.round(m.x - mw / 2), Math.round(drawY));
       }
       ctx.restore();
     } else {
@@ -2008,7 +2010,8 @@ function draw() {
     const barW = 18;
     const barH = 3;
     const bx = Math.round(m.x - barW / 2);
-    const by = Math.round(m.y - (spr?.height || m.h) / 2 - 6);
+    const topY = spr ? m.y + m.h / 2 - (spr.height || 0) : m.y - m.h / 2;
+    const by = Math.round(topY - 6);
     ctx.save();
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     ctx.fillRect(bx, by, barW, barH);
