@@ -63,9 +63,11 @@ const gallerySearchInput = document.getElementById('gallerySearchInput');
 const gallerySortSelect = document.getElementById('gallerySortSelect');
 const editorView = document.getElementById('editorView');
 const backToGalleryBtn = document.getElementById('backToGalleryBtn');
+const editorHeadbar = document.getElementById('editorHeadbar');
 const editorLayout = document.querySelector('.editor-layout');
 const splitLeft = document.getElementById('splitLeft');
 const splitRight = document.getElementById('splitRight');
+const editorToolbar = document.getElementById('editorToolbar');
 
 const canvasMeta = document.getElementById('canvasMeta');
 const canvasScroll = document.getElementById('canvasScroll');
@@ -137,6 +139,13 @@ const importImageInput = document.getElementById('importImageInput');
 const statusText = document.getElementById('statusText');
 const toolbarMenuBtn = document.getElementById('toolbarMenuBtn');
 const toolbarMore = document.getElementById('toolbarMore');
+const framesBtn = document.getElementById('framesBtn');
+
+// Frames modal (mobile)
+const framesModal = document.getElementById('framesModal');
+const framesCloseBtn = document.getElementById('framesCloseBtn');
+const framesModalBody = document.getElementById('framesModalBody');
+const frameSideEl = document.querySelector('.frame-side');
 
 // New asset modal
 const newAssetModal = document.getElementById('newAssetModal');
@@ -436,6 +445,69 @@ function restorePopoverHome(el) {
   } catch {
     // ignore
   }
+}
+
+// Portal (move nodes temporarily; used for mobile frames modal)
+const nodeHomes = new WeakMap();
+function portalNode(el, nextParent) {
+  if (!el || !nextParent) return;
+  if (!nodeHomes.has(el)) {
+    nodeHomes.set(el, { parent: el.parentNode, next: el.nextSibling });
+  }
+  if (el.parentNode !== nextParent) nextParent.appendChild(el);
+}
+
+function restoreNode(el) {
+  const home = nodeHomes.get(el);
+  if (!home || !home.parent) return;
+  if (el.parentNode === home.parent) return;
+  try {
+    home.parent.insertBefore(el, home.next || null);
+  } catch {
+    // ignore
+  }
+}
+
+const mobileMq = window.matchMedia?.('(max-width: 959px)');
+function isMobileEditorLayout() {
+  return mobileMq?.matches ?? false;
+}
+
+function syncEditorChromeVars() {
+  const headH = editorHeadbar instanceof HTMLElement ? Math.ceil(editorHeadbar.getBoundingClientRect().height || 0) : 0;
+  const toolH = editorToolbar instanceof HTMLElement ? Math.ceil(editorToolbar.getBoundingClientRect().height || 0) : 0;
+  document.documentElement.style.setProperty('--pm-editor-head-h', `${headH}px`);
+  document.documentElement.style.setProperty('--pm-editor-toolbar-h', `${toolH}px`);
+}
+
+function syncEditorMobileClass() {
+  const inEditor = appRoot?.dataset?.view === 'editor';
+  document.body.classList.toggle('pm-editor-mobile', Boolean(inEditor && isMobileEditorLayout()));
+}
+
+function syncModalOpenClass() {
+  const anyOpen =
+    (!newAssetModal?.hidden) ||
+    (sampleModal && !sampleModal.hidden) ||
+    (framesModal && !framesModal.hidden);
+  document.body.classList.toggle('modal-open', Boolean(anyOpen));
+}
+
+function closeFramesModal() {
+  if (!framesModal) return;
+  framesModal.hidden = true;
+  framesModal.setAttribute('aria-hidden', 'true');
+  if (frameSideEl && framesModalBody && frameSideEl.parentNode === framesModalBody) restoreNode(frameSideEl);
+  syncModalOpenClass();
+}
+
+function openFramesModal() {
+  if (!framesModal || !framesModalBody) return;
+  if (!isMobileEditorLayout()) return; // desktop shows the frames pane
+  if (frameSideEl) portalNode(frameSideEl, framesModalBody);
+  framesModal.hidden = false;
+  framesModal.setAttribute('aria-hidden', 'false');
+  syncModalOpenClass();
 }
 
 // PCレイアウト: ツールボックス / キャンバス / フレームの境界をドラッグで調整
@@ -814,14 +886,14 @@ function openSampleModal() {
   renderSampleList();
   sampleModal.hidden = false;
   sampleModal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+  syncModalOpenClass();
 }
 
 function closeSampleModal() {
   if (!sampleModal) return;
   sampleModal.hidden = true;
   sampleModal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
+  syncModalOpenClass();
 }
 
 function renderSampleList() {
@@ -938,6 +1010,11 @@ function setView(view) {
   }
   // topbar の高さが変わっても editor を画面内に収める
   requestAnimationFrame(() => syncTopbarHeightVar());
+  // mobile: fixed toolbars need correct spacing
+  requestAnimationFrame(() => {
+    syncEditorChromeVars();
+    syncEditorMobileClass();
+  });
 }
 
 function updateCanvasLayout() {
@@ -2293,14 +2370,14 @@ function openNewAssetModal() {
   newNameInput.value = DEFAULT_NEW_ASSET.name;
   newAssetModal.hidden = false;
   newAssetModal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+  syncModalOpenClass();
   newNameInput.focus();
 }
 
 function closeNewAssetModal() {
   newAssetModal.hidden = true;
   newAssetModal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
+  syncModalOpenClass();
 }
 
 function createFromModalAndEnterEditor() {
@@ -2348,6 +2425,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   if (!newAssetModal.hidden) closeNewAssetModal();
   if (sampleModal && !sampleModal.hidden) closeSampleModal();
+  if (framesModal && !framesModal.hidden) closeFramesModal();
   if (colorPopover && !colorPopover.hidden) closeColorPopover();
   if (huePopover && !huePopover.hidden) closeHuePopover();
 });
@@ -2356,6 +2434,19 @@ if (sampleCloseBtn) sampleCloseBtn.addEventListener('click', closeSampleModal);
 if (sampleModal) {
   sampleModal.addEventListener('click', (e) => {
     if (e.target === sampleModal) closeSampleModal();
+  });
+}
+
+if (framesBtn) {
+  framesBtn.addEventListener('click', () => {
+    if (framesModal && !framesModal.hidden) closeFramesModal();
+    else openFramesModal();
+  });
+}
+if (framesCloseBtn) framesCloseBtn.addEventListener('click', closeFramesModal);
+if (framesModal) {
+  framesModal.addEventListener('click', (e) => {
+    if (e.target === framesModal) closeFramesModal();
   });
 }
 
@@ -2857,11 +2948,15 @@ canvas.addEventListener('pointerleave', () => {
     // keep simple; this only controls open/close, not layout itself
     syncToolbarMoreForViewport();
     syncTopbarHeightVar();
+    syncEditorChromeVars();
+    syncEditorMobileClass();
+    if (!isMobileEditorLayout() && framesModal && !framesModal.hidden) closeFramesModal();
   });
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).
   closeNewAssetModal();
   closeSampleModal();
+  closeFramesModal();
 
   setView('gallery');
   await refreshGalleryList();

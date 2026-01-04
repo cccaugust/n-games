@@ -62,7 +62,10 @@
       <div class="workspace" id="editorView" hidden>
         <header class="editor-headbar card" id="editorHeadbar" aria-label="エディターヘッダー">
           <div class="editor-headbar-left">
-            <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
+            <button class="btn-sub" id="backToGalleryBtn" type="button" aria-label="ギャラリーに戻る">
+              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+              <span class="btn-text">ギャラリー</span>
+            </button>
           </div>
 
           <div class="editor-headbar-center">
@@ -74,7 +77,8 @@
 
           <div class="editor-headbar-right">
             <button class="btn-primary-solid" id="saveBtn" type="button" aria-label="保存">
-              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> 保存
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+              <span class="btn-text">保存</span>
             </button>
           </div>
         </header>
@@ -202,6 +206,12 @@
                   </button>
                   <button class="tool-icon" id="avatarPickBtn" type="button" aria-label="アバターにする">
                     <i class="fa-solid fa-user"></i><span>アイコン</span>
+                  </button>
+                </div>
+
+                <div class="toolbar-group" aria-label="フレーム">
+                  <button class="tool-icon" id="framesBtn" type="button" aria-label="フレームを開く">
+                    <i class="fa-solid fa-layer-group"></i><span>フレーム</span>
                   </button>
                 </div>
 
@@ -348,6 +358,19 @@
           </div>
 
           <div class="assets-list" id="sampleList" aria-label="サンプル一覧"></div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="framesModal" hidden>
+        <div class="card modal pm-frames-modal" role="dialog" aria-label="フレーム">
+          <div class="modal-head">
+            <div>
+              <div class="section-title">フレーム</div>
+              <div class="tiny-note">コマを切り替えてアニメ素材を作れます</div>
+            </div>
+            <button class="btn-sub" id="framesCloseBtn" type="button">× 閉じる</button>
+          </div>
+          <div id="framesModalBody"></div>
         </div>
       </div>
     </main>
