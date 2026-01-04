@@ -1488,6 +1488,107 @@ input[type='color'] {
     z-index: 30;
   }
 
+  /* Compact "top tools" (editor headbar + canvas head) */
+  #editorHeadbar {
+    padding: 8px 10px;
+    border-radius: 14px;
+  }
+
+  #editorHeadbar .editor-headbar-left,
+  #editorHeadbar .editor-headbar-right {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  #editorHeadbar .editor-headbar-center {
+    min-width: 0;
+  }
+
+  /* Back/Save: icon-first */
+  #backToGalleryBtn,
+  #saveBtn {
+    min-height: 44px;
+    padding: 10px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  #backToGalleryBtn .btn-text,
+  #saveBtn .btn-text {
+    display: none;
+  }
+
+  /* Name field: hide label, keep input */
+  .editor-name > span {
+    display: none;
+  }
+
+  .editor-name input[type='text'] {
+    padding: 10px 12px;
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* Canvas "top tools": make rows shorter and icon-centric */
+  .canvas-panel {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .canvas-head {
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .canvas-head-left .small-label {
+    display: none;
+  }
+
+  .canvas-meta {
+    font-size: 0.9rem;
+  }
+
+  .canvas-head-actions {
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide button text, keep icon for compactness */
+  .canvas-head-actions .btn-mini {
+    font-size: 0;
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  .canvas-head-actions .btn-mini i {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .canvas-subhead-actions {
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  #gridToggleBtn {
+    font-size: 0;
+    padding: 8px 10px;
+    min-height: 40px;
+  }
+
+  #gridToggleBtn i {
+    font-size: 1.05rem;
+  }
+
+  .zoom-mini #zoomRange {
+    width: 120px;
+    max-width: 40vw;
+  }
+
   /* Canvas should fill the remaining space */
   .editor-layout {
     flex: 1;

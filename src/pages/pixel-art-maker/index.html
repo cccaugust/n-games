@@ -62,7 +62,10 @@
       <div class="workspace" id="editorView" hidden>
         <header class="editor-headbar card" id="editorHeadbar" aria-label="エディターヘッダー">
           <div class="editor-headbar-left">
-            <button class="btn-sub" id="backToGalleryBtn" type="button">← ギャラリー</button>
+            <button class="btn-sub" id="backToGalleryBtn" type="button" aria-label="ギャラリーに戻る">
+              <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+              <span class="btn-text">ギャラリー</span>
+            </button>
           </div>
 
           <div class="editor-headbar-center">
@@ -74,7 +77,8 @@
 
           <div class="editor-headbar-right">
             <button class="btn-primary-solid" id="saveBtn" type="button" aria-label="保存">
-              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> 保存
+              <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+              <span class="btn-text">保存</span>
             </button>
           </div>
         </header>
