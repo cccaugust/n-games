@@ -80,6 +80,11 @@ const toolPen = document.getElementById('toolPen');
 const toolEraser = document.getElementById('toolEraser');
 const toolFill = document.getElementById('toolFill');
 const toolPicker = document.getElementById('toolPicker');
+const toolSelect = document.getElementById('toolSelect');
+
+const rangeCopyBtn = document.getElementById('rangeCopyBtn');
+const rangeCutBtn = document.getElementById('rangeCutBtn');
+const rangePasteBtn = document.getElementById('rangePasteBtn');
 
 const colorInput = document.getElementById('colorInput');
 const paletteGrid = document.getElementById('paletteGrid');
