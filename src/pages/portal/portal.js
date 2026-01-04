@@ -128,6 +128,14 @@ const games = [
     link: '/games/berry-bounce/'
   },
   {
+    id: 'unity-catch',
+    title: 'ユニティキャッチ',
+    desc: 'Unityの素材で見た目を変えられる！🪙',
+    color: '#f59e0b',
+    icon: '🪙',
+    link: '/games/unity-catch/'
+  },
+  {
     id: 'pokedex',
     title: 'オリジナルポケモン図鑑',
     desc: 'キミだけの最強ポケモン！',

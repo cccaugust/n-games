@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>ユニティキャッチ | N-Games</title>
+  <link rel="stylesheet" href="../../style.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <div class="container">
+    <a href="../../pages/portal/portal.html" class="back-link">&larr; もどる</a>
+
+    <div class="hud card">
+      <div class="hud-item">スコア: <span id="score">0</span></div>
+      <div class="hud-item">ライフ: <span id="lives">❤️❤️❤️</span></div>
+    </div>
+
+    <div class="game-shell card">
+      <div class="title-row">
+        <div class="title">ユニティキャッチ</div>
+        <div class="hint">ドラッグ/←→でうごく</div>
+      </div>
+      <canvas id="gameCanvas" width="360" height="640" aria-label="ユニティキャッチのゲーム画面"></canvas>
+    </div>
+  </div>
+
+  <div class="overlay" id="startOverlay">
+    <div class="overlay-card">
+      <h1>ユニティキャッチ</h1>
+      <p>
+        おちてくるコインをキャッチ！<br />
+        💎は高得点 / 💣はダメ！
+      </p>
+      <button class="btn-primary" id="startBtn">スタート！</button>
+      <p class="small">Unityの無料素材PNGを置くと見た目が変わるよ</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="resultOverlay" style="display:none;"></div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+
+</html>
+
