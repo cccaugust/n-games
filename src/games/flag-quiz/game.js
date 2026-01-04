@@ -282,23 +282,34 @@ function setFlag(country) {
   els.flagSkeleton.style.display = '';
 
   const src = flagUrl(country.code);
-  const img = new Image();
-  img.decoding = 'async';
-  img.referrerPolicy = 'no-referrer';
-  img.onload = () => {
-    if (loadId !== flagLoadId) return;
-    els.flagImg.src = src;
-    els.flagImg.alt = `${country.name} の国旗`;
-    els.flagSkeleton.style.display = 'none';
-    els.flagImg.style.display = '';
-  };
-  img.onerror = () => {
+
+  const fallback = () => {
     if (loadId !== flagLoadId) return;
     els.flagImg.removeAttribute('src');
     els.flagSkeleton.style.display = 'none';
     els.flagEmoji.style.display = '';
   };
-  img.src = src;
+
+  // 画像ブロック環境などで load/error が来ないケースがあるので保険を入れる
+  window.clearTimeout(setFlag._t);
+  setFlag._t = window.setTimeout(fallback, 2500);
+
+  els.flagImg.onload = () => {
+    if (loadId !== flagLoadId) return;
+    window.clearTimeout(setFlag._t);
+    els.flagImg.alt = `${country.name} の国旗`;
+    els.flagSkeleton.style.display = 'none';
+    els.flagEmoji.style.display = 'none';
+    els.flagImg.style.display = '';
+  };
+  els.flagImg.onerror = () => {
+    window.clearTimeout(setFlag._t);
+    fallback();
+  };
+
+  // 再読み込み時に onload が走らないブラウザ対策で一度クリアしてからセット
+  els.flagImg.removeAttribute('src');
+  els.flagImg.src = src;
 }
 
 function renderOptions(options) {
