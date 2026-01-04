@@ -1217,16 +1217,46 @@ aquariumScene.events.on('fishTapped', (fishId) => {
   openFishModal(String(fishId));
 });
 
-new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: 'phaserRoot',
-  backgroundColor: '#0b3555',
-  pixelArt: true,
-  antialias: false,
-  scale: {
-    mode: Phaser.Scale.RESIZE,
-    autoCenter: Phaser.Scale.CENTER_BOTH
-  },
-  scene: [aquariumScene]
-});
+const PHASER_PARENT_ID = 'phaserRoot';
+
+try {
+  new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: PHASER_PARENT_ID,
+    backgroundColor: '#0b3555',
+    pixelArt: true,
+    antialias: false,
+    scale: {
+      // `RESIZE` は親要素のサイズ追従が命。iOS Safari 対策で parent を明示。
+      parent: PHASER_PARENT_ID,
+      mode: Phaser.Scale.RESIZE,
+      autoCenter: Phaser.Scale.CENTER_BOTH
+    },
+    scene: [aquariumScene]
+  });
+} catch (e) {
+  console.warn('Phaser init failed:', e);
+  showToast('水槽の描画に失敗しました（再読み込みしてね）');
+  // Fallback message (canvas が作れない端末向け)
+  try {
+    const wrap = document.getElementById('aquariumDrop');
+    if (wrap && !wrap.querySelector('.aq-phaser-fallback')) {
+      const msg = document.createElement('div');
+      msg.className = 'aq-phaser-fallback';
+      msg.textContent = '水槽の描画に失敗しました。ページを再読み込みしてください。';
+      msg.style.position = 'absolute';
+      msg.style.inset = '0';
+      msg.style.display = 'grid';
+      msg.style.placeItems = 'center';
+      msg.style.padding = '18px';
+      msg.style.color = 'rgba(255,255,255,0.92)';
+      msg.style.fontWeight = '900';
+      msg.style.textAlign = 'center';
+      msg.style.background = 'rgba(0,0,0,0.25)';
+      wrap.appendChild(msg);
+    }
+  } catch {
+    // ignore
+  }
+}
 
