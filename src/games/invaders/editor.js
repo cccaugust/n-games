@@ -534,7 +534,7 @@ async function buildAssetStrip() {
   defaultBtn.addEventListener('click', () => setSelectedEnemyToken(ENEMY_DEFAULT));
   assetStrip.appendChild(defaultBtn);
 
-  // User assets (dot-art maker)
+  // Assets (dot-art maker): samples + my saved assets
   let assets = [];
   try {
     assets = await listEnemyAssetsForCurrentPlayer();
@@ -551,7 +551,23 @@ async function buildAssetStrip() {
     return;
   }
 
-  assets.forEach((a) => {
+  const sampleAssets = assets.filter((a) => String(a.ownerId || '') === 'sample' || String(a.id || '').startsWith('sample_'));
+  const userAssets = assets.filter((a) => !(String(a.ownerId || '') === 'sample' || String(a.id || '').startsWith('sample_')));
+
+  function addSectionLabel(text) {
+    const chip = document.createElement('div');
+    chip.className = 'iv-chip';
+    chip.style.gridColumn = '1 / -1';
+    chip.textContent = text;
+    assetStrip.appendChild(chip);
+  }
+
+  if (sampleAssets.length > 0) addSectionLabel('サンプル（コピー不要で使える）');
+  if (sampleAssets.length > 0 && userAssets.length > 0) addSectionLabel('自分の作品（ドット絵メーカーで保存したもの）');
+
+  const ordered = sampleAssets.length > 0 || userAssets.length > 0 ? [...sampleAssets, ...userAssets] : [...assets];
+
+  ordered.forEach((a) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'iv-asset-btn';
@@ -564,11 +580,13 @@ async function buildAssetStrip() {
     img.src = thumbUrl;
     enemyThumbImg.set(a.id, img);
 
+    const frameCount = Array.isArray(a.frames) ? a.frames.length : 1;
+    const isSample = String(a.ownerId || '') === 'sample' || String(a.id || '').startsWith('sample_');
     btn.innerHTML = `
       <img alt="" src="${thumbUrl}">
       <div>
         <div class="iv-asset-name">${escapeHtml(a.name || '（no name）')}</div>
-        <div class="iv-asset-meta">${a.width}×${a.height}</div>
+        <div class="iv-asset-meta">${a.width}×${a.height}${frameCount > 1 ? ` / ${frameCount}フレーム` : ''}${isSample ? ' / サンプル' : ''}</div>
       </div>
     `;
     btn.addEventListener('click', () => setSelectedEnemyToken(a.id));
