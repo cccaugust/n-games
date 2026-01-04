@@ -52,6 +52,9 @@ const gallerySearchInput = document.getElementById('gallerySearchInput');
 const gallerySortSelect = document.getElementById('gallerySortSelect');
 const editorView = document.getElementById('editorView');
 const backToGalleryBtn = document.getElementById('backToGalleryBtn');
+const editorLayout = document.querySelector('.editor-layout');
+const splitLeft = document.getElementById('splitLeft');
+const splitRight = document.getElementById('splitRight');
 
 const canvasMeta = document.getElementById('canvasMeta');
 const canvasScroll = document.getElementById('canvasScroll');
@@ -301,6 +304,178 @@ function setReadOnly(next) {
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
+}
+
+// PCレイアウト: ツールボックス / キャンバス / フレームの境界をドラッグで調整
+const LAYOUT_PREF_KEY = 'ngames.pm.pixelArtMaker.layout.v1';
+const DEFAULT_LEFT_W = 300;
+const DEFAULT_RIGHT_W = 320;
+const SPLITTER_W = 12;
+const MIN_LEFT_W = 220;
+const MIN_RIGHT_W = 240;
+const MIN_CENTER_W = 320;
+
+function readLayoutPrefs() {
+  try {
+    const raw = localStorage.getItem(LAYOUT_PREF_KEY);
+    const json = raw ? JSON.parse(raw) : null;
+    if (!json || typeof json !== 'object') return null;
+    const left = Number(json.leftPx);
+    const right = Number(json.rightPx);
+    return {
+      leftPx: Number.isFinite(left) ? left : DEFAULT_LEFT_W,
+      rightPx: Number.isFinite(right) ? right : DEFAULT_RIGHT_W
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeLayoutPrefs(prefs) {
+  try {
+    localStorage.setItem(LAYOUT_PREF_KEY, JSON.stringify({ leftPx: prefs.leftPx, rightPx: prefs.rightPx }));
+  } catch {
+    // ignore
+  }
+}
+
+function applyEditorLayoutWidths({ leftPx, rightPx }) {
+  if (!editorLayout) return;
+  const rect = editorLayout.getBoundingClientRect();
+  const total = rect.width || 0;
+  if (!total) return;
+
+  const maxLeft = Math.max(MIN_LEFT_W, total - MIN_CENTER_W - MIN_RIGHT_W - SPLITTER_W * 2);
+  const maxRight = Math.max(MIN_RIGHT_W, total - MIN_CENTER_W - MIN_LEFT_W - SPLITTER_W * 2);
+
+  const left = clamp(Number(leftPx) || DEFAULT_LEFT_W, MIN_LEFT_W, maxLeft);
+  const right = clamp(Number(rightPx) || DEFAULT_RIGHT_W, MIN_RIGHT_W, maxRight);
+
+  editorLayout.style.setProperty('--pm-left-w', `${Math.round(left)}px`);
+  editorLayout.style.setProperty('--pm-right-w', `${Math.round(right)}px`);
+
+  return { leftPx: Math.round(left), rightPx: Math.round(right) };
+}
+
+function resetEditorLayoutWidths() {
+  const applied = applyEditorLayoutWidths({ leftPx: DEFAULT_LEFT_W, rightPx: DEFAULT_RIGHT_W });
+  if (applied) writeLayoutPrefs(applied);
+}
+
+function syncEditorLayoutFromPrefs() {
+  const prefs = readLayoutPrefs();
+  if (prefs) {
+    const applied = applyEditorLayoutWidths(prefs);
+    if (applied) writeLayoutPrefs(applied);
+  } else {
+    const applied = applyEditorLayoutWidths({ leftPx: DEFAULT_LEFT_W, rightPx: DEFAULT_RIGHT_W });
+    if (applied) writeLayoutPrefs(applied);
+  }
+}
+
+function initResizableEditorLayout() {
+  if (!editorLayout || !splitLeft || !splitRight) return;
+
+  const desktopMq = window.matchMedia?.('(min-width: 960px)');
+
+  function isDesktop() {
+    return desktopMq?.matches ?? false;
+  }
+
+  let dragging = null;
+
+  function beginDrag(which, e) {
+    if (!isDesktop()) return;
+    if (!(e instanceof PointerEvent)) return;
+    const rect = editorLayout.getBoundingClientRect();
+    dragging = {
+      which,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startLeft: parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-left-w')) || DEFAULT_LEFT_W,
+      startRight: parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-right-w')) || DEFAULT_RIGHT_W,
+      rectLeft: rect.left,
+      rectRight: rect.right
+    };
+    document.body.classList.add('pm-resizing');
+    try {
+      /** @type {HTMLElement} */ (e.currentTarget)?.setPointerCapture?.(e.pointerId);
+    } catch {
+      // ignore
+    }
+    e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    if (!(e instanceof PointerEvent)) return;
+    if (e.pointerId !== dragging.pointerId) return;
+
+    const x = e.clientX;
+    if (dragging.which === 'left') {
+      const nextLeft = x - dragging.rectLeft;
+      const applied = applyEditorLayoutWidths({ leftPx: nextLeft, rightPx: dragging.startRight });
+      if (applied) writeLayoutPrefs(applied);
+    } else {
+      const nextRight = dragging.rectRight - x;
+      const applied = applyEditorLayoutWidths({ leftPx: dragging.startLeft, rightPx: nextRight });
+      if (applied) writeLayoutPrefs(applied);
+    }
+    e.preventDefault();
+  }
+
+  function endDrag(e) {
+    if (!dragging) return;
+    if (!(e instanceof PointerEvent)) return;
+    if (e.pointerId !== dragging.pointerId) return;
+    dragging = null;
+    document.body.classList.remove('pm-resizing');
+  }
+
+  function onKey(which, e) {
+    if (!isDesktop()) return;
+    if (!['ArrowLeft', 'ArrowRight', 'Home'].includes(e.key)) return;
+    e.preventDefault();
+
+    const step = e.shiftKey ? 40 : 10;
+    if (e.key === 'Home') {
+      resetEditorLayoutWidths();
+      return;
+    }
+
+    const curLeft = parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-left-w')) || DEFAULT_LEFT_W;
+    const curRight = parseFloat(getComputedStyle(editorLayout).getPropertyValue('--pm-right-w')) || DEFAULT_RIGHT_W;
+
+    if (which === 'left') {
+      const delta = e.key === 'ArrowLeft' ? -step : step;
+      const applied = applyEditorLayoutWidths({ leftPx: curLeft + delta, rightPx: curRight });
+      if (applied) writeLayoutPrefs(applied);
+    } else {
+      // 右ペインは「左矢印 = 右ペインを広げる」だと直感的
+      const delta = e.key === 'ArrowLeft' ? step : -step;
+      const applied = applyEditorLayoutWidths({ leftPx: curLeft, rightPx: curRight + delta });
+      if (applied) writeLayoutPrefs(applied);
+    }
+  }
+
+  splitLeft.addEventListener('pointerdown', (e) => beginDrag('left', e));
+  splitRight.addEventListener('pointerdown', (e) => beginDrag('right', e));
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
+
+  splitLeft.addEventListener('dblclick', resetEditorLayoutWidths);
+  splitRight.addEventListener('dblclick', resetEditorLayoutWidths);
+
+  splitLeft.addEventListener('keydown', (e) => onKey('left', e));
+  splitRight.addEventListener('keydown', (e) => onKey('right', e));
+
+  // 初期適用 & 画面サイズ変更追従
+  syncEditorLayoutFromPrefs();
+  window.addEventListener('resize', () => {
+    if (!isDesktop()) return;
+    syncEditorLayoutFromPrefs();
+  });
 }
 
 function updateHueUi() {
@@ -623,6 +798,10 @@ function setView(view) {
   const showEditor = v === 'editor';
   editorView.hidden = !showEditor;
   galleryView.hidden = showEditor;
+  if (showEditor) {
+    // 表示されたタイミングで幅を再計算して、キャンバスを最大化する
+    requestAnimationFrame(() => syncEditorLayoutFromPrefs());
+  }
 }
 
 function updateCanvasLayout() {
@@ -2457,6 +2636,7 @@ canvas.addEventListener('pointerleave', () => {
   setHuePreview(0);
   updateRangeButtons();
   syncToolbarMoreForViewport();
+  initResizableEditorLayout();
 
   if (toolbarMenuBtn) {
     toolbarMenuBtn.addEventListener('click', () => {

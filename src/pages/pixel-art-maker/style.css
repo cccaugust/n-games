@@ -3,6 +3,9 @@
   --pm-bg: #f6f7fb;
   --pm-card: #ffffff;
   --pm-danger: #ff5c5c;
+  --pm-left-w: 300px;
+  --pm-right-w: 320px;
+  --pm-splitter-w: 12px;
 }
 
 body {
@@ -101,6 +104,13 @@ img.pm-pill-avatar {
 .app {
   padding-top: 16px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+.container.app[data-view='editor'] {
+  /* 編集画面だけ、横幅の上限を外してキャンバスを最大化 */
+  max-width: none;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .gallery {
@@ -216,12 +226,58 @@ img.pm-pill-avatar {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  min-height: 0;
 }
 
 .editor-layout {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* PC用の境界（ドラッグでサイズ変更） */
+.pm-splitter {
+  display: none;
+  width: var(--pm-splitter-w);
+  min-width: var(--pm-splitter-w);
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  border-radius: 12px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02));
+  position: relative;
+}
+
+.pm-splitter::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 36px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  box-shadow:
+    0 -10px 0 rgba(0, 0, 0, 0.18),
+    0 10px 0 rgba(0, 0, 0, 0.18);
+  opacity: 0.7;
+}
+
+.pm-splitter:hover,
+.pm-splitter:focus-visible {
+  background: linear-gradient(to right, rgba(108, 92, 231, 0.14), rgba(0, 206, 201, 0.08));
+  outline: 3px solid rgba(108, 92, 231, 0.35);
+  outline-offset: 2px;
+}
+
+body.pm-resizing,
+body.pm-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
 }
 
 /* `hidden` 属性が `.workspace { display: grid; }` に負けてしまうのを防ぐ */
@@ -923,14 +979,24 @@ input[type='color'] {
 
   .editor-layout {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr) 320px;
-    gap: 12px;
-    align-items: start;
+    grid-template-columns:
+      var(--pm-left-w)
+      var(--pm-splitter-w)
+      minmax(0, 1fr)
+      var(--pm-splitter-w)
+      var(--pm-right-w);
+    gap: 0;
+    align-items: stretch;
+    min-height: calc(100svh - 140px);
   }
 
   .editor-left,
   .editor-right {
     min-width: 0;
+  }
+
+  .pm-splitter {
+    display: block;
   }
 
   .editor-toolbar {
