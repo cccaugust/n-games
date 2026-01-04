@@ -88,6 +88,14 @@ const games = [
     link: '/games/yojijukugo-quiz/'
   },
   {
+    id: 'flag-quiz',
+    title: '国旗あてクイズ',
+    desc: 'はたを見て くにをあてよう！',
+    color: '#6c5ce7',
+    icon: '🏳️',
+    link: '/games/flag-quiz/'
+  },
+  {
     id: 'slime-adventure',
     title: 'スライムの大冒険',
     desc: 'ゴールをめざせ！',
