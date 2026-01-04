@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>バトルアリーナ | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body class="ba-safe">
+    <div class="container ba-page">
+      <div class="ba-topbar">
+        <a id="backLink" class="ba-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+        <div class="ba-title">
+          <span class="ba-chip">バトルアリーナ</span>
+          <span class="ba-chip ba-chip-sub">2人対戦</span>
+        </div>
+        <button id="helpBtn" class="ba-help" type="button" aria-label="あそびかた">？</button>
+      </div>
+
+      <div class="ba-stage-wrap">
+        <div id="game-container" class="ba-game"></div>
+
+        <div class="ba-hud" aria-hidden="true">
+          <div class="ba-hud-left">
+            <div class="ba-hud-name">P1</div>
+            <div class="ba-hud-row">
+              <span class="ba-percent"><span id="p1Percent">0</span>%</span>
+              <span class="ba-stocks" id="p1Stocks">●●●</span>
+            </div>
+          </div>
+          <div class="ba-hud-right">
+            <div class="ba-hud-name">P2</div>
+            <div class="ba-hud-row">
+              <span class="ba-stocks" id="p2Stocks">●●●</span>
+              <span class="ba-percent"><span id="p2Percent">0</span>%</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="roundOverlay" class="ba-overlay" aria-live="polite">
+          <div class="ba-overlay-card">
+            <div class="ba-overlay-title">バトルアリーナ</div>
+            <div class="ba-overlay-sub">ふっとばして、場外に落とそう！</div>
+            <div class="ba-controls">
+              <div class="ba-controls-col">
+                <div class="ba-controls-title">P1</div>
+                <div class="ba-controls-line">移動: A / D</div>
+                <div class="ba-controls-line">ジャンプ: W</div>
+                <div class="ba-controls-line">こうげき: F</div>
+                <div class="ba-controls-line">つよい: G</div>
+              </div>
+              <div class="ba-controls-col">
+                <div class="ba-controls-title">P2</div>
+                <div class="ba-controls-line">移動: ← / →</div>
+                <div class="ba-controls-line">ジャンプ: ↑</div>
+                <div class="ba-controls-line">こうげき: K</div>
+                <div class="ba-controls-line">つよい: L</div>
+              </div>
+            </div>
+            <div class="ba-overlay-actions">
+              <button id="startBtn" class="btn-primary" type="button">スタート！</button>
+              <button id="restartBtn" class="ba-btn" type="button" style="display:none;">もう一回</button>
+            </div>
+            <div class="ba-overlay-hint">R でも もう一回できるよ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ba-touch" id="touchControls" aria-label="タッチ操作" style="display:none;">
+        <div class="ba-touch-side ba-touch-p1">
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn" data-player="p1" data-action="left" type="button">◀</button>
+            <button class="ba-touch-btn" data-player="p1" data-action="right" type="button">▶</button>
+          </div>
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn ba-touch-btn-wide" data-player="p1" data-action="jump" type="button">
+              ジャンプ
+            </button>
+          </div>
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn" data-player="p1" data-action="attack" type="button">こうげき</button>
+            <button class="ba-touch-btn" data-player="p1" data-action="strong" type="button">つよい</button>
+          </div>
+        </div>
+        <div class="ba-touch-side ba-touch-p2">
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn" data-player="p2" data-action="left" type="button">◀</button>
+            <button class="ba-touch-btn" data-player="p2" data-action="right" type="button">▶</button>
+          </div>
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn ba-touch-btn-wide" data-player="p2" data-action="jump" type="button">
+              ジャンプ
+            </button>
+          </div>
+          <div class="ba-touch-row">
+            <button class="ba-touch-btn" data-player="p2" data-action="attack" type="button">こうげき</button>
+            <button class="ba-touch-btn" data-player="p2" data-action="strong" type="button">つよい</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="helpModal" class="ba-modal hidden" aria-hidden="true">
+      <div class="ba-modal-card" role="dialog" aria-modal="true" aria-label="あそびかた">
+        <div class="ba-modal-title">あそびかた</div>
+        <div class="ba-modal-body">
+          <p class="ba-modal-p">
+            こうげきを当てると <b>%</b> がふえます。% が大きいほど、ふっとびが強くなるよ！
+          </p>
+          <p class="ba-modal-p">場外に落とすと相手のストックがへるよ。先にストックが 0 でまけ！</p>
+          <p class="ba-modal-p">スマホ/タブレットは下のタッチボタンで操作できます。</p>
+        </div>
+        <div class="ba-modal-actions">
+          <button id="closeHelpBtn" class="btn-primary" type="button">とじる</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
+
