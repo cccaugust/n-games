@@ -301,7 +301,12 @@ function listDropKindsForPack(packId) {
 function renderHand(state) {
   const hand = state.hands[state.current] || {};
   el.handList.innerHTML = '';
-  const kinds = listDropKindsForPack(state.packId);
+  // 基本は「駒パック由来の持ち駒一覧」だが、
+  // 対局中に取った駒（例: 玉など）が一覧に含まれないと「使えない」ので、
+  // “いま手元に存在する種類” は必ず表示対象に含める。
+  const baseKinds = listDropKindsForPack(state.packId);
+  const extraKinds = Object.keys(hand || {}).filter((k) => !baseKinds.includes(k));
+  const kinds = baseKinds.concat(extraKinds);
   let hasAny = false;
   kinds.forEach((k) => {
     const n = Math.max(0, Math.floor(Number(hand[k]) || 0));
