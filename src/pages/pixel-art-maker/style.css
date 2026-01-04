@@ -877,6 +877,17 @@ input[type='color'] {
   white-space: nowrap;
 }
 
+/* 「書く」(ペン)はアイコン優先で、文字を小さめに */
+#toolPen {
+  gap: 4px;
+  min-width: 46px;
+  min-height: 46px;
+}
+
+#toolPen span {
+  font-size: 0.64rem;
+}
+
 .tool-icon:active {
   transform: translateY(1px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
@@ -938,6 +949,48 @@ input[type='color'] {
   border: 1px solid rgba(0, 0, 0, 0.18);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
   background: #333333;
+}
+
+/* ツールボックス常設パレット（最近8 + 基本24） */
+.toolbar-palette {
+  --pm-swatch: 22px;
+  display: grid;
+  grid-template-columns: repeat(8, var(--pm-swatch));
+  gap: 6px;
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.toolbar-swatch {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  width: var(--pm-swatch);
+  height: var(--pm-swatch);
+  padding: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.toolbar-swatch.selected {
+  outline: 3px solid rgba(108, 92, 231, 0.45);
+  outline-offset: 2px;
+}
+
+.toolbar-swatch:focus-visible {
+  outline: 3px solid rgba(108, 92, 231, 0.6);
+  outline-offset: 2px;
+}
+
+.toolbar-swatch.empty {
+  opacity: 0.55;
+  background-color: #ffffff;
+  background-size: 10px 10px;
+  background-position: 0 0;
+  background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.04) 75%);
 }
 
 .color-popover {
@@ -1151,6 +1204,27 @@ input[type='color'] {
 
   .editor-toolbar .tool-icon span {
     font-size: 0.78rem;
+  }
+
+  .editor-toolbar #toolPen span {
+    font-size: 0.72rem;
+  }
+
+  .editor-toolbar #toolPen {
+    min-width: 90px; /* desktop の他ボタンと揃える */
+    min-height: 52px;
+  }
+
+  .editor-toolbar .toolbar-palette {
+    width: 100%;
+    grid-template-columns: repeat(8, 1fr);
+    --pm-swatch: auto;
+  }
+
+  .editor-toolbar .toolbar-swatch {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
   }
 
   .frame-side {
