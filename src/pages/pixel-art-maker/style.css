@@ -1261,6 +1261,11 @@ input[type='color'] {
   #toolbarMenuBtn {
     display: none;
   }
+
+  /* Desktop: frames are always visible, so hide the modal trigger */
+  #framesBtn {
+    display: none;
+  }
 }
 
 .btn-primary-solid {
@@ -1466,6 +1471,77 @@ input[type='color'] {
   .tool-icon {
     min-width: 50px;
     min-height: 50px;
+  }
+}
+
+/* Mobile editor layout: canvas-first, tools on top/bottom */
+@media (max-width: 959px) {
+  body.pm-editor-mobile {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* Keep the editor header on top (inside the app container) */
+  #editorHeadbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  /* Canvas should fill the remaining space */
+  .editor-layout {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  .canvas-panel {
+    flex: 1;
+    min-height: 0;
+    /* avoid being covered by bottom toolbar */
+    padding-bottom: calc(var(--pm-editor-toolbar-h, 0px) + 14px);
+  }
+
+  .canvas-scroll {
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+
+  /* Bottom toolbar: fixed to viewport bottom for phone ergonomics */
+  .editor-left {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    padding: 0 12px;
+    pointer-events: none;
+  }
+
+  .editor-left .editor-toolbar {
+    pointer-events: auto;
+  }
+
+  /* When fixed, sticky isn't needed */
+  .editor-toolbar {
+    position: relative;
+    bottom: auto;
+  }
+
+  /* Hide side frames on mobile (open via modal) */
+  .editor-right {
+    display: none;
+  }
+
+  /* Make the frames modal content behave nicely */
+  .pm-frames-modal .frame-side {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: none;
+    box-shadow: none;
   }
 }
 

@@ -205,6 +205,12 @@
                   </button>
                 </div>
 
+                <div class="toolbar-group" aria-label="フレーム">
+                  <button class="tool-icon" id="framesBtn" type="button" aria-label="フレームを開く">
+                    <i class="fa-solid fa-layer-group"></i><span>フレーム</span>
+                  </button>
+                </div>
+
                 <div class="toolbar-group" aria-label="保存など">
                   <button class="tool-icon" id="newBtn" type="button" aria-label="新規">
                     <i class="fa-solid fa-file-circle-plus"></i><span>新規</span>
@@ -348,6 +354,19 @@
           </div>
 
           <div class="assets-list" id="sampleList" aria-label="サンプル一覧"></div>
+        </div>
+      </div>
+
+      <div class="modal-backdrop" id="framesModal" hidden>
+        <div class="card modal pm-frames-modal" role="dialog" aria-label="フレーム">
+          <div class="modal-head">
+            <div>
+              <div class="section-title">フレーム</div>
+              <div class="tiny-note">コマを切り替えてアニメ素材を作れます</div>
+            </div>
+            <button class="btn-sub" id="framesCloseBtn" type="button">× 閉じる</button>
+          </div>
+          <div id="framesModalBody"></div>
         </div>
       </div>
     </main>
