@@ -710,12 +710,13 @@ const MONSTER_KIND = {
   SLIME: 'slime'
 };
 
-/** @type {Record<string, {name: string, speed: number, contactDamage: number, spriteSampleId: string, w: number, h: number}>} */
+/** @type {Record<string, {name: string, speed: number, contactDamage: number, maxHp: number, spriteSampleId: string, w: number, h: number}>} */
 const MONSTER_DEF = {
   [MONSTER_KIND.SLIME]: {
     name: 'スライム',
     speed: 56,
     contactDamage: 1,
+    maxHp: 3,
     spriteSampleId: 'slime_mini_16',
     w: 14,
     h: 12
@@ -933,7 +934,7 @@ function resetSave() {
  *  particles: Array<{x:number,y:number,vx:number,vy:number,lifeMs:number,maxLifeMs:number,size:number,color:string}>,
  *  shakeMs: number,
  *  shakePower: number,
- *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number}>,
+ *  monsters: Array<{id:number, kind:string, x:number,y:number,vx:number,vy:number,w:number,h:number,onGround:boolean, dir:number, thinkMs:number, hp:number, hurtMs:number}>,
  *  animMs: number,
  *  lastSaveAt: number
  * }} */
@@ -964,6 +965,7 @@ const state = {
   monsters: [],
   monsterSpawnMs: 0,
   lavaTickMs: 0,
+  attackCooldownMs: 0,
   animMs: 0,
   lastSaveAt: 0
 };
@@ -1013,7 +1015,9 @@ function trySpawnOneMonsterNearPlayer() {
     h: def.h,
     onGround: false,
     dir: Math.random() < 0.5 ? -1 : 1,
-    thinkMs: 150 + Math.floor(Math.random() * 450)
+    thinkMs: 150 + Math.floor(Math.random() * 450),
+    hp: def.maxHp,
+    hurtMs: 0
   });
   return true;
 }
@@ -1054,7 +1058,9 @@ function spawnMonsters(world, seedStr) {
       h: def.h,
       onGround: false,
       dir: rand() < 0.5 ? -1 : 1,
-      thinkMs: 150 + Math.floor(rand() * 450)
+      thinkMs: 150 + Math.floor(rand() * 450),
+      hp: def.maxHp,
+      hurtMs: 0
     });
   }
   state.monsters = out;
@@ -1465,6 +1471,16 @@ function sfxPickup() {
   playTone({ type: 'triangle', freq: 860, sweepTo: 1240, dur: 0.07, vol: 0.08 });
 }
 
+function sfxHit() {
+  playNoise({ dur: 0.05, vol: 0.12, hp: 900, lp: 9000 });
+  playTone({ type: 'square', freq: 520, sweepTo: 320, dur: 0.06, vol: 0.06 });
+}
+
+function sfxDefeat() {
+  playNoise({ dur: 0.09, vol: 0.14, hp: 600, lp: 8000 });
+  playTone({ type: 'sawtooth', freq: 320, sweepTo: 140, dur: 0.1, vol: 0.07 });
+}
+
 function tryUsePotion() {
   const items = state.items || makeDefaultItems();
   const n = Math.max(0, Math.floor(items[ITEM.POTION] || 0));
@@ -1474,6 +1490,59 @@ function tryUsePotion() {
   healPlayer(2);
   updateLootUi();
   sfxPickup();
+  return true;
+}
+
+function canMeleeHitMonsterAt(wx, wy) {
+  const dx = wx - state.player.x;
+  const dy = wy - state.player.y;
+  return dx * dx + dy * dy <= (TILE_SIZE * 4.2) * (TILE_SIZE * 4.2);
+}
+
+function pickMonsterAtWorld(wx, wy) {
+  for (let i = state.monsters.length - 1; i >= 0; i--) {
+    const m = state.monsters[i];
+    if (aabbOverlap(m.x, m.y, m.w, m.h, wx, wy, 2, 2)) return m;
+  }
+  return null;
+}
+
+function maybeDropItemsFromMonster(kind, wx, wy) {
+  const r = Math.random();
+  if (r < 0.55) giveItem(ITEM.COIN, 1, TILE.STONE, wx, wy);
+  else if (r < 0.7) giveItem(ITEM.POTION, 1, TILE.GRASS_BLOCK, wx, wy);
+  else if (r < 0.78) giveItem(ITEM.GEM, 1, TILE.ICE, wx, wy);
+}
+
+function attackMonsterAtWorld(wx, wy) {
+  if ((state.attackCooldownMs || 0) > 0) return false;
+  const m = pickMonsterAtWorld(wx, wy);
+  if (!m) return false;
+  if (!canMeleeHitMonsterAt(m.x, m.y)) return false;
+  const def = MONSTER_DEF[m.kind] || MONSTER_DEF[MONSTER_KIND.SLIME];
+
+  state.attackCooldownMs = 180;
+  m.hp = Math.max(0, Math.floor(m.hp || def.maxHp || 1));
+  m.hurtMs = 120;
+  m.hp = Math.max(0, m.hp - 1);
+
+  // knockback
+  const dir = state.player.x < m.x ? 1 : -1;
+  m.vx += dir * 140;
+  m.vy = Math.min(m.vy, -190);
+
+  sfxHit();
+  addShake(0.6, 90);
+  spawnDustAtWorld(m.x, m.y, TILE.DIRT, 0.25);
+
+  if (m.hp <= 0) {
+    const idx = state.monsters.indexOf(m);
+    if (idx >= 0) state.monsters.splice(idx, 1);
+    sfxDefeat();
+    addShake(1.0, 120);
+    spawnDustAtWorld(m.x, m.y, TILE.WOOD, 0.5);
+    maybeDropItemsFromMonster(m.kind, m.x, m.y);
+  }
   return true;
 }
 
@@ -1524,6 +1593,7 @@ function tickMonsters(dtMs) {
     const def = MONSTER_DEF[m.kind];
     if (!def) continue;
     m.onGround = false;
+    m.hurtMs = Math.max(0, (m.hurtMs || 0) - dtMs);
 
     updateMonsterAi(m, dtMs);
 
@@ -1683,6 +1753,7 @@ function tick(dtMs) {
   state.damageFlashMs = Math.max(0, (state.damageFlashMs || 0) - dtMs);
   state.shakeMs = Math.max(0, (state.shakeMs || 0) - dtMs);
   if (state.shakeMs <= 0) state.shakePower = 0;
+  state.attackCooldownMs = Math.max(0, (state.attackCooldownMs || 0) - dtMs);
 
   // autosave (not every frame)
   const now = performance.now();
@@ -1765,10 +1836,12 @@ function draw() {
     const m = state.monsters[i];
     const anim = monsterSprites.get(m.kind);
     const spr = anim ? pickAnimFrame(anim.frames, anim.durationsMs, state.animMs) : null;
+    const def = MONSTER_DEF[m.kind] || MONSTER_DEF[MONSTER_KIND.SLIME];
     if (spr) {
       const mw = spr.width || 0;
       const mh = spr.height || 0;
       ctx.save();
+      if ((m.hurtMs || 0) > 0) ctx.globalAlpha = 0.6;
       if (m.dir < 0) {
         ctx.translate(Math.round(m.x), Math.round(m.y));
         ctx.scale(-1, 1);
@@ -1781,6 +1854,20 @@ function draw() {
       ctx.fillStyle = 'rgba(255,0,255,0.85)';
       ctx.fillRect(Math.round(m.x - m.w / 2), Math.round(m.y - m.h / 2), m.w, m.h);
     }
+
+    // HPバー（小さく）
+    const maxHp = Math.max(1, Math.floor(def?.maxHp || 1));
+    const hp = Math.max(0, Math.min(maxHp, Math.floor(m.hp ?? maxHp)));
+    const barW = 18;
+    const barH = 3;
+    const bx = Math.round(m.x - barW / 2);
+    const by = Math.round(m.y - (spr?.height || m.h) / 2 - 6);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(bx, by, barW, barH);
+    ctx.fillStyle = hp <= 1 ? 'rgba(255, 90, 90, 0.95)' : 'rgba(255, 230, 120, 0.95)';
+    ctx.fillRect(bx, by, Math.round((barW * hp) / maxHp), barH);
+    ctx.restore();
   }
 
   // mining highlight
@@ -1982,6 +2069,10 @@ function bindCanvasPointer() {
       tryPlace(state.pointer.worldTx, state.pointer.worldTy);
       return;
     }
+
+    // 先に「叩く」を判定（モンスターを倒せるようにする）
+    const wp = screenToWorldPixel(e.clientX, e.clientY);
+    if (attackMonsterAtWorld(wp.wx, wp.wy)) return;
 
     if (state.mode === 'place') {
       tryPlace(state.pointer.worldTx, state.pointer.worldTy);
