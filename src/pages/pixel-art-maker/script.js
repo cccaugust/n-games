@@ -147,6 +147,11 @@ const toolbarMenuBtn = document.getElementById('toolbarMenuBtn');
 const toolbarMore = document.getElementById('toolbarMore');
 const framesBtn = document.getElementById('framesBtn');
 
+// Mobile color toggle accordion
+const colorToggleBtn = document.getElementById('colorToggleBtn');
+const colorToggleSwatch = document.getElementById('colorToggleSwatch');
+const paletteAccordion = document.getElementById('paletteAccordion');
+
 // Frames modal (mobile)
 const framesModal = document.getElementById('framesModal');
 const framesCloseBtn = document.getElementById('framesCloseBtn');
@@ -1060,7 +1065,16 @@ function updateColorDot() {
   colorDot.style.background = String(colorInput.value || '#333333');
 }
 
-function setColorHex(hex, { addRecent = true } = {}) {
+/** Close the mobile color palette accordion */
+function closePaletteAccordion() {
+  if (paletteAccordion && colorToggleBtn) {
+    paletteAccordion.classList.remove('expanded');
+    colorToggleBtn.classList.remove('expanded');
+    colorToggleBtn.setAttribute('aria-expanded', 'false');
+  }
+}
+
+function setColorHex(hex, { addRecent = true, closeAccordion = true } = {}) {
   if (!hex) return;
   const safe = normalizeHex(hex);
   const currentValue = String(colorInput.value || '').toLowerCase();
@@ -1071,6 +1085,14 @@ function setColorHex(hex, { addRecent = true } = {}) {
   updatePaletteSelection();
   updateToolbarPaletteSelection();
   updateColorDot();
+  // Update mobile color toggle swatch
+  if (colorToggleSwatch) {
+    colorToggleSwatch.style.background = safe;
+  }
+  // Close mobile accordion when color is selected (only if closeAccordion is true)
+  if (closeAccordion && window.innerWidth < 960) {
+    closePaletteAccordion();
+  }
   if (addRecent) {
     // 最近使った色に追加
     addRecentColor(safe);
@@ -2305,11 +2327,11 @@ gridToggle.addEventListener('change', () => {
   canvasFrame.classList.toggle('grid', gridToggle.checked);
 });
 
-// フルカラー: inputはプレビューのみ（最近色には追加しない）
+// フルカラー: inputはプレビューのみ（最近色には追加しない、アコーディオンも閉じない）
 colorInput.addEventListener('input', (e) => {
   const newValue = String(e.target.value || '').trim();
   if (newValue) {
-    setColorHex(newValue, { addRecent: false });
+    setColorHex(newValue, { addRecent: false, closeAccordion: false });
   }
 });
 // フルカラー: 確定時に最近色へ追加
@@ -3239,6 +3261,23 @@ canvas.addEventListener('pointerleave', () => {
       setToolbarMoreOpen(next);
     });
   }
+
+  // Mobile color toggle accordion
+  if (colorToggleBtn && paletteAccordion) {
+    colorToggleBtn.addEventListener('click', () => {
+      const isExpanded = paletteAccordion.classList.contains('expanded');
+      if (isExpanded) {
+        paletteAccordion.classList.remove('expanded');
+        colorToggleBtn.classList.remove('expanded');
+        colorToggleBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        paletteAccordion.classList.add('expanded');
+        colorToggleBtn.classList.add('expanded');
+        colorToggleBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
   window.addEventListener('resize', () => {
     // keep simple; this only controls open/close, not layout itself
     syncToolbarMoreForViewport();
@@ -3246,6 +3285,8 @@ canvas.addEventListener('pointerleave', () => {
     syncEditorChromeVars();
     syncEditorMobileClass();
     if (!isMobileEditorLayout() && framesModal && !framesModal.hidden) closeFramesModal();
+    // Close palette accordion when switching to desktop
+    if (!isMobileEditorLayout()) closePaletteAccordion();
   });
 
   // Safety: make sure modal is closed on first paint (and also after bfcache restores).

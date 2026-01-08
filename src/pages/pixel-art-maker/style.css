@@ -1625,6 +1625,14 @@ input[type='color'] {
   }
 }
 
+/* ===== Mobile compact topbar (editor view) ===== */
+@media (max-width: 959px) {
+  /* Hide topbar when in editor mode */
+  body.pm-editor-mobile .topbar {
+    display: none;
+  }
+}
+
 /* Mobile editor layout: canvas-first, tools on top/bottom */
 @media (max-width: 959px) {
   body.pm-editor-mobile {
@@ -1773,6 +1781,13 @@ input[type='color'] {
   .editor-toolbar {
     position: relative;
     bottom: auto;
+  }
+
+  /* Toolbar row modifications for accordion */
+  .editor-toolbar .toolbar-row.toolbar-primary {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    overflow-y: visible;
   }
 
   /* Hide side frames on mobile (open via modal) */
@@ -2035,6 +2050,119 @@ input[type='color'] {
   /* Hide hint on mobile to save space */
   .anim-preview-area + #frameHint {
     display: none;
+  }
+}
+
+/* ===========================================
+   Mobile Color Picker Accordion
+   =========================================== */
+
+/* Color toggle button - shows current color, always visible on mobile */
+.pm-color-toggle {
+  display: none; /* Hidden on desktop */
+  appearance: none;
+  border: 2px solid var(--pm-border);
+  background: #ffffff;
+  border-radius: 14px;
+  min-height: 52px;
+  min-width: 52px;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.pm-color-toggle:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.pm-color-toggle.expanded {
+  border-color: rgba(108, 92, 231, 0.5);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+.pm-color-toggle-swatch {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.pm-color-toggle-icon {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.pm-color-toggle.expanded .pm-color-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Palette wrapper for accordion */
+.pm-palette-accordion {
+  display: contents; /* On desktop, behave as if not wrapped */
+}
+
+@media (max-width: 959px) {
+  /* Show color toggle button on mobile */
+  .pm-color-toggle {
+    display: block;
+  }
+
+  /* Color toolbar group needs special handling for accordion */
+  .toolbar-group[aria-label="色"] {
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Palette accordion wrapper */
+  .pm-palette-accordion {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    width: 100%;
+  }
+
+  .pm-palette-accordion.expanded {
+    max-height: 500px;
+    overflow: visible;
+  }
+
+  /* Palette styling when inside accordion */
+  .pm-palette-accordion .toolbar-palette {
+    padding: 12px 0 8px 0;
+    margin-top: 0;
+    border-top: none;
+  }
+
+  .pm-palette-accordion .pm-color-actions {
+    display: flex;
+    gap: 8px;
+    padding: 8px 0;
+    margin-top: 0;
+    flex-wrap: wrap;
+  }
+
+  .pm-palette-accordion .pm-color-actions .tool-icon {
+    min-width: 50px;
+    min-height: 50px;
+    flex: 1;
   }
 }
 
