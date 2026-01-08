@@ -108,21 +108,30 @@
                 </div>
 
                 <div class="toolbar-group" aria-label="色">
-                  <div class="toolbar-palette" id="toolbarPalette" aria-label="色パレット（64色）"></div>
+                  <!-- Mobile color toggle button -->
+                  <button class="pm-color-toggle" id="colorToggleBtn" type="button" aria-label="色を選ぶ" aria-expanded="false">
+                    <div class="pm-color-toggle-swatch" id="colorToggleSwatch" style="background: #333333;"></div>
+                    <span class="pm-color-toggle-icon"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                  </button>
 
-                  <div class="pm-color-actions" aria-label="色の操作">
-                    <button class="tool-icon" id="pickColorBtn" type="button" aria-label="スポイト（画面から色を取る）" title="スポイト">
-                      <i class="fa-solid fa-eye-dropper" aria-hidden="true"></i>
-                      <span>スポイト</span>
-                    </button>
+                  <!-- Palette accordion wrapper (collapsible on mobile) -->
+                  <div class="pm-palette-accordion" id="paletteAccordion">
+                    <div class="toolbar-palette" id="toolbarPalette" aria-label="色パレット（64色）"></div>
 
-                    <button class="tool-icon" id="colorBtn" type="button" aria-label="フルカラー" title="フルカラー">
-                      <i class="fa-solid fa-palette" aria-hidden="true"></i>
-                      <span>フルカラー</span>
-                    </button>
+                    <div class="pm-color-actions" aria-label="色の操作">
+                      <button class="tool-icon" id="pickColorBtn" type="button" aria-label="スポイト（画面から色を取る）" title="スポイト">
+                        <i class="fa-solid fa-eye-dropper" aria-hidden="true"></i>
+                        <span>スポイト</span>
+                      </button>
 
-                    <!-- フルカラー（ネイティブカラーピッカー）。ボタン押下で直接開く -->
-                    <input id="colorInput" class="pm-fullcolor-input" type="color" value="#333333" aria-label="フルカラー（色をえらぶ）" />
+                      <button class="tool-icon" id="colorBtn" type="button" aria-label="フルカラー" title="フルカラー">
+                        <i class="fa-solid fa-palette" aria-hidden="true"></i>
+                        <span>フルカラー</span>
+                      </button>
+
+                      <!-- フルカラー（ネイティブカラーピッカー）。ボタン押下で直接開く -->
+                      <input id="colorInput" class="pm-fullcolor-input" type="color" value="#333333" aria-label="フルカラー（色をえらぶ）" />
+                    </div>
                   </div>
 
                   <!-- 既存のキャンバススポイト（ショートカット/内部状態用） -->
