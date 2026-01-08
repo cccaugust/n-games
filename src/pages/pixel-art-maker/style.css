@@ -1792,3 +1792,200 @@ input[type='color'] {
   }
 }
 
+/* ===========================================
+   Animation Preview Area
+   =========================================== */
+.anim-preview-area {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #e8f4fc 0%, #d4edfc 100%);
+  border: 2px solid rgba(108, 92, 231, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.anim-preview-stage {
+  position: relative;
+  height: 80px;
+  border-radius: 12px;
+  background: linear-gradient(180deg,
+    #87ceeb 0%,    /* sky */
+    #b0e0f6 60%,   /* horizon */
+    #98d977 60%,   /* grass top */
+    #7bc95d 100%   /* grass bottom */
+  );
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.anim-preview-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #7bc95d 0px,
+      #7bc95d 8px,
+      #6ab84a 8px,
+      #6ab84a 16px
+    );
+  border-top: 2px dashed rgba(255, 255, 255, 0.4);
+}
+
+.anim-preview-ground::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 10%;
+  width: 6px;
+  height: 10px;
+  background: #5a9e3a;
+  border-radius: 50% 50% 0 0;
+  box-shadow:
+    20px 2px 0 #5a9e3a,
+    45px -1px 0 #5a9e3a,
+    70px 1px 0 #5a9e3a,
+    95px 0px 0 #5a9e3a;
+}
+
+.anim-preview-canvas {
+  position: relative;
+  z-index: 2;
+  image-rendering: pixelated;
+  margin-bottom: 26px;
+  filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.2));
+  transition: transform 0.08s ease;
+}
+
+.anim-preview-canvas.bounce {
+  animation: anim-bounce 0.3s ease-out;
+}
+
+@keyframes anim-bounce {
+  0% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+  50% { transform: translateY(-6px); }
+  70% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+
+.anim-preview-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+}
+
+.anim-preview-btn {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(108, 92, 231, 0.3);
+  background: linear-gradient(145deg, #fff 0%, #f0f0ff 100%);
+  color: var(--primary-color);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(108, 92, 231, 0.2);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.anim-preview-btn:hover {
+  background: linear-gradient(145deg, #f0f0ff 0%, #e8e8ff 100%);
+}
+
+.anim-preview-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 rgba(108, 92, 231, 0.2);
+}
+
+.anim-preview-btn.playing {
+  background: linear-gradient(145deg, #6c5ce7 0%, #5b4cdb 100%);
+  color: white;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.anim-speed-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.anim-speed-label {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.anim-speed-control input[type="range"] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(108, 92, 231, 0.15);
+  accent-color: var(--primary-color);
+  min-width: 60px;
+}
+
+.anim-speed-value {
+  font-size: 0.75rem;
+  font-weight: 900;
+  color: var(--primary-color);
+  min-width: 50px;
+  text-align: right;
+}
+
+/* Desktop: Animation preview in sidebar */
+@media (min-width: 960px) {
+  .anim-preview-area {
+    margin-top: auto;
+    padding: 12px;
+  }
+
+  .anim-preview-stage {
+    height: 100px;
+  }
+
+  .anim-preview-canvas {
+    margin-bottom: 28px;
+  }
+}
+
+/* Mobile: Compact animation preview */
+@media (max-width: 959px) {
+  .anim-preview-area {
+    margin-top: 10px;
+    padding: 8px;
+  }
+
+  .anim-preview-stage {
+    height: 70px;
+  }
+
+  .anim-preview-canvas {
+    margin-bottom: 22px;
+  }
+
+  .anim-preview-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .anim-speed-value {
+    font-size: 0.7rem;
+    min-width: 44px;
+  }
+}
+
