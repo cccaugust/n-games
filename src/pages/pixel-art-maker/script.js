@@ -92,6 +92,15 @@ const frameAddBtn = document.getElementById('frameAddBtn');
 const frameDuplicateBtn = document.getElementById('frameDuplicateBtn');
 const frameDeleteBtn = document.getElementById('frameDeleteBtn');
 
+// Animation Preview UI
+const animPreviewArea = document.getElementById('animPreviewArea');
+const animPreviewCanvas = document.getElementById('animPreviewCanvas');
+const animPreviewCtx = animPreviewCanvas?.getContext('2d');
+const animPlayBtn = document.getElementById('animPlayBtn');
+const animPlayIcon = document.getElementById('animPlayIcon');
+const animSpeedRange = document.getElementById('animSpeedRange');
+const animSpeedValue = document.getElementById('animSpeedValue');
+
 const toolPen = document.getElementById('toolPen');
 const toolEraser = document.getElementById('toolEraser');
 const toolFill = document.getElementById('toolFill');
@@ -207,6 +216,12 @@ let lastPaintedIndex = -1;
 let renderScheduled = false;
 let huePreviewDeg = 0;
 let frameThumbTimer = null;
+
+// Animation preview state
+let animPlaying = false;
+let animTimerId = null;
+let animFrameIndex = 0;
+let animFps = 8;
 
 const pickAvatarMode = new URLSearchParams(window.location.search).get('pickAvatar') === '1';
 // UIから「アイコン」ボタンは削除（将来復活する場合に備えてロジックは残す）
@@ -1187,6 +1202,10 @@ function updateActiveFrameThumb() {
   } catch {
     // ignore
   }
+  // Also update animation preview (only when not playing)
+  if (!animPlaying) {
+    updateAnimPreview();
+  }
 }
 
 function hasSelection() {
@@ -1508,6 +1527,145 @@ function updateFrameUi() {
 
     frameList.appendChild(btn);
   });
+
+  // Update animation preview (show current frame when not playing)
+  updateAnimPreview();
+}
+
+// =============================================
+// Animation Preview
+// =============================================
+function updateAnimPreview() {
+  if (!animPreviewCanvas || !animPreviewCtx || !currentAsset) return;
+
+  const frames = currentAsset.frames || [];
+  if (frames.length === 0) return;
+
+  // Use current animation frame if playing, otherwise show the editing frame
+  const frameIdx = animPlaying
+    ? Math.min(animFrameIndex, frames.length - 1)
+    : Math.min(currentFrameIndex, frames.length - 1);
+  const frame = frames[frameIdx];
+  if (!frame?.pixels) return;
+
+  const w = frame.width ?? currentAsset.width;
+  const h = frame.height ?? currentAsset.height;
+
+  // Calculate preview size (fit in stage, max 64px for cute small look)
+  const maxSize = 56;
+  const scale = Math.max(1, Math.floor(maxSize / Math.max(w, h)));
+  const drawW = w * scale;
+  const drawH = h * scale;
+
+  animPreviewCanvas.width = drawW;
+  animPreviewCanvas.height = drawH;
+  animPreviewCanvas.style.width = `${drawW}px`;
+  animPreviewCanvas.style.height = `${drawH}px`;
+
+  // Draw pixels
+  animPreviewCtx.clearRect(0, 0, drawW, drawH);
+  const imageData = pixelsToImageData(frame.pixels, w, h);
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.putImageData(imageData, 0, 0);
+
+  animPreviewCtx.imageSmoothingEnabled = false;
+  animPreviewCtx.drawImage(tempCanvas, 0, 0, drawW, drawH);
+}
+
+function startAnimPreview() {
+  if (!currentAsset || animPlaying) return;
+
+  const frames = currentAsset.frames || [];
+  if (frames.length <= 1) {
+    // Single frame: just show it bouncing once
+    if (animPreviewCanvas) {
+      animPreviewCanvas.classList.add('bounce');
+      setTimeout(() => animPreviewCanvas.classList.remove('bounce'), 300);
+    }
+    return;
+  }
+
+  animPlaying = true;
+  animFrameIndex = 0;
+
+  if (animPlayBtn) animPlayBtn.classList.add('playing');
+  if (animPlayIcon) {
+    animPlayIcon.classList.remove('fa-play');
+    animPlayIcon.classList.add('fa-pause');
+  }
+
+  function tick() {
+    if (!animPlaying || !currentAsset) return;
+
+    const frames = currentAsset.frames || [];
+    if (frames.length === 0) {
+      stopAnimPreview();
+      return;
+    }
+
+    // Bounce effect on frame change
+    if (animPreviewCanvas) {
+      animPreviewCanvas.classList.remove('bounce');
+      // Force reflow for animation restart
+      void animPreviewCanvas.offsetWidth;
+      animPreviewCanvas.classList.add('bounce');
+    }
+
+    updateAnimPreview();
+
+    animFrameIndex = (animFrameIndex + 1) % frames.length;
+    animTimerId = setTimeout(tick, 1000 / animFps);
+  }
+
+  tick();
+}
+
+function stopAnimPreview() {
+  animPlaying = false;
+  if (animTimerId != null) {
+    clearTimeout(animTimerId);
+    animTimerId = null;
+  }
+
+  if (animPlayBtn) animPlayBtn.classList.remove('playing');
+  if (animPlayIcon) {
+    animPlayIcon.classList.remove('fa-pause');
+    animPlayIcon.classList.add('fa-play');
+  }
+
+  // Show current editing frame
+  updateAnimPreview();
+}
+
+function toggleAnimPreview() {
+  if (animPlaying) {
+    stopAnimPreview();
+  } else {
+    startAnimPreview();
+  }
+}
+
+function setAnimSpeed(fps) {
+  animFps = Math.max(1, Math.min(20, fps));
+  if (animSpeedValue) {
+    animSpeedValue.textContent = `${animFps} FPS`;
+  }
+}
+
+// Animation preview event listeners
+if (animPlayBtn) {
+  animPlayBtn.addEventListener('click', toggleAnimPreview);
+}
+
+if (animSpeedRange) {
+  animSpeedRange.addEventListener('input', (e) => {
+    setAnimSpeed(Number(e.target.value));
+  });
+  // Initialize
+  setAnimSpeed(Number(animSpeedRange.value));
 }
 
 function snapshotCurrentFrame() {
@@ -1594,6 +1752,9 @@ function deleteCurrentFrame() {
 }
 
 function setAsset(asset, { persisted }) {
+  // Stop any running animation preview
+  stopAnimPreview();
+
   currentAsset = asset;
   isPersisted = Boolean(persisted);
   setDirty(false);
@@ -2378,6 +2539,7 @@ if (rangePasteBtn) {
 
 backToGalleryBtn.addEventListener('click', async () => {
   if (dirty && !confirm('いまの変更は保存されていません。ギャラリーに戻りますか？')) return;
+  stopAnimPreview(); // Stop animation when leaving editor
   setView('gallery');
   await refreshGalleryList();
 });
