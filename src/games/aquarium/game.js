@@ -701,6 +701,7 @@ class AquariumScene extends Phaser.Scene {
 
   create() {
     this.makeBubbleTexture();
+    this.makeFoodTexture();
     this.spawnBubbles();
 
     // Subtle light beams
@@ -729,6 +730,27 @@ class AquariumScene extends Phaser.Scene {
       }
     });
 
+    // 水槽クリック/タップで餌を落とす
+    this.input.on('pointerdown', (pointer) => {
+      // 魚をタップした場合は餌を落とさない（魚のモーダルが開く）
+      const hitFish = this.fishMap.size > 0 && Array.from(this.fishMap.values()).some((st) => {
+        const sprite = st.sprite;
+        if (!sprite) return false;
+        const dist = Math.hypot(pointer.x - sprite.x, pointer.y - sprite.y);
+        const hitRadius = Math.max(sprite.displayWidth, sprite.displayHeight) * 0.5;
+        return dist < hitRadius;
+      });
+      if (hitFish) return;
+
+      // 餌を複数落とす（2〜4個をばらまく）
+      const count = 2 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < count; i++) {
+        const offsetX = (Math.random() - 0.5) * 40;
+        const offsetY = (Math.random() - 0.5) * 20;
+        this.spawnFood(pointer.x + offsetX, pointer.y + offsetY);
+      }
+    });
+
     // シーンが初期化されたので、外部の scene 変数を設定
     scene = this;
     this.setEmptyHintVisible(fishes.length === 0);
@@ -753,6 +775,60 @@ class AquariumScene extends Phaser.Scene {
     ctx.arc(12, 12, 8, 0, Math.PI * 2);
     ctx.stroke();
     this.textures.addCanvas('aq_bubble', c);
+  }
+
+  makeFoodTexture() {
+    if (this.textures.exists('aq_food')) return;
+    const c = document.createElement('canvas');
+    c.width = 16;
+    c.height = 16;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 16, 16);
+    // 餌粒（オレンジ〜茶色の小さな粒）
+    const gradient = ctx.createRadialGradient(8, 8, 0, 8, 8, 6);
+    gradient.addColorStop(0, '#fbbf24');
+    gradient.addColorStop(0.6, '#f59e0b');
+    gradient.addColorStop(1, '#b45309');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(8, 8, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // ハイライト
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath();
+    ctx.arc(6, 6, 2, 0, Math.PI * 2);
+    ctx.fill();
+    this.textures.addCanvas('aq_food', c);
+  }
+
+  spawnFood(x, y) {
+    if (foods.length >= MAX_FOODS) {
+      // 古い餌を削除
+      const old = foods.shift();
+      if (old?.sprite) old.sprite.destroy();
+    }
+    const food = {
+      id: createId('food'),
+      x: x,
+      y: y,
+      vy: FOOD_SINK_SPEED,
+      sprite: null
+    };
+    const sprite = this.add.image(x, y, 'aq_food');
+    sprite.setOrigin(0.5, 0.5);
+    sprite.setScale(0.8 + Math.random() * 0.4);
+    sprite.setAlpha(0.95);
+    sprite.setDepth(5);
+    food.sprite = sprite;
+    foods.push(food);
+  }
+
+  removeFood(foodId) {
+    const idx = foods.findIndex((f) => f.id === foodId);
+    if (idx === -1) return;
+    const food = foods[idx];
+    if (food.sprite) food.sprite.destroy();
+    foods.splice(idx, 1);
   }
 
   spawnBubbles() {
@@ -902,6 +978,24 @@ class AquariumScene extends Phaser.Scene {
     const W = this.scale.width;
     const H = this.scale.height;
 
+    // ===== 餌の更新（落下 + 画面外削除） =====
+    const foodsToRemove = [];
+    for (const food of foods) {
+      food.y += food.vy * dt;
+      if (food.sprite) {
+        food.sprite.x = food.x;
+        food.sprite.y = food.y;
+      }
+      // 画面下に到達したら削除
+      if (food.y > H + 20) {
+        foodsToRemove.push(food.id);
+      }
+    }
+    for (const id of foodsToRemove) {
+      this.removeFood(id);
+    }
+
+    // ===== 魚の更新 =====
     this.fishMap.forEach((st) => {
       st.t += dt;
       st.changeIn -= dt;
@@ -912,9 +1006,48 @@ class AquariumScene extends Phaser.Scene {
 
       // Lazy fish sometimes stop
       const isLazyStop = fish.personality === 'lazy' && Math.sin(st.t * 0.9 + (sprite.getData('seed') || 0)) > 0.85;
-      const desiredSpeed = isLazyStop ? speed * 0.2 : speed;
+      let desiredSpeed = isLazyStop ? speed * 0.2 : speed;
 
-      if (st.changeIn <= 0) {
+      // ===== 餌を探す =====
+      let chasingFood = null;
+      let nearestFoodDist = FOOD_DETECT_RADIUS;
+      for (const food of foods) {
+        const fdx = food.x - sprite.x;
+        const fdy = food.y - sprite.y;
+        const fdist = Math.hypot(fdx, fdy);
+        if (fdist < nearestFoodDist) {
+          nearestFoodDist = fdist;
+          chasingFood = food;
+        }
+      }
+
+      // 餌を見つけたらそっちに向かう（ターゲットを上書き）
+      if (chasingFood) {
+        st.targetX = chasingFood.x;
+        st.targetY = chasingFood.y;
+        st.changeIn = 0.3; // 餌を追いかけ中は頻繁にターゲット更新
+        // げんきな魚は餌に向かって速く泳ぐ
+        if (fish.personality === 'energetic') {
+          desiredSpeed = speed * 1.3;
+        } else {
+          desiredSpeed = speed * 1.1;
+        }
+
+        // ===== 餌を食べる判定 =====
+        if (nearestFoodDist < FOOD_EAT_RADIUS) {
+          // 餌を食べた！
+          this.removeFood(chasingFood.id);
+
+          // 成長！
+          const oldSize = fish.size;
+          fish.size = clamp(fish.size + GROWTH_PER_FOOD, 0.4, MAX_FISH_SIZE);
+
+          // 成長したらシーンに反映
+          if (fish.size !== oldSize) {
+            syncToScene(fish);
+          }
+        }
+      } else if (st.changeIn <= 0) {
         const next = this.pickNextTarget(st);
         st.targetX = next.x;
         st.targetY = next.y;
@@ -967,7 +1100,7 @@ class AquariumScene extends Phaser.Scene {
 
       // Deform animation (wobble)
       const wobble = Math.sin(st.t * 4.2 + seed) * 0.06;
-      const s = clamp(Number(fish.size) || 1, 0.4, 3);
+      const s = clamp(Number(fish.size) || 1, 0.4, MAX_FISH_SIZE);
       sprite.setScale(s, s * (1 + wobble));
       sprite.setAngle(wobble * 6);
     });
@@ -995,6 +1128,18 @@ const MAX_FISH = 48;
 
 /** @type {Map<string, any>} */
 let paletteMap = new Map();
+
+// -----------------------
+// 餌システム
+// -----------------------
+/** @type {{id:string, x:number, y:number, vy:number, sprite:Phaser.GameObjects.Image|null}[]} */
+let foods = [];
+const MAX_FOODS = 30;
+const FOOD_SINK_SPEED = 45; // px/s
+const FOOD_EAT_RADIUS = 28; // 魚が餌を食べられる距離
+const FOOD_DETECT_RADIUS = 180; // 魚が餌を感知する距離
+const GROWTH_PER_FOOD = 0.06; // 餌1個で成長するサイズ
+const MAX_FISH_SIZE = 3.5; // 最大サイズ
 
 let toastTimer = null;
 function showToast(text) {
