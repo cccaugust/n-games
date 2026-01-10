@@ -530,10 +530,19 @@ export class Item extends Entity {
     this.tileSize = tileSize;
     this.type = type;
     this.animTimer = 0;
+    // ドロップ直後は爆発で破壊されないように無敵時間を設定
+    this.invincibleTimer = 600; // 600ms (爆発の持続時間500ms + バッファ)
   }
 
   update(dt) {
     this.animTimer += dt;
+    if (this.invincibleTimer > 0) {
+      this.invincibleTimer -= dt;
+    }
+  }
+
+  isInvincible() {
+    return this.invincibleTimer > 0;
   }
 
   draw(ctx, offsetX = 0, offsetY = 0) {

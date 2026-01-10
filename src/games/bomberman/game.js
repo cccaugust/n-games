@@ -695,7 +695,8 @@ function destroyBlock(x, y) {
 
   // Check if exit was hidden here
   if (exitDoor && exitDoor.tileX === x && exitDoor.tileY === y) {
-    // Exit is now visible
+    // Exit is now visible - don't spawn item here
+    return;
   }
 
   // Spawn item
@@ -743,9 +744,9 @@ function checkExplosionCollisions(explosion) {
       }
     }
 
-    // Destroy items
+    // Destroy items (無敵状態のアイテムは破壊しない)
     for (const item of items) {
-      if (item.tileX === cell.x && item.tileY === cell.y) {
+      if (item.tileX === cell.x && item.tileY === cell.y && !item.isInvincible()) {
         item.markedForDeletion = true;
       }
     }
