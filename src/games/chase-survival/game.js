@@ -1315,24 +1315,48 @@ function updatePlayer(delta) {
     playerState.velocity.clone().multiplyScalar(delta)
   );
 
-  // 障害物との衝突判定
-  let canMove = true;
-  for (const obstacle of obstacles) {
-    const dx = newPosition.x - obstacle.position.x;
-    const dz = newPosition.z - obstacle.position.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
+  // 障害物との衝突判定（複数パスで確実に押し戻す）
+  for (let pass = 0; pass < 3; pass++) {
+    for (const obstacle of obstacles) {
+      const dx = newPosition.x - obstacle.position.x;
+      const dz = newPosition.z - obstacle.position.z;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      const minDist = player.radius + obstacle.radius;
 
-    if (dist < player.radius + obstacle.radius) {
-      // 押し戻し
-      const pushDir = new THREE.Vector3(dx, 0, dz).normalize();
-      const pushDist = player.radius + obstacle.radius - dist;
-      newPosition.add(pushDir.multiplyScalar(pushDist));
+      if (dist < minDist && dist > 0.001) {
+        // 押し戻し
+        const pushDir = new THREE.Vector3(dx, 0, dz).normalize();
+        const pushDist = minDist - dist + 0.05;
+        newPosition.add(pushDir.clone().multiplyScalar(pushDist));
+
+        // 衝突方向の速度をキャンセル（壁に向かう速度成分を除去）
+        const velocityDot = playerState.velocity.dot(pushDir);
+        if (velocityDot < 0) {
+          playerState.velocity.sub(pushDir.clone().multiplyScalar(velocityDot));
+        }
+      }
     }
   }
 
-  // フィールド境界
-  newPosition.x = Math.max(-FIELD_SIZE / 2 + 1, Math.min(FIELD_SIZE / 2 - 1, newPosition.x));
-  newPosition.z = Math.max(-FIELD_SIZE / 2 + 1, Math.min(FIELD_SIZE / 2 - 1, newPosition.z));
+  // フィールド境界（壁に当たったら速度をキャンセル）
+  const boundaryMin = -FIELD_SIZE / 2 + 1;
+  const boundaryMax = FIELD_SIZE / 2 - 1;
+
+  if (newPosition.x < boundaryMin) {
+    newPosition.x = boundaryMin;
+    if (playerState.velocity.x < 0) playerState.velocity.x = 0;
+  } else if (newPosition.x > boundaryMax) {
+    newPosition.x = boundaryMax;
+    if (playerState.velocity.x > 0) playerState.velocity.x = 0;
+  }
+
+  if (newPosition.z < boundaryMin) {
+    newPosition.z = boundaryMin;
+    if (playerState.velocity.z < 0) playerState.velocity.z = 0;
+  } else if (newPosition.z > boundaryMax) {
+    newPosition.z = boundaryMax;
+    if (playerState.velocity.z > 0) playerState.velocity.z = 0;
+  }
 
   // 移動距離を記録
   gameState.distance += player.position.distanceTo(newPosition);
