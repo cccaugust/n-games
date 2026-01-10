@@ -41,7 +41,54 @@ export class Renderer {
     // 探索済みマップ
     this.explored = null;
 
+    // 現在のフェーズ（色テーマ用）
+    this.currentPhase = null;
+    this.phaseColors = { ...COLORS };
+
     this.resize();
+  }
+
+  /**
+   * フェーズを設定（色テーマを変更）
+   */
+  setPhase(phase) {
+    this.currentPhase = phase;
+    if (phase) {
+      this.phaseColors = {
+        ...COLORS,
+        wall: phase.wallColor || COLORS.wall,
+        wallLight: this.lightenColor(phase.wallColor || COLORS.wall, 20),
+        floor: phase.floorColor || COLORS.floor,
+        floorLight: this.lightenColor(phase.floorColor || COLORS.floor, 20),
+        corridor: this.darkenColor(phase.floorColor || COLORS.floor, 10),
+        fog: phase.fogColor || COLORS.fog,
+        ambient: phase.ambientColor || 'transparent'
+      };
+    } else {
+      this.phaseColors = { ...COLORS };
+    }
+  }
+
+  /**
+   * 色を明るくする
+   */
+  lightenColor(hex, amount) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.min(255, ((num >> 16) & 0xff) + amount);
+    const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+    const b = Math.min(255, (num & 0xff) + amount);
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  }
+
+  /**
+   * 色を暗くする
+   */
+  darkenColor(hex, amount) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.max(0, ((num >> 16) & 0xff) - amount);
+    const g = Math.max(0, ((num >> 8) & 0xff) - amount);
+    const b = Math.max(0, (num & 0xff) - amount);
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
   }
 
   /**
@@ -77,31 +124,44 @@ export class Renderer {
 
       for (const sample of data.samples) {
         // Base64からピクセルデータを復元
-        const pixels = this.base64ToPixels(sample.pixelsB64 || sample.frames?.[0]?.pixelsB64);
+        // framesがある場合はframes[0].pixelsB64を使用
+        let pixelsB64 = null;
+        if (sample.frames && sample.frames.length > 0 && sample.frames[0].pixelsB64) {
+          pixelsB64 = sample.frames[0].pixelsB64;
+        } else if (sample.pixelsB64) {
+          pixelsB64 = sample.pixelsB64;
+        }
+
+        if (!pixelsB64) continue;
+
+        const pixels = this.base64ToPixels(pixelsB64);
         if (!pixels) continue;
 
-        // ImageDataを作成
-        const imageData = new ImageData(
-          new Uint8ClampedArray(pixels.buffer),
-          sample.width,
-          sample.height
-        );
-
-        // キャンバスに描画してImageBitmapを作成
+        // キャンバスを作成してピクセルデータを描画
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = sample.width;
         tempCanvas.height = sample.height;
         const tempCtx = tempCanvas.getContext('2d');
+
+        // ImageDataを作成（Uint32ArrayからUint8ClampedArrayに変換）
+        const imageData = tempCtx.createImageData(sample.width, sample.height);
+        const uint8 = new Uint8Array(pixels.buffer);
+
+        // samples.jsonは0xAARRGGBB形式（リトルエンディアン）
+        // バイト順: [B, G, R, A] → 必要な順: [R, G, B, A]
+        for (let i = 0; i < uint8.length; i += 4) {
+          imageData.data[i] = uint8[i + 2];     // R
+          imageData.data[i + 1] = uint8[i + 1]; // G
+          imageData.data[i + 2] = uint8[i];     // B
+          imageData.data[i + 3] = uint8[i + 3]; // A
+        }
+
         tempCtx.putImageData(imageData, 0, 0);
-
-        // AABBGGRR → AABBGGRR のまま使えるか確認
-        // samples.jsonは0xAARRGGBB形式なのでRGBA変換が必要
-        this.convertARGBtoRGBA(tempCtx, sample.width, sample.height);
-
         this.sprites[sample.id] = tempCanvas;
       }
 
       this.spritesLoaded = true;
+      console.log('スプライト読み込み完了:', Object.keys(this.sprites).length, '個');
     } catch (e) {
       console.warn('スプライトの読み込みに失敗:', e);
       this.spritesLoaded = true; // 失敗しても続行
@@ -123,32 +183,6 @@ export class Renderer {
     } catch (e) {
       return null;
     }
-  }
-
-  /**
-   * ARGB形式をRGBA形式に変換（キャンバス上で）
-   */
-  convertARGBtoRGBA(ctx, width, height) {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-
-    // samples.jsonは0xAARRGGBB (little-endian)
-    // Canvas ImageDataはRGBA順
-    // little-endianなので bytes[0]=B, [1]=G, [2]=R, [3]=A
-    // → RGBA: [0]=R, [1]=G, [2]=B, [3]=A に変換
-
-    for (let i = 0; i < data.length; i += 4) {
-      const b = data[i];
-      const g = data[i + 1];
-      const r = data[i + 2];
-      const a = data[i + 3];
-      data[i] = r;
-      data[i + 1] = g;
-      data[i + 2] = b;
-      data[i + 3] = a;
-    }
-
-    ctx.putImageData(imageData, 0, 0);
   }
 
   /**
@@ -271,7 +305,7 @@ export class Renderer {
 
         if (isExplored && !isVisible) {
           // 探索済みだが視界外
-          this.ctx.fillStyle = COLORS.explored;
+          this.ctx.fillStyle = this.phaseColors.fog || COLORS.explored;
           this.ctx.fillRect(vx * TILE_SIZE, vy * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
       }
@@ -284,26 +318,27 @@ export class Renderer {
   drawTile(vx, vy, tile, isVisible) {
     const x = vx * TILE_SIZE;
     const y = vy * TILE_SIZE;
+    const colors = this.phaseColors;
 
     let color;
     switch (tile) {
       case TILE.WALL:
-        color = isVisible ? COLORS.wallLight : COLORS.wall;
+        color = isVisible ? colors.wallLight : colors.wall;
         break;
       case TILE.FLOOR:
-        color = isVisible ? COLORS.floorLight : COLORS.floor;
+        color = isVisible ? colors.floorLight : colors.floor;
         break;
       case TILE.CORRIDOR:
-        color = COLORS.corridor;
+        color = colors.corridor;
         break;
       case TILE.STAIRS_DOWN:
-        color = COLORS.stairs;
+        color = colors.stairs || COLORS.stairs;
         break;
       case TILE.TRAP:
-        color = COLORS.floor; // 罠は別途描画
+        color = colors.floor; // 罠は別途描画
         break;
       default:
-        color = COLORS.floor;
+        color = colors.floor;
     }
 
     this.ctx.fillStyle = color;
@@ -323,6 +358,12 @@ export class Renderer {
           this.ctx.fillRect(x + px, y + py, 2, 2);
         }
       }
+    }
+
+    // 環境光（フェーズの雰囲気）
+    if (isVisible && colors.ambient) {
+      this.ctx.fillStyle = colors.ambient;
+      this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
     }
   }
 
