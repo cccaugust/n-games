@@ -41,12 +41,12 @@ export const defaultStages = [
       { x: 3, y: 9, type: 'slime' }
     ],
     itemRates: {
-      bomb_up: 20,
-      fire_up: 20,
-      speed_up: 15,
-      penetrate: 5,
-      kick: 5,
-      life: 5
+      bomb_up: 2.5,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1,
+      kick: 1,
+      life: 1
     }
   },
   {
@@ -77,12 +77,12 @@ export const defaultStages = [
       { x: 11, y: 7, type: 'slime' }
     ],
     itemRates: {
-      bomb_up: 20,
-      fire_up: 20,
-      speed_up: 15,
-      penetrate: 8,
-      kick: 8,
-      life: 5
+      bomb_up: 2.5,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1,
+      kick: 1,
+      life: 1
     }
   },
   {
@@ -115,12 +115,12 @@ export const defaultStages = [
       { x: 9, y: 7, type: 'slime' }
     ],
     itemRates: {
-      bomb_up: 15,
-      fire_up: 20,
-      speed_up: 20,
-      penetrate: 10,
-      kick: 10,
-      life: 8
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2.5,
+      penetrate: 1,
+      kick: 1,
+      life: 1
     }
   },
   {
@@ -155,12 +155,12 @@ export const defaultStages = [
       { x: 8, y: 3, type: 'bat' }
     ],
     itemRates: {
-      bomb_up: 18,
-      fire_up: 22,
-      speed_up: 18,
-      penetrate: 12,
-      kick: 12,
-      life: 6
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1.5,
+      kick: 1,
+      life: 1
     }
   },
   {
@@ -194,12 +194,12 @@ export const defaultStages = [
       { x: 12, y: 7, type: 'bat' }
     ],
     itemRates: {
-      bomb_up: 15,
-      fire_up: 20,
-      speed_up: 25,
-      penetrate: 12,
-      kick: 15,
-      life: 8
+      bomb_up: 2,
+      fire_up: 2,
+      speed_up: 2.5,
+      penetrate: 1.5,
+      kick: 1,
+      life: 1
     }
   },
   {
@@ -235,12 +235,267 @@ export const defaultStages = [
       { x: 15, y: 6, type: 'bat' }
     ],
     itemRates: {
-      bomb_up: 20,
-      fire_up: 25,
-      speed_up: 20,
-      penetrate: 15,
-      kick: 15,
-      life: 10
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1.5,
+      kick: 1,
+      life: 1
+    }
+  },
+  // World 3 - Ice World
+  {
+    id: 'stage_3_1',
+    name: '氷の洞窟',
+    world: 3,
+    level: 1,
+    width: 17,
+    height: 13,
+    timeLimit: 200,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,2,2,0,0,0,0,0,2,2,0,0,0,1],
+      [1,0,1,0,1,2,1,0,1,0,1,2,1,0,1,0,1],
+      [1,0,0,2,2,2,2,0,0,0,2,2,2,2,0,0,1],
+      [1,2,1,2,1,0,1,2,1,2,1,0,1,2,1,2,1],
+      [1,0,2,2,0,0,0,0,0,0,0,0,0,2,2,0,1],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      [1,0,2,2,0,0,0,0,0,0,0,0,0,2,2,0,1],
+      [1,2,1,2,1,0,1,2,1,2,1,0,1,2,1,2,1],
+      [1,0,0,2,2,2,2,0,0,0,2,2,2,2,0,0,1],
+      [1,0,1,0,1,2,1,0,1,0,1,2,1,0,1,0,1],
+      [1,0,0,0,2,2,0,0,0,0,0,2,2,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 15, y: 1, type: 'ice_golem' },
+      { x: 1, y: 11, type: 'ice_golem' },
+      { x: 8, y: 6, type: 'skeleton' },
+      { x: 4, y: 4, type: 'slime' },
+      { x: 12, y: 8, type: 'slime' },
+      { x: 8, y: 3, type: 'bat' }
+    ],
+    itemRates: {
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1,
+      kick: 1,
+      life: 1,
+      shield: 0.5
+    }
+  },
+  {
+    id: 'stage_3_2',
+    name: '影の回廊',
+    world: 3,
+    level: 2,
+    width: 17,
+    height: 13,
+    timeLimit: 220,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,0,0,2,0,0,0,2,0,0,0,0,0,1],
+      [1,0,1,2,1,0,1,2,1,2,1,0,1,2,1,0,1],
+      [1,0,2,0,2,0,2,0,0,0,2,0,2,0,2,0,1],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      [1,2,2,0,0,0,0,0,0,0,0,0,0,0,2,2,1],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      [1,2,2,0,0,0,0,0,0,0,0,0,0,0,2,2,1],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      [1,0,2,0,2,0,2,0,0,0,2,0,2,0,2,0,1],
+      [1,0,1,2,1,0,1,2,1,2,1,0,1,2,1,0,1],
+      [1,0,0,0,0,0,2,0,0,0,2,0,0,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 15, y: 1, type: 'shadow' },
+      { x: 1, y: 11, type: 'shadow' },
+      { x: 8, y: 6, type: 'wizard' },
+      { x: 4, y: 5, type: 'skeleton' },
+      { x: 12, y: 7, type: 'skeleton' },
+      { x: 8, y: 3, type: 'ghost' }
+    ],
+    itemRates: {
+      bomb_up: 2,
+      fire_up: 2,
+      speed_up: 2.5,
+      penetrate: 1.5,
+      kick: 1,
+      life: 0.5,
+      shield: 0.5
+    }
+  },
+  {
+    id: 'stage_3_3',
+    name: '魔王の城',
+    world: 3,
+    level: 3,
+    width: 19,
+    height: 15,
+    timeLimit: 300,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,2,2,2,2,0,0,0,2,2,2,2,0,0,0,1],
+      [1,0,1,0,1,0,1,2,1,0,1,2,1,0,1,0,1,0,1],
+      [1,0,0,0,0,0,2,2,2,0,2,2,2,0,0,0,0,0,1],
+      [1,2,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,2,1],
+      [1,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,1],
+      [1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,0,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,0,1],
+      [1,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,1],
+      [1,2,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,2,1],
+      [1,0,0,0,0,0,2,2,2,0,2,2,2,0,0,0,0,0,1],
+      [1,0,1,0,1,0,1,2,1,0,1,2,1,0,1,0,1,0,1],
+      [1,0,0,0,2,2,2,2,0,0,0,2,2,2,2,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 9, y: 7, type: 'dragon' },
+      { x: 4, y: 3, type: 'demon' },
+      { x: 14, y: 3, type: 'demon' },
+      { x: 4, y: 11, type: 'fire_spirit' },
+      { x: 14, y: 11, type: 'fire_spirit' },
+      { x: 1, y: 7, type: 'wizard' },
+      { x: 17, y: 7, type: 'wizard' },
+      { x: 9, y: 4, type: 'shadow' },
+      { x: 9, y: 10, type: 'shadow' }
+    ],
+    itemRates: {
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1.5,
+      kick: 1,
+      life: 0.5,
+      shield: 0.5
+    }
+  },
+  // World 4 - Fire World
+  {
+    id: 'stage_4_1',
+    name: '灼熱の荒野',
+    world: 4,
+    level: 1,
+    width: 15,
+    height: 11,
+    timeLimit: 180,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,2,0,0,0,0,0,2,0,0,0,1],
+      [1,0,1,2,1,2,1,0,1,2,1,2,1,0,1],
+      [1,0,2,2,2,2,0,0,0,2,2,2,2,0,1],
+      [1,0,1,2,1,0,1,2,1,0,1,2,1,0,1],
+      [1,0,0,0,0,0,2,2,2,0,0,0,0,0,1],
+      [1,0,1,2,1,0,1,2,1,0,1,2,1,0,1],
+      [1,0,2,2,2,2,0,0,0,2,2,2,2,0,1],
+      [1,0,1,2,1,2,1,0,1,2,1,2,1,0,1],
+      [1,0,0,0,2,0,0,0,0,0,2,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 13, y: 1, type: 'fire_spirit' },
+      { x: 7, y: 5, type: 'fire_spirit' },
+      { x: 3, y: 9, type: 'slime' },
+      { x: 11, y: 3, type: 'bat' },
+      { x: 5, y: 7, type: 'skeleton' }
+    ],
+    itemRates: {
+      bomb_up: 2.5,
+      fire_up: 3,
+      speed_up: 2,
+      penetrate: 1,
+      kick: 1,
+      life: 0.5
+    }
+  },
+  {
+    id: 'stage_4_2',
+    name: '炎の神殿',
+    world: 4,
+    level: 2,
+    width: 17,
+    height: 13,
+    timeLimit: 240,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,0,2,0,0,0,0,0,2,0,0,0,0,1],
+      [1,0,1,0,1,2,1,0,1,0,1,2,1,0,1,0,1],
+      [1,0,0,0,2,2,2,0,0,0,2,2,2,0,0,0,1],
+      [1,0,1,2,1,0,1,0,1,0,1,0,1,2,1,0,1],
+      [1,2,2,2,0,0,0,0,0,0,0,0,0,2,2,2,1],
+      [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      [1,2,2,2,0,0,0,0,0,0,0,0,0,2,2,2,1],
+      [1,0,1,2,1,0,1,0,1,0,1,0,1,2,1,0,1],
+      [1,0,0,0,2,2,2,0,0,0,2,2,2,0,0,0,1],
+      [1,0,1,0,1,2,1,0,1,0,1,2,1,0,1,0,1],
+      [1,0,0,0,0,2,0,0,0,0,0,2,0,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 15, y: 1, type: 'fire_spirit' },
+      { x: 1, y: 11, type: 'fire_spirit' },
+      { x: 8, y: 6, type: 'demon' },
+      { x: 4, y: 4, type: 'chaser' },
+      { x: 12, y: 8, type: 'chaser' },
+      { x: 8, y: 3, type: 'bat' },
+      { x: 8, y: 9, type: 'skeleton' }
+    ],
+    itemRates: {
+      bomb_up: 2,
+      fire_up: 2.5,
+      speed_up: 2,
+      penetrate: 1.5,
+      kick: 1,
+      life: 0.5,
+      time_bonus: 0.5
+    }
+  },
+  {
+    id: 'stage_4_3',
+    name: '業火の竜',
+    world: 4,
+    level: 3,
+    width: 19,
+    height: 15,
+    timeLimit: 300,
+    map: [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+      [1,3,0,0,0,2,2,2,0,0,0,2,2,2,0,0,0,0,1],
+      [1,0,1,0,1,0,1,2,1,0,1,2,1,0,1,0,1,0,1],
+      [1,0,0,2,0,0,2,2,0,0,0,2,2,0,0,2,0,0,1],
+      [1,0,1,2,1,0,1,0,1,0,1,0,1,0,1,2,1,0,1],
+      [1,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,2,2,1],
+      [1,2,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,2,1],
+      [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+      [1,2,1,0,1,0,1,0,0,0,0,0,1,0,1,0,1,2,1],
+      [1,2,2,2,0,0,0,0,0,0,0,0,0,0,0,2,2,2,1],
+      [1,0,1,2,1,0,1,0,1,0,1,0,1,0,1,2,1,0,1],
+      [1,0,0,2,0,0,2,2,0,0,0,2,2,0,0,2,0,0,1],
+      [1,0,1,0,1,0,1,2,1,0,1,2,1,0,1,0,1,0,1],
+      [1,0,0,0,0,2,2,2,0,0,0,2,2,2,0,0,0,4,1],
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ],
+    enemies: [
+      { x: 9, y: 7, type: 'dragon' },
+      { x: 9, y: 4, type: 'dragon' },
+      { x: 4, y: 5, type: 'demon' },
+      { x: 14, y: 5, type: 'demon' },
+      { x: 4, y: 9, type: 'fire_spirit' },
+      { x: 14, y: 9, type: 'fire_spirit' },
+      { x: 1, y: 7, type: 'wizard' },
+      { x: 17, y: 7, type: 'wizard' }
+    ],
+    itemRates: {
+      bomb_up: 2,
+      fire_up: 2,
+      speed_up: 2,
+      penetrate: 1.5,
+      kick: 1,
+      life: 0.5,
+      shield: 0.5,
+      time_bonus: 0.5
     }
   }
 ];
@@ -297,6 +552,77 @@ export const defaultEnemyTypes = {
     color: '#22c55e',
     points: 1000,
     size: 1.5
+  },
+  skeleton: {
+    id: 'skeleton',
+    name: 'スケルトン',
+    speed: 0.9,
+    pattern: 'patrol',
+    wallPass: false,
+    bombPass: false,
+    color: '#f5f5dc',
+    points: 150
+  },
+  fire_spirit: {
+    id: 'fire_spirit',
+    name: 'ファイアスピリット',
+    speed: 1.3,
+    pattern: 'chase',
+    wallPass: false,
+    bombPass: false,
+    color: '#ff6b00',
+    points: 350
+  },
+  ice_golem: {
+    id: 'ice_golem',
+    name: 'アイスゴーレム',
+    speed: 0.5,
+    pattern: 'random',
+    wallPass: false,
+    bombPass: true,
+    color: '#87ceeb',
+    points: 250
+  },
+  shadow: {
+    id: 'shadow',
+    name: 'シャドウ',
+    speed: 1.4,
+    pattern: 'random',
+    wallPass: true,
+    bombPass: false,
+    color: '#2d2d2d',
+    points: 500
+  },
+  wizard: {
+    id: 'wizard',
+    name: 'ウィザード',
+    speed: 0.8,
+    pattern: 'smart',
+    wallPass: false,
+    bombPass: false,
+    color: '#9333ea',
+    points: 450
+  },
+  demon: {
+    id: 'demon',
+    name: 'デーモン',
+    speed: 1.1,
+    pattern: 'chase',
+    wallPass: true,
+    bombPass: true,
+    color: '#dc2626',
+    points: 600
+  },
+  dragon: {
+    id: 'dragon',
+    name: 'ドラゴン',
+    speed: 0.6,
+    pattern: 'smart',
+    wallPass: false,
+    bombPass: false,
+    color: '#b91c1c',
+    points: 800,
+    size: 1.3
   }
 };
 
