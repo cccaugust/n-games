@@ -49,6 +49,9 @@ let timeLimit = 180;
 let score = 0;
 let lives = 3;
 
+// Saved player stats (for carrying over between stages)
+let savedPlayerStats = null;
+
 // Input
 let keys = {};
 let touchDir = null;
@@ -202,6 +205,8 @@ function renderStageList() {
         playSound('menu_confirm');
         currentStageIndex = index;
         currentStage = stage;
+        lives = 3;
+        savedPlayerStats = null; // Reset stats when selecting a stage
         startGame(stage);
       });
     }
@@ -359,6 +364,16 @@ function startGame(stage) {
 
   // Create player
   player = new Player(spawnX, spawnY, TILE_SIZE, playerSprite);
+
+  // Restore saved stats if available (carry over from previous stage)
+  if (savedPlayerStats) {
+    player.maxBombs = savedPlayerStats.maxBombs;
+    player.fireRange = savedPlayerStats.fireRange;
+    player.speed = savedPlayerStats.speed;
+    player.hasPenetrate = savedPlayerStats.hasPenetrate;
+    player.hasKick = savedPlayerStats.hasKick;
+    player.hasShield = savedPlayerStats.hasShield;
+  }
 
   // Create exit door
   exitDoor = new ExitDoor(exitX, exitY, TILE_SIZE);
@@ -704,7 +719,7 @@ function destroyBlock(x, y) {
     const roll = Math.random() * 100;
     let cumulative = 0;
 
-    const itemTypes = ['bomb_up', 'fire_up', 'speed_up', 'penetrate', 'kick', 'life'];
+    const itemTypes = ['bomb_up', 'fire_up', 'speed_up', 'penetrate', 'kick', 'life', 'shield', 'time_bonus', 'score_up', 'skull'];
     for (const itemType of itemTypes) {
       cumulative += currentStage.itemRates[itemType] || 0;
       if (roll < cumulative) {
@@ -796,6 +811,23 @@ function pickupItem(item) {
     case 'life':
       lives = Math.min(lives + 1, 5);
       break;
+    case 'shield':
+      player.hasShield = true;
+      break;
+    case 'time_bonus':
+      gameTime = Math.max(0, gameTime - 30000); // Add 30 seconds
+      break;
+    case 'score_up':
+      score += 500;
+      break;
+    case 'skull':
+      // Temporary speed penalty
+      const originalSpeed = player.speed;
+      player.speed = Math.max(0.5, player.speed - 0.5);
+      setTimeout(() => {
+        if (player) player.speed = originalSpeed;
+      }, 5000);
+      break;
   }
 
   // Sparkle effect
@@ -813,6 +845,14 @@ function pickupItem(item) {
 
 // ===== Player Hit =====
 function playerHit() {
+  // Shield absorbs one hit
+  if (player.hasShield) {
+    player.hasShield = false;
+    player.makeInvincible(1000);
+    playSound('item_get'); // Shield break sound
+    return;
+  }
+
   lives--;
   playSound('player_death');
   player.makeInvincible(3000);
@@ -833,6 +873,16 @@ function stageClear() {
   gameState = 'clear';
   playSound('stage_clear');
 
+  // Save player stats for next stage (carry over powerups)
+  savedPlayerStats = {
+    maxBombs: player.maxBombs,
+    fireRange: player.fireRange,
+    speed: player.speed,
+    hasPenetrate: player.hasPenetrate,
+    hasKick: player.hasKick,
+    hasShield: player.hasShield
+  };
+
   const timeBonus = Math.max(0, (timeLimit - Math.floor(gameTime / 1000)) * 10);
   const finalScore = score + timeBonus;
 
@@ -848,6 +898,8 @@ function stageClear() {
 function gameOver() {
   gameState = 'gameover';
   playSound('game_over');
+  // Reset saved stats on game over
+  savedPlayerStats = null;
   showOverlay('gameover');
 }
 
@@ -1048,7 +1100,11 @@ function setupItemRates() {
     { type: 'speed_up', icon: '👟', name: '速度+' },
     { type: 'penetrate', icon: '💥', name: '貫通' },
     { type: 'kick', icon: '👢', name: 'キック' },
-    { type: 'life', icon: '❤️', name: 'ライフ' }
+    { type: 'life', icon: '❤️', name: 'ライフ' },
+    { type: 'shield', icon: '🛡️', name: 'シールド' },
+    { type: 'time_bonus', icon: '⏰', name: '時間+' },
+    { type: 'score_up', icon: '💎', name: 'スコア+' },
+    { type: 'skull', icon: '💀', name: 'どくろ' }
   ];
 
   itemTypes.forEach(item => {
@@ -1319,6 +1375,7 @@ function setupEventListeners() {
     playSound('menu_confirm');
     currentStageIndex = 0;
     lives = 3;
+    savedPlayerStats = null; // Reset stats when starting from beginning
     startGame(allStages[0]);
   });
 
@@ -1416,6 +1473,7 @@ function setupEventListeners() {
   document.getElementById('retryBtn').addEventListener('click', () => {
     hideOverlays();
     lives = 3;
+    savedPlayerStats = null; // Reset stats on retry
     startGame(currentStage);
   });
   document.getElementById('gameOverQuitBtn').addEventListener('click', () => {

@@ -29,6 +29,7 @@ export class Player extends Entity {
     this.speed = 1;
     this.hasPenetrate = false;
     this.hasKick = false;
+    this.hasShield = false;
 
     // State
     this.isMoving = false;
@@ -570,7 +571,11 @@ export class Item extends Entity {
       'speed_up': '👟',
       'penetrate': '💥',
       'kick': '👢',
-      'life': '❤️'
+      'life': '❤️',
+      'shield': '🛡️',
+      'time_bonus': '⏰',
+      'score_up': '💎',
+      'skull': '💀'
     };
 
     ctx.fillText(icons[this.type] || '?', px + this.tileSize / 2, py + this.tileSize / 2 + bounce);
