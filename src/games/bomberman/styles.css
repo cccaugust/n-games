@@ -752,7 +752,15 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
-@media (max-width: 768px) {
+/* タッチデバイス（スマホ・タブレット）でモバイルコントロールを表示 */
+@media (pointer: coarse) {
+  .mobile-controls {
+    display: flex;
+  }
+}
+
+/* フォールバック: 画面幅でも判定（タブレット横向きも含む） */
+@media (max-width: 1024px) and (hover: none) {
   .mobile-controls {
     display: flex;
   }
@@ -907,14 +915,16 @@ body {
 }
 
 .sprite-item {
-  aspect-ratio: 1;
   background: var(--bg-card);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+  gap: 4px;
   border: 2px solid transparent;
 }
 
@@ -930,6 +940,16 @@ body {
   width: 48px;
   height: 48px;
   image-rendering: pixelated;
+}
+
+.sprite-name {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ===== Responsive ===== */
