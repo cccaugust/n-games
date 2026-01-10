@@ -1316,6 +1316,9 @@ function updatePlayer(delta) {
   );
 
   // 障害物との衝突判定（複数パスで確実に押し戻す）
+  // 位置の押し戻しは複数パスで行い、速度修正は最後に1回だけ行う
+  const collisionNormals = [];
+
   for (let pass = 0; pass < 3; pass++) {
     for (const obstacle of obstacles) {
       const dx = newPosition.x - obstacle.position.x;
@@ -1326,15 +1329,28 @@ function updatePlayer(delta) {
       if (dist < minDist && dist > 0.001) {
         // 押し戻し
         const pushDir = new THREE.Vector3(dx, 0, dz).normalize();
-        const pushDist = minDist - dist + 0.05;
+        const pushDist = minDist - dist + 0.1;
         newPosition.add(pushDir.clone().multiplyScalar(pushDist));
 
-        // 衝突方向の速度をキャンセル（壁に向かう速度成分を除去）
-        const velocityDot = playerState.velocity.dot(pushDir);
-        if (velocityDot < 0) {
-          playerState.velocity.sub(pushDir.clone().multiplyScalar(velocityDot));
+        // 最初のパスでのみ衝突法線を記録
+        if (pass === 0) {
+          collisionNormals.push(pushDir.clone());
         }
       }
+    }
+  }
+
+  // 衝突があった場合、速度を壁に沿った方向に修正
+  if (collisionNormals.length > 0) {
+    // 全ての衝突法線を平均して、主要な押し戻し方向を決定
+    const avgNormal = new THREE.Vector3();
+    collisionNormals.forEach(n => avgNormal.add(n));
+    avgNormal.normalize();
+
+    // 壁に向かう速度成分のみを除去（壁に沿った移動は維持）
+    const velocityDot = playerState.velocity.dot(avgNormal);
+    if (velocityDot < 0) {
+      playerState.velocity.sub(avgNormal.clone().multiplyScalar(velocityDot));
     }
   }
 
