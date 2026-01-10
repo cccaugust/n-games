@@ -77,6 +77,22 @@ class Game {
 
     // 初回描画
     this.renderTitle();
+
+    // アニメーションループ開始
+    this.startAnimationLoop();
+  }
+
+  /**
+   * アニメーションループを開始
+   */
+  startAnimationLoop() {
+    const loop = () => {
+      if (this.state === STATE.PLAYING) {
+        this.render();
+      }
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
   }
 
   /**
@@ -888,8 +904,20 @@ class Game {
    * モンスターを攻撃
    */
   attackMonster(monster) {
+    // 攻撃アニメーション開始
+    this.renderer.startAttackAnimation(this.player.x, this.player.y, monster.x, monster.y, true);
+
     const damage = this.calculateDamage(this.player, monster);
     monster.takeDamage(damage);
+
+    // ダメージエフェクトと効果音
+    this.renderer.addEffect('slash', monster.x, monster.y, { duration: 200 });
+    this.renderer.addEffect('damage', monster.x, monster.y, {
+      text: `-${damage}`,
+      color: '#ff4',
+      duration: 600
+    });
+    this.renderer.playSound('hit');
 
     this.addMessage(`${monster.name}に${damage}のダメージ！`);
 
@@ -899,13 +927,26 @@ class Game {
       if (heal > 0) {
         this.player.heal(heal);
         this.addMessage(`HPを${heal}回復した`);
+        this.renderer.addEffect('heal', this.player.x, this.player.y, {
+          text: `+${heal}`,
+          duration: 600
+        });
+        this.renderer.playSound('heal');
       }
     }
 
     // 撃破
     if (!monster.isAlive) {
       this.addMessage(`${monster.name}を倒した！`);
+      const prevLevel = this.player.level;
       this.player.gainExp(monster.exp);
+
+      // レベルアップチェック
+      if (this.player.level > prevLevel) {
+        this.renderer.addEffect('levelup', this.player.x, this.player.y, { duration: 800 });
+        this.renderer.playSound('levelup');
+        this.addMessage(`レベルアップ！ Lv.${this.player.level}になった！`);
+      }
 
       // 爆発系
       if (monster.special?.startsWith('explode_')) {
@@ -914,6 +955,12 @@ class Game {
         if (dist <= 1) {
           this.player.takeDamage(explosionDamage);
           this.addMessage(`爆発で${explosionDamage}のダメージ！`);
+          this.renderer.addEffect('damage', this.player.x, this.player.y, {
+            text: `-${explosionDamage}`,
+            color: '#f44',
+            duration: 600
+          });
+          this.renderer.playSound('damage');
         }
       }
     }
@@ -1017,6 +1064,10 @@ class Game {
     if (this.player.pickupItem(item)) {
       this.items = this.items.filter(i => i !== item);
       this.addMessage(`${item.name}を拾った`);
+
+      // エフェクトと効果音
+      this.renderer.addEffect('pickup', this.player.x, this.player.y, { duration: 400 });
+      this.renderer.playSound('pickup');
     } else {
       this.addMessage('持ち物がいっぱいだ');
     }
@@ -1026,6 +1077,9 @@ class Game {
    * 階段を降りる
    */
   descendStairs() {
+    // 効果音
+    this.renderer.playSound('stairs');
+
     const prevFloor = this.floor;
     this.floor++;
 
@@ -1175,25 +1229,60 @@ class Game {
         monster.y += action.dy;
         break;
 
-      case 'attack':
+      case 'attack': {
+        // 攻撃アニメーション
+        this.renderer.startAttackAnimation(monster.x, monster.y, this.player.x, this.player.y, false);
         const damage = this.calculateDamage(monster, this.player);
         this.player.takeDamage(damage);
         this.addMessage(`${monster.name}の攻撃！${damage}のダメージ`);
 
+        // エフェクトと効果音
+        this.renderer.addEffect('slash', this.player.x, this.player.y, { duration: 200 });
+        this.renderer.addEffect('damage', this.player.x, this.player.y, {
+          text: `-${damage}`,
+          color: '#f44',
+          duration: 600
+        });
+        this.renderer.playSound('damage');
+
         // 特殊能力
         this.processMonsterSpecial(monster, action.target);
         break;
+      }
 
-      case 'ranged_attack':
+      case 'ranged_attack': {
         const rDamage = this.calculateDamage(monster, this.player);
         this.player.takeDamage(rDamage);
         this.addMessage(`${monster.name}の槍攻撃！${rDamage}のダメージ`);
-        break;
 
-      case 'fire_attack':
+        // エフェクトと効果音
+        this.renderer.addEffect('slash', this.player.x, this.player.y, { duration: 200 });
+        this.renderer.addEffect('damage', this.player.x, this.player.y, {
+          text: `-${rDamage}`,
+          color: '#f44',
+          duration: 600
+        });
+        this.renderer.playSound('damage');
+        break;
+      }
+
+      case 'fire_attack': {
         this.player.takeDamage(action.damage);
         this.addMessage(`${monster.name}の炎！${action.damage}のダメージ`);
+
+        // エフェクトと効果音
+        this.renderer.addEffect('use', this.player.x, this.player.y, {
+          color: '#f80',
+          duration: 400
+        });
+        this.renderer.addEffect('damage', this.player.x, this.player.y, {
+          text: `-${action.damage}`,
+          color: '#f80',
+          duration: 600
+        });
+        this.renderer.playSound('damage');
         break;
+      }
 
       case 'wait':
         break;
@@ -1532,28 +1621,48 @@ class Game {
    * 草を使用
    */
   useGrass(item) {
+    // 使用エフェクトと効果音
+    this.renderer.addEffect('use', this.player.x, this.player.y, {
+      color: '#8f8',
+      duration: 400
+    });
+    this.renderer.playSound('use');
+
     switch (item.effect) {
       case 'heal_30':
         this.player.heal(30);
         this.addMessage('HPが30回復した');
+        this.renderer.addEffect('heal', this.player.x, this.player.y, {
+          text: '+30',
+          duration: 600
+        });
+        this.renderer.playSound('heal');
         break;
       case 'heal_100':
         this.player.heal(100);
         this.addMessage('HPが100回復した');
+        this.renderer.addEffect('heal', this.player.x, this.player.y, {
+          text: '+100',
+          duration: 600
+        });
+        this.renderer.playSound('heal');
         break;
       case 'max_hp_up':
         this.player.maxHp += 5;
         this.player.hp += 5;
         this.addMessage('最大HPが5上がった！');
+        this.renderer.addEffect('levelup', this.player.x, this.player.y, { duration: 600 });
         break;
       case 'strength_up':
         this.player.maxStrength++;
         this.player.strength++;
         this.addMessage('ちからが1上がった！');
+        this.renderer.addEffect('levelup', this.player.x, this.player.y, { duration: 600 });
         break;
       case 'cure_poison':
         this.player.strength = this.player.maxStrength;
         this.addMessage('ちからが回復した');
+        this.renderer.playSound('heal');
         break;
       case 'confuse':
         this.player.statusEffects.confused = 10;
@@ -1572,6 +1681,13 @@ class Game {
    * 巻物を使用
    */
   useScroll(item) {
+    // 使用エフェクトと効果音
+    this.renderer.addEffect('use', this.player.x, this.player.y, {
+      color: '#88f',
+      duration: 400
+    });
+    this.renderer.playSound('use');
+
     switch (item.effect) {
       case 'reveal_map':
         // マップ全開示
@@ -1597,14 +1713,23 @@ class Game {
    * 食べ物を使用
    */
   useFood(item) {
+    // 使用エフェクトと効果音
+    this.renderer.addEffect('use', this.player.x, this.player.y, {
+      color: '#fa8',
+      duration: 400
+    });
+    this.renderer.playSound('use');
+
     switch (item.effect) {
       case 'satiety_50':
         this.player.satiety = Math.min(this.player.maxSatiety, this.player.satiety + 50);
         this.addMessage('満腹度が回復した');
+        this.renderer.playSound('heal');
         break;
       case 'satiety_100':
         this.player.satiety = Math.min(this.player.maxSatiety, this.player.satiety + 100);
         this.addMessage('満腹度が大きく回復した');
+        this.renderer.playSound('heal');
         break;
     }
   }

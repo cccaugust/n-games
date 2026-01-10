@@ -302,12 +302,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: var(--bg-surface);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      padding: 20px;
+      background: linear-gradient(135deg, #1e1e2f 0%, #2a2a3e 100%);
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 24px;
       min-width: 280px;
       z-index: 200;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                  0 0 20px rgba(139, 92, 246, 0.2);
     }
 
     .game-menu.hidden {
@@ -315,31 +317,45 @@
     }
 
     .game-menu h2 {
-      margin-bottom: 16px;
-      font-size: 18px;
+      margin-bottom: 20px;
+      font-size: 20px;
       text-align: center;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+      font-weight: bold;
     }
 
     .menu-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .menu-item {
-      padding: 12px 16px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 6px;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 500;
     }
 
     .menu-item:hover {
-      background: rgba(255,255,255,0.2);
+      background: rgba(139, 92, 246, 0.3);
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .menu-item:active {
+      transform: translateX(4px) scale(0.98);
     }
 
     .menu-item.selected {
       background: var(--primary);
+      border-color: var(--primary);
     }
 
     /* アイテムリスト */
@@ -348,45 +364,61 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: var(--bg-surface);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      padding: 16px;
+      background: linear-gradient(135deg, #1e1e2f 0%, #2a2a3e 100%);
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 20px;
       width: 90%;
       max-width: 360px;
       max-height: 80vh;
       overflow-y: auto;
       z-index: 200;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                  0 0 20px rgba(139, 92, 246, 0.2);
     }
 
     .inventory-panel.hidden {
       display: none;
     }
 
+    .inventory-panel h2 {
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
     .inventory-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 6px;
-      margin-bottom: 6px;
+      padding: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      margin-bottom: 8px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
     .inventory-item:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--primary);
+      transform: translateX(4px);
     }
 
     .inventory-item.selected {
       background: var(--primary);
+      border-color: var(--primary);
     }
 
     .inventory-item .icon {
       width: 32px;
       height: 32px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 4px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
     }
 
     .inventory-item .info {
@@ -394,12 +426,15 @@
     }
 
     .inventory-item .name {
-      font-size: 14px;
+      font-size: 15px;
+      color: #fff;
+      font-weight: 500;
     }
 
     .inventory-item .desc {
-      font-size: 11px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 2px;
     }
 
     /* ステータスパネル */
@@ -408,13 +443,15 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: var(--bg-surface);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 12px;
-      padding: 16px;
+      background: linear-gradient(135deg, #1e1e2f 0%, #2a2a3e 100%);
+      border: 2px solid var(--primary);
+      border-radius: 16px;
+      padding: 20px;
       width: 90%;
       max-width: 320px;
       z-index: 200;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                  0 0 20px rgba(139, 92, 246, 0.2);
     }
 
     .status-panel.hidden {
@@ -422,9 +459,11 @@
     }
 
     .status-panel h2 {
-      margin-bottom: 12px;
-      font-size: 18px;
+      margin-bottom: 16px;
+      font-size: 20px;
       text-align: center;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
     }
 
     .status-content {
@@ -451,19 +490,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 8px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 4px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
     }
 
     .status-label {
-      color: var(--text-muted);
+      color: #aaa;
       font-size: 13px;
     }
 
     .status-value {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
+      color: #fff;
     }
 
     .status-section {

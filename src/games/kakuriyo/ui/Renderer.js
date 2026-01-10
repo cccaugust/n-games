@@ -1,6 +1,7 @@
 /**
  * レンダラー
  * キャンバスへの描画処理
+ * アニメーション・エフェクト・サウンド対応
  */
 
 import { TILE } from '../dungeon/DungeonGenerator.js';
@@ -27,7 +28,8 @@ export class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.sprites = {};
+    this.sprites = {}; // { id: [frame0Canvas, frame1Canvas, ...] }
+    this.spriteDurations = {}; // { id: [duration0, duration1, ...] }
     this.spritesLoaded = false;
 
     // カメラ位置
@@ -45,7 +47,240 @@ export class Renderer {
     this.currentPhase = null;
     this.phaseColors = { ...COLORS };
 
+    // アニメーション用
+    this.animationTime = 0;
+    this.lastTime = performance.now();
+    this.animationFrame = 0;
+    this.animationInterval = 200; // 200msごとにフレーム切り替え
+
+    // エフェクト管理
+    this.effects = [];
+
+    // 攻撃アニメーション用
+    this.attackAnimation = null;
+
+    // サウンド管理
+    this.sounds = {};
+    this.soundEnabled = true;
+
     this.resize();
+    this.initSounds();
+  }
+
+  /**
+   * サウンドの初期化
+   */
+  initSounds() {
+    // Web Audio APIでサウンドを生成
+    try {
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      this.soundEnabled = true;
+    } catch (e) {
+      console.warn('Web Audio API is not supported');
+      this.soundEnabled = false;
+    }
+  }
+
+  /**
+   * サウンドを再生（Web Audio APIで簡易的に生成）
+   */
+  playSound(type) {
+    if (!this.soundEnabled || !this.audioCtx) return;
+
+    // AudioContextが停止中なら再開
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
+
+    const ctx = this.audioCtx;
+    const now = ctx.currentTime;
+
+    switch (type) {
+      case 'attack': {
+        // 攻撃音: 短い「シュッ」という音
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+        break;
+      }
+      case 'hit': {
+        // ヒット音: 「ドン」という音
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+        break;
+      }
+      case 'pickup': {
+        // アイテム取得音: 「ピロン」という音
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523, now); // C5
+        osc.frequency.setValueAtTime(659, now + 0.08); // E5
+        osc.frequency.setValueAtTime(784, now + 0.16); // G5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+        break;
+      }
+      case 'use': {
+        // アイテム使用音: 「キラーン」という音
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(880, now);
+        osc2.frequency.setValueAtTime(1320, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.3);
+        osc2.stop(now + 0.3);
+        break;
+      }
+      case 'heal': {
+        // 回復音: 「ポワン」という音
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+        break;
+      }
+      case 'levelup': {
+        // レベルアップ音: 「テレレーン」
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.setValueAtTime(659, now + 0.1);
+        osc.frequency.setValueAtTime(784, now + 0.2);
+        osc.frequency.setValueAtTime(1047, now + 0.3);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.setValueAtTime(0.15, now + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+        break;
+      }
+      case 'stairs': {
+        // 階段音: 「シュワーン」
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.4);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        break;
+      }
+      case 'damage': {
+        // ダメージ音: 「ガッ」という音
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+      }
+    }
+  }
+
+  /**
+   * アニメーションの更新
+   */
+  updateAnimation() {
+    const now = performance.now();
+    const delta = now - this.lastTime;
+    this.lastTime = now;
+    this.animationTime += delta;
+
+    if (this.animationTime >= this.animationInterval) {
+      this.animationTime = 0;
+      this.animationFrame = (this.animationFrame + 1) % 2;
+    }
+
+    // エフェクトの更新
+    this.effects = this.effects.filter(effect => {
+      effect.time += delta;
+      return effect.time < effect.duration;
+    });
+
+    // 攻撃アニメーションの更新
+    if (this.attackAnimation) {
+      this.attackAnimation.time += delta;
+      if (this.attackAnimation.time >= this.attackAnimation.duration) {
+        this.attackAnimation = null;
+      }
+    }
+  }
+
+  /**
+   * エフェクトを追加
+   */
+  addEffect(type, x, y, options = {}) {
+    const effect = {
+      type,
+      x, y,
+      time: 0,
+      duration: options.duration || 300,
+      color: options.color || '#fff',
+      text: options.text || '',
+      size: options.size || 16,
+      direction: options.direction || { dx: 0, dy: 0 }
+    };
+    this.effects.push(effect);
+  }
+
+  /**
+   * 攻撃アニメーションを開始
+   */
+  startAttackAnimation(attackerX, attackerY, targetX, targetY, isPlayer = true) {
+    const dx = targetX - attackerX;
+    const dy = targetY - attackerY;
+    this.attackAnimation = {
+      isPlayer,
+      attackerX, attackerY,
+      dx, dy,
+      time: 0,
+      duration: 150
+    };
+    this.playSound('attack');
   }
 
   /**
@@ -115,7 +350,7 @@ export class Renderer {
   }
 
   /**
-   * スプライトをロード（samples.jsonから）
+   * スプライトをロード（samples.jsonから）全フレーム対応
    */
   async loadSprites() {
     try {
@@ -124,41 +359,35 @@ export class Renderer {
       const data = await res.json();
 
       for (const sample of data.samples) {
-        // Base64からピクセルデータを復元
-        // framesがある場合はframes[0].pixelsB64を使用
-        let pixelsB64 = null;
-        if (sample.frames && sample.frames.length > 0 && sample.frames[0].pixelsB64) {
-          pixelsB64 = sample.frames[0].pixelsB64;
+        // framesがある場合は全フレームを読み込み
+        if (sample.frames && sample.frames.length > 0) {
+          const frameCanvases = [];
+          const frameDurations = [];
+
+          for (const frame of sample.frames) {
+            if (!frame.pixelsB64) continue;
+
+            const pixels = this.base64ToPixels(frame.pixelsB64);
+            if (!pixels) continue;
+
+            const canvas = this.createSpriteCanvas(pixels, sample.width, sample.height);
+            frameCanvases.push(canvas);
+            frameDurations.push(frame.durationMs || 200);
+          }
+
+          if (frameCanvases.length > 0) {
+            this.sprites[sample.id] = frameCanvases;
+            this.spriteDurations[sample.id] = frameDurations;
+          }
         } else if (sample.pixelsB64) {
-          pixelsB64 = sample.pixelsB64;
+          // 単一フレームの場合
+          const pixels = this.base64ToPixels(sample.pixelsB64);
+          if (!pixels) continue;
+
+          const canvas = this.createSpriteCanvas(pixels, sample.width, sample.height);
+          this.sprites[sample.id] = [canvas]; // 配列として保存
+          this.spriteDurations[sample.id] = [200];
         }
-
-        if (!pixelsB64) continue;
-
-        const pixels = this.base64ToPixels(pixelsB64);
-        if (!pixels) continue;
-
-        // キャンバスを作成してピクセルデータを描画
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = sample.width;
-        tempCanvas.height = sample.height;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        // ImageDataを作成（Uint32ArrayからUint8ClampedArrayに変換）
-        const imageData = tempCtx.createImageData(sample.width, sample.height);
-        const uint8 = new Uint8Array(pixels.buffer);
-
-        // samples.jsonは0xAARRGGBB形式（リトルエンディアン）
-        // バイト順: [B, G, R, A] → 必要な順: [R, G, B, A]
-        for (let i = 0; i < uint8.length; i += 4) {
-          imageData.data[i] = uint8[i + 2];     // R
-          imageData.data[i + 1] = uint8[i + 1]; // G
-          imageData.data[i + 2] = uint8[i];     // B
-          imageData.data[i + 3] = uint8[i + 3]; // A
-        }
-
-        tempCtx.putImageData(imageData, 0, 0);
-        this.sprites[sample.id] = tempCanvas;
       }
 
       this.spritesLoaded = true;
@@ -167,6 +396,32 @@ export class Renderer {
       console.warn('スプライトの読み込みに失敗:', e);
       this.spritesLoaded = true; // 失敗しても続行
     }
+  }
+
+  /**
+   * ピクセルデータからキャンバスを作成
+   */
+  createSpriteCanvas(pixels, width, height) {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = width;
+    tempCanvas.height = height;
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // ImageDataを作成（Uint32ArrayからUint8ClampedArrayに変換）
+    const imageData = tempCtx.createImageData(width, height);
+    const uint8 = new Uint8Array(pixels.buffer);
+
+    // samples.jsonは0xAARRGGBB形式（リトルエンディアン）
+    // バイト順: [B, G, R, A] → 必要な順: [R, G, B, A]
+    for (let i = 0; i < uint8.length; i += 4) {
+      imageData.data[i] = uint8[i + 2];     // R
+      imageData.data[i + 1] = uint8[i + 1]; // G
+      imageData.data[i + 2] = uint8[i];     // B
+      imageData.data[i + 3] = uint8[i + 3]; // A
+    }
+
+    tempCtx.putImageData(imageData, 0, 0);
+    return tempCanvas;
   }
 
   /**
@@ -211,6 +466,9 @@ export class Renderer {
    */
   render(gameState) {
     const { tiles, player, monsters, items, traps, rooms, floor } = gameState;
+
+    // アニメーション更新
+    this.updateAnimation();
 
     // カメラ更新
     this.updateCamera(player, tiles[0].length, tiles.length);
@@ -311,6 +569,126 @@ export class Renderer {
         }
       }
     }
+
+    // エフェクト描画
+    this.drawEffects();
+  }
+
+  /**
+   * エフェクト描画
+   */
+  drawEffects() {
+    for (const effect of this.effects) {
+      const vx = effect.x - this.cameraX;
+      const vy = effect.y - this.cameraY;
+      if (vx < 0 || vx >= this.viewWidth || vy < 0 || vy >= this.viewHeight) continue;
+
+      const px = vx * TILE_SIZE + TILE_SIZE / 2;
+      const py = vy * TILE_SIZE + TILE_SIZE / 2;
+      const progress = effect.time / effect.duration;
+
+      switch (effect.type) {
+        case 'damage': {
+          // ダメージ数字が上に浮かぶ
+          const offsetY = -20 * progress;
+          const alpha = 1 - progress;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = effect.color;
+          this.ctx.font = `bold ${effect.size}px sans-serif`;
+          this.ctx.textAlign = 'center';
+          this.ctx.strokeStyle = '#000';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeText(effect.text, px, py + offsetY);
+          this.ctx.fillText(effect.text, px, py + offsetY);
+          this.ctx.restore();
+          break;
+        }
+        case 'heal': {
+          // 回復エフェクト（緑の数字が上へ）
+          const offsetY = -20 * progress;
+          const alpha = 1 - progress;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = '#4f4';
+          this.ctx.font = `bold ${effect.size}px sans-serif`;
+          this.ctx.textAlign = 'center';
+          this.ctx.strokeStyle = '#000';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeText(effect.text, px, py + offsetY);
+          this.ctx.fillText(effect.text, px, py + offsetY);
+          this.ctx.restore();
+          break;
+        }
+        case 'slash': {
+          // 攻撃エフェクト（斬撃線）
+          const alpha = 1 - progress;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.strokeStyle = '#fff';
+          this.ctx.lineWidth = 3;
+          this.ctx.lineCap = 'round';
+          this.ctx.beginPath();
+          // 斜め線を描く
+          const len = 12 + progress * 8;
+          this.ctx.moveTo(px - len, py - len);
+          this.ctx.lineTo(px + len, py + len);
+          this.ctx.moveTo(px + len, py - len);
+          this.ctx.lineTo(px - len, py + len);
+          this.ctx.stroke();
+          this.ctx.restore();
+          break;
+        }
+        case 'pickup': {
+          // アイテム取得エフェクト（キラキラ）
+          const alpha = 1 - progress;
+          const scale = 1 + progress * 0.5;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fillStyle = '#ff0';
+          // 星形を描く
+          for (let i = 0; i < 4; i++) {
+            const angle = (Math.PI / 4) * i + progress * Math.PI;
+            const dist = 8 * scale;
+            const sx = px + Math.cos(angle) * dist;
+            const sy = py + Math.sin(angle) * dist;
+            this.ctx.beginPath();
+            this.ctx.arc(sx, sy, 2, 0, Math.PI * 2);
+            this.ctx.fill();
+          }
+          this.ctx.restore();
+          break;
+        }
+        case 'levelup': {
+          // レベルアップエフェクト（上昇する光の柱）
+          const alpha = 1 - progress;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha * 0.7;
+          const gradient = this.ctx.createLinearGradient(px, py + TILE_SIZE, px, py - TILE_SIZE * 2);
+          gradient.addColorStop(0, 'transparent');
+          gradient.addColorStop(0.5, '#ff0');
+          gradient.addColorStop(1, 'transparent');
+          this.ctx.fillStyle = gradient;
+          this.ctx.fillRect(px - 8, py - TILE_SIZE * (1 + progress), 16, TILE_SIZE * 2);
+          this.ctx.restore();
+          break;
+        }
+        case 'use': {
+          // アイテム使用エフェクト（波紋）
+          const alpha = 1 - progress;
+          const radius = 10 + progress * 20;
+          this.ctx.save();
+          this.ctx.globalAlpha = alpha;
+          this.ctx.strokeStyle = effect.color;
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.arc(px, py, radius, 0, Math.PI * 2);
+          this.ctx.stroke();
+          this.ctx.restore();
+          break;
+        }
+      }
+    }
   }
 
   /**
@@ -375,9 +753,10 @@ export class Renderer {
     const x = vx * TILE_SIZE;
     const y = vy * TILE_SIZE;
 
-    // スプライトがあれば使用
-    if (this.sprites['kaidan_32']) {
-      this.ctx.drawImage(this.sprites['kaidan_32'], x, y, TILE_SIZE, TILE_SIZE);
+    // スプライトがあれば使用（配列形式に対応）
+    const frames = this.sprites['kaidan_32'];
+    if (frames && frames.length > 0) {
+      this.ctx.drawImage(frames[0], x, y, TILE_SIZE, TILE_SIZE);
     } else {
       // フォールバック: シンプルな階段表示
       this.ctx.fillStyle = COLORS.stairs;
@@ -399,8 +778,9 @@ export class Renderer {
     const x = vx * TILE_SIZE;
     const y = vy * TILE_SIZE;
 
-    if (this.sprites['wana_32']) {
-      this.ctx.drawImage(this.sprites['wana_32'], x, y, TILE_SIZE, TILE_SIZE);
+    const frames = this.sprites['wana_32'];
+    if (frames && frames.length > 0) {
+      this.ctx.drawImage(frames[0], x, y, TILE_SIZE, TILE_SIZE);
     } else {
       this.ctx.fillStyle = COLORS.trapVisible;
       this.ctx.fillRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
@@ -417,8 +797,11 @@ export class Renderer {
     const y = vy * TILE_SIZE;
 
     const spriteId = item.sprite;
-    if (this.sprites[spriteId]) {
-      this.ctx.drawImage(this.sprites[spriteId], x, y, TILE_SIZE, TILE_SIZE);
+    const frames = this.sprites[spriteId];
+    if (frames && frames.length > 0) {
+      // アニメーションフレームを取得
+      const frameIndex = this.animationFrame % frames.length;
+      this.ctx.drawImage(frames[frameIndex], x, y, TILE_SIZE, TILE_SIZE);
     } else {
       // フォールバック
       this.ctx.fillStyle = '#8f8';
@@ -432,12 +815,32 @@ export class Renderer {
    * モンスター描画
    */
   drawMonster(vx, vy, monster) {
-    const x = vx * TILE_SIZE;
-    const y = vy * TILE_SIZE;
+    let x = vx * TILE_SIZE;
+    let y = vy * TILE_SIZE;
+
+    // 攻撃アニメーション中のオフセット（モンスターがプレイヤーを攻撃中）
+    if (this.attackAnimation && !this.attackAnimation.isPlayer) {
+      const anim = this.attackAnimation;
+      if (anim.attackerX === monster.x + this.cameraX && anim.attackerY === monster.y + this.cameraY) {
+        const progress = anim.time / anim.duration;
+        // 前半は前進、後半は戻る
+        const offset = progress < 0.5
+          ? progress * 2 * 8
+          : (1 - progress) * 2 * 8;
+        x += anim.dx * offset;
+        y += anim.dy * offset;
+      }
+    }
 
     const spriteId = monster.sprite;
-    if (this.sprites[spriteId]) {
-      this.ctx.drawImage(this.sprites[spriteId], x, y, TILE_SIZE, TILE_SIZE);
+    const frames = this.sprites[spriteId];
+
+    // 睡眠中はアニメーションしない
+    const isSleeping = monster.statusEffects?.sleeping > 0;
+
+    if (frames && frames.length > 0) {
+      const frameIndex = isSleeping ? 0 : (this.animationFrame % frames.length);
+      this.ctx.drawImage(frames[frameIndex], x, y, TILE_SIZE, TILE_SIZE);
     } else {
       // フォールバック: 赤い円
       this.ctx.fillStyle = monster.isBoss ? '#f44' : '#c44';
@@ -458,18 +861,48 @@ export class Renderer {
       this.ctx.fillStyle = '#f44';
       this.ctx.fillRect(x + 2, y - 6, (TILE_SIZE - 4) * hpRatio, 4);
     }
+
+    // 状態異常表示
+    if (monster.statusEffects?.confused > 0) {
+      this.ctx.fillStyle = '#ff0';
+      this.ctx.font = '12px sans-serif';
+      this.ctx.fillText('?', x + TILE_SIZE - 6, y + 10);
+    }
+    if (isSleeping) {
+      this.ctx.fillStyle = '#88f';
+      this.ctx.font = '10px sans-serif';
+      this.ctx.fillText('Zzz', x + TILE_SIZE - 12, y + 10);
+    }
   }
 
   /**
    * プレイヤー描画
    */
   drawPlayer(vx, vy, player) {
-    const x = vx * TILE_SIZE;
-    const y = vy * TILE_SIZE;
+    let x = vx * TILE_SIZE;
+    let y = vy * TILE_SIZE;
+
+    // 攻撃アニメーション中のオフセット（プレイヤーが攻撃中）
+    if (this.attackAnimation && this.attackAnimation.isPlayer) {
+      const anim = this.attackAnimation;
+      const progress = anim.time / anim.duration;
+      // 前半は前進、後半は戻る
+      const offset = progress < 0.5
+        ? progress * 2 * 8
+        : (1 - progress) * 2 * 8;
+      x += anim.dx * offset;
+      y += anim.dy * offset;
+    }
 
     const spriteId = player.sprite;
-    if (this.sprites[spriteId]) {
-      this.ctx.drawImage(this.sprites[spriteId], x, y, TILE_SIZE, TILE_SIZE);
+    const frames = this.sprites[spriteId];
+
+    // 睡眠中はアニメーションしない
+    const isSleeping = player.statusEffects?.sleeping > 0;
+
+    if (frames && frames.length > 0) {
+      const frameIndex = isSleeping ? 0 : (this.animationFrame % frames.length);
+      this.ctx.drawImage(frames[frameIndex], x, y, TILE_SIZE, TILE_SIZE);
     } else {
       // フォールバック: 青い円
       this.ctx.fillStyle = '#48f';
@@ -483,12 +916,12 @@ export class Renderer {
     }
 
     // 状態異常表示
-    if (player.statusEffects.confused > 0) {
+    if (player.statusEffects?.confused > 0) {
       this.ctx.fillStyle = '#ff0';
       this.ctx.font = '16px sans-serif';
       this.ctx.fillText('?', x + TILE_SIZE - 8, y + 8);
     }
-    if (player.statusEffects.sleeping > 0) {
+    if (isSleeping) {
       this.ctx.fillStyle = '#88f';
       this.ctx.font = '12px sans-serif';
       this.ctx.fillText('Zzz', x + TILE_SIZE - 12, y + 8);
