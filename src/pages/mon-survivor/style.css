@@ -82,11 +82,33 @@ canvas {
     box-shadow: 0 5px 0 #c0392b;
 }
 
+.start-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-link {
+    background: rgba(255, 165, 2, 0.2);
+    color: #ffa502;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 2px solid #ffa502;
+    transition: all 0.2s;
+}
+
+.settings-link:hover {
+    background: rgba(255, 165, 2, 0.4);
+}
+
 .portal-link {
     color: #ccc;
     text-decoration: none;
     font-size: 1rem;
-    margin-top: 10px;
 }
 
 /* UI Overlay */

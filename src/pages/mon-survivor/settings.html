@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>設定 - モンスターサバイバー</title>
+    <link rel="stylesheet" href="settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="settings-container">
+        <header class="settings-header">
+            <a href="./index.html" class="back-btn">← 戻る</a>
+            <h1>プレイヤー設定</h1>
+        </header>
+
+        <main class="settings-main">
+            <!-- 現在のスキン -->
+            <section class="current-section">
+                <h2>現在のスキン</h2>
+                <div class="current-preview-card">
+                    <img id="currentPreview" class="current-preview-img" src="" alt="現在のスキン">
+                    <div class="current-info">
+                        <div id="currentName" class="current-name">読み込み中...</div>
+                        <div id="currentNote" class="current-note"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- タブ切り替え -->
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="sample">サンプル</button>
+                <button class="tab-btn" data-tab="myart">自作ドット絵</button>
+                <button class="tab-btn" data-tab="pokemon">ポケモン図鑑</button>
+            </div>
+
+            <!-- サンプルタブ -->
+            <section id="tab-sample" class="tab-content active">
+                <div class="search-box">
+                    <input type="text" id="sampleSearch" placeholder="サンプルを検索..." class="search-input">
+                </div>
+                <div id="sampleList" class="skin-grid"></div>
+            </section>
+
+            <!-- 自作ドット絵タブ -->
+            <section id="tab-myart" class="tab-content">
+                <p id="assetHint" class="hint-text">読み込み中...</p>
+                <button id="refreshBtn" class="refresh-btn">更新</button>
+                <div id="assetList" class="skin-grid"></div>
+            </section>
+
+            <!-- ポケモン図鑑タブ -->
+            <section id="tab-pokemon" class="tab-content">
+                <div class="search-box">
+                    <input type="text" id="pokemonSearch" placeholder="ポケモンを検索..." class="search-input">
+                </div>
+                <div id="pokemonList" class="skin-grid"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="./settings.js"></script>
+</body>
+
+</html>
