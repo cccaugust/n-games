@@ -119,7 +119,8 @@ export class Renderer {
    */
   async loadSprites() {
     try {
-      const res = await fetch('/pages/pixel-art-maker/samples.json');
+      // 相対パス（GitHub Pages 対応）
+      const res = await fetch('../../pages/pixel-art-maker/samples.json');
       const data = await res.json();
 
       for (const sample of data.samples) {
