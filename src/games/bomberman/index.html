@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>ボンバーマン | N-Games</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- タイトル画面 -->
+  <div id="titleScreen" class="screen active">
+    <div class="title-container">
+      <h1 class="game-title">
+        <span class="bomb-icon">💣</span>
+        ボンバーマン
+        <span class="bomb-icon">💣</span>
+      </h1>
+      <p class="subtitle">爆弾で道を切り開け！</p>
+
+      <div class="menu-buttons">
+        <button id="startGameBtn" class="menu-btn primary">
+          <span class="btn-icon">▶</span>
+          ゲームスタート
+        </button>
+        <button id="stageSelectBtn" class="menu-btn">
+          <span class="btn-icon">📋</span>
+          ステージ選択
+        </button>
+        <button id="skinSelectBtn" class="menu-btn">
+          <span class="btn-icon">👤</span>
+          スキン変更
+        </button>
+        <button id="stageEditorBtn" class="menu-btn">
+          <span class="btn-icon">🔧</span>
+          ステージエディター
+        </button>
+        <button id="enemyEditorBtn" class="menu-btn">
+          <span class="btn-icon">👾</span>
+          敵エディター
+        </button>
+      </div>
+
+      <div class="current-skin">
+        <span>現在のスキン:</span>
+        <canvas id="skinPreview" width="32" height="32"></canvas>
+        <span id="skinName">デフォルト</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ステージ選択画面 -->
+  <div id="stageSelectScreen" class="screen">
+    <div class="screen-header">
+      <button id="stageSelectBackBtn" class="back-btn">← 戻る</button>
+      <h2>ステージ選択</h2>
+    </div>
+    <div class="stage-tabs">
+      <button class="tab-btn active" data-tab="default">デフォルト</button>
+      <button class="tab-btn" data-tab="custom">カスタム</button>
+    </div>
+    <div id="stageList" class="stage-list"></div>
+  </div>
+
+  <!-- スキン選択画面 -->
+  <div id="skinSelectScreen" class="screen">
+    <div class="screen-header">
+      <button id="skinSelectBackBtn" class="back-btn">← 戻る</button>
+      <h2>スキン変更</h2>
+    </div>
+    <div class="skin-tabs">
+      <button class="tab-btn active" data-tab="sample">サンプル</button>
+      <button class="tab-btn" data-tab="myart">マイ作品</button>
+      <button class="tab-btn" data-tab="pokemon">ポケモン</button>
+    </div>
+    <div id="skinList" class="skin-list"></div>
+  </div>
+
+  <!-- ステージエディター画面 -->
+  <div id="stageEditorScreen" class="screen">
+    <div class="screen-header">
+      <button id="editorBackBtn" class="back-btn">← 戻る</button>
+      <h2>ステージエディター</h2>
+      <div class="editor-actions">
+        <button id="testStageBtn" class="action-btn">テストプレイ</button>
+        <button id="saveStageBtn" class="action-btn primary">保存</button>
+      </div>
+    </div>
+    <div class="editor-container">
+      <div class="editor-sidebar">
+        <div class="tool-section">
+          <h3>配置ツール</h3>
+          <div id="placementTools" class="tool-grid"></div>
+        </div>
+        <div class="tool-section">
+          <h3>敵の配置</h3>
+          <div id="enemyTools" class="tool-grid"></div>
+        </div>
+        <div class="tool-section">
+          <h3>ステージ設定</h3>
+          <div class="setting-row">
+            <label>ステージ名</label>
+            <input type="text" id="stageName" placeholder="ステージ名">
+          </div>
+          <div class="setting-row">
+            <label>幅</label>
+            <input type="number" id="stageWidth" min="9" max="21" value="15">
+          </div>
+          <div class="setting-row">
+            <label>高さ</label>
+            <input type="number" id="stageHeight" min="9" max="15" value="13">
+          </div>
+          <div class="setting-row">
+            <label>制限時間（秒）</label>
+            <input type="number" id="stageTimeLimit" min="60" max="300" value="180">
+          </div>
+        </div>
+        <div class="tool-section">
+          <h3>アイテム出現率</h3>
+          <div class="item-rates" id="itemRates"></div>
+        </div>
+      </div>
+      <div class="editor-main">
+        <canvas id="editorCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 敵エディター画面 -->
+  <div id="enemyEditorScreen" class="screen">
+    <div class="screen-header">
+      <button id="enemyEditorBackBtn" class="back-btn">← 戻る</button>
+      <h2>敵エディター</h2>
+    </div>
+    <div class="enemy-editor-container">
+      <div class="enemy-list-panel">
+        <h3>敵一覧</h3>
+        <div id="enemyListPanel" class="enemy-list"></div>
+        <button id="createNewEnemyBtn" class="action-btn primary">+ 新しい敵を作成</button>
+      </div>
+      <div class="enemy-edit-panel">
+        <h3>敵の設定</h3>
+        <div class="enemy-form">
+          <div class="setting-row">
+            <label>名前</label>
+            <input type="text" id="enemyName" placeholder="敵の名前">
+          </div>
+          <div class="setting-row">
+            <label>スプライト</label>
+            <button id="selectEnemySpriteBtn" class="sprite-select-btn">
+              <canvas id="enemySpritePreview" width="32" height="32"></canvas>
+              <span>選択</span>
+            </button>
+          </div>
+          <div class="setting-row">
+            <label>移動速度</label>
+            <input type="range" id="enemySpeed" min="0.5" max="3" step="0.1" value="1">
+            <span id="enemySpeedValue">1.0</span>
+          </div>
+          <div class="setting-row">
+            <label>行動パターン</label>
+            <select id="enemyPattern">
+              <option value="random">ランダム</option>
+              <option value="chase">追跡</option>
+              <option value="patrol">パトロール</option>
+              <option value="smart">賢い</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <label>壁すり抜け</label>
+            <input type="checkbox" id="enemyWallPass">
+          </div>
+          <div class="setting-row">
+            <label>爆弾すり抜け</label>
+            <input type="checkbox" id="enemyBombPass">
+          </div>
+          <button id="saveEnemyBtn" class="action-btn primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="gameScreen" class="screen">
+    <div class="game-hud">
+      <div class="hud-left">
+        <div class="hud-item">
+          <span class="hud-icon">⏱</span>
+          <span id="timeDisplay">3:00</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-icon">📋</span>
+          <span id="stageDisplay">1-1</span>
+        </div>
+      </div>
+      <div class="hud-center">
+        <div class="hud-item lives">
+          <span id="livesDisplay">❤️❤️❤️</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-item">
+          <span class="hud-icon">💣</span>
+          <span id="bombCount">1</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-icon">🔥</span>
+          <span id="fireRange">1</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-icon">👟</span>
+          <span id="speedLevel">1</span>
+        </div>
+        <button id="pauseBtn" class="hud-btn">⏸</button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- モバイル操作 -->
+    <div class="mobile-controls">
+      <div class="dpad">
+        <button class="dpad-btn up" data-dir="up">▲</button>
+        <button class="dpad-btn left" data-dir="left">◀</button>
+        <button class="dpad-btn right" data-dir="right">▶</button>
+        <button class="dpad-btn down" data-dir="down">▼</button>
+      </div>
+      <button class="bomb-btn" id="placeBombBtn">💣</button>
+    </div>
+  </div>
+
+  <!-- ポーズ画面 -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>ポーズ</h2>
+      <div class="overlay-buttons">
+        <button id="resumeBtn" class="menu-btn primary">再開</button>
+        <button id="restartBtn" class="menu-btn">リトライ</button>
+        <button id="quitBtn" class="menu-btn">タイトルへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ステージクリア画面 -->
+  <div id="clearOverlay" class="overlay hidden">
+    <div class="overlay-content clear">
+      <h2>ステージクリア！</h2>
+      <div class="clear-stats">
+        <div class="stat-row">
+          <span>タイム</span>
+          <span id="clearTime">2:30</span>
+        </div>
+        <div class="stat-row">
+          <span>スコア</span>
+          <span id="clearScore">10000</span>
+        </div>
+      </div>
+      <div class="overlay-buttons">
+        <button id="nextStageBtn" class="menu-btn primary">次のステージ</button>
+        <button id="clearQuitBtn" class="menu-btn">タイトルへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ゲームオーバー画面 -->
+  <div id="gameOverOverlay" class="overlay hidden">
+    <div class="overlay-content gameover">
+      <h2>ゲームオーバー</h2>
+      <div class="overlay-buttons">
+        <button id="retryBtn" class="menu-btn primary">リトライ</button>
+        <button id="gameOverQuitBtn" class="menu-btn">タイトルへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- スプライト選択モーダル -->
+  <div id="spriteModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>スプライトを選択</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="sprite-tabs">
+        <button class="tab-btn active" data-tab="sample">サンプル</button>
+        <button class="tab-btn" data-tab="myart">マイ作品</button>
+      </div>
+      <div id="spriteGrid" class="sprite-grid"></div>
+    </div>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>

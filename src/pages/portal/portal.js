@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'bomberman',
+    title: 'ボンバーマン',
+    desc: '爆弾で道を切り開け！ステージエディター付き💣',
+    color: '#ff6b35',
+    icon: '💣',
+    link: '/games/bomberman/'
+  },
+  {
     id: 'voice-beat-lab',
     title: 'ボイスビートラボ',
     desc: 'こえでドラム！ヘンテコ曲づくり🎤',
