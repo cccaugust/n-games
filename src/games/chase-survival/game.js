@@ -924,14 +924,6 @@ function setupEventListeners() {
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup', onKeyUp);
 
-  // マウス操作（PC用視点操作）
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('click', () => {
-    if (gameState.isPlaying && !gameState.isPaused) {
-      renderer.domElement.requestPointerLock?.();
-    }
-  });
-
   // タッチ操作（ジョイスティック）
   setupJoystick();
 
@@ -1002,13 +994,6 @@ function onKeyUp(e) {
       input.right = false;
       break;
   }
-}
-
-function onMouseMove(e) {
-  if (!gameState.isPlaying || gameState.isPaused) return;
-  if (document.pointerLockElement !== renderer.domElement) return;
-
-  playerState.rotation -= e.movementX * 0.003;
 }
 
 function setupJoystick() {
@@ -1147,7 +1132,6 @@ function clearGameObjects() {
 function pauseGame() {
   gameState.isPaused = true;
   elements.pauseScreen.classList.add('active');
-  document.exitPointerLock?.();
 }
 
 function resumeGame() {
@@ -1164,7 +1148,6 @@ function showTitleScreen() {
   elements.hud.style.display = 'none';
   elements.minimap.style.display = 'none';
   elements.controls.style.display = 'none';
-  document.exitPointerLock?.();
 }
 
 function gameOver() {
@@ -1181,7 +1164,6 @@ function gameOver() {
   elements.controls.style.display = 'none';
 
   playSound('gameover');
-  document.exitPointerLock?.();
 }
 
 function activateDash() {
@@ -1267,27 +1249,20 @@ function update(delta) {
 }
 
 function updatePlayer(delta) {
-  // 移動入力を取得
+  // 移動入力を取得（ワールド座標基準）
   let moveX = 0;
   let moveZ = 0;
 
-  if (input.forward || input.joystickY > 0.1) {
-    moveZ -= input.joystickY || 1;
-  }
-  if (input.backward || input.joystickY < -0.1) {
-    moveZ -= input.joystickY || -1;
-  }
-  if (input.left || input.joystickX < -0.1) {
-    moveX -= input.joystickX ? -input.joystickX : 1;
-  }
-  if (input.right || input.joystickX > 0.1) {
-    moveX -= input.joystickX ? -input.joystickX : -1;
-  }
+  // キーボード入力
+  if (input.forward) moveZ -= 1;
+  if (input.backward) moveZ += 1;
+  if (input.left) moveX -= 1;
+  if (input.right) moveX += 1;
 
-  // ジョイスティックで回転
+  // ジョイスティック入力（キーボードより優先）
   if (Math.abs(input.joystickX) > 0.1 || Math.abs(input.joystickY) > 0.1) {
-    const targetRotation = Math.atan2(-input.joystickX, -input.joystickY);
-    playerState.rotation = targetRotation;
+    moveX = input.joystickX;
+    moveZ = -input.joystickY; // 上方向が負のZ
   }
 
   // 速度計算
@@ -1299,10 +1274,11 @@ function updatePlayer(delta) {
     speed *= 1.5;
   }
 
-  // 移動方向をカメラ基準で変換
+  // 移動方向を正規化してワールド座標で直接移動
   const direction = new THREE.Vector3(moveX, 0, moveZ).normalize();
   if (direction.length() > 0) {
-    direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerState.rotation);
+    // プレイヤーの向きを移動方向に合わせる
+    playerState.rotation = Math.atan2(direction.x, direction.z);
 
     const targetVelocity = direction.multiplyScalar(speed);
     playerState.velocity.lerp(targetVelocity, 0.15);
@@ -1454,9 +1430,8 @@ function addHunter() {
 }
 
 function updateCamera() {
-  // 3人称視点カメラ
-  const cameraOffset = new THREE.Vector3(0, 12, 18);
-  cameraOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerState.rotation);
+  // 3人称視点カメラ（固定角度でプレイヤーを追従）
+  const cameraOffset = new THREE.Vector3(0, 15, 20);
 
   const targetPosition = player.position.clone().add(cameraOffset);
   camera.position.lerp(targetPosition, 0.08);
