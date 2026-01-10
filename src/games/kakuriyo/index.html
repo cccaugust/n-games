@@ -436,6 +436,117 @@
     .death-stats p {
       margin: 4px 0;
     }
+
+    /* フェーズ表示 */
+    .phase-display {
+      font-size: 11px;
+      color: var(--primary);
+      background: rgba(139, 92, 246, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* フェーズ移行オーバーレイ */
+    .phase-transition {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 400;
+      animation: phaseIn 0.5s ease-out;
+    }
+
+    .phase-transition.hidden {
+      display: none;
+    }
+
+    @keyframes phaseIn {
+      0% { opacity: 0; transform: scale(1.1); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .phase-transition .phase-name {
+      font-size: 42px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #c084fc, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5)); }
+      50% { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8)); }
+    }
+
+    .phase-transition .phase-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .phase-transition .phase-desc {
+      font-size: 14px;
+      color: var(--text-primary);
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .phase-transition .phase-floor {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+
+    /* クリア画面 */
+    .clear-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(20, 20, 50, 0.95), rgba(50, 30, 80, 0.95));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 350;
+    }
+
+    .clear-screen.hidden {
+      display: none;
+    }
+
+    .clear-screen h2 {
+      font-size: 36px;
+      background: linear-gradient(135deg, #f0c040, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .clear-screen .clear-stats {
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .clear-screen .clear-stats p {
+      margin: 6px 0;
+      font-size: 15px;
+    }
   </style>
 </head>
 <body>
@@ -443,7 +554,10 @@
     <header class="header">
       <a href="../../pages/portal/portal.html">← もどる</a>
       <h1>幽世の試練</h1>
-      <span id="floorDisplay">B1F</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="phase-display" id="phaseDisplay">黄泉路</span>
+        <span id="floorDisplay">B1F</span>
+      </div>
     </header>
 
     <div class="hud">
@@ -542,6 +656,25 @@
       <p>獲得経験値: <span id="deathExp">0</span></p>
     </div>
     <button class="menu-btn" id="btnRetry">もう一度挑戦</button>
+  </div>
+
+  <!-- フェーズ移行オーバーレイ -->
+  <div class="phase-transition hidden" id="phaseTransition">
+    <div class="phase-name" id="phaseName">古戦場</div>
+    <div class="phase-subtitle" id="phaseSubtitle">こせんじょう</div>
+    <div class="phase-desc" id="phaseDesc">幾多の合戦が繰り広げられた地。武者の怨念が渦巻く</div>
+    <div class="phase-floor" id="phaseFloor">B11F ～ B25F</div>
+  </div>
+
+  <!-- クリア画面 -->
+  <div class="clear-screen hidden" id="clearScreen">
+    <h2>踏破達成！</h2>
+    <p style="color: var(--text-primary); margin-bottom: 16px;">幽世塔を制覇し、現世への道が開いた...</p>
+    <div class="clear-stats">
+      <p>最終レベル: <span id="clearLevel">1</span></p>
+      <p>総ターン数: <span id="clearTurns">0</span></p>
+    </div>
+    <button class="menu-btn" id="btnClearOk" onclick="location.reload()">タイトルへ</button>
   </div>
 
   <script type="module" src="./game.js"></script>

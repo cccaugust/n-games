@@ -9,6 +9,7 @@ import { Monster, createMonster } from './entities/Monster.js';
 import { Renderer } from './ui/Renderer.js';
 import { MONSTERS, getRandomMonster } from './data/monsters.js';
 import { ALL_ITEMS, getRandomItem } from './data/items.js';
+import { PHASES, getPhaseForFloor, checkPhaseChange } from './data/phases.js';
 
 // ゲーム状態
 const STATE = {
@@ -25,6 +26,9 @@ class Game {
     this.state = STATE.TITLE;
     this.floor = 1;
     this.maxFloor = 100;
+
+    // フェーズ管理
+    this.currentPhase = null;
 
     // ダンジョンデータ
     this.dungeon = null;
@@ -223,12 +227,17 @@ class Game {
     this.messages = [];
     this.turnCount = 0;
 
+    // フェーズ初期化
+    this.currentPhase = getPhaseForFloor(this.floor);
+    this.renderer.setPhase(this.currentPhase);
+
     this.generateFloor();
 
     this.state = STATE.PLAYING;
     this.hideOverlay('titleScreen');
 
     this.addMessage('幽世塔の探索を開始した...');
+    this.addMessage(`【${this.currentPhase.name}】${this.currentPhase.description}`);
     this.render();
     this.updateUI();
   }
@@ -585,19 +594,80 @@ class Game {
    * 階段を降りる
    */
   descendStairs() {
+    const prevFloor = this.floor;
     this.floor++;
 
     if (this.floor > this.maxFloor) {
       // クリア
       this.state = STATE.CLEAR;
       this.addMessage('幽世塔を踏破した！現世への道が開いた...');
+      this.showClearScreen();
       return;
     }
 
-    this.addMessage(`B${this.floor}Fに降りた`);
+    // フェーズ変更チェック
+    const newPhase = checkPhaseChange(prevFloor, this.floor);
+    if (newPhase) {
+      this.currentPhase = newPhase;
+      this.renderer.setPhase(this.currentPhase);
+      this.showPhaseTransition(newPhase);
+    } else {
+      this.addMessage(`B${this.floor}Fに降りた`);
+    }
+
     this.generateFloor();
     this.render();
     this.updateUI();
+  }
+
+  /**
+   * フェーズ移行演出を表示
+   */
+  showPhaseTransition(phase) {
+    this.inputEnabled = false;
+
+    // フェーズ移行オーバーレイを表示
+    const overlay = document.getElementById('phaseTransition');
+    const phaseName = document.getElementById('phaseName');
+    const phaseSubtitle = document.getElementById('phaseSubtitle');
+    const phaseDesc = document.getElementById('phaseDesc');
+    const phaseFloor = document.getElementById('phaseFloor');
+
+    if (overlay && phaseName && phaseSubtitle && phaseDesc && phaseFloor) {
+      phaseName.textContent = phase.name;
+      phaseSubtitle.textContent = phase.subtitle;
+      phaseDesc.textContent = phase.description;
+      phaseFloor.textContent = `B${this.floor}F ～ B${phase.floors[1]}F`;
+
+      overlay.classList.remove('hidden');
+      overlay.style.background = phase.bgColor;
+
+      // 3秒後に自動で閉じる
+      setTimeout(() => {
+        overlay.classList.add('hidden');
+        this.inputEnabled = true;
+        this.addMessage(`【${phase.name}】に足を踏み入れた...`);
+        this.addMessage(phase.description);
+      }, 2500);
+    } else {
+      // オーバーレイがない場合はメッセージのみ
+      this.addMessage(`B${this.floor}Fに降りた`);
+      this.addMessage(`【${phase.name}】に足を踏み入れた...`);
+      this.addMessage(phase.description);
+      this.inputEnabled = true;
+    }
+  }
+
+  /**
+   * クリア画面を表示
+   */
+  showClearScreen() {
+    const overlay = document.getElementById('clearScreen');
+    if (overlay) {
+      document.getElementById('clearLevel').textContent = this.player.level;
+      document.getElementById('clearTurns').textContent = this.turnCount;
+      overlay.classList.remove('hidden');
+    }
   }
 
   /**
@@ -769,10 +839,15 @@ class Game {
     this.messages = [];
     this.turnCount = 0;
 
+    // フェーズ初期化
+    this.currentPhase = getPhaseForFloor(this.floor);
+    this.renderer.setPhase(this.currentPhase);
+
     this.generateFloor();
     this.state = STATE.PLAYING;
 
     this.addMessage('幽世塔の探索を再開した...');
+    this.addMessage(`【${this.currentPhase.name}】${this.currentPhase.description}`);
     this.render();
     this.updateUI();
   }
@@ -1086,6 +1161,12 @@ HP: ${p.hp}/${p.maxHp}
     document.getElementById('levelText').textContent = p.level;
     document.getElementById('strengthText').textContent = p.strength;
     document.getElementById('goldText').textContent = p.gold;
+
+    // フェーズ名を更新
+    const phaseDisplay = document.getElementById('phaseDisplay');
+    if (phaseDisplay && this.currentPhase) {
+      phaseDisplay.textContent = this.currentPhase.name;
+    }
   }
 
   /**
