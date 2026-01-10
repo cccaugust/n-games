@@ -383,12 +383,12 @@ function startGame(stage) {
   gameTime = 0;
   score = 0;
 
-  // Setup canvas
-  setupCanvas();
-
-  // Show game screen
+  // Show game screen first (so container has dimensions)
   showScreen('game');
   gameState = 'playing';
+
+  // Setup canvas after screen is visible
+  setupCanvas();
 
   // Start game loop
   resumeAudio();
