@@ -729,7 +729,11 @@ class AquariumScene extends Phaser.Scene {
       }
     });
 
-    this.events.emit('ready');
+    // シーンが初期化されたので、外部の scene 変数を設定
+    scene = this;
+    this.setEmptyHintVisible(fishes.length === 0);
+    // Phaser起動前に追加された魚があれば同期
+    fishes.forEach((f) => syncToScene(f));
   }
 
   makeBubbleTexture() {
@@ -821,7 +825,7 @@ class AquariumScene extends Phaser.Scene {
       sprite.setData('seed', Math.random() * 1000);
       sprite.setInteractive({ useHandCursor: true });
       sprite.on('pointerdown', () => {
-        this.events.emit('fishTapped', fish.id);
+        openFishModal(String(fish.id));
       });
 
       const obj = {
@@ -1225,17 +1229,6 @@ void loadPalette();
 // Init Phaser
 // -----------------------
 const aquariumScene = new AquariumScene();
-
-aquariumScene.events.on('ready', () => {
-  scene = aquariumScene;
-  scene.setEmptyHintVisible(fishes.length === 0);
-  // If fishes were added before Phaser finished booting, sync them now.
-  fishes.forEach((f) => syncToScene(f));
-});
-
-aquariumScene.events.on('fishTapped', (fishId) => {
-  openFishModal(String(fishId));
-});
 
 const PHASER_PARENT_ID = 'phaserRoot';
 
