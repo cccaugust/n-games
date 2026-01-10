@@ -984,7 +984,7 @@ function setupPlacementTools() {
   });
 }
 
-function setupEnemyTools() {
+async function setupEnemyTools() {
   const container = document.getElementById('enemyTools');
   container.innerHTML = '';
 
@@ -992,11 +992,41 @@ function setupEnemyTools() {
   const customEnemies = loadCustomEnemies();
   customEnemies.forEach(e => allEnemies[e.id] = e);
 
-  Object.entries(allEnemies).forEach(([id, enemy]) => {
+  for (const [id, enemy] of Object.entries(allEnemies)) {
     const btn = document.createElement('button');
     btn.className = `tool-btn ${editorEnemyType === id ? 'active' : ''}`;
-    btn.style.background = enemy.color;
     btn.title = enemy.name;
+
+    // スプライトが設定されている場合はcanvasで描画
+    if (enemy.spriteId && enemy.spriteSource) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 32;
+      canvas.height = 32;
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+
+      const spriteData = await loadSpriteData({
+        source: enemy.spriteSource,
+        sampleId: enemy.spriteSource === 'sample' ? enemy.spriteId : undefined,
+        assetId: enemy.spriteSource === 'asset' ? enemy.spriteId : undefined
+      });
+
+      if (spriteData && spriteData.frames && spriteData.frames[0]) {
+        const frame = spriteData.frames[0].imageData;
+        ctx.drawImage(frame, 0, 0, 32, 32);
+      } else {
+        // フォールバック
+        ctx.fillStyle = enemy.color || '#ff6b6b';
+        ctx.beginPath();
+        ctx.arc(16, 16, 12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      btn.appendChild(canvas);
+    } else {
+      // スプライトがない場合は色で背景を設定
+      btn.style.background = enemy.color;
+    }
+
     btn.addEventListener('click', () => {
       editorTool = 'enemy';
       editorEnemyType = id;
@@ -1004,7 +1034,7 @@ function setupEnemyTools() {
       setupEnemyTools();
     });
     container.appendChild(btn);
-  });
+  }
 }
 
 function setupItemRates() {
@@ -1234,7 +1264,7 @@ function renderEnemyList() {
   });
 }
 
-function updateEnemyForm() {
+async function updateEnemyForm() {
   document.getElementById('enemyName').value = editingEnemy.name;
   document.getElementById('enemySpeed').value = editingEnemy.speed;
   document.getElementById('enemySpeedValue').textContent = editingEnemy.speed.toFixed(1);
@@ -1246,6 +1276,22 @@ function updateEnemyForm() {
   const preview = document.getElementById('enemySpritePreview');
   const ctx = preview.getContext('2d');
   ctx.clearRect(0, 0, 32, 32);
+
+  // スプライトが設定されている場合はそれを描画
+  if (editingEnemy.spriteId && editingEnemy.spriteSource) {
+    const spriteData = await loadSpriteData({
+      source: editingEnemy.spriteSource,
+      sampleId: editingEnemy.spriteSource === 'sample' ? editingEnemy.spriteId : undefined,
+      assetId: editingEnemy.spriteSource === 'asset' ? editingEnemy.spriteId : undefined
+    });
+    if (spriteData && spriteData.frames && spriteData.frames[0]) {
+      const frame = spriteData.frames[0].imageData;
+      ctx.drawImage(frame, 0, 0, 32, 32);
+      return;
+    }
+  }
+
+  // フォールバック: 色の円を描画
   ctx.fillStyle = editingEnemy.color || '#ff6b6b';
   ctx.beginPath();
   ctx.arc(16, 16, 12, 0, Math.PI * 2);
@@ -1470,6 +1516,128 @@ function setupEventListeners() {
     initEnemyEditor();
     alert('敵を保存しました！');
   });
+
+  // Sprite selection modal
+  const spriteModal = document.getElementById('spriteModal');
+  const spriteGrid = document.getElementById('spriteGrid');
+  let currentSpriteTab = 'sample';
+
+  document.getElementById('selectEnemySpriteBtn')?.addEventListener('click', async () => {
+    spriteModal?.classList.remove('hidden');
+    await renderSpriteGrid();
+  });
+
+  spriteModal?.querySelector('.modal-close')?.addEventListener('click', () => {
+    spriteModal?.classList.add('hidden');
+  });
+
+  spriteModal?.addEventListener('click', (e) => {
+    if (e.target === spriteModal) {
+      spriteModal.classList.add('hidden');
+    }
+  });
+
+  // Sprite tabs
+  document.querySelectorAll('.sprite-tabs .tab-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.sprite-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSpriteTab = btn.dataset.tab;
+      await renderSpriteGrid();
+    });
+  });
+
+  async function renderSpriteGrid() {
+    if (!spriteGrid) return;
+    spriteGrid.innerHTML = '<div style="padding: 20px; text-align: center;">読み込み中...</div>';
+
+    try {
+      let items = [];
+
+      if (currentSpriteTab === 'sample') {
+        const samples = await loadSamples();
+        items = samples.map(s => ({
+          id: s.id,
+          name: s.name,
+          source: 'sample',
+          width: s.width,
+          height: s.height,
+          frames: s.frames
+        }));
+      } else if (currentSpriteTab === 'myart') {
+        try {
+          const { listAssets } = await import('../../js/pixelAssets.js');
+          const assets = await listAssets();
+          items = assets.map(a => ({
+            id: a.id,
+            name: a.name,
+            source: 'asset',
+            width: a.width,
+            height: a.height,
+            frames: a.frames || [{ pixels: a.pixels }]
+          }));
+        } catch (e) {
+          console.log('No assets found');
+        }
+      }
+
+      if (items.length === 0) {
+        spriteGrid.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted);">
+          ${currentSpriteTab === 'sample' ? 'サンプルがありません' : 'マイ作品がありません'}
+        </div>`;
+        return;
+      }
+
+      spriteGrid.innerHTML = '';
+      for (const item of items) {
+        const div = document.createElement('div');
+        div.className = 'sprite-item';
+        div.title = item.name;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 32;
+        canvas.height = 32;
+        const ctx = canvas.getContext('2d');
+
+        // フレームを描画
+        if (item.frames && item.frames[0]) {
+          const frame = item.frames[0];
+          if (frame.pixelsB64) {
+            const pixels = decodePixelsB64(frame.pixelsB64);
+            const imgCanvas = createImageFromPixels(pixels, item.width, item.height);
+            if (imgCanvas) {
+              ctx.drawImage(imgCanvas, 0, 0, 32, 32);
+            }
+          } else if (frame.pixels) {
+            const imgCanvas = createImageFromPixels(frame.pixels, item.width, item.height);
+            if (imgCanvas) {
+              ctx.drawImage(imgCanvas, 0, 0, 32, 32);
+            }
+          }
+        }
+
+        div.appendChild(canvas);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'sprite-name';
+        nameSpan.textContent = item.name;
+        div.appendChild(nameSpan);
+
+        div.addEventListener('click', () => {
+          editingEnemy.spriteId = item.id;
+          editingEnemy.spriteSource = item.source;
+          spriteModal.classList.add('hidden');
+          updateEnemyForm();
+          playSound('menu_select');
+        });
+
+        spriteGrid.appendChild(div);
+      }
+    } catch (e) {
+      console.error('Failed to load sprites:', e);
+      spriteGrid.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--danger);">読み込みに失敗しました</div>';
+    }
+  }
 
   // Window resize
   window.addEventListener('resize', () => {
