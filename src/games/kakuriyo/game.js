@@ -51,6 +51,10 @@ class Game {
     this.lastMoveTime = 0;
     this.moveDelay = 150;
 
+    // ダッシュ用
+    this.lastDirection = { dx: 0, dy: 0 };
+    this.isDashing = false;
+
     // メッセージログ
     this.messages = [];
 
@@ -111,6 +115,9 @@ class Game {
 
     // インベントリ
     document.getElementById('btnCloseInventory')?.addEventListener('click', () => this.closeInventory());
+
+    // ステータスパネル
+    document.getElementById('btnCloseStatus')?.addEventListener('click', () => this.closeStatus());
 
     // 死亡画面
     document.getElementById('btnRetry')?.addEventListener('click', () => this.restartGame());
@@ -247,14 +254,177 @@ class Game {
    */
   continueGame() {
     const saveData = localStorage.getItem('kakuriyo_save');
-    if (saveData) {
-      // TODO: セーブデータのロード
-      this.addMessage('セーブデータを読み込みました');
-    } else {
-      this.addMessage('セーブデータがありません');
+    if (!saveData) {
+      alert('セーブデータがありません');
+      return;
     }
-    // とりあえず新規ゲーム
-    this.startNewGame();
+
+    try {
+      const data = JSON.parse(saveData);
+      this.loadGame(data);
+      this.state = STATE.PLAYING;
+      this.hideOverlay('titleScreen');
+      this.addMessage('セーブデータを読み込みました');
+      this.render();
+      this.updateUI();
+    } catch (e) {
+      console.error('セーブデータの読み込みに失敗:', e);
+      alert('セーブデータの読み込みに失敗しました');
+    }
+  }
+
+  /**
+   * ゲームをセーブ
+   */
+  saveGame() {
+    const data = {
+      version: 1,
+      floor: this.floor,
+      turnCount: this.turnCount,
+      currentPhaseId: this.currentPhase?.id,
+
+      // プレイヤー情報
+      player: {
+        x: this.player.x,
+        y: this.player.y,
+        level: this.player.level,
+        hp: this.player.hp,
+        maxHp: this.player.maxHp,
+        strength: this.player.strength,
+        maxStrength: this.player.maxStrength,
+        satiety: this.player.satiety,
+        maxSatiety: this.player.maxSatiety,
+        exp: this.player.exp,
+        gold: this.player.gold,
+        equipment: this.player.equipment,
+        inventory: this.player.inventory,
+        statusEffects: this.player.statusEffects,
+        regenCounter: this.player.regenCounter
+      },
+
+      // ダンジョンデータ
+      tiles: this.tiles,
+      rooms: this.rooms,
+      stairsPos: this.stairsPos,
+      traps: this.traps,
+
+      // モンスター情報
+      monsters: this.monsters.map(m => ({
+        id: m.id,
+        name: m.name,
+        x: m.x,
+        y: m.y,
+        hp: m.hp,
+        maxHp: m.maxHp,
+        attack: m.attack,
+        defense: m.defense,
+        exp: m.exp,
+        special: m.special,
+        sprite: m.sprite,
+        isBoss: m.isBoss,
+        isAlive: m.isAlive,
+        state: m.state,
+        lastSeenPlayer: m.lastSeenPlayer,
+        statusEffects: m.statusEffects,
+        isDoubleSpeed: m.isDoubleSpeed,
+        turnCounter: m.turnCounter,
+        hasBeenAttacked: m.hasBeenAttacked,
+        isImmobile: m.isImmobile
+      })),
+
+      // アイテム情報
+      items: this.items,
+
+      // メッセージ（最新20件）
+      messages: this.messages.slice(-20),
+
+      // 探索済みマップ
+      explored: this.renderer.explored
+    };
+
+    localStorage.setItem('kakuriyo_save', JSON.stringify(data));
+  }
+
+  /**
+   * ゲームをロード
+   */
+  loadGame(data) {
+    this.floor = data.floor;
+    this.turnCount = data.turnCount;
+
+    // フェーズ復元
+    this.currentPhase = getPhaseForFloor(this.floor);
+    this.renderer.setPhase(this.currentPhase);
+
+    // プレイヤー復元
+    this.player = new Player(data.player.x, data.player.y);
+    Object.assign(this.player, {
+      level: data.player.level,
+      hp: data.player.hp,
+      maxHp: data.player.maxHp,
+      strength: data.player.strength,
+      maxStrength: data.player.maxStrength,
+      satiety: data.player.satiety,
+      maxSatiety: data.player.maxSatiety,
+      exp: data.player.exp,
+      gold: data.player.gold,
+      equipment: data.player.equipment,
+      inventory: data.player.inventory,
+      statusEffects: data.player.statusEffects,
+      regenCounter: data.player.regenCounter
+    });
+
+    // ダンジョンデータ復元
+    this.tiles = data.tiles;
+    this.rooms = data.rooms;
+    this.stairsPos = data.stairsPos;
+    this.traps = data.traps;
+
+    // モンスター復元
+    this.monsters = data.monsters.map(mData => {
+      const monster = createMonster(mData.x, mData.y, {
+        id: mData.id,
+        name: mData.name,
+        hp: mData.maxHp,
+        attack: mData.attack,
+        defense: mData.defense,
+        exp: mData.exp,
+        special: mData.special,
+        sprite: mData.sprite,
+        isBoss: mData.isBoss
+      });
+      monster.hp = mData.hp;
+      monster.isAlive = mData.isAlive;
+      monster.state = mData.state;
+      monster.lastSeenPlayer = mData.lastSeenPlayer;
+      monster.statusEffects = mData.statusEffects;
+      monster.isDoubleSpeed = mData.isDoubleSpeed;
+      monster.turnCounter = mData.turnCounter;
+      monster.hasBeenAttacked = mData.hasBeenAttacked;
+      monster.isImmobile = mData.isImmobile;
+      return monster;
+    });
+
+    // アイテム復元
+    this.items = data.items;
+
+    // メッセージ復元
+    this.messages = data.messages || [];
+    this.updateMessageLog();
+
+    // 探索済みマップ復元
+    if (data.explored) {
+      this.renderer.explored = data.explored;
+    } else {
+      this.renderer.initExplored(this.tiles[0].length, this.tiles.length);
+    }
+  }
+
+  /**
+   * セーブデータを削除
+   */
+  deleteSave() {
+    localStorage.removeItem('kakuriyo_save');
   }
 
   /**
@@ -288,26 +458,150 @@ class Game {
     this.rooms = floor.rooms;
     this.stairsPos = floor.stairsPos;
     this.traps = floor.traps;
+    this.isBossFloor = floor.isBossFloor || false;
+    this.monsterHouseRoom = floor.monsterHouseRoom || null;
+    this.monsterHouseTriggered = false;
 
     // プレイヤー配置
     this.player.moveTo(floor.startPos.x, floor.startPos.y);
 
     // モンスター配置
     this.monsters = [];
-    const monsterCount = 3 + Math.floor(this.floor / 5);
-    for (let i = 0; i < monsterCount; i++) {
-      this.spawnMonster();
+
+    if (this.isBossFloor) {
+      // ボスフロア: ボスのみ配置
+      this.spawnBoss(floor.bossPos);
+    } else {
+      // 通常フロア
+      const monsterCount = 3 + Math.floor(this.floor / 5);
+      for (let i = 0; i < monsterCount; i++) {
+        this.spawnMonster();
+      }
     }
 
-    // アイテム配置
+    // アイテム配置（ボスフロアはなし）
     this.items = [];
-    const itemCount = 3 + Math.floor(Math.random() * 3);
-    for (let i = 0; i < itemCount; i++) {
-      this.spawnItem();
+    if (!this.isBossFloor) {
+      const itemCount = 3 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < itemCount; i++) {
+        this.spawnItem();
+      }
+    }
+
+    // モンスターハウスセットアップ
+    if (this.monsterHouseRoom) {
+      this.setupMonsterHouse(this.monsterHouseRoom);
     }
 
     // 探索済みマップ初期化
     this.renderer.initExplored(floor.width, floor.height);
+  }
+
+  /**
+   * ボスをスポーン
+   */
+  spawnBoss(pos) {
+    const bossData = MONSTERS.rinnemori;
+    const boss = createMonster(pos.x, pos.y, bossData);
+    boss.bossPhase = 1; // ボスのフェーズ（形態変化用）
+    this.monsters.push(boss);
+    this.addMessage('【輪廻守】が現れた！');
+  }
+
+  /**
+   * モンスターハウスをセットアップ
+   */
+  setupMonsterHouse(room) {
+    // モンスターハウスには多くのモンスターとアイテムを配置
+    const monsterCount = 8 + Math.floor(this.floor / 10);
+    const itemCount = 5 + Math.floor(this.floor / 15);
+
+    // モンスター配置
+    for (let i = 0; i < monsterCount; i++) {
+      const monsterData = getRandomMonster(this.floor);
+      let attempts = 0;
+
+      while (attempts < 30) {
+        const x = room.x + 1 + Math.floor(Math.random() * (room.w - 2));
+        const y = room.y + 1 + Math.floor(Math.random() * (room.h - 2));
+
+        if (this.monsters.some(m => m.x === x && m.y === y)) {
+          attempts++;
+          continue;
+        }
+
+        const monster = createMonster(x, y, monsterData);
+        monster.state = 'wander'; // 最初は徘徊状態
+        this.monsters.push(monster);
+        break;
+      }
+    }
+
+    // アイテム配置
+    for (let i = 0; i < itemCount; i++) {
+      const itemData = getRandomItem(this.floor);
+      let attempts = 0;
+
+      while (attempts < 30) {
+        const x = room.x + 1 + Math.floor(Math.random() * (room.w - 2));
+        const y = room.y + 1 + Math.floor(Math.random() * (room.h - 2));
+
+        if (this.items.some(it => it.x === x && it.y === y)) {
+          attempts++;
+          continue;
+        }
+        if (x === this.stairsPos.x && y === this.stairsPos.y) {
+          attempts++;
+          continue;
+        }
+
+        const item = {
+          ...itemData,
+          x, y,
+          enhancement: 0,
+          identified: false
+        };
+        this.items.push(item);
+        break;
+      }
+    }
+  }
+
+  /**
+   * モンスターハウス発動チェック
+   */
+  checkMonsterHouse() {
+    if (!this.monsterHouseRoom || this.monsterHouseTriggered) return;
+
+    const room = this.monsterHouseRoom;
+    const px = this.player.x;
+    const py = this.player.y;
+
+    // プレイヤーがモンスターハウスの部屋に入ったか
+    if (px >= room.x && px < room.x + room.w &&
+        py >= room.y && py < room.y + room.h) {
+      this.triggerMonsterHouse();
+    }
+  }
+
+  /**
+   * モンスターハウス発動
+   */
+  triggerMonsterHouse() {
+    this.monsterHouseTriggered = true;
+
+    // 警告メッセージ
+    this.addMessage('【モンスターハウスだ！】', 'important');
+
+    // モンスターハウス内のモンスターを全て覚醒
+    for (const monster of this.monsters) {
+      const room = this.monsterHouseRoom;
+      if (monster.x >= room.x && monster.x < room.x + room.w &&
+          monster.y >= room.y && monster.y < room.y + room.h) {
+        monster.state = 'chase';
+        monster.lastSeenPlayer = { x: this.player.x, y: this.player.y };
+      }
+    }
   }
 
   /**
@@ -378,14 +672,15 @@ class Game {
   /**
    * プレイヤー移動
    */
-  movePlayer(dx, dy) {
+  movePlayer(dx, dy, fromDash = false) {
     if (!this.player.canAct()) {
       this.processTurn();
       return true;
     }
 
-    // 混乱時はランダム方向
+    // 混乱時はランダム方向（ダッシュ中は解除）
     if (this.player.statusEffects.confused > 0) {
+      this.isDashing = false;
       const conf = this.player.getConfusedDirection();
       dx = conf.dx;
       dy = conf.dy;
@@ -394,9 +689,10 @@ class Game {
     const nx = this.player.x + dx;
     const ny = this.player.y + dy;
 
-    // モンスターがいれば攻撃
+    // モンスターがいれば攻撃（ダッシュ停止）
     const target = this.monsters.find(m => m.isAlive && m.x === nx && m.y === ny);
     if (target) {
+      this.isDashing = false;
       this.attackMonster(target);
       this.processTurn();
       return true;
@@ -404,20 +700,32 @@ class Game {
 
     // 移動可能かチェック
     if (!this.player.canMoveTo(this.tiles, nx, ny, this.monsters)) {
+      this.isDashing = false;
       return false;
     }
+
+    // 移動方向を記録
+    this.lastDirection = { dx, dy };
 
     // 移動実行
     this.player.moveTo(nx, ny);
 
-    // 罠チェック
+    // 罠チェック（踏んだらダッシュ停止）
+    const trap = this.traps.find(t => t.x === this.player.x && t.y === this.player.y);
+    if (trap) {
+      this.isDashing = false;
+    }
     this.checkTrap();
 
     // アイテム拾得チェック
     this.checkItemPickup();
 
+    // モンスターハウスチェック
+    this.checkMonsterHouse();
+
     // 階段チェック
     if (nx === this.stairsPos.x && ny === this.stairsPos.y) {
+      this.isDashing = false;
       this.addMessage('階段がある。降りますか？（足踏みで降りる）');
     }
 
@@ -448,8 +756,132 @@ class Game {
    * ダッシュ（自動移動）
    */
   playerDash() {
-    // TODO: 実装
-    this.addMessage('ダッシュは未実装です');
+    if (!this.player.canAct()) {
+      this.addMessage('動けない！');
+      return;
+    }
+
+    // 前回移動していない場合は通路方向を探す
+    let dx = this.lastDirection.dx;
+    let dy = this.lastDirection.dy;
+
+    if (dx === 0 && dy === 0) {
+      // 通路方向を自動検出
+      const passageDir = this.findPassageDirection();
+      if (passageDir) {
+        dx = passageDir.dx;
+        dy = passageDir.dy;
+      } else {
+        this.addMessage('ダッシュできる方向がない');
+        return;
+      }
+    }
+
+    // ダッシュ開始
+    this.isDashing = true;
+    this.continueDash(dx, dy);
+  }
+
+  /**
+   * ダッシュを継続
+   */
+  continueDash(dx, dy) {
+    if (!this.isDashing || !this.player.isAlive) return;
+
+    // 敵が視界内にいるか確認
+    const visibleMonster = this.monsters.find(m => {
+      if (!m.isAlive) return false;
+      const distX = Math.abs(m.x - this.player.x);
+      const distY = Math.abs(m.y - this.player.y);
+      return distX <= 2 && distY <= 2;
+    });
+
+    if (visibleMonster) {
+      this.isDashing = false;
+      this.addMessage('敵を発見！');
+      return;
+    }
+
+    // 移動先チェック
+    const nx = this.player.x + dx;
+    const ny = this.player.y + dy;
+
+    // 移動できないなら停止
+    if (!this.player.canMoveTo(this.tiles, nx, ny, this.monsters)) {
+      this.isDashing = false;
+      return;
+    }
+
+    // 分岐点チェック（通路で複数方向に行ける場合）
+    if (this.isAtJunction(dx, dy)) {
+      this.isDashing = false;
+      this.addMessage('分岐点で停止');
+      return;
+    }
+
+    // 移動実行
+    this.movePlayer(dx, dy, true);
+
+    // まだダッシュ中なら続行
+    if (this.isDashing) {
+      setTimeout(() => this.continueDash(dx, dy), 80);
+    }
+  }
+
+  /**
+   * 通路方向を探す
+   */
+  findPassageDirection() {
+    const dirs = [
+      { dx: 0, dy: -1 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 0 },
+      { dx: 1, dy: 0 }
+    ];
+
+    const passable = dirs.filter(d => {
+      const nx = this.player.x + d.dx;
+      const ny = this.player.y + d.dy;
+      return this.player.canMoveTo(this.tiles, nx, ny, this.monsters);
+    });
+
+    // 1方向だけ進めるなら自動でその方向へ
+    if (passable.length === 1) {
+      return passable[0];
+    }
+
+    return null;
+  }
+
+  /**
+   * 分岐点にいるかチェック
+   */
+  isAtJunction(currentDx, currentDy) {
+    // 現在の部屋を確認
+    const inRoom = this.rooms.some(room =>
+      this.player.x >= room.x && this.player.x < room.x + room.w &&
+      this.player.y >= room.y && this.player.y < room.y + room.h
+    );
+
+    // 部屋に入ったら停止
+    if (inRoom) {
+      return true;
+    }
+
+    // 通路で左右（または前後）に分岐があるか
+    const perpDirs = currentDx !== 0
+      ? [{ dx: 0, dy: -1 }, { dx: 0, dy: 1 }]
+      : [{ dx: -1, dy: 0 }, { dx: 1, dy: 0 }];
+
+    for (const d of perpDirs) {
+      const nx = this.player.x + d.dx;
+      const ny = this.player.y + d.dy;
+      if (this.player.canMoveTo(this.tiles, nx, ny, this.monsters)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -601,6 +1033,7 @@ class Game {
       // クリア
       this.state = STATE.CLEAR;
       this.addMessage('幽世塔を踏破した！現世への道が開いた...');
+      this.deleteSave(); // クリア時はセーブデータを削除
       this.showClearScreen();
       return;
     }
@@ -616,6 +1049,10 @@ class Game {
     }
 
     this.generateFloor();
+
+    // 自動セーブ
+    this.saveGame();
+
     this.render();
     this.updateUI();
   }
@@ -723,6 +1160,12 @@ class Game {
    * モンスター行動処理
    */
   processMonsterAction(monster) {
+    // ボス専用処理
+    if (monster.isBoss) {
+      this.processBossAction(monster);
+      return;
+    }
+
     const action = monster.act(this.player, this.tiles, this.monsters, this);
     if (!action) return;
 
@@ -757,6 +1200,78 @@ class Game {
     }
 
     monster.endTurn();
+  }
+
+  /**
+   * ボス専用行動処理
+   */
+  processBossAction(boss) {
+    if (!boss.isAlive || !boss.canAct()) return;
+
+    const dx = this.player.x - boss.x;
+    const dy = this.player.y - boss.y;
+    const dist = Math.abs(dx) + Math.abs(dy);
+
+    // フェーズ移行チェック（HPに応じて）
+    const hpRatio = boss.hp / boss.maxHp;
+    if (hpRatio <= 0.3 && boss.bossPhase < 3) {
+      boss.bossPhase = 3;
+      this.addMessage('【輪廻守】が最終形態へ変化した！', 'important');
+      // フェーズ3: 攻撃力アップ
+      boss.attack = Math.floor(boss.attack * 1.5);
+    } else if (hpRatio <= 0.6 && boss.bossPhase < 2) {
+      boss.bossPhase = 2;
+      this.addMessage('【輪廻守】が形態を変化させた！', 'important');
+    }
+
+    // 隣接時は攻撃
+    if (dist <= 2) {
+      // 特殊攻撃選択
+      const attackType = Math.random();
+
+      if (attackType < 0.2) {
+        // 範囲攻撃（8方向）
+        const areaDamage = 20 + boss.bossPhase * 10;
+        this.player.takeDamage(areaDamage);
+        this.addMessage(`【輪廻守】の輪廻波動！${areaDamage}のダメージ！`, 'damage');
+      } else if (attackType < 0.35 && boss.bossPhase >= 2) {
+        // 状態異常攻撃
+        if (Math.random() < 0.5) {
+          this.player.statusEffects.confused = 5;
+          this.addMessage('【輪廻守】の幻惑！混乱した！', 'damage');
+        } else {
+          this.player.statusEffects.slowed = 5;
+          this.addMessage('【輪廻守】の呪縛！体が重い...', 'damage');
+        }
+      } else {
+        // 通常攻撃
+        const damage = this.calculateDamage(boss, this.player);
+        this.player.takeDamage(damage);
+        this.addMessage(`【輪廻守】の攻撃！${damage}のダメージ`, 'damage');
+      }
+    } else {
+      // 遠距離時の行動
+      if (boss.bossPhase >= 2 && Math.random() < 0.3) {
+        // 遠距離攻撃（黄泉の炎）
+        const fireDamage = 15 + boss.bossPhase * 5;
+        this.player.takeDamage(fireDamage);
+        this.addMessage(`【輪廻守】の黄泉火！${fireDamage}のダメージ！`, 'damage');
+      } else {
+        // 接近移動
+        const moveX = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
+        const moveY = dy > 0 ? 1 : (dy < 0 ? -1 : 0);
+
+        const nx = boss.x + moveX;
+        const ny = boss.y + moveY;
+
+        if (this.tiles[ny]?.[nx] !== 0) {
+          boss.x = nx;
+          boss.y = ny;
+        }
+      }
+    }
+
+    boss.endTurn();
   }
 
   /**
@@ -820,6 +1335,9 @@ class Game {
   onPlayerDeath() {
     this.player.onDeath();
     this.state = STATE.DEAD;
+
+    // 死亡時はセーブデータを削除
+    this.deleteSave();
 
     document.getElementById('deathFloor').textContent = `B${this.floor}F`;
     document.getElementById('deathLevel').textContent = this.player.level;
@@ -1110,17 +1628,58 @@ class Game {
    */
   showStatus() {
     const p = this.player;
-    alert(`【${p.name}】
-Lv.${p.level}
-HP: ${p.hp}/${p.maxHp}
-ちから: ${p.strength}/${p.maxStrength}
-満腹度: ${Math.floor(p.satiety)}/${p.maxSatiety}
-経験値: ${p.exp}/${p.level * p.level * 10}
-所持金: ${p.gold}G
 
-武器: ${p.equipment.weapon?.name ?? 'なし'}
-盾: ${p.equipment.shield?.name ?? 'なし'}
-指輪: ${p.equipment.ring?.name ?? 'なし'}`);
+    // ステータスパネルを更新
+    document.getElementById('statusName').textContent = p.name;
+    document.getElementById('statusLevel').textContent = p.level;
+    document.getElementById('statusHp').textContent = `${p.hp}/${p.maxHp}`;
+    document.getElementById('statusStrength').textContent = `${p.strength}/${p.maxStrength}`;
+    document.getElementById('statusSatiety').textContent = `${Math.floor(p.satiety)}/${p.maxSatiety}`;
+    document.getElementById('statusExp').textContent = `${p.exp}/${p.level * p.level * 10}`;
+    document.getElementById('statusGold').textContent = `${p.gold}G`;
+
+    // 装備
+    const weaponName = p.equipment.weapon
+      ? `${p.equipment.weapon.name}${p.equipment.weapon.enhancement > 0 ? `+${p.equipment.weapon.enhancement}` : ''}`
+      : 'なし';
+    const shieldName = p.equipment.shield
+      ? `${p.equipment.shield.name}${p.equipment.shield.enhancement > 0 ? `+${p.equipment.shield.enhancement}` : ''}`
+      : 'なし';
+    const ringName = p.equipment.ring?.name ?? 'なし';
+
+    document.getElementById('statusWeapon').textContent = weaponName;
+    document.getElementById('statusShield').textContent = shieldName;
+    document.getElementById('statusRing').textContent = ringName;
+
+    // 状態異常
+    const effects = [];
+    if (p.statusEffects.confused > 0) effects.push('混乱');
+    if (p.statusEffects.sleeping > 0) effects.push('睡眠');
+    if (p.statusEffects.paralyzed > 0) effects.push('金縛り');
+    if (p.statusEffects.slowed > 0) effects.push('鈍足');
+    if (p.statusEffects.blind > 0) effects.push('目潰し');
+    if (p.statusEffects.sealed) effects.push('封印');
+
+    const effectsSection = document.getElementById('statusEffectsSection');
+    const effectsDiv = document.getElementById('statusEffects');
+
+    if (effects.length > 0) {
+      effectsSection.style.display = 'block';
+      effectsDiv.innerHTML = effects.map(e =>
+        `<span class="status-effect-badge">${e}</span>`
+      ).join('');
+    } else {
+      effectsSection.style.display = 'none';
+    }
+
+    this.showOverlay('statusPanel');
+  }
+
+  /**
+   * ステータスパネルを閉じる
+   */
+  closeStatus() {
+    this.hideOverlay('statusPanel');
   }
 
   /**
