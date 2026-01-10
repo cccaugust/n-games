@@ -17,6 +17,9 @@ import gaiadriverImg from '../pages/pokedex/assets/gaiadriver.png';
 import prominessImg from '../pages/pokedex/assets/prominess.png';
 import abysswalkerImg from '../pages/pokedex/assets/abysswalker.png';
 import plasmakaiserImg from '../pages/pokedex/assets/plasmakaiser.png';
+import wompImg from '../pages/pokedex/assets/womp.png';
+import daikoImg from '../pages/pokedex/assets/daiko.png';
+import coinkoiImg from '../pages/pokedex/assets/coinkoi.png';
 
 
 // Pokemon Data
@@ -352,5 +355,59 @@ export const pokemonData = [
         extraInfo: '発電所を襲うこともあるが、それはエネルギー不足で苦しむ街に電力を分け与えるためだという義賊的な側面もある。',
         author: 'KENTO',
         stats: { hp: 80, attack: 115, defense: 70, spAtk: 115, spDef: 70, speed: 130 }
+    },
+    {
+        id: '0019',
+        name: 'ウォンプ',
+        classification: 'おんぷポケモン',
+        types: ['ghost', 'steel'],
+        typeNames: ['ゴースト', 'はがね'],
+        image: wompImg,
+        description: 'からだが金属のようにひかる不思議なおんぷポケモン。ちいさく揺れるたびに、こころが落ち着く音がひびく。',
+        ecology: '夜になると街灯の下に集まり、空気をふるわせて「見えない合唱」をつくる。楽しそうに鳴るほど、まわりのノイズが消え、静けさが広がるという。',
+        abilityName: 'ノイズキャンセル',
+        abilityDesc: '場に出た時、相手全員の「とくこう」を1段階下げる。',
+        moveName: 'ハミングプレス',
+        moveType: 'steel',
+        moveDesc: 'タイプ：はがね / 威力：85 / 命中：100<br>低い共鳴音で押しつぶす。30%の確率で相手を「ひるみ」状態にする。',
+        extraInfo: 'ウォンプが近くにいると、機械の雑音が小さくなると言われている。音に敏感な子どもたちに人気。',
+        author: 'JUNPEI',
+        stats: { hp: 78, attack: 65, defense: 95, spAtk: 110, spDef: 95, speed: 72 }
+    },
+    {
+        id: '0020',
+        name: 'ダイコ',
+        classification: 'たいこポケモン',
+        types: ['fighting', 'normal'],
+        typeNames: ['かくとう', 'ノーマル'],
+        image: daikoImg,
+        description: 'おなかのたいこを「ドン！」と鳴らすと、みんなのやる気が上がる。リズムが合うほど力がわいてくるポケモン。',
+        ecology: '仲間の足音や波の音に合わせて、すぐにビートを作る。元気な音は遠くまで届き、迷子の仲間を呼び戻す合図にもなる。',
+        abilityName: 'ビートアップ',
+        abilityDesc: 'ターン終了時、自分の「こうげき」が1段階上がる（最大+2まで）。',
+        moveName: 'どんどこラッシュ',
+        moveType: 'fighting',
+        moveDesc: 'タイプ：かくとう / 威力：25×2〜5回 / 命中：90<br>たいこの連打で連続攻撃する。',
+        extraInfo: 'ダイコのリズムに合わせて運動すると、いつもより長く走れるという。学校の運動会で引っぱりだこ。',
+        author: 'JUNPEI',
+        stats: { hp: 95, attack: 105, defense: 80, spAtk: 45, spDef: 70, speed: 85 }
+    },
+    {
+        id: '0021',
+        name: 'コインコイ',
+        classification: 'おかねごいポケモン',
+        types: ['water', 'steel'],
+        typeNames: ['みず', 'はがね'],
+        image: coinkoiImg,
+        description: 'コインをのせて泳ぐ、つやつやのポケモン。ひかりを集めるのが得意で、水面がきらきらするほどごきげんになる。',
+        ecology: '川底の硬い金属片を集めて、自分のコインを磨く。ピカピカに光るほど強くなると信じているらしく、毎日せっせと手入れをする。',
+        abilityName: 'ゴールドスケイル',
+        abilityDesc: '相手の攻撃で受けるダメージが少し減る（こうげき技のダメージを0.9倍）。',
+        moveName: 'コインスプラッシュ',
+        moveType: 'water',
+        moveDesc: 'タイプ：みず / 威力：75 / 命中：100<br>水しぶきにコインの光を混ぜて攻撃する。20%の確率で相手の「ぼうぎょ」を1段階下げる。',
+        extraInfo: 'コインコイが通ったあとは、水がいつもより澄んで見えるという。きれい好きな個体ほど、町の噴水に現れやすい。',
+        author: 'JUNPEI',
+        stats: { hp: 70, attack: 70, defense: 110, spAtk: 65, spDef: 95, speed: 55 }
     }
 ];
