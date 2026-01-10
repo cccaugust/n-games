@@ -1544,8 +1544,12 @@ class Game {
       const item = this.player.inventory[i];
       const div = document.createElement('div');
       div.className = 'inventory-item';
+
+      // アイテムアイコンを取得
+      const iconDataURL = this.renderer.getItemIconDataURL(item, 32);
+
       div.innerHTML = `
-        <div class="icon"></div>
+        <img class="icon" src="${iconDataURL}" alt="${item.name}" style="width:32px;height:32px;border-radius:6px;background:rgba(0,0,0,0.4);">
         <div class="info">
           <div class="name">${item.name}${item.enhancement > 0 ? `+${item.enhancement}` : ''}</div>
           <div class="desc">${this.getItemDescription(item)}</div>
@@ -1607,6 +1611,20 @@ class Game {
         this.player.inventory.splice(index, 1);
         this.useFood(item);
         break;
+
+      case 'staff':
+        this.useStaff(item, index);
+        break;
+
+      case 'arrow':
+        this.player.inventory.splice(index, 1);
+        this.useArrow(item);
+        break;
+
+      case 'pot':
+        this.addMessage('壺は足元に置いて割ると使えます');
+        this.closeInventory();
+        return;
 
       default:
         this.addMessage('このアイテムは使えません');
@@ -1732,6 +1750,191 @@ class Game {
         this.renderer.playSound('heal');
         break;
     }
+  }
+
+  /**
+   * 杖を使用
+   */
+  useStaff(item, index) {
+    // 使用回数を確認
+    if (!item.uses || item.uses[0] <= 0) {
+      this.addMessage('杖の回数が残っていない');
+      return;
+    }
+
+    // 前方のモンスターを探す（プレイヤーの向きがないので直線で探す）
+    const target = this.findTargetInLine();
+
+    if (!target) {
+      this.addMessage('対象がいない');
+      return;
+    }
+
+    // 使用回数を減らす
+    item.uses[0]--;
+
+    // 回数が0になったら削除
+    if (item.uses[0] <= 0) {
+      this.player.inventory.splice(index, 1);
+      this.addMessage(`${item.name}は砕け散った`);
+    }
+
+    // 使用エフェクトと効果音
+    this.renderer.addEffect('use', target.x, target.y, {
+      color: '#fa0',
+      duration: 400
+    });
+    this.renderer.playSound('use');
+
+    // 効果を適用
+    switch (item.effect) {
+      case 'knockback':
+        // 吹き飛ばし（簡易実装）
+        this.addMessage(`${target.name}を吹き飛ばした！`);
+        const dx = target.x - this.player.x;
+        const dy = target.y - this.player.y;
+        const ndx = dx !== 0 ? dx / Math.abs(dx) : 0;
+        const ndy = dy !== 0 ? dy / Math.abs(dy) : 0;
+        // 3マス吹き飛ばし
+        for (let i = 0; i < 3; i++) {
+          const nx = target.x + ndx;
+          const ny = target.y + ndy;
+          if (this.tiles[ny]?.[nx] === 0) break; // 壁
+          if (this.monsters.some(m => m !== target && m.isAlive && m.x === nx && m.y === ny)) break;
+          target.x = nx;
+          target.y = ny;
+        }
+        break;
+      case 'sleep':
+        target.statusEffects.sleeping = 10;
+        this.addMessage(`${target.name}は眠りについた`);
+        break;
+      case 'confuse':
+        target.statusEffects.confused = 10;
+        this.addMessage(`${target.name}は混乱した`);
+        break;
+      case 'slow':
+        target.statusEffects.slowed = 10;
+        this.addMessage(`${target.name}は動きが鈍くなった`);
+        break;
+      case 'seal':
+        target.statusEffects.sealed = true;
+        this.addMessage(`${target.name}の特技を封印した`);
+        break;
+      case 'paralyze':
+        target.statusEffects.paralyzed = 5;
+        this.addMessage(`${target.name}は金縛りになった`);
+        break;
+      case 'swap':
+        // 場所入れ替え
+        const px = this.player.x;
+        const py = this.player.y;
+        this.player.x = target.x;
+        this.player.y = target.y;
+        target.x = px;
+        target.y = py;
+        this.addMessage(`${target.name}と場所を入れ替えた`);
+        break;
+      default:
+        this.addMessage(`${item.name}を振った`);
+    }
+  }
+
+  /**
+   * 矢を使用（投げる）
+   */
+  useArrow(item) {
+    // 前方のモンスターを探す
+    const target = this.findTargetInLine();
+
+    // 使用エフェクトと効果音
+    this.renderer.addEffect('use', this.player.x, this.player.y, {
+      color: '#aaa',
+      duration: 300
+    });
+    this.renderer.playSound('attack');
+
+    if (!target) {
+      this.addMessage('矢は誰にも当たらなかった');
+      return;
+    }
+
+    // ダメージ計算
+    let damage = item.attack || 5;
+
+    // 銀の矢は高ダメージ
+    if (item.id === 'silver_arrow') {
+      damage = 15;
+    }
+
+    target.takeDamage(damage);
+
+    // エフェクト
+    this.renderer.addEffect('slash', target.x, target.y, { duration: 200 });
+    this.renderer.addEffect('damage', target.x, target.y, {
+      text: `-${damage}`,
+      color: '#ff4',
+      duration: 600
+    });
+    this.renderer.playSound('hit');
+
+    this.addMessage(`${target.name}に${damage}のダメージ！`);
+
+    // 撃破チェック
+    if (!target.isAlive) {
+      this.addMessage(`${target.name}を倒した！`);
+      const prevLevel = this.player.level;
+      this.player.gainExp(target.exp);
+
+      if (this.player.level > prevLevel) {
+        this.renderer.addEffect('levelup', this.player.x, this.player.y, { duration: 800 });
+        this.renderer.playSound('levelup');
+        this.addMessage(`レベルアップ！ Lv.${this.player.level}になった！`);
+      }
+    }
+  }
+
+  /**
+   * プレイヤーから直線上の最初のモンスターを探す
+   */
+  findTargetInLine() {
+    // 8方向を探す
+    const directions = [
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: -1 },
+      { dx: 1, dy: 0 },
+      { dx: 1, dy: 1 },
+      { dx: 0, dy: 1 },
+      { dx: -1, dy: 1 },
+      { dx: -1, dy: 0 },
+      { dx: -1, dy: -1 }
+    ];
+
+    // 最も近いモンスターを探す
+    let closestMonster = null;
+    let closestDist = Infinity;
+
+    for (const dir of directions) {
+      for (let i = 1; i <= 10; i++) {
+        const x = this.player.x + dir.dx * i;
+        const y = this.player.y + dir.dy * i;
+
+        // 壁に当たったら終了
+        if (this.tiles[y]?.[x] === 0) break;
+
+        // モンスターを探す
+        const monster = this.monsters.find(m => m.isAlive && m.x === x && m.y === y);
+        if (monster) {
+          if (i < closestDist) {
+            closestDist = i;
+            closestMonster = monster;
+          }
+          break;
+        }
+      }
+    }
+
+    return closestMonster;
   }
 
   /**
