@@ -131,6 +131,22 @@
       background: #0a0a0f;
     }
 
+    /* ミニマップ */
+    .minimap {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 96px;
+      height: 64px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      border-radius: 4px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      pointer-events: none;
+      z-index: 10;
+    }
+
     /* メッセージログ */
     .message-log {
       height: 60px;
@@ -721,6 +737,7 @@
 
     <div class="game-area">
       <canvas id="gameCanvas"></canvas>
+      <canvas id="minimapCanvas" class="minimap"></canvas>
     </div>
 
     <div class="message-log" id="messageLog">

@@ -32,6 +32,10 @@ export class Renderer {
     this.spriteDurations = {}; // { id: [duration0, duration1, ...] }
     this.spritesLoaded = false;
 
+    // ミニマップ
+    this.minimapCanvas = document.getElementById('minimapCanvas');
+    this.minimapCtx = this.minimapCanvas?.getContext('2d');
+
     // カメラ位置
     this.cameraX = 0;
     this.cameraY = 0;
@@ -572,6 +576,73 @@ export class Renderer {
 
     // エフェクト描画
     this.drawEffects();
+
+    // ミニマップ描画
+    this.drawMinimap(gameState);
+  }
+
+  /**
+   * ミニマップ描画（探索済みの場所だけ表示）
+   */
+  drawMinimap(gameState) {
+    if (!this.minimapCanvas || !this.minimapCtx || !this.explored) return;
+
+    const { tiles, player, stairsPos } = gameState;
+    const ctx = this.minimapCtx;
+    const mapWidth = tiles[0].length;
+    const mapHeight = tiles.length;
+
+    // ミニマップのサイズを設定（CSSサイズと同じ）
+    const displayWidth = 96;
+    const displayHeight = 64;
+
+    // 1ピクセルあたりのタイル数を計算
+    const pixelSize = 2;
+    const canvasWidth = mapWidth * pixelSize;
+    const canvasHeight = mapHeight * pixelSize;
+
+    this.minimapCanvas.width = canvasWidth;
+    this.minimapCanvas.height = canvasHeight;
+
+    // 背景クリア
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    // 探索済みタイルを描画
+    for (let y = 0; y < mapHeight; y++) {
+      for (let x = 0; x < mapWidth; x++) {
+        if (!this.explored[y]?.[x]) continue;
+
+        const tile = tiles[y][x];
+        let color;
+
+        if (tile === TILE.WALL) {
+          color = '#444';
+        } else if (tile === TILE.FLOOR || tile === TILE.CORRIDOR) {
+          color = '#666';
+        } else if (tile === TILE.STAIRS_DOWN) {
+          color = '#8b5cf6';
+        } else {
+          color = '#555';
+        }
+
+        ctx.fillStyle = color;
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+
+    // 階段を強調表示
+    if (stairsPos && this.explored[stairsPos.y]?.[stairsPos.x]) {
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fillRect(stairsPos.x * pixelSize, stairsPos.y * pixelSize, pixelSize, pixelSize);
+    }
+
+    // プレイヤー位置を描画（点滅）
+    const blink = Math.floor(Date.now() / 300) % 2 === 0;
+    if (blink) {
+      ctx.fillStyle = '#4af';
+      ctx.fillRect(player.x * pixelSize - 1, player.y * pixelSize - 1, pixelSize + 2, pixelSize + 2);
+    }
   }
 
   /**
@@ -944,5 +1015,93 @@ export class Renderer {
     this.ctx.font = 'bold 14px sans-serif';
     this.ctx.textAlign = 'center';
     this.ctx.fillText(`-${amount}`, px, py);
+  }
+
+  /**
+   * アイテムのアイコンDataURLを取得
+   */
+  getItemIconDataURL(item, size = 32) {
+    const spriteId = item.sprite;
+    const frames = this.sprites[spriteId];
+
+    if (frames && frames.length > 0) {
+      // スプライトがある場合
+      const sourceCanvas = frames[0];
+
+      // 指定サイズにリサイズ
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = size;
+      tempCanvas.height = size;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.imageSmoothingEnabled = false;
+      tempCtx.drawImage(sourceCanvas, 0, 0, size, size);
+
+      return tempCanvas.toDataURL();
+    }
+
+    // スプライトがない場合はタイプ別のフォールバックアイコンを生成
+    return this.generateFallbackIcon(item.type, size);
+  }
+
+  /**
+   * フォールバックアイコンを生成
+   */
+  generateFallbackIcon(type, size = 32) {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = size;
+    tempCanvas.height = size;
+    const ctx = tempCanvas.getContext('2d');
+
+    // 背景
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, size, size);
+
+    // タイプ別の色とシンボル
+    let color, symbol;
+    switch (type) {
+      case 'weapon':
+        color = '#f88'; symbol = '剣';
+        break;
+      case 'shield':
+        color = '#88f'; symbol = '盾';
+        break;
+      case 'ring':
+        color = '#ff0'; symbol = '輪';
+        break;
+      case 'grass':
+        color = '#8f8'; symbol = '草';
+        break;
+      case 'scroll':
+        color = '#f8f'; symbol = '巻';
+        break;
+      case 'staff':
+        color = '#fa0'; symbol = '杖';
+        break;
+      case 'arrow':
+        color = '#aaa'; symbol = '矢';
+        break;
+      case 'pot':
+        color = '#8af'; symbol = '壺';
+        break;
+      case 'food':
+        color = '#fa8'; symbol = '食';
+        break;
+      default:
+        color = '#888'; symbol = '？';
+    }
+
+    // アイコン描画
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${size / 2}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, size / 2, size / 2);
+
+    return tempCanvas.toDataURL();
   }
 }
