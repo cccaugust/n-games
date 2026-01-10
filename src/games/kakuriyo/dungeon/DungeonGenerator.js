@@ -28,6 +28,11 @@ export class DungeonGenerator {
    * @returns {Object} - 生成されたフロアデータ
    */
   generate(floor) {
+    // B100Fはボス部屋
+    if (floor === 100) {
+      return this.generateBossFloor();
+    }
+
     // タイルマップ初期化（全て壁）
     const tiles = Array(this.height).fill(null).map(() =>
       Array(this.width).fill(TILE.WALL)
@@ -65,14 +70,85 @@ export class DungeonGenerator {
     const trapCount = Math.floor(floor / 5) + 1;
     const traps = this.placeTraps(tiles, rooms, trapCount, startPos, stairsPos);
 
+    // モンスターハウス判定（10F以降、確率で発生）
+    let monsterHouseRoom = null;
+    if (floor >= 10 && rooms.length >= 3) {
+      const mhChance = Math.min(0.05 + floor * 0.002, 0.15); // 5%〜15%
+      if (Math.random() < mhChance) {
+        // プレイヤー開始部屋と階段部屋以外からランダム選択
+        const candidates = rooms.filter((r, i) => i !== 0 && i !== rooms.length - 1);
+        if (candidates.length > 0) {
+          monsterHouseRoom = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+      }
+    }
+
     return {
       tiles,
       rooms,
       startPos,
       stairsPos,
       traps,
+      monsterHouseRoom,
       width: this.width,
       height: this.height
+    };
+  }
+
+  /**
+   * ボスフロアを生成（B100F用）
+   */
+  generateBossFloor() {
+    const tiles = Array(this.height).fill(null).map(() =>
+      Array(this.width).fill(TILE.WALL)
+    );
+
+    // 大きな一部屋を中央に作成
+    const roomW = 20;
+    const roomH = 16;
+    const roomX = Math.floor((this.width - roomW) / 2);
+    const roomY = Math.floor((this.height - roomH) / 2);
+
+    const bossRoom = {
+      x: roomX,
+      y: roomY,
+      w: roomW,
+      h: roomH,
+      centerX: roomX + Math.floor(roomW / 2),
+      centerY: roomY + Math.floor(roomH / 2)
+    };
+
+    this.carveRoom(tiles, bossRoom);
+
+    // プレイヤー開始位置（部屋の入口付近）
+    const startPos = {
+      x: roomX + 2,
+      y: roomY + Math.floor(roomH / 2)
+    };
+
+    // 階段は部屋の奥（ボスを倒すと出現するイメージ）
+    const stairsPos = {
+      x: roomX + roomW - 3,
+      y: roomY + Math.floor(roomH / 2)
+    };
+    tiles[stairsPos.y][stairsPos.x] = TILE.STAIRS_DOWN;
+
+    // ボス配置位置（中央）
+    const bossPos = {
+      x: bossRoom.centerX,
+      y: bossRoom.centerY
+    };
+
+    return {
+      tiles,
+      rooms: [bossRoom],
+      startPos,
+      stairsPos,
+      bossPos,
+      traps: [], // ボス部屋には罠なし
+      width: this.width,
+      height: this.height,
+      isBossFloor: true
     };
   }
 

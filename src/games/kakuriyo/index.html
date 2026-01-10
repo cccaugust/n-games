@@ -402,6 +402,96 @@
       color: var(--text-muted);
     }
 
+    /* ステータスパネル */
+    .status-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--bg-surface);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      width: 90%;
+      max-width: 320px;
+      z-index: 200;
+    }
+
+    .status-panel.hidden {
+      display: none;
+    }
+
+    .status-panel h2 {
+      margin-bottom: 12px;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .status-content {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .status-name {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .status-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+
+    .status-label {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .status-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status-section {
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 12px;
+    }
+
+    .status-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .status-effects {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .status-effect-badge {
+      padding: 4px 8px;
+      background: var(--danger);
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
     /* 死亡画面 */
     .death-screen {
       position: fixed;
@@ -645,6 +735,60 @@
     <h2>持ち物</h2>
     <div id="inventoryList"></div>
     <button class="menu-btn secondary" style="width:100%;margin-top:12px" id="btnCloseInventory">とじる</button>
+  </div>
+
+  <!-- ステータス画面 -->
+  <div class="status-panel hidden" id="statusPanel">
+    <h2>ステータス</h2>
+    <div class="status-content">
+      <div class="status-name" id="statusName">影丸</div>
+      <div class="status-grid">
+        <div class="status-row">
+          <span class="status-label">レベル</span>
+          <span class="status-value" id="statusLevel">1</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">HP</span>
+          <span class="status-value" id="statusHp">15/15</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">ちから</span>
+          <span class="status-value" id="statusStrength">8/8</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">満腹度</span>
+          <span class="status-value" id="statusSatiety">100/100</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">経験値</span>
+          <span class="status-value" id="statusExp">0/10</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">所持金</span>
+          <span class="status-value" id="statusGold">0G</span>
+        </div>
+      </div>
+      <div class="status-section">
+        <div class="status-subtitle">装備</div>
+        <div class="status-row">
+          <span class="status-label">武器</span>
+          <span class="status-value" id="statusWeapon">なし</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">盾</span>
+          <span class="status-value" id="statusShield">なし</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">指輪</span>
+          <span class="status-value" id="statusRing">なし</span>
+        </div>
+      </div>
+      <div class="status-section" id="statusEffectsSection" style="display:none;">
+        <div class="status-subtitle">状態異常</div>
+        <div class="status-effects" id="statusEffects"></div>
+      </div>
+    </div>
+    <button class="menu-btn secondary" style="width:100%;margin-top:12px" id="btnCloseStatus">とじる</button>
   </div>
 
   <!-- 死亡画面 -->
