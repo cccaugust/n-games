@@ -2334,6 +2334,1340 @@ function makeDwMascotRound16() {
   return c;
 }
 
+// ============================================
+// 新規キャラクター素材（ゲーム向け高品質版）
+// ============================================
+
+// --- 16x16 キャラクター（15個）---
+
+function makeNinja16() {
+  const c = makeCanvas(16, 16);
+  const bodyDark = rgba(40, 40, 50, 255);
+  const bodyMid = rgba(60, 60, 75, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const eye = rgba(255, 255, 255, 255);
+  const bandRed = rgba(220, 60, 60, 255);
+  // head
+  fillCircle(c, 8, 5, 3, bodyDark);
+  fillRect(c, 6, 4, 4, 2, bodyMid);
+  // eyes
+  setPx(c, 6, 5, eye);
+  setPx(c, 9, 5, eye);
+  // headband
+  fillRect(c, 5, 3, 6, 1, bandRed);
+  setPx(c, 11, 4, bandRed);
+  setPx(c, 12, 5, bandRed);
+  // body
+  fillRect(c, 6, 8, 4, 4, bodyDark);
+  fillRect(c, 7, 9, 2, 2, bodyMid);
+  // arms
+  fillRect(c, 4, 9, 2, 3, bodyDark);
+  fillRect(c, 10, 9, 2, 3, bodyDark);
+  // legs
+  fillRect(c, 6, 12, 2, 2, bodyDark);
+  fillRect(c, 8, 12, 2, 2, bodyDark);
+  // sword on back
+  setPx(c, 11, 6, PALETTE.gray3);
+  setPx(c, 11, 7, PALETTE.gray3);
+  setPx(c, 11, 8, PALETTE.brown2);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeWizard16() {
+  const c = makeCanvas(16, 16);
+  const robe = rgba(90, 60, 150, 255);
+  const robeDark = rgba(60, 40, 110, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const hat = rgba(70, 50, 130, 255);
+  const star = rgba(255, 230, 100, 255);
+  // hat
+  fillRect(c, 7, 1, 2, 1, hat);
+  fillRect(c, 6, 2, 4, 1, hat);
+  fillRect(c, 5, 3, 6, 2, hat);
+  setPx(c, 8, 1, star);
+  // face
+  fillCircle(c, 8, 6, 2, skin);
+  // beard
+  fillRect(c, 7, 7, 2, 2, PALETTE.white);
+  setPx(c, 8, 9, PALETTE.white);
+  // eyes
+  setPx(c, 7, 5, PALETTE.ink);
+  setPx(c, 9, 5, PALETTE.ink);
+  // body (robe)
+  fillRect(c, 5, 8, 6, 5, robe);
+  fillRect(c, 6, 9, 4, 3, robeDark);
+  // arms
+  fillRect(c, 3, 9, 2, 3, robe);
+  fillRect(c, 11, 9, 2, 3, robe);
+  // staff
+  fillRect(c, 12, 5, 1, 8, PALETTE.brown2);
+  setPx(c, 12, 4, rgba(100, 200, 255, 255));
+  setPx(c, 12, 3, rgba(150, 230, 255, 255));
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeKnightPlayer16() {
+  const c = makeCanvas(16, 16);
+  const armor = rgba(180, 190, 210, 255);
+  const armorDark = rgba(130, 140, 160, 255);
+  const armorLight = rgba(220, 230, 245, 255);
+  const plume = rgba(220, 60, 60, 255);
+  // helmet
+  fillRect(c, 6, 2, 4, 4, armor);
+  fillRect(c, 5, 3, 6, 2, armor);
+  setPx(c, 7, 3, armorLight);
+  setPx(c, 8, 3, armorLight);
+  // plume
+  setPx(c, 8, 1, plume);
+  setPx(c, 9, 1, plume);
+  setPx(c, 10, 2, plume);
+  // visor
+  fillRect(c, 6, 4, 4, 1, armorDark);
+  setPx(c, 7, 4, PALETTE.ink);
+  setPx(c, 9, 4, PALETTE.ink);
+  // body
+  fillRect(c, 5, 6, 6, 5, armor);
+  fillRect(c, 6, 7, 4, 3, armorDark);
+  setPx(c, 8, 8, armorLight);
+  // arms
+  fillRect(c, 3, 7, 2, 4, armor);
+  fillRect(c, 11, 7, 2, 4, armor);
+  // sword
+  fillRect(c, 2, 6, 1, 5, PALETTE.gray3);
+  setPx(c, 2, 5, PALETTE.gray3);
+  setPx(c, 2, 11, PALETTE.brown2);
+  // shield
+  fillRect(c, 12, 8, 2, 3, rgba(60, 100, 180, 255));
+  setPx(c, 13, 9, rgba(255, 220, 80, 255));
+  // legs
+  fillRect(c, 6, 11, 2, 3, armor);
+  fillRect(c, 8, 11, 2, 3, armor);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makePrincess16() {
+  const c = makeCanvas(16, 16);
+  const dress = rgba(255, 150, 200, 255);
+  const dressDark = rgba(220, 120, 170, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const hair = rgba(255, 200, 100, 255);
+  const crown = rgba(255, 220, 80, 255);
+  // hair
+  fillCircle(c, 8, 5, 4, hair);
+  fillRect(c, 5, 6, 2, 4, hair);
+  fillRect(c, 9, 6, 2, 4, hair);
+  // crown
+  setPx(c, 7, 1, crown);
+  setPx(c, 8, 1, crown);
+  setPx(c, 9, 1, crown);
+  setPx(c, 8, 0, crown);
+  fillRect(c, 6, 2, 4, 1, crown);
+  // face
+  fillCircle(c, 8, 5, 2, skin);
+  // eyes
+  setPx(c, 7, 5, PALETTE.blue2);
+  setPx(c, 9, 5, PALETTE.blue2);
+  // blush
+  setPx(c, 6, 6, rgba(255, 180, 180, 255));
+  setPx(c, 10, 6, rgba(255, 180, 180, 255));
+  // dress body
+  fillRect(c, 5, 8, 6, 3, dress);
+  // dress skirt
+  fillRect(c, 4, 11, 8, 3, dress);
+  fillRect(c, 3, 13, 10, 1, dress);
+  fillRect(c, 5, 10, 6, 2, dressDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeArcher16() {
+  const c = makeCanvas(16, 16);
+  const tunic = rgba(60, 130, 80, 255);
+  const tunicDark = rgba(40, 100, 60, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const hair = rgba(140, 90, 60, 255);
+  // head/hair
+  fillCircle(c, 8, 5, 3, hair);
+  // face
+  fillCircle(c, 8, 5, 2, skin);
+  // eyes
+  setPx(c, 7, 5, PALETTE.ink);
+  setPx(c, 9, 5, PALETTE.ink);
+  // hood hint
+  setPx(c, 5, 4, tunic);
+  setPx(c, 11, 4, tunic);
+  // body
+  fillRect(c, 6, 8, 4, 4, tunic);
+  fillRect(c, 7, 9, 2, 2, tunicDark);
+  // arms
+  fillRect(c, 4, 8, 2, 3, tunic);
+  fillRect(c, 10, 8, 2, 3, tunic);
+  // bow
+  setPx(c, 3, 6, PALETTE.brown2);
+  setPx(c, 3, 7, PALETTE.brown2);
+  setPx(c, 3, 8, PALETTE.brown2);
+  setPx(c, 3, 9, PALETTE.brown2);
+  setPx(c, 3, 10, PALETTE.brown2);
+  setPx(c, 2, 7, PALETTE.brown1);
+  setPx(c, 2, 9, PALETTE.brown1);
+  // bow string
+  setPx(c, 4, 7, PALETTE.gray3);
+  setPx(c, 4, 8, PALETTE.gray3);
+  setPx(c, 4, 9, PALETTE.gray3);
+  // quiver
+  fillRect(c, 11, 7, 2, 4, PALETTE.brown2);
+  setPx(c, 12, 6, PALETTE.gray3);
+  // legs
+  fillRect(c, 6, 12, 2, 2, PALETTE.brown2);
+  fillRect(c, 8, 12, 2, 2, PALETTE.brown2);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makePirate16() {
+  const c = makeCanvas(16, 16);
+  const vest = rgba(180, 50, 50, 255);
+  const pants = rgba(60, 60, 90, 255);
+  const skin = rgba(230, 190, 150, 255);
+  const bandana = rgba(200, 40, 40, 255);
+  // head
+  fillCircle(c, 8, 5, 3, skin);
+  // bandana
+  fillRect(c, 5, 2, 6, 2, bandana);
+  setPx(c, 11, 4, bandana);
+  setPx(c, 12, 5, bandana);
+  // eye patch
+  fillRect(c, 9, 4, 2, 2, PALETTE.ink);
+  // eye
+  setPx(c, 6, 5, PALETTE.ink);
+  // beard stubble
+  setPx(c, 7, 7, PALETTE.brown1);
+  setPx(c, 8, 7, PALETTE.brown1);
+  setPx(c, 9, 7, PALETTE.brown1);
+  // body (vest)
+  fillRect(c, 5, 8, 6, 4, vest);
+  fillRect(c, 7, 8, 2, 3, PALETTE.white);
+  // arms
+  fillRect(c, 3, 8, 2, 3, skin);
+  fillRect(c, 11, 8, 2, 3, skin);
+  // cutlass
+  setPx(c, 2, 9, PALETTE.gray3);
+  setPx(c, 2, 10, PALETTE.gray3);
+  setPx(c, 2, 11, PALETTE.brown2);
+  // pants
+  fillRect(c, 6, 12, 2, 2, pants);
+  fillRect(c, 8, 12, 2, 2, pants);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeAlien16() {
+  const c = makeCanvas(16, 16);
+  const body = rgba(120, 200, 120, 255);
+  const bodyDark = rgba(80, 160, 80, 255);
+  const eye = rgba(20, 20, 20, 255);
+  // head (big)
+  fillCircle(c, 8, 6, 5, body);
+  fillCircle(c, 8, 7, 4, bodyDark);
+  // big eyes
+  fillCircle(c, 6, 5, 2, PALETTE.ink);
+  fillCircle(c, 10, 5, 2, PALETTE.ink);
+  setPx(c, 5, 4, PALETTE.white);
+  setPx(c, 9, 4, PALETTE.white);
+  // antenna
+  setPx(c, 6, 1, body);
+  setPx(c, 10, 1, body);
+  setPx(c, 6, 0, rgba(255, 100, 100, 255));
+  setPx(c, 10, 0, rgba(255, 100, 100, 255));
+  // small body
+  fillRect(c, 6, 11, 4, 3, body);
+  fillRect(c, 7, 12, 2, 2, bodyDark);
+  // arms
+  fillRect(c, 4, 11, 2, 2, body);
+  fillRect(c, 10, 11, 2, 2, body);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeUfo16() {
+  const c = makeCanvas(16, 16);
+  const dome = rgba(180, 220, 255, 255);
+  const body = rgba(160, 170, 190, 255);
+  const bodyDark = rgba(120, 130, 150, 255);
+  const light = rgba(255, 255, 100, 255);
+  // dome (glass)
+  fillCircle(c, 8, 5, 3, dome);
+  setPx(c, 7, 4, PALETTE.white);
+  // alien inside
+  setPx(c, 7, 5, rgba(120, 200, 120, 255));
+  setPx(c, 9, 5, rgba(120, 200, 120, 255));
+  setPx(c, 8, 6, rgba(120, 200, 120, 255));
+  // saucer body
+  fillRect(c, 3, 8, 10, 2, body);
+  fillRect(c, 5, 7, 6, 1, body);
+  fillRect(c, 4, 10, 8, 1, bodyDark);
+  // lights
+  setPx(c, 4, 9, light);
+  setPx(c, 7, 9, light);
+  setPx(c, 9, 9, light);
+  setPx(c, 12, 9, light);
+  // beam
+  setPx(c, 7, 11, rgba(255, 255, 200, 150));
+  setPx(c, 8, 11, rgba(255, 255, 200, 150));
+  setPx(c, 9, 11, rgba(255, 255, 200, 150));
+  setPx(c, 7, 12, rgba(255, 255, 200, 100));
+  setPx(c, 8, 12, rgba(255, 255, 200, 100));
+  setPx(c, 9, 12, rgba(255, 255, 200, 100));
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+function makeBomberChar16() {
+  const c = makeCanvas(16, 16);
+  const suit = rgba(240, 240, 250, 255);
+  const suitDark = rgba(200, 200, 220, 255);
+  const helmet = rgba(80, 150, 220, 255);
+  const skin = rgba(255, 220, 185, 255);
+  // helmet
+  fillCircle(c, 8, 5, 4, helmet);
+  fillRect(c, 6, 4, 4, 3, helmet);
+  // visor
+  fillRect(c, 6, 4, 4, 2, skin);
+  // eyes
+  setPx(c, 7, 5, PALETTE.ink);
+  setPx(c, 9, 5, PALETTE.ink);
+  // smile
+  setPx(c, 8, 6, PALETTE.shadow);
+  // body (suit)
+  fillRect(c, 5, 9, 6, 4, suit);
+  fillRect(c, 6, 10, 4, 2, suitDark);
+  // belt
+  fillRect(c, 5, 11, 6, 1, PALETTE.brown2);
+  // arms
+  fillRect(c, 3, 9, 2, 3, suit);
+  fillRect(c, 11, 9, 2, 3, suit);
+  // hands with bomb
+  setPx(c, 2, 10, skin);
+  setPx(c, 13, 10, skin);
+  // legs
+  fillRect(c, 6, 13, 2, 2, suit);
+  fillRect(c, 8, 13, 2, 2, suit);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeMiner16() {
+  const c = makeCanvas(16, 16);
+  const helmet = rgba(255, 200, 50, 255);
+  const overall = rgba(80, 120, 180, 255);
+  const overallDark = rgba(50, 90, 150, 255);
+  const skin = rgba(255, 220, 185, 255);
+  // helmet
+  fillRect(c, 5, 2, 6, 3, helmet);
+  fillRect(c, 4, 3, 8, 2, helmet);
+  // light on helmet
+  setPx(c, 8, 2, PALETTE.white);
+  setPx(c, 8, 1, rgba(255, 255, 200, 255));
+  // face
+  fillRect(c, 6, 5, 4, 3, skin);
+  // eyes
+  setPx(c, 7, 6, PALETTE.ink);
+  setPx(c, 9, 6, PALETTE.ink);
+  // body (overalls)
+  fillRect(c, 5, 8, 6, 4, overall);
+  fillRect(c, 6, 9, 4, 2, overallDark);
+  // straps
+  setPx(c, 6, 8, PALETTE.brown2);
+  setPx(c, 9, 8, PALETTE.brown2);
+  // arms
+  fillRect(c, 3, 8, 2, 3, overall);
+  fillRect(c, 11, 8, 2, 3, overall);
+  // pickaxe
+  setPx(c, 2, 7, PALETTE.gray3);
+  setPx(c, 1, 6, PALETTE.gray3);
+  setPx(c, 3, 6, PALETTE.gray3);
+  setPx(c, 2, 8, PALETTE.brown2);
+  setPx(c, 2, 9, PALETTE.brown2);
+  setPx(c, 2, 10, PALETTE.brown2);
+  // legs
+  fillRect(c, 6, 12, 2, 2, overall);
+  fillRect(c, 8, 12, 2, 2, overall);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeFairy16() {
+  const c = makeCanvas(16, 16);
+  const skin = rgba(255, 230, 210, 255);
+  const dress = rgba(200, 255, 220, 255);
+  const dressDark = rgba(150, 230, 180, 255);
+  const hair = rgba(255, 230, 150, 255);
+  const wing = rgba(200, 240, 255, 180);
+  // wings
+  fillCircle(c, 4, 7, 2, wing);
+  fillCircle(c, 12, 7, 2, wing);
+  fillCircle(c, 4, 10, 2, wing);
+  fillCircle(c, 12, 10, 2, wing);
+  // hair
+  fillCircle(c, 8, 5, 3, hair);
+  // face
+  fillCircle(c, 8, 5, 2, skin);
+  // eyes
+  setPx(c, 7, 5, PALETTE.blue2);
+  setPx(c, 9, 5, PALETTE.blue2);
+  // blush
+  setPx(c, 6, 6, rgba(255, 180, 180, 255));
+  setPx(c, 10, 6, rgba(255, 180, 180, 255));
+  // body
+  fillRect(c, 6, 8, 4, 4, dress);
+  fillRect(c, 7, 9, 2, 2, dressDark);
+  // wand
+  setPx(c, 12, 5, rgba(255, 255, 100, 255));
+  setPx(c, 12, 6, PALETTE.brown1);
+  setPx(c, 12, 7, PALETTE.brown1);
+  // sparkles
+  setPx(c, 11, 4, rgba(255, 255, 200, 255));
+  setPx(c, 13, 4, rgba(255, 255, 200, 255));
+  setPx(c, 12, 3, rgba(255, 255, 200, 255));
+  // legs
+  fillRect(c, 7, 12, 1, 2, skin);
+  fillRect(c, 8, 12, 1, 2, skin);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 40) });
+  return c;
+}
+
+function makeDragonMini16() {
+  const c = makeCanvas(16, 16);
+  const body = rgba(100, 180, 100, 255);
+  const bodyDark = rgba(70, 140, 70, 255);
+  const belly = rgba(255, 230, 180, 255);
+  const wing = rgba(80, 150, 80, 200);
+  // wings
+  fillRect(c, 2, 5, 3, 4, wing);
+  fillRect(c, 11, 5, 3, 4, wing);
+  setPx(c, 1, 4, wing);
+  setPx(c, 14, 4, wing);
+  // body
+  fillCircle(c, 8, 8, 4, body);
+  fillCircle(c, 8, 9, 3, bodyDark);
+  // belly
+  fillRect(c, 7, 8, 2, 3, belly);
+  // head
+  fillCircle(c, 8, 4, 3, body);
+  // horns
+  setPx(c, 6, 1, bodyDark);
+  setPx(c, 10, 1, bodyDark);
+  setPx(c, 6, 2, body);
+  setPx(c, 10, 2, body);
+  // eyes
+  setPx(c, 7, 4, rgba(255, 200, 50, 255));
+  setPx(c, 9, 4, rgba(255, 200, 50, 255));
+  // nostrils
+  setPx(c, 7, 6, PALETTE.ink);
+  setPx(c, 9, 6, PALETTE.ink);
+  // tail
+  setPx(c, 12, 10, body);
+  setPx(c, 13, 11, body);
+  setPx(c, 14, 11, bodyDark);
+  // legs
+  fillRect(c, 5, 11, 2, 2, body);
+  fillRect(c, 9, 11, 2, 2, body);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeGolem16() {
+  const c = makeCanvas(16, 16);
+  const stone = rgba(140, 130, 120, 255);
+  const stoneDark = rgba(100, 95, 90, 255);
+  const stoneLight = rgba(180, 170, 160, 255);
+  const eye = rgba(255, 200, 50, 255);
+  // head
+  fillRect(c, 5, 2, 6, 5, stone);
+  fillRect(c, 6, 3, 4, 3, stoneDark);
+  setPx(c, 5, 2, stoneLight);
+  // eyes
+  setPx(c, 6, 4, eye);
+  setPx(c, 9, 4, eye);
+  // mouth
+  fillRect(c, 7, 5, 2, 1, PALETTE.ink);
+  // body
+  fillRect(c, 4, 7, 8, 5, stone);
+  fillRect(c, 5, 8, 6, 3, stoneDark);
+  // cracks
+  setPx(c, 6, 9, stoneLight);
+  setPx(c, 9, 10, stoneLight);
+  // arms (big)
+  fillRect(c, 1, 7, 3, 5, stone);
+  fillRect(c, 12, 7, 3, 5, stone);
+  fillRect(c, 2, 8, 1, 3, stoneDark);
+  fillRect(c, 13, 8, 1, 3, stoneDark);
+  // legs
+  fillRect(c, 5, 12, 2, 2, stone);
+  fillRect(c, 9, 12, 2, 2, stone);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeVampire16() {
+  const c = makeCanvas(16, 16);
+  const cape = rgba(60, 30, 80, 255);
+  const capeDark = rgba(40, 20, 60, 255);
+  const skin = rgba(220, 210, 230, 255);
+  const hair = rgba(30, 30, 40, 255);
+  // cape spread
+  fillRect(c, 2, 6, 12, 8, cape);
+  fillRect(c, 3, 7, 10, 6, capeDark);
+  fillRect(c, 1, 8, 2, 5, cape);
+  fillRect(c, 13, 8, 2, 5, cape);
+  // inner red
+  fillRect(c, 5, 8, 6, 5, rgba(140, 40, 50, 255));
+  // head
+  fillCircle(c, 8, 5, 3, skin);
+  // hair
+  fillRect(c, 5, 2, 6, 2, hair);
+  setPx(c, 5, 4, hair);
+  setPx(c, 10, 4, hair);
+  // widow's peak
+  setPx(c, 8, 3, hair);
+  // eyes
+  setPx(c, 7, 5, rgba(200, 50, 50, 255));
+  setPx(c, 9, 5, rgba(200, 50, 50, 255));
+  // fangs
+  setPx(c, 7, 7, PALETTE.white);
+  setPx(c, 9, 7, PALETTE.white);
+  // body hidden in cape
+  fillRect(c, 6, 8, 4, 4, PALETTE.ink);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeGhostEnemy16() {
+  const c = makeCanvas(16, 16);
+  const body = rgba(200, 200, 220, 220);
+  const bodyDark = rgba(160, 160, 190, 200);
+  // main body
+  fillCircle(c, 8, 7, 5, body);
+  fillCircle(c, 8, 8, 4, bodyDark);
+  // wavy bottom
+  fillRect(c, 4, 10, 8, 3, body);
+  setPx(c, 4, 13, body);
+  setPx(c, 6, 14, body);
+  setPx(c, 8, 13, body);
+  setPx(c, 10, 14, body);
+  setPx(c, 12, 13, body);
+  // eyes (menacing)
+  fillRect(c, 5, 6, 2, 2, PALETTE.ink);
+  fillRect(c, 9, 6, 2, 2, PALETTE.ink);
+  setPx(c, 6, 6, rgba(255, 50, 50, 255));
+  setPx(c, 10, 6, rgba(255, 50, 50, 255));
+  // mouth
+  fillRect(c, 7, 9, 2, 1, PALETTE.ink);
+  // arms
+  fillRect(c, 2, 7, 2, 3, body);
+  fillRect(c, 12, 7, 2, 3, body);
+  outlineFromFill(c, rgba(100, 100, 130, 255));
+  return c;
+}
+
+// --- 32x32 キャラクター（15個）---
+
+function makeNinja32() {
+  const c = makeCanvas(32, 32);
+  const bodyDark = rgba(40, 40, 50, 255);
+  const bodyMid = rgba(60, 60, 75, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const eye = rgba(255, 255, 255, 255);
+  const bandRed = rgba(220, 60, 60, 255);
+  // head
+  fillCircle(c, 16, 9, 6, bodyDark);
+  fillRect(c, 12, 7, 8, 4, bodyMid);
+  // eyes
+  fillRect(c, 12, 9, 2, 2, eye);
+  fillRect(c, 18, 9, 2, 2, eye);
+  setPx(c, 13, 10, PALETTE.ink);
+  setPx(c, 19, 10, PALETTE.ink);
+  // headband
+  fillRect(c, 10, 5, 12, 2, bandRed);
+  fillRect(c, 22, 7, 2, 3, bandRed);
+  fillRect(c, 24, 9, 2, 2, bandRed);
+  // body
+  fillRect(c, 11, 15, 10, 9, bodyDark);
+  fillRect(c, 13, 17, 6, 5, bodyMid);
+  // belt
+  fillRect(c, 11, 22, 10, 2, PALETTE.brown2);
+  // arms
+  fillRect(c, 6, 16, 5, 7, bodyDark);
+  fillRect(c, 21, 16, 5, 7, bodyDark);
+  // hands
+  fillRect(c, 6, 23, 3, 2, skin);
+  fillRect(c, 23, 23, 3, 2, skin);
+  // legs
+  fillRect(c, 11, 24, 4, 6, bodyDark);
+  fillRect(c, 17, 24, 4, 6, bodyDark);
+  // feet
+  fillRect(c, 10, 29, 5, 2, PALETTE.ink);
+  fillRect(c, 17, 29, 5, 2, PALETTE.ink);
+  // sword on back
+  fillRect(c, 22, 10, 2, 14, PALETTE.gray3);
+  fillRect(c, 22, 24, 2, 3, PALETTE.brown2);
+  setPx(c, 23, 9, PALETTE.white);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeWizard32() {
+  const c = makeCanvas(32, 32);
+  const robe = rgba(90, 60, 150, 255);
+  const robeDark = rgba(60, 40, 110, 255);
+  const robeLight = rgba(120, 90, 180, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const hat = rgba(70, 50, 130, 255);
+  const star = rgba(255, 230, 100, 255);
+  // hat
+  fillRect(c, 14, 0, 4, 2, hat);
+  fillRect(c, 13, 2, 6, 2, hat);
+  fillRect(c, 11, 4, 10, 3, hat);
+  fillRect(c, 9, 7, 14, 2, hat);
+  setPx(c, 16, 1, star);
+  setPx(c, 15, 3, star);
+  // face
+  fillCircle(c, 16, 12, 5, skin);
+  // beard
+  fillRect(c, 13, 14, 6, 6, PALETTE.white);
+  fillRect(c, 14, 20, 4, 2, PALETTE.white);
+  setPx(c, 16, 22, PALETTE.white);
+  // eyes
+  fillRect(c, 13, 11, 2, 2, PALETTE.ink);
+  fillRect(c, 17, 11, 2, 2, PALETTE.ink);
+  // body (robe)
+  fillRect(c, 9, 18, 14, 10, robe);
+  fillRect(c, 11, 20, 10, 6, robeDark);
+  fillRect(c, 7, 26, 18, 4, robe);
+  // robe detail
+  fillRect(c, 15, 19, 2, 8, robeLight);
+  // arms
+  fillRect(c, 4, 19, 5, 7, robe);
+  fillRect(c, 23, 19, 5, 7, robe);
+  // hands
+  fillRect(c, 4, 26, 3, 2, skin);
+  fillRect(c, 25, 26, 3, 2, skin);
+  // staff
+  fillRect(c, 26, 8, 2, 20, PALETTE.brown2);
+  fillCircle(c, 27, 6, 3, rgba(100, 200, 255, 255));
+  setPx(c, 27, 5, PALETTE.white);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeKnight32() {
+  const c = makeCanvas(32, 32);
+  const armor = rgba(180, 190, 210, 255);
+  const armorDark = rgba(130, 140, 160, 255);
+  const armorLight = rgba(220, 230, 245, 255);
+  const plume = rgba(220, 60, 60, 255);
+  // helmet
+  fillRect(c, 11, 3, 10, 10, armor);
+  fillRect(c, 9, 5, 14, 6, armor);
+  fillRect(c, 13, 4, 6, 2, armorLight);
+  // plume
+  fillRect(c, 16, 0, 4, 4, plume);
+  fillRect(c, 20, 2, 2, 4, plume);
+  // visor
+  fillRect(c, 11, 8, 10, 3, armorDark);
+  fillRect(c, 13, 9, 2, 1, PALETTE.ink);
+  fillRect(c, 17, 9, 2, 1, PALETTE.ink);
+  // body
+  fillRect(c, 9, 13, 14, 11, armor);
+  fillRect(c, 11, 15, 10, 7, armorDark);
+  // chest emblem
+  fillCircle(c, 16, 18, 2, rgba(200, 180, 50, 255));
+  // belt
+  fillRect(c, 9, 22, 14, 2, PALETTE.brown2);
+  setPx(c, 16, 23, rgba(200, 180, 50, 255));
+  // arms
+  fillRect(c, 4, 14, 5, 9, armor);
+  fillRect(c, 23, 14, 5, 9, armor);
+  fillRect(c, 5, 15, 3, 7, armorDark);
+  fillRect(c, 24, 15, 3, 7, armorDark);
+  // gauntlets
+  fillRect(c, 4, 23, 4, 3, armorDark);
+  fillRect(c, 24, 23, 4, 3, armorDark);
+  // sword
+  fillRect(c, 2, 10, 2, 14, PALETTE.gray3);
+  setPx(c, 3, 9, PALETTE.white);
+  fillRect(c, 1, 24, 4, 2, PALETTE.brown2);
+  // shield
+  fillRect(c, 25, 16, 5, 7, rgba(60, 100, 180, 255));
+  fillRect(c, 26, 17, 3, 5, rgba(80, 120, 200, 255));
+  setPx(c, 27, 19, rgba(255, 220, 80, 255));
+  // legs
+  fillRect(c, 10, 24, 5, 6, armor);
+  fillRect(c, 17, 24, 5, 6, armor);
+  fillRect(c, 11, 25, 3, 4, armorDark);
+  fillRect(c, 18, 25, 3, 4, armorDark);
+  // boots
+  fillRect(c, 9, 29, 6, 2, armorDark);
+  fillRect(c, 17, 29, 6, 2, armorDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makePrincess32() {
+  const c = makeCanvas(32, 32);
+  const dress = rgba(255, 150, 200, 255);
+  const dressDark = rgba(220, 120, 170, 255);
+  const dressLight = rgba(255, 180, 220, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const hair = rgba(255, 200, 100, 255);
+  const hairDark = rgba(220, 170, 70, 255);
+  const crown = rgba(255, 220, 80, 255);
+  // hair back
+  fillRect(c, 8, 8, 16, 14, hair);
+  fillRect(c, 10, 22, 12, 4, hair);
+  // crown
+  fillRect(c, 11, 1, 10, 3, crown);
+  setPx(c, 13, 0, crown);
+  setPx(c, 16, 0, crown);
+  setPx(c, 19, 0, crown);
+  setPx(c, 16, 0, rgba(255, 100, 100, 255));
+  // head
+  fillCircle(c, 16, 10, 6, skin);
+  // hair front
+  fillRect(c, 10, 4, 12, 4, hair);
+  fillRect(c, 8, 7, 3, 8, hair);
+  fillRect(c, 21, 7, 3, 8, hair);
+  // eyes
+  fillRect(c, 13, 10, 2, 3, PALETTE.blue2);
+  fillRect(c, 17, 10, 2, 3, PALETTE.blue2);
+  setPx(c, 13, 10, PALETTE.white);
+  setPx(c, 17, 10, PALETTE.white);
+  // blush
+  fillRect(c, 10, 12, 2, 1, rgba(255, 180, 180, 255));
+  fillRect(c, 20, 12, 2, 1, rgba(255, 180, 180, 255));
+  // smile
+  fillRect(c, 15, 14, 2, 1, rgba(200, 100, 100, 255));
+  // dress body
+  fillRect(c, 10, 16, 12, 6, dress);
+  fillRect(c, 12, 18, 8, 3, dressDark);
+  // necklace
+  fillRect(c, 14, 16, 4, 1, crown);
+  // dress skirt
+  fillRect(c, 6, 22, 20, 8, dress);
+  fillRect(c, 4, 26, 24, 5, dress);
+  fillRect(c, 8, 23, 16, 5, dressDark);
+  // skirt detail
+  for (let i = 0; i < 5; i++) {
+    setPx(c, 6 + i * 5, 28, dressLight);
+    setPx(c, 7 + i * 5, 29, dressLight);
+  }
+  // arms
+  fillRect(c, 6, 17, 4, 6, dress);
+  fillRect(c, 22, 17, 4, 6, dress);
+  // hands
+  fillRect(c, 6, 23, 3, 2, skin);
+  fillRect(c, 23, 23, 3, 2, skin);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makePirate32() {
+  const c = makeCanvas(32, 32);
+  const vest = rgba(180, 50, 50, 255);
+  const vestDark = rgba(140, 30, 30, 255);
+  const pants = rgba(60, 60, 90, 255);
+  const skin = rgba(230, 190, 150, 255);
+  const bandana = rgba(200, 40, 40, 255);
+  // head
+  fillCircle(c, 16, 10, 6, skin);
+  // bandana
+  fillRect(c, 9, 3, 14, 4, bandana);
+  fillRect(c, 23, 6, 3, 4, bandana);
+  fillRect(c, 26, 9, 2, 3, bandana);
+  // eye patch
+  fillRect(c, 18, 8, 4, 4, PALETTE.ink);
+  fillRect(c, 17, 7, 6, 1, PALETTE.ink);
+  // good eye
+  fillRect(c, 12, 9, 2, 3, PALETTE.ink);
+  setPx(c, 12, 9, PALETTE.white);
+  // scar
+  setPx(c, 14, 11, rgba(180, 130, 110, 255));
+  setPx(c, 15, 12, rgba(180, 130, 110, 255));
+  // beard
+  fillRect(c, 13, 14, 6, 3, PALETTE.brown1);
+  fillRect(c, 14, 17, 4, 2, PALETTE.brown1);
+  // earring
+  setPx(c, 10, 12, rgba(255, 220, 80, 255));
+  // body (vest)
+  fillRect(c, 9, 18, 14, 8, vest);
+  fillRect(c, 11, 19, 10, 5, vestDark);
+  // shirt underneath
+  fillRect(c, 14, 18, 4, 6, PALETTE.white);
+  // belt
+  fillRect(c, 9, 24, 14, 2, PALETTE.brown2);
+  setPx(c, 16, 25, rgba(255, 220, 80, 255));
+  // arms
+  fillRect(c, 4, 18, 5, 8, vest);
+  fillRect(c, 23, 18, 5, 8, vest);
+  // hands
+  fillRect(c, 4, 26, 4, 2, skin);
+  // hook hand!
+  fillRect(c, 24, 26, 3, 2, PALETTE.gray3);
+  setPx(c, 27, 27, PALETTE.gray3);
+  setPx(c, 28, 26, PALETTE.gray3);
+  // cutlass
+  fillRect(c, 2, 18, 2, 10, PALETTE.gray3);
+  setPx(c, 3, 17, PALETTE.white);
+  fillRect(c, 1, 28, 4, 2, PALETTE.brown2);
+  // pants
+  fillRect(c, 10, 26, 5, 5, pants);
+  fillRect(c, 17, 26, 5, 5, pants);
+  // boots
+  fillRect(c, 9, 29, 6, 2, PALETTE.brown1);
+  fillRect(c, 17, 29, 6, 2, PALETTE.brown1);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeAlienBoss32() {
+  const c = makeCanvas(32, 32);
+  const body = rgba(80, 160, 80, 255);
+  const bodyDark = rgba(50, 120, 50, 255);
+  const bodyLight = rgba(120, 200, 120, 255);
+  const eye = rgba(255, 50, 50, 255);
+  // huge head
+  fillCircle(c, 16, 12, 10, body);
+  fillCircle(c, 16, 14, 8, bodyDark);
+  // brain texture
+  for (let i = 0; i < 5; i++) {
+    setPx(c, 12 + i * 2, 6, bodyLight);
+    setPx(c, 11 + i * 2, 8, bodyLight);
+  }
+  // big evil eyes
+  fillCircle(c, 11, 12, 4, PALETTE.ink);
+  fillCircle(c, 21, 12, 4, PALETTE.ink);
+  fillCircle(c, 11, 12, 2, eye);
+  fillCircle(c, 21, 12, 2, eye);
+  setPx(c, 10, 11, PALETTE.white);
+  setPx(c, 20, 11, PALETTE.white);
+  // antenna
+  fillRect(c, 9, 1, 2, 4, body);
+  fillRect(c, 21, 1, 2, 4, body);
+  fillCircle(c, 10, 1, 2, rgba(255, 100, 255, 255));
+  fillCircle(c, 22, 1, 2, rgba(255, 100, 255, 255));
+  // tentacle arms
+  fillRect(c, 3, 14, 5, 3, body);
+  fillRect(c, 1, 17, 4, 3, body);
+  fillRect(c, 0, 20, 3, 3, bodyDark);
+  fillRect(c, 24, 14, 5, 3, body);
+  fillRect(c, 27, 17, 4, 3, body);
+  fillRect(c, 29, 20, 3, 3, bodyDark);
+  // body (smaller)
+  fillRect(c, 11, 22, 10, 6, body);
+  fillRect(c, 13, 24, 6, 3, bodyDark);
+  // legs/tentacles
+  fillRect(c, 9, 28, 4, 3, body);
+  fillRect(c, 19, 28, 4, 3, body);
+  fillRect(c, 8, 30, 2, 2, bodyDark);
+  fillRect(c, 22, 30, 2, 2, bodyDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeBomberPlayer32() {
+  const c = makeCanvas(32, 32);
+  const suit = rgba(240, 240, 250, 255);
+  const suitDark = rgba(200, 200, 220, 255);
+  const helmet = rgba(80, 150, 220, 255);
+  const helmetDark = rgba(50, 110, 180, 255);
+  const skin = rgba(255, 220, 185, 255);
+  // helmet
+  fillCircle(c, 16, 10, 8, helmet);
+  fillRect(c, 10, 6, 12, 8, helmet);
+  fillRect(c, 11, 7, 10, 6, helmetDark);
+  // antenna
+  fillRect(c, 15, 1, 2, 4, helmet);
+  fillCircle(c, 16, 1, 2, rgba(255, 100, 100, 255));
+  // visor (face visible)
+  fillRect(c, 11, 8, 10, 6, skin);
+  // eyes
+  fillRect(c, 12, 10, 2, 2, PALETTE.ink);
+  fillRect(c, 18, 10, 2, 2, PALETTE.ink);
+  setPx(c, 12, 10, PALETTE.white);
+  setPx(c, 18, 10, PALETTE.white);
+  // smile
+  fillRect(c, 14, 13, 4, 1, rgba(200, 100, 100, 255));
+  // body
+  fillRect(c, 9, 18, 14, 8, suit);
+  fillRect(c, 11, 20, 10, 4, suitDark);
+  // belt
+  fillRect(c, 9, 24, 14, 2, PALETTE.brown2);
+  setPx(c, 16, 25, rgba(255, 220, 80, 255));
+  // "B" logo
+  fillRect(c, 14, 20, 4, 3, rgba(220, 60, 60, 255));
+  // arms
+  fillRect(c, 4, 18, 5, 8, suit);
+  fillRect(c, 23, 18, 5, 8, suit);
+  // gloves
+  fillRect(c, 3, 26, 5, 3, suitDark);
+  fillRect(c, 24, 26, 5, 3, suitDark);
+  // legs
+  fillRect(c, 10, 26, 5, 5, suit);
+  fillRect(c, 17, 26, 5, 5, suit);
+  // boots
+  fillRect(c, 9, 29, 6, 2, helmetDark);
+  fillRect(c, 17, 29, 6, 2, helmetDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeMinerPro32() {
+  const c = makeCanvas(32, 32);
+  const helmet = rgba(255, 200, 50, 255);
+  const helmetDark = rgba(220, 170, 30, 255);
+  const overall = rgba(80, 120, 180, 255);
+  const overallDark = rgba(50, 90, 150, 255);
+  const skin = rgba(255, 220, 185, 255);
+  // helmet
+  fillRect(c, 9, 3, 14, 6, helmet);
+  fillRect(c, 7, 5, 18, 4, helmet);
+  fillRect(c, 10, 4, 12, 4, helmetDark);
+  // headlamp
+  fillRect(c, 14, 3, 4, 2, PALETTE.gray3);
+  fillRect(c, 15, 2, 2, 1, rgba(255, 255, 200, 255));
+  // light beam
+  setPx(c, 16, 1, rgba(255, 255, 200, 200));
+  setPx(c, 15, 0, rgba(255, 255, 200, 150));
+  setPx(c, 17, 0, rgba(255, 255, 200, 150));
+  // face
+  fillRect(c, 11, 9, 10, 7, skin);
+  // eyes
+  fillRect(c, 13, 11, 2, 2, PALETTE.ink);
+  fillRect(c, 17, 11, 2, 2, PALETTE.ink);
+  // smile
+  fillRect(c, 14, 14, 4, 1, rgba(200, 100, 100, 255));
+  // body (overalls)
+  fillRect(c, 9, 16, 14, 10, overall);
+  fillRect(c, 11, 18, 10, 6, overallDark);
+  // straps
+  fillRect(c, 11, 16, 2, 4, PALETTE.brown2);
+  fillRect(c, 19, 16, 2, 4, PALETTE.brown2);
+  // pocket
+  fillRect(c, 14, 21, 4, 3, overallDark);
+  setPx(c, 16, 22, PALETTE.gray3);
+  // arms
+  fillRect(c, 4, 17, 5, 8, overall);
+  fillRect(c, 23, 17, 5, 8, overall);
+  // gloves
+  fillRect(c, 3, 25, 5, 3, PALETTE.brown2);
+  fillRect(c, 24, 25, 5, 3, PALETTE.brown2);
+  // pickaxe
+  fillRect(c, 1, 14, 2, 14, PALETTE.brown2);
+  fillRect(c, 0, 12, 4, 3, PALETTE.gray3);
+  setPx(c, 0, 11, PALETTE.gray3);
+  setPx(c, 4, 11, PALETTE.gray3);
+  setPx(c, 2, 13, PALETTE.white);
+  // legs
+  fillRect(c, 10, 26, 5, 5, overall);
+  fillRect(c, 17, 26, 5, 5, overall);
+  // boots
+  fillRect(c, 9, 29, 6, 2, PALETTE.brown1);
+  fillRect(c, 17, 29, 6, 2, PALETTE.brown1);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeDragon32() {
+  const c = makeCanvas(32, 32);
+  const body = rgba(100, 180, 100, 255);
+  const bodyDark = rgba(70, 140, 70, 255);
+  const bodyLight = rgba(140, 210, 140, 255);
+  const belly = rgba(255, 230, 180, 255);
+  const wing = rgba(80, 150, 80, 220);
+  const wingDark = rgba(50, 110, 50, 200);
+  // wings
+  fillRect(c, 1, 8, 8, 10, wing);
+  fillRect(c, 23, 8, 8, 10, wing);
+  fillRect(c, 0, 6, 4, 4, wing);
+  fillRect(c, 28, 6, 4, 4, wing);
+  fillRect(c, 2, 10, 5, 6, wingDark);
+  fillRect(c, 25, 10, 5, 6, wingDark);
+  // body
+  fillCircle(c, 16, 16, 8, body);
+  fillCircle(c, 16, 18, 6, bodyDark);
+  // belly
+  fillRect(c, 13, 14, 6, 8, belly);
+  // head
+  fillCircle(c, 16, 7, 6, body);
+  fillRect(c, 13, 9, 6, 3, bodyDark);
+  // snout
+  fillRect(c, 14, 10, 4, 4, body);
+  // nostrils
+  setPx(c, 14, 12, PALETTE.ink);
+  setPx(c, 17, 12, PALETTE.ink);
+  // horns
+  fillRect(c, 10, 1, 2, 4, bodyDark);
+  fillRect(c, 20, 1, 2, 4, bodyDark);
+  setPx(c, 10, 0, bodyLight);
+  setPx(c, 21, 0, bodyLight);
+  // eyes
+  fillCircle(c, 13, 6, 2, rgba(255, 200, 50, 255));
+  fillCircle(c, 19, 6, 2, rgba(255, 200, 50, 255));
+  setPx(c, 13, 6, PALETTE.ink);
+  setPx(c, 19, 6, PALETTE.ink);
+  // spines
+  for (let i = 0; i < 4; i++) {
+    setPx(c, 16, 22 + i * 2, bodyDark);
+  }
+  // tail
+  fillRect(c, 22, 20, 4, 3, body);
+  fillRect(c, 25, 22, 3, 2, body);
+  fillRect(c, 27, 24, 3, 2, bodyDark);
+  setPx(c, 30, 25, bodyLight);
+  // legs
+  fillRect(c, 10, 22, 4, 6, body);
+  fillRect(c, 18, 22, 4, 6, body);
+  // claws
+  fillRect(c, 9, 27, 5, 2, bodyDark);
+  fillRect(c, 18, 27, 5, 2, bodyDark);
+  setPx(c, 9, 28, bodyLight);
+  setPx(c, 13, 28, bodyLight);
+  setPx(c, 18, 28, bodyLight);
+  setPx(c, 22, 28, bodyLight);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeGolem32() {
+  const c = makeCanvas(32, 32);
+  const stone = rgba(140, 130, 120, 255);
+  const stoneDark = rgba(100, 95, 90, 255);
+  const stoneLight = rgba(180, 170, 160, 255);
+  const eye = rgba(255, 200, 50, 255);
+  const eyeGlow = rgba(255, 150, 50, 255);
+  // head
+  fillRect(c, 10, 3, 12, 10, stone);
+  fillRect(c, 12, 5, 8, 6, stoneDark);
+  setPx(c, 10, 3, stoneLight);
+  setPx(c, 21, 3, stoneLight);
+  // eyes
+  fillRect(c, 12, 6, 3, 3, eye);
+  fillRect(c, 17, 6, 3, 3, eye);
+  setPx(c, 13, 7, eyeGlow);
+  setPx(c, 18, 7, eyeGlow);
+  // mouth
+  fillRect(c, 14, 10, 4, 2, PALETTE.ink);
+  // body
+  fillRect(c, 8, 13, 16, 12, stone);
+  fillRect(c, 10, 15, 12, 8, stoneDark);
+  // chest cracks/runes
+  setPx(c, 14, 16, eye);
+  setPx(c, 17, 16, eye);
+  setPx(c, 16, 18, eye);
+  setPx(c, 15, 20, eye);
+  setPx(c, 17, 20, eye);
+  // arms (massive)
+  fillRect(c, 1, 13, 7, 12, stone);
+  fillRect(c, 24, 13, 7, 12, stone);
+  fillRect(c, 3, 15, 3, 8, stoneDark);
+  fillRect(c, 26, 15, 3, 8, stoneDark);
+  // fists
+  fillRect(c, 0, 25, 8, 4, stone);
+  fillRect(c, 24, 25, 8, 4, stone);
+  fillRect(c, 2, 26, 4, 2, stoneDark);
+  fillRect(c, 26, 26, 4, 2, stoneDark);
+  // legs
+  fillRect(c, 9, 25, 6, 6, stone);
+  fillRect(c, 17, 25, 6, 6, stone);
+  fillRect(c, 11, 27, 2, 3, stoneDark);
+  fillRect(c, 19, 27, 2, 3, stoneDark);
+  // cracks detail
+  setPx(c, 5, 18, stoneLight);
+  setPx(c, 6, 20, stoneLight);
+  setPx(c, 27, 19, stoneLight);
+  setPx(c, 12, 28, stoneLight);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeWitch32() {
+  const c = makeCanvas(32, 32);
+  const dress = rgba(50, 40, 70, 255);
+  const dressDark = rgba(30, 25, 50, 255);
+  const skin = rgba(200, 220, 200, 255);
+  const hair = rgba(80, 60, 100, 255);
+  const hat = rgba(40, 30, 60, 255);
+  // hat
+  fillRect(c, 14, 0, 4, 3, hat);
+  fillRect(c, 12, 3, 8, 3, hat);
+  fillRect(c, 10, 6, 12, 2, hat);
+  fillRect(c, 7, 8, 18, 2, hat);
+  // buckle
+  fillRect(c, 14, 6, 4, 2, rgba(255, 200, 50, 255));
+  // hair
+  fillRect(c, 8, 10, 16, 10, hair);
+  fillRect(c, 6, 14, 4, 10, hair);
+  fillRect(c, 22, 14, 4, 10, hair);
+  // face
+  fillCircle(c, 16, 14, 5, skin);
+  // eyes
+  fillRect(c, 13, 13, 2, 2, PALETTE.ink);
+  fillRect(c, 17, 13, 2, 2, PALETTE.ink);
+  setPx(c, 13, 13, rgba(150, 50, 200, 255));
+  setPx(c, 17, 13, rgba(150, 50, 200, 255));
+  // nose (pointy)
+  setPx(c, 16, 15, skin);
+  setPx(c, 16, 16, skin);
+  // smile
+  fillRect(c, 14, 17, 4, 1, rgba(100, 50, 80, 255));
+  // body
+  fillRect(c, 10, 20, 12, 8, dress);
+  fillRect(c, 12, 22, 8, 4, dressDark);
+  // cape
+  fillRect(c, 6, 20, 4, 10, dress);
+  fillRect(c, 22, 20, 4, 10, dress);
+  // arms
+  fillRect(c, 5, 21, 5, 6, dress);
+  fillRect(c, 22, 21, 5, 6, dress);
+  // hands
+  fillRect(c, 4, 27, 4, 2, skin);
+  fillRect(c, 24, 27, 4, 2, skin);
+  // broom
+  fillRect(c, 26, 14, 2, 16, PALETTE.brown2);
+  fillRect(c, 25, 28, 4, 3, PALETTE.brown1);
+  fillRect(c, 24, 29, 6, 2, PALETTE.brown1);
+  // skirt bottom
+  fillRect(c, 8, 28, 16, 3, dress);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeSamurai32() {
+  const c = makeCanvas(32, 32);
+  const armor = rgba(60, 60, 80, 255);
+  const armorDark = rgba(40, 40, 60, 255);
+  const armorRed = rgba(180, 50, 50, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const helmet = rgba(50, 50, 70, 255);
+  // helmet (kabuto)
+  fillRect(c, 9, 2, 14, 8, helmet);
+  fillRect(c, 7, 4, 18, 4, helmet);
+  // crest
+  fillRect(c, 14, 0, 4, 3, rgba(255, 200, 50, 255));
+  setPx(c, 16, 0, armorRed);
+  // mask
+  fillRect(c, 11, 8, 10, 4, armor);
+  fillRect(c, 12, 9, 8, 2, armorDark);
+  // face visible
+  fillRect(c, 12, 10, 8, 4, skin);
+  // eyes
+  fillRect(c, 13, 11, 2, 2, PALETTE.ink);
+  fillRect(c, 17, 11, 2, 2, PALETTE.ink);
+  // body armor
+  fillRect(c, 8, 14, 16, 10, armor);
+  fillRect(c, 10, 16, 12, 6, armorDark);
+  // chest plate detail
+  fillRect(c, 12, 15, 8, 1, armorRed);
+  fillRect(c, 12, 18, 8, 1, armorRed);
+  fillRect(c, 12, 21, 8, 1, armorRed);
+  // shoulder armor
+  fillRect(c, 4, 14, 5, 4, armor);
+  fillRect(c, 23, 14, 5, 4, armor);
+  fillRect(c, 5, 15, 3, 2, armorRed);
+  fillRect(c, 24, 15, 3, 2, armorRed);
+  // arms
+  fillRect(c, 4, 18, 4, 7, armor);
+  fillRect(c, 24, 18, 4, 7, armor);
+  // hands
+  fillRect(c, 3, 25, 4, 2, skin);
+  fillRect(c, 25, 25, 4, 2, skin);
+  // katana
+  fillRect(c, 1, 12, 2, 16, PALETTE.gray3);
+  setPx(c, 2, 11, PALETTE.white);
+  fillRect(c, 0, 28, 4, 2, PALETTE.brown2);
+  fillRect(c, 0, 27, 4, 1, rgba(255, 200, 50, 255));
+  // skirt armor (kusazuri)
+  fillRect(c, 9, 24, 14, 4, armor);
+  fillRect(c, 10, 25, 4, 2, armorDark);
+  fillRect(c, 18, 25, 4, 2, armorDark);
+  // legs
+  fillRect(c, 10, 28, 5, 3, armorDark);
+  fillRect(c, 17, 28, 5, 3, armorDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makePumpkinHead32() {
+  const c = makeCanvas(32, 32);
+  const pumpkin = rgba(255, 150, 50, 255);
+  const pumpkinDark = rgba(220, 120, 30, 255);
+  const pumpkinLight = rgba(255, 180, 80, 255);
+  const stem = rgba(80, 120, 50, 255);
+  const glow = rgba(255, 200, 50, 255);
+  const cloak = rgba(40, 30, 50, 255);
+  // stem
+  fillRect(c, 14, 0, 4, 3, stem);
+  // pumpkin head
+  fillCircle(c, 16, 10, 9, pumpkin);
+  // segments
+  fillRect(c, 8, 6, 2, 10, pumpkinDark);
+  fillRect(c, 14, 5, 2, 11, pumpkinDark);
+  fillRect(c, 22, 6, 2, 10, pumpkinDark);
+  // highlights
+  fillRect(c, 11, 7, 2, 6, pumpkinLight);
+  fillRect(c, 19, 7, 2, 6, pumpkinLight);
+  // carved eyes (glowing)
+  fillRect(c, 10, 8, 4, 4, PALETTE.ink);
+  fillRect(c, 18, 8, 4, 4, PALETTE.ink);
+  fillRect(c, 11, 9, 2, 2, glow);
+  fillRect(c, 19, 9, 2, 2, glow);
+  // carved mouth
+  fillRect(c, 11, 14, 10, 3, PALETTE.ink);
+  setPx(c, 11, 14, pumpkin);
+  setPx(c, 20, 14, pumpkin);
+  setPx(c, 13, 14, pumpkin);
+  setPx(c, 15, 14, pumpkin);
+  setPx(c, 17, 14, pumpkin);
+  fillRect(c, 12, 15, 2, 1, glow);
+  fillRect(c, 16, 15, 2, 1, glow);
+  // cloak body
+  fillRect(c, 8, 19, 16, 10, cloak);
+  fillRect(c, 6, 22, 20, 8, cloak);
+  // arms hidden in cloak
+  fillRect(c, 4, 22, 4, 6, cloak);
+  fillRect(c, 24, 22, 4, 6, cloak);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+function makeSnowman32() {
+  const c = makeCanvas(32, 32);
+  const snow = rgba(250, 250, 255, 255);
+  const snowDark = rgba(220, 230, 240, 255);
+  const hat = rgba(40, 40, 50, 255);
+  const scarf = rgba(220, 60, 60, 255);
+  const carrot = rgba(255, 150, 50, 255);
+  const coal = rgba(30, 30, 40, 255);
+  // hat
+  fillRect(c, 11, 1, 10, 3, hat);
+  fillRect(c, 9, 4, 14, 2, hat);
+  // head
+  fillCircle(c, 16, 10, 6, snow);
+  fillCircle(c, 16, 11, 5, snowDark);
+  // eyes (coal)
+  fillRect(c, 13, 8, 2, 2, coal);
+  fillRect(c, 17, 8, 2, 2, coal);
+  // carrot nose
+  fillRect(c, 15, 10, 1, 1, carrot);
+  fillRect(c, 16, 10, 1, 1, carrot);
+  fillRect(c, 17, 10, 1, 1, carrot);
+  fillRect(c, 18, 10, 2, 1, carrot);
+  // mouth (coal)
+  setPx(c, 13, 13, coal);
+  setPx(c, 14, 14, coal);
+  setPx(c, 16, 14, coal);
+  setPx(c, 18, 14, coal);
+  setPx(c, 19, 13, coal);
+  // scarf
+  fillRect(c, 10, 15, 12, 2, scarf);
+  fillRect(c, 20, 17, 3, 6, scarf);
+  // body
+  fillCircle(c, 16, 24, 8, snow);
+  fillCircle(c, 16, 25, 7, snowDark);
+  // buttons (coal)
+  setPx(c, 16, 20, coal);
+  setPx(c, 16, 23, coal);
+  setPx(c, 16, 26, coal);
+  // stick arms
+  fillRect(c, 3, 21, 6, 1, PALETTE.brown1);
+  fillRect(c, 23, 21, 6, 1, PALETTE.brown1);
+  setPx(c, 2, 20, PALETTE.brown1);
+  setPx(c, 3, 19, PALETTE.brown1);
+  setPx(c, 28, 20, PALETTE.brown1);
+  setPx(c, 27, 19, PALETTE.brown1);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 40) });
+  return c;
+}
+
+function makeWolf32() {
+  const c = makeCanvas(32, 32);
+  const fur = rgba(120, 120, 130, 255);
+  const furDark = rgba(80, 80, 90, 255);
+  const furLight = rgba(180, 180, 190, 255);
+  const belly = rgba(220, 220, 230, 255);
+  const nose = rgba(40, 40, 50, 255);
+  // ears
+  fillRect(c, 7, 2, 4, 5, fur);
+  fillRect(c, 21, 2, 4, 5, fur);
+  fillRect(c, 8, 3, 2, 3, rgba(255, 180, 180, 255));
+  fillRect(c, 22, 3, 2, 3, rgba(255, 180, 180, 255));
+  // head
+  fillCircle(c, 16, 10, 7, fur);
+  fillCircle(c, 16, 11, 6, furDark);
+  // snout
+  fillRect(c, 13, 11, 6, 5, fur);
+  fillRect(c, 14, 13, 4, 3, furLight);
+  // nose
+  fillRect(c, 15, 12, 2, 2, nose);
+  // eyes
+  fillRect(c, 11, 8, 3, 3, PALETTE.white);
+  fillRect(c, 18, 8, 3, 3, PALETTE.white);
+  fillRect(c, 12, 9, 2, 2, rgba(200, 180, 50, 255));
+  fillRect(c, 19, 9, 2, 2, rgba(200, 180, 50, 255));
+  setPx(c, 13, 10, PALETTE.ink);
+  setPx(c, 20, 10, PALETTE.ink);
+  // body
+  fillRect(c, 8, 17, 16, 10, fur);
+  fillRect(c, 10, 19, 12, 6, furDark);
+  // belly
+  fillRect(c, 12, 20, 8, 5, belly);
+  // front legs
+  fillRect(c, 8, 24, 4, 6, fur);
+  fillRect(c, 20, 24, 4, 6, fur);
+  fillRect(c, 9, 26, 2, 3, furDark);
+  fillRect(c, 21, 26, 2, 3, furDark);
+  // paws
+  fillRect(c, 7, 29, 5, 2, furLight);
+  fillRect(c, 20, 29, 5, 2, furLight);
+  // tail
+  fillRect(c, 24, 18, 4, 3, fur);
+  fillRect(c, 27, 16, 3, 4, fur);
+  fillRect(c, 29, 14, 2, 3, furLight);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 3, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -2494,7 +3828,45 @@ const samples = [
   toSample('dw_lollipop_16', 'ぺろぺろキャンディ', 'object', makeDwItemLollipop16(), ['ドリーミー', 'パステル', '16x16', '小物', '食べもの']),
   toSample('dw_dream_door_16', 'ゆめのとびら', 'object', makeDwItemDreamDoor16(), ['ドリーミー', 'パステル', '16x16', '小物', 'ギミック']),
   toSample('dw_bubble_16', 'しゃぼんだま', 'object', makeDwItemBubble16(), ['ドリーミー', 'パステル', '16x16', '小物', 'エフェクト']),
-  toSample('dw_strawberry_16', 'いちご', 'object', makeDwItemStrawberry16(), ['ドリーミー', 'パステル', '16x16', '小物', '食べもの'])
+  toSample('dw_strawberry_16', 'いちご', 'object', makeDwItemStrawberry16(), ['ドリーミー', 'パステル', '16x16', '小物', '食べもの']),
+
+  // ============================================
+  // 新規キャラクター素材（ゲーム向け高品質版）
+  // ============================================
+
+  // --- 16x16 キャラクター（15個）---
+  toSampleAnimated2('ninja_16', 'にんじゃ', 'character', makeNinja16(), ['キャラ', '16x16', '主人公', 'アクション'], { dy: 1 }),
+  toSampleAnimated2('wizard_16', 'まほうつかい', 'character', makeWizard16(), ['キャラ', '16x16', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('knight_player_16', 'きし', 'character', makeKnightPlayer16(), ['キャラ', '16x16', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('princess_16', 'おひめさま', 'character', makePrincess16(), ['キャラ', '16x16', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('archer_16', 'ゆみつかい', 'character', makeArcher16(), ['キャラ', '16x16', '主人公', 'アクション'], { dy: 1 }),
+  toSampleAnimated2('pirate_16', 'かいぞく', 'character', makePirate16(), ['キャラ', '16x16', '主人公', 'アドベンチャー'], { dy: 1 }),
+  toSampleAnimated2('alien_16', 'うちゅうじん', 'character', makeAlien16(), ['キャラ', '16x16', 'SF', 'インベーダー'], { dy: 1 }),
+  toSample('ufo_16', 'ユーフォー', 'character', makeUfo16(), ['キャラ', '16x16', 'SF', 'インベーダー', '敵']),
+  toSampleAnimated2('bomber_char_16', 'ボンバーくん', 'character', makeBomberChar16(), ['キャラ', '16x16', '主人公', 'ボンバーマン'], { dy: 1 }),
+  toSampleAnimated2('miner_16', 'こうふ', 'character', makeMiner16(), ['キャラ', '16x16', '主人公', 'ピクセルマイナー'], { dy: 1 }),
+  toSampleAnimated2('fairy_16', 'ようせい', 'character', makeFairy16(), ['キャラ', '16x16', 'NPC', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('dragon_mini_16', 'ちびドラゴン', 'character', makeDragonMini16(), ['キャラ', '16x16', 'モンスター', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('golem_16', 'ゴーレム', 'character', makeGolem16(), ['キャラ', '16x16', 'モンスター', '敵', 'ピクセルマイナー'], { dy: 1 }),
+  toSampleAnimated2('vampire_16', 'きゅうけつき', 'character', makeVampire16(), ['キャラ', '16x16', 'モンスター', '敵'], { dy: 1 }),
+  toSampleAnimated2('ghost_enemy_16', 'ゆうれい', 'character', makeGhostEnemy16(), ['キャラ', '16x16', 'モンスター', '敵'], { dy: 1 }),
+
+  // --- 32x32 キャラクター（15個）---
+  toSampleAnimated2('ninja_32', 'にんじゃ', 'character', makeNinja32(), ['キャラ', '32x32', '主人公', 'アクション'], { dy: 1 }),
+  toSampleAnimated2('wizard_32', 'まほうつかい', 'character', makeWizard32(), ['キャラ', '32x32', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('knight_32', 'きし', 'character', makeKnight32(), ['キャラ', '32x32', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('princess_32', 'おひめさま', 'character', makePrincess32(), ['キャラ', '32x32', '主人公', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('pirate_32', 'かいぞく', 'character', makePirate32(), ['キャラ', '32x32', '主人公', 'アドベンチャー'], { dy: 1 }),
+  toSampleAnimated2('alien_boss_32', 'うちゅうじんボス', 'character', makeAlienBoss32(), ['キャラ', '32x32', 'SF', 'インベーダー', 'ボス'], { dy: 1 }),
+  toSampleAnimated2('bomber_player_32', 'ボンバーくん', 'character', makeBomberPlayer32(), ['キャラ', '32x32', '主人公', 'ボンバーマン'], { dy: 1 }),
+  toSampleAnimated2('miner_pro_32', 'こうふプロ', 'character', makeMinerPro32(), ['キャラ', '32x32', '主人公', 'ピクセルマイナー'], { dy: 1 }),
+  toSampleAnimated2('dragon_32', 'ドラゴン', 'character', makeDragon32(), ['キャラ', '32x32', 'モンスター', 'ボス', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('golem_32', 'ゴーレム', 'character', makeGolem32(), ['キャラ', '32x32', 'モンスター', '敵', 'ピクセルマイナー'], { dy: 1 }),
+  toSampleAnimated2('witch_32', 'まじょ', 'character', makeWitch32(), ['キャラ', '32x32', 'モンスター', '敵', 'ファンタジー'], { dy: 1 }),
+  toSampleAnimated2('samurai_32', 'さむらい', 'character', makeSamurai32(), ['キャラ', '32x32', '主人公', 'アクション'], { dy: 1 }),
+  toSampleAnimated2('pumpkin_head_32', 'かぼちゃあたま', 'character', makePumpkinHead32(), ['キャラ', '32x32', 'モンスター', 'ハロウィン'], { dy: 1 }),
+  toSampleAnimated2('snowman_32', 'ゆきだるま', 'character', makeSnowman32(), ['キャラ', '32x32', 'NPC', 'ふゆ'], { dy: 1 }),
+  toSampleAnimated2('wolf_32', 'オオカミ', 'character', makeWolf32(), ['キャラ', '32x32', 'どうぶつ', '敵'], { dy: 1 })
 ];
 
 const output = {
