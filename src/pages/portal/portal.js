@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'chase-survival',
+    title: '逃走サバイバル',
+    desc: 'ハンターから逃げて賞金を稼げ！3Dチェイス🏃',
+    color: '#1a1a2e',
+    icon: '🏃',
+    link: '/games/chase-survival/'
+  },
+  {
     id: 'bomberman',
     title: 'ボンバーマン',
     desc: '爆弾で道を切り開け！ステージエディター付き💣',
