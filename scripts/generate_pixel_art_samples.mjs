@@ -3668,6 +3668,829 @@ function makeWolf32() {
   return c;
 }
 
+// ============================================
+// 和風ローグライク「幽世の試練」用素材
+// ============================================
+
+// --- キャラクター（32x32）---
+
+// 影丸（プレイヤー）
+function makeKagemaru32() {
+  const c = makeCanvas(32, 32);
+  const hair = rgba(40, 35, 45, 255);
+  const skin = rgba(255, 220, 185, 255);
+  const skinDark = rgba(230, 190, 155, 255);
+  const hakama = rgba(60, 80, 120, 255);
+  const hakamaDark = rgba(40, 55, 90, 255);
+  const gi = rgba(245, 240, 230, 255);
+  const giDark = rgba(220, 210, 195, 255);
+  const obi = rgba(80, 50, 40, 255);
+  // hair
+  fillCircle(c, 16, 8, 6, hair);
+  fillRect(c, 10, 4, 12, 6, hair);
+  // face
+  fillCircle(c, 16, 10, 5, skin);
+  fillRect(c, 12, 10, 8, 4, skin);
+  // eyes
+  setPx(c, 14, 10, PALETTE.ink);
+  setPx(c, 18, 10, PALETTE.ink);
+  setPx(c, 13, 9, PALETTE.white);
+  setPx(c, 17, 9, PALETTE.white);
+  // mouth
+  setPx(c, 16, 12, skinDark);
+  // gi (top)
+  fillRect(c, 10, 14, 12, 6, gi);
+  fillRect(c, 12, 15, 8, 4, giDark);
+  // obi (belt)
+  fillRect(c, 10, 19, 12, 2, obi);
+  // hakama (bottom)
+  fillRect(c, 9, 21, 14, 8, hakama);
+  fillRect(c, 11, 23, 10, 5, hakamaDark);
+  // arms
+  fillRect(c, 6, 14, 4, 6, gi);
+  fillRect(c, 22, 14, 4, 6, gi);
+  // hands
+  fillRect(c, 6, 20, 3, 2, skin);
+  fillRect(c, 23, 20, 3, 2, skin);
+  // feet
+  fillRect(c, 10, 29, 4, 2, PALETTE.brown1);
+  fillRect(c, 18, 29, 4, 2, PALETTE.brown1);
+  // sword at side
+  fillRect(c, 24, 16, 2, 12, PALETTE.brown2);
+  fillRect(c, 24, 14, 2, 2, PALETTE.gray3);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 2, dy: 2, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// 骸骨丸
+function makeGaikotsu32() {
+  const c = makeCanvas(32, 32);
+  const bone = rgba(250, 245, 235, 255);
+  const boneDark = rgba(220, 210, 195, 255);
+  const armor = rgba(100, 90, 80, 255);
+  // skull
+  fillCircle(c, 16, 9, 7, bone);
+  fillRect(c, 10, 8, 12, 8, bone);
+  // eye sockets
+  fillCircle(c, 13, 9, 2, PALETTE.ink);
+  fillCircle(c, 19, 9, 2, PALETTE.ink);
+  // eyes glow
+  setPx(c, 13, 9, rgba(200, 50, 50, 255));
+  setPx(c, 19, 9, rgba(200, 50, 50, 255));
+  // nose hole
+  setPx(c, 16, 12, PALETTE.ink);
+  // teeth
+  for (let x = 12; x <= 20; x += 2) {
+    fillRect(c, x, 14, 1, 2, bone);
+  }
+  // spine/ribcage
+  fillRect(c, 14, 17, 4, 8, bone);
+  for (let y = 18; y <= 23; y += 2) {
+    fillRect(c, 10, y, 12, 1, boneDark);
+  }
+  // arms (bones)
+  fillRect(c, 6, 17, 4, 2, bone);
+  fillRect(c, 22, 17, 4, 2, bone);
+  fillRect(c, 4, 18, 3, 6, bone);
+  fillRect(c, 25, 18, 3, 6, bone);
+  // legs
+  fillRect(c, 11, 25, 3, 6, bone);
+  fillRect(c, 18, 25, 3, 6, bone);
+  // old armor pieces
+  fillRect(c, 12, 16, 8, 2, armor);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// ぬりかべ
+function makeNurikabe32() {
+  const c = makeCanvas(32, 32);
+  const wall = rgba(180, 170, 160, 255);
+  const wallDark = rgba(140, 130, 120, 255);
+  const wallLight = rgba(210, 200, 190, 255);
+  // main body (rectangular wall)
+  fillRect(c, 4, 6, 24, 24, wall);
+  fillRect(c, 6, 8, 20, 20, wallDark);
+  // texture
+  for (let y = 8; y < 28; y += 4) {
+    fillRect(c, 4, y, 24, 1, wallLight);
+  }
+  for (let x = 8; x < 28; x += 6) {
+    fillRect(c, x, 6, 1, 24, wallLight);
+  }
+  // eyes
+  fillRect(c, 10, 14, 4, 4, PALETTE.ink);
+  fillRect(c, 18, 14, 4, 4, PALETTE.ink);
+  setPx(c, 11, 15, PALETTE.white);
+  setPx(c, 19, 15, PALETTE.white);
+  // small mouth
+  fillRect(c, 13, 22, 6, 2, PALETTE.ink);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 河童
+function makeKappa32() {
+  const c = makeCanvas(32, 32);
+  const skin = rgba(100, 180, 100, 255);
+  const skinDark = rgba(70, 140, 70, 255);
+  const belly = rgba(230, 220, 180, 255);
+  const shell = rgba(90, 70, 50, 255);
+  const plate = rgba(200, 255, 200, 255);
+  // head
+  fillCircle(c, 16, 10, 7, skin);
+  // plate on head (sara)
+  fillCircle(c, 16, 6, 4, plate);
+  fillCircle(c, 16, 6, 3, rgba(180, 240, 240, 255));
+  // beak
+  fillRect(c, 13, 12, 6, 3, rgba(255, 200, 100, 255));
+  // eyes
+  fillCircle(c, 12, 10, 2, PALETTE.white);
+  fillCircle(c, 20, 10, 2, PALETTE.white);
+  setPx(c, 12, 10, PALETTE.ink);
+  setPx(c, 20, 10, PALETTE.ink);
+  // body
+  fillCircle(c, 16, 22, 8, skin);
+  fillCircle(c, 16, 23, 7, skinDark);
+  // shell on back
+  fillCircle(c, 16, 23, 6, shell);
+  fillCircle(c, 16, 23, 4, rgba(110, 90, 70, 255));
+  // belly
+  fillCircle(c, 16, 24, 4, belly);
+  // arms
+  fillRect(c, 4, 18, 5, 3, skin);
+  fillRect(c, 23, 18, 5, 3, skin);
+  // webbed hands
+  fillRect(c, 2, 19, 3, 4, skinDark);
+  fillRect(c, 27, 19, 3, 4, skinDark);
+  // legs
+  fillRect(c, 10, 28, 4, 3, skin);
+  fillRect(c, 18, 28, 4, 3, skin);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 鬼火
+function makeOnibi32() {
+  const c = makeCanvas(32, 32);
+  const flame1 = rgba(100, 150, 255, 255);
+  const flame2 = rgba(150, 200, 255, 255);
+  const flame3 = rgba(200, 230, 255, 255);
+  const core = rgba(255, 255, 255, 255);
+  // outer flame
+  fillCircle(c, 16, 18, 10, flame1);
+  fillCircle(c, 16, 16, 8, flame2);
+  fillCircle(c, 16, 15, 6, flame3);
+  // flicker up
+  fillRect(c, 14, 6, 4, 8, flame2);
+  fillRect(c, 10, 8, 3, 6, flame1);
+  fillRect(c, 19, 9, 3, 5, flame1);
+  fillRect(c, 15, 4, 2, 4, flame3);
+  // core
+  fillCircle(c, 16, 17, 3, core);
+  // eyes
+  fillCircle(c, 13, 16, 2, PALETTE.ink);
+  fillCircle(c, 19, 16, 2, PALETTE.ink);
+  setPx(c, 12, 15, flame3);
+  setPx(c, 18, 15, flame3);
+  // mouth
+  fillRect(c, 14, 20, 4, 1, PALETTE.ink);
+  return c;
+}
+
+// 野狐（狐）
+function makeKitsune32() {
+  const c = makeCanvas(32, 32);
+  const fur = rgba(255, 180, 100, 255);
+  const furDark = rgba(220, 140, 70, 255);
+  const white = rgba(255, 250, 240, 255);
+  // ears
+  fillRect(c, 7, 2, 5, 6, fur);
+  fillRect(c, 20, 2, 5, 6, fur);
+  fillRect(c, 8, 3, 3, 4, rgba(255, 200, 180, 255));
+  fillRect(c, 21, 3, 3, 4, rgba(255, 200, 180, 255));
+  // head
+  fillCircle(c, 16, 10, 8, fur);
+  // face markings
+  fillCircle(c, 16, 12, 5, white);
+  // snout
+  fillRect(c, 14, 12, 4, 4, white);
+  setPx(c, 16, 13, PALETTE.ink);
+  // eyes (slanted)
+  fillRect(c, 11, 9, 3, 2, PALETTE.ink);
+  fillRect(c, 18, 9, 3, 2, PALETTE.ink);
+  setPx(c, 11, 9, fur);
+  setPx(c, 20, 9, fur);
+  setPx(c, 12, 9, rgba(255, 220, 100, 255));
+  setPx(c, 19, 9, rgba(255, 220, 100, 255));
+  // body
+  fillRect(c, 10, 18, 12, 8, fur);
+  fillRect(c, 12, 20, 8, 5, furDark);
+  // chest white
+  fillRect(c, 13, 19, 6, 4, white);
+  // legs
+  fillRect(c, 8, 24, 4, 6, fur);
+  fillRect(c, 20, 24, 4, 6, fur);
+  fillRect(c, 8, 28, 4, 2, furDark);
+  fillRect(c, 20, 28, 4, 2, furDark);
+  // tail (fluffy)
+  fillCircle(c, 26, 22, 4, fur);
+  fillCircle(c, 28, 20, 3, fur);
+  fillCircle(c, 29, 18, 2, white);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 落武者
+function makeOchimusha32() {
+  const c = makeCanvas(32, 32);
+  const armor = rgba(80, 70, 60, 255);
+  const armorDark = rgba(50, 45, 40, 255);
+  const skin = rgba(180, 200, 180, 255);
+  const hair = rgba(30, 30, 35, 255);
+  // helmet (kabuto)
+  fillRect(c, 8, 2, 16, 4, armor);
+  fillRect(c, 6, 4, 20, 3, armor);
+  fillRect(c, 12, 1, 8, 2, armorDark);
+  // face (ghostly)
+  fillRect(c, 10, 7, 12, 8, skin);
+  // hollow eyes
+  fillRect(c, 12, 9, 3, 3, PALETTE.ink);
+  fillRect(c, 17, 9, 3, 3, PALETTE.ink);
+  setPx(c, 13, 10, rgba(100, 150, 255, 255));
+  setPx(c, 18, 10, rgba(100, 150, 255, 255));
+  // mouth
+  fillRect(c, 13, 13, 6, 1, PALETTE.ink);
+  // body armor (do)
+  fillRect(c, 8, 15, 16, 10, armor);
+  fillRect(c, 10, 17, 12, 6, armorDark);
+  // shoulder guards (sode)
+  fillRect(c, 3, 15, 6, 6, armor);
+  fillRect(c, 23, 15, 6, 6, armor);
+  // tattered cloth
+  fillRect(c, 9, 25, 14, 6, armorDark);
+  for (let x = 10; x < 23; x += 3) {
+    fillRect(c, x, 28, 2, 3, armor);
+  }
+  // katana
+  fillRect(c, 26, 10, 2, 18, PALETTE.gray3);
+  fillRect(c, 26, 8, 2, 2, PALETTE.yellow1);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 餓鬼
+function makeGaki32() {
+  const c = makeCanvas(32, 32);
+  const skin = rgba(150, 180, 120, 255);
+  const skinDark = rgba(120, 150, 90, 255);
+  const belly = rgba(180, 160, 120, 255);
+  // huge head
+  fillCircle(c, 16, 10, 8, skin);
+  // sunken eyes
+  fillCircle(c, 12, 9, 3, PALETTE.ink);
+  fillCircle(c, 20, 9, 3, PALETTE.ink);
+  setPx(c, 12, 8, rgba(255, 200, 50, 255));
+  setPx(c, 20, 8, rgba(255, 200, 50, 255));
+  // wide open mouth
+  fillRect(c, 10, 13, 12, 5, PALETTE.ink);
+  // teeth
+  for (let x = 11; x <= 20; x += 2) {
+    setPx(c, x, 13, PALETTE.white);
+    setPx(c, x, 17, PALETTE.white);
+  }
+  // thin neck
+  fillRect(c, 14, 18, 4, 2, skin);
+  // bloated belly
+  fillCircle(c, 16, 24, 6, skin);
+  fillCircle(c, 16, 25, 5, belly);
+  // ribs showing
+  for (let y = 21; y <= 25; y += 2) {
+    fillRect(c, 12, y, 8, 1, skinDark);
+  }
+  // thin arms
+  fillRect(c, 6, 20, 6, 2, skin);
+  fillRect(c, 20, 20, 6, 2, skin);
+  fillRect(c, 4, 21, 3, 4, skin);
+  fillRect(c, 25, 21, 3, 4, skin);
+  // thin legs
+  fillRect(c, 12, 28, 2, 4, skin);
+  fillRect(c, 18, 28, 2, 4, skin);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 天狗
+function makeTengu32() {
+  const c = makeCanvas(32, 32);
+  const skin = rgba(220, 100, 100, 255);
+  const skinDark = rgba(180, 70, 70, 255);
+  const robe = rgba(60, 60, 80, 255);
+  const robeDark = rgba(40, 40, 60, 255);
+  const feather = rgba(40, 40, 50, 255);
+  // yamabushi hood/hair
+  fillRect(c, 8, 2, 16, 6, feather);
+  fillRect(c, 6, 6, 20, 4, feather);
+  // face
+  fillCircle(c, 16, 11, 6, skin);
+  // long nose
+  fillRect(c, 15, 10, 2, 8, skin);
+  fillRect(c, 15, 17, 2, 2, skinDark);
+  // eyes (fierce)
+  fillRect(c, 11, 10, 3, 2, PALETTE.white);
+  fillRect(c, 18, 10, 3, 2, PALETTE.white);
+  setPx(c, 12, 10, PALETTE.ink);
+  setPx(c, 19, 10, PALETTE.ink);
+  // eyebrows (angry)
+  fillRect(c, 10, 8, 4, 1, feather);
+  fillRect(c, 18, 8, 4, 1, feather);
+  // robe
+  fillRect(c, 8, 17, 16, 12, robe);
+  fillRect(c, 10, 19, 12, 8, robeDark);
+  // wings
+  fillRect(c, 2, 14, 6, 10, feather);
+  fillRect(c, 24, 14, 6, 10, feather);
+  for (let y = 15; y <= 23; y += 2) {
+    setPx(c, 1, y, feather);
+    setPx(c, 30, y, feather);
+  }
+  // fan (hauchiwa)
+  fillCircle(c, 6, 26, 4, rgba(255, 50, 50, 255));
+  fillRect(c, 4, 27, 5, 4, PALETTE.brown2);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 般若
+function makeHannya32() {
+  const c = makeCanvas(32, 32);
+  const mask = rgba(255, 240, 220, 255);
+  const maskDark = rgba(230, 200, 170, 255);
+  const horn = rgba(255, 220, 180, 255);
+  const hair = rgba(30, 30, 40, 255);
+  // horns
+  fillRect(c, 6, 2, 4, 8, horn);
+  fillRect(c, 22, 2, 4, 8, horn);
+  setPx(c, 7, 1, horn);
+  setPx(c, 24, 1, horn);
+  // wild hair
+  fillRect(c, 4, 8, 24, 6, hair);
+  for (let x = 5; x < 27; x += 3) {
+    fillRect(c, x, 6, 2, 4, hair);
+  }
+  // mask face
+  fillCircle(c, 16, 16, 9, mask);
+  fillRect(c, 8, 14, 16, 10, mask);
+  // eyes (terrifying)
+  fillRect(c, 10, 14, 5, 4, PALETTE.ink);
+  fillRect(c, 17, 14, 5, 4, PALETTE.ink);
+  // golden eye glint
+  setPx(c, 12, 15, rgba(255, 215, 0, 255));
+  setPx(c, 19, 15, rgba(255, 215, 0, 255));
+  // nose
+  fillRect(c, 14, 18, 4, 3, maskDark);
+  // open mouth (screaming)
+  fillRect(c, 10, 22, 12, 5, PALETTE.ink);
+  // fangs
+  fillRect(c, 11, 22, 2, 3, PALETTE.white);
+  fillRect(c, 19, 22, 2, 3, PALETTE.white);
+  fillRect(c, 13, 25, 2, 2, PALETTE.white);
+  fillRect(c, 17, 25, 2, 2, PALETTE.white);
+  // red marks
+  setPx(c, 9, 20, rgba(200, 50, 50, 255));
+  setPx(c, 23, 20, rgba(200, 50, 50, 255));
+  // body (shadowy)
+  fillRect(c, 10, 27, 12, 5, rgba(50, 50, 60, 200));
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 輪廻守（ボス）
+function makeRinnemori32() {
+  const c = makeCanvas(32, 32);
+  const robe = rgba(80, 40, 100, 255);
+  const robeDark = rgba(50, 25, 70, 255);
+  const gold = rgba(255, 215, 0, 255);
+  const skin = rgba(200, 200, 220, 255);
+  const aura = rgba(150, 100, 200, 150);
+  // aura
+  fillCircle(c, 16, 16, 14, aura);
+  // hood/crown
+  fillRect(c, 6, 2, 20, 8, robe);
+  fillRect(c, 4, 6, 24, 4, robe);
+  // crown ornament
+  fillRect(c, 13, 1, 6, 3, gold);
+  setPx(c, 16, 0, gold);
+  // face (otherworldly)
+  fillCircle(c, 16, 12, 6, skin);
+  // three eyes
+  fillCircle(c, 12, 11, 2, PALETTE.ink);
+  fillCircle(c, 20, 11, 2, PALETTE.ink);
+  fillCircle(c, 16, 8, 2, rgba(200, 50, 200, 255));
+  setPx(c, 11, 10, rgba(255, 100, 255, 255));
+  setPx(c, 19, 10, rgba(255, 100, 255, 255));
+  setPx(c, 16, 7, PALETTE.white);
+  // regal robe
+  fillRect(c, 4, 16, 24, 14, robe);
+  fillRect(c, 6, 18, 20, 10, robeDark);
+  // gold trim
+  fillRect(c, 4, 16, 24, 1, gold);
+  fillRect(c, 4, 29, 24, 1, gold);
+  // wheel symbol on chest
+  fillCircle(c, 16, 22, 4, gold);
+  fillCircle(c, 16, 22, 2, robeDark);
+  // floating hands
+  fillCircle(c, 4, 20, 3, skin);
+  fillCircle(c, 28, 20, 3, skin);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// --- アイテム（32x32）---
+
+// 木刀
+function makeBokutou32() {
+  const c = makeCanvas(32, 32);
+  const wood = rgba(180, 140, 100, 255);
+  const woodDark = rgba(140, 100, 70, 255);
+  // blade
+  for (let i = 0; i < 20; i++) {
+    setPx(c, 6 + i, 24 - i, wood);
+    setPx(c, 7 + i, 24 - i, woodDark);
+    setPx(c, 8 + i, 24 - i, wood);
+  }
+  // handle
+  for (let i = 0; i < 6; i++) {
+    setPx(c, 4 + (i >> 1), 26 + i, woodDark);
+    setPx(c, 5 + (i >> 1), 26 + i, wood);
+  }
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// 打刀
+function makeUchigatana32() {
+  const c = makeCanvas(32, 32);
+  const blade = rgba(220, 230, 240, 255);
+  const bladeDark = rgba(180, 190, 200, 255);
+  const hamon = rgba(250, 250, 255, 255);
+  const tsuka = rgba(40, 30, 50, 255);
+  const tsuba = rgba(60, 50, 40, 255);
+  // blade
+  for (let i = 0; i < 18; i++) {
+    setPx(c, 8 + i, 22 - i, blade);
+    setPx(c, 9 + i, 22 - i, bladeDark);
+    setPx(c, 10 + i, 22 - i, blade);
+  }
+  // hamon (wave pattern)
+  for (let i = 2; i < 16; i += 2) {
+    setPx(c, 8 + i, 21 - i, hamon);
+  }
+  // tsuba (guard)
+  fillCircle(c, 9, 22, 3, tsuba);
+  // tsuka (handle)
+  for (let i = 0; i < 8; i++) {
+    setPx(c, 5 + (i >> 1), 25 + i, tsuka);
+    setPx(c, 6 + (i >> 1), 25 + i, rgba(200, 180, 160, 255));
+    setPx(c, 7 + (i >> 1), 25 + i, tsuka);
+  }
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// 木盾
+function makeMokutate32() {
+  const c = makeCanvas(32, 32);
+  const wood = rgba(180, 140, 100, 255);
+  const woodDark = rgba(140, 100, 70, 255);
+  const metal = rgba(120, 120, 130, 255);
+  // shield body
+  fillRect(c, 8, 6, 16, 20, wood);
+  fillRect(c, 10, 8, 12, 16, woodDark);
+  // metal bands
+  fillRect(c, 8, 10, 16, 2, metal);
+  fillRect(c, 8, 18, 16, 2, metal);
+  // center boss
+  fillCircle(c, 16, 15, 3, metal);
+  fillCircle(c, 16, 15, 1, rgba(160, 160, 170, 255));
+  // wood grain
+  for (let y = 8; y < 24; y += 3) {
+    fillRect(c, 11, y, 10, 1, rgba(160, 120, 80, 255));
+  }
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// 鉄盾
+function makeTetsutate32() {
+  const c = makeCanvas(32, 32);
+  const metal = rgba(140, 140, 150, 255);
+  const metalDark = rgba(100, 100, 110, 255);
+  const metalLight = rgba(180, 180, 190, 255);
+  const gold = rgba(200, 170, 80, 255);
+  // shield body
+  fillRect(c, 8, 5, 16, 22, metal);
+  fillRect(c, 10, 7, 12, 18, metalDark);
+  // bottom point
+  for (let i = 0; i < 4; i++) {
+    fillRect(c, 10 + i, 27 + i, 12 - i * 2, 1, metal);
+  }
+  // rivets
+  for (let y of [7, 13, 19, 25]) {
+    setPx(c, 9, y, gold);
+    setPx(c, 22, y, gold);
+  }
+  // center emblem
+  fillCircle(c, 16, 16, 4, gold);
+  fillCircle(c, 16, 16, 2, metalDark);
+  // highlight
+  fillRect(c, 11, 8, 2, 6, metalLight);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// 薬草
+function makeYakusou32() {
+  const c = makeCanvas(32, 32);
+  const leaf = rgba(80, 160, 80, 255);
+  const leafDark = rgba(50, 120, 50, 255);
+  const stem = rgba(100, 140, 80, 255);
+  // stem
+  fillRect(c, 15, 18, 2, 10, stem);
+  // leaves
+  fillCircle(c, 12, 14, 5, leaf);
+  fillCircle(c, 20, 14, 5, leaf);
+  fillCircle(c, 16, 10, 6, leaf);
+  fillCircle(c, 12, 15, 4, leafDark);
+  fillCircle(c, 20, 15, 4, leafDark);
+  fillCircle(c, 16, 11, 4, leafDark);
+  // veins
+  fillRect(c, 16, 8, 1, 5, stem);
+  fillRect(c, 12, 12, 1, 4, stem);
+  fillRect(c, 20, 12, 1, 4, stem);
+  // sparkle (healing effect)
+  setPx(c, 10, 8, PALETTE.white);
+  setPx(c, 22, 10, PALETTE.white);
+  setPx(c, 16, 6, PALETTE.white);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 巻物
+function makeMakimono32() {
+  const c = makeCanvas(32, 32);
+  const paper = rgba(255, 250, 235, 255);
+  const paperDark = rgba(240, 230, 210, 255);
+  const rod = rgba(160, 120, 80, 255);
+  const rodDark = rgba(120, 85, 50, 255);
+  // scroll body
+  fillRect(c, 8, 10, 16, 14, paper);
+  fillRect(c, 10, 12, 12, 10, paperDark);
+  // rolled ends
+  fillCircle(c, 8, 12, 3, paper);
+  fillCircle(c, 8, 22, 3, paper);
+  fillCircle(c, 24, 12, 3, paper);
+  fillCircle(c, 24, 22, 3, paper);
+  // rods
+  fillRect(c, 5, 8, 3, 18, rod);
+  fillRect(c, 24, 8, 3, 18, rod);
+  fillRect(c, 5, 8, 3, 2, rodDark);
+  fillRect(c, 24, 8, 3, 2, rodDark);
+  fillRect(c, 5, 24, 3, 2, rodDark);
+  fillRect(c, 24, 24, 3, 2, rodDark);
+  // text lines
+  for (let y = 13; y <= 21; y += 2) {
+    fillRect(c, 11, y, 10, 1, rgba(60, 50, 40, 255));
+  }
+  // seal
+  fillCircle(c, 20, 18, 2, rgba(200, 50, 50, 255));
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 杖
+function makeTsue32() {
+  const c = makeCanvas(32, 32);
+  const wood = rgba(120, 80, 60, 255);
+  const woodDark = rgba(90, 55, 40, 255);
+  const gem = rgba(100, 200, 255, 255);
+  const gemGlow = rgba(150, 230, 255, 255);
+  // staff
+  fillRect(c, 15, 8, 2, 22, wood);
+  fillRect(c, 14, 10, 1, 18, woodDark);
+  // top ornament
+  fillCircle(c, 16, 8, 4, wood);
+  fillCircle(c, 16, 8, 2, gem);
+  setPx(c, 15, 7, gemGlow);
+  // bands
+  fillRect(c, 14, 14, 4, 1, rgba(200, 170, 80, 255));
+  fillRect(c, 14, 20, 4, 1, rgba(200, 170, 80, 255));
+  // glow effect
+  setPx(c, 12, 6, rgba(150, 230, 255, 100));
+  setPx(c, 20, 6, rgba(150, 230, 255, 100));
+  setPx(c, 16, 4, rgba(150, 230, 255, 100));
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 矢
+function makeYa32() {
+  const c = makeCanvas(32, 32);
+  const shaft = rgba(180, 150, 100, 255);
+  const head = rgba(160, 160, 170, 255);
+  const feather = rgba(255, 250, 245, 255);
+  const featherDark = rgba(200, 50, 50, 255);
+  // shaft
+  for (let i = 0; i < 22; i++) {
+    setPx(c, 8 + i, 20 - (i * 0.3) | 0, shaft);
+  }
+  // arrowhead
+  setPx(c, 6, 20, head);
+  setPx(c, 5, 21, head);
+  setPx(c, 7, 21, head);
+  setPx(c, 4, 22, head);
+  setPx(c, 6, 22, head);
+  // fletching
+  fillRect(c, 26, 12, 3, 1, feather);
+  fillRect(c, 27, 11, 2, 1, featherDark);
+  fillRect(c, 26, 15, 3, 1, feather);
+  fillRect(c, 27, 16, 2, 1, featherDark);
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// 壺
+function makeTsubo32() {
+  const c = makeCanvas(32, 32);
+  const pot = rgba(160, 120, 80, 255);
+  const potDark = rgba(120, 85, 55, 255);
+  const potLight = rgba(200, 160, 120, 255);
+  // neck
+  fillRect(c, 12, 6, 8, 4, pot);
+  // lip
+  fillRect(c, 10, 5, 12, 2, potLight);
+  // body
+  fillCircle(c, 16, 18, 10, pot);
+  fillCircle(c, 16, 19, 9, potDark);
+  // highlight
+  fillRect(c, 10, 14, 3, 8, potLight);
+  // bottom
+  fillRect(c, 10, 27, 12, 2, potDark);
+  // pattern
+  fillRect(c, 12, 15, 8, 1, rgba(100, 70, 45, 255));
+  fillRect(c, 12, 22, 8, 1, rgba(100, 70, 45, 255));
+  outlineFromFill(c, PALETTE.shadow);
+  return c;
+}
+
+// おにぎり
+function makeOnigiri32() {
+  const c = makeCanvas(32, 32);
+  const rice = rgba(255, 255, 250, 255);
+  const riceDark = rgba(240, 240, 235, 255);
+  const nori = rgba(30, 50, 30, 255);
+  // rice triangle
+  for (let y = 0; y < 18; y++) {
+    const w = 4 + y;
+    const x0 = 16 - w / 2;
+    for (let x = 0; x < w; x++) {
+      setPx(c, x0 + x, 6 + y, rice);
+    }
+  }
+  // shading
+  for (let y = 0; y < 16; y++) {
+    const w = 2 + y / 2;
+    const x0 = 18;
+    for (let x = 0; x < w && x0 + x < 26; x++) {
+      const yy = 8 + y;
+      if (getPx(c, x0 + x, yy)) {
+        setPx(c, x0 + x, yy, riceDark);
+      }
+    }
+  }
+  // nori wrap
+  fillRect(c, 10, 16, 12, 8, nori);
+  // rice texture
+  setPx(c, 14, 10, riceDark);
+  setPx(c, 18, 12, riceDark);
+  setPx(c, 12, 14, riceDark);
+  outlineFromFill(c, PALETTE.shadow);
+  addShadow(c, { dx: 1, dy: 1, color: rgba(0, 0, 0, 50) });
+  return c;
+}
+
+// --- 地形タイル（32x32）---
+
+// 畳床
+function makeTatamiFloor32() {
+  const c = makeCanvas(32, 32);
+  const tatami = rgba(180, 170, 120, 255);
+  const tatamiDark = rgba(150, 140, 95, 255);
+  const edge = rgba(60, 80, 60, 255);
+  // base
+  fillRect(c, 0, 0, 32, 32, tatami);
+  // weave pattern
+  for (let y = 0; y < 32; y += 2) {
+    for (let x = (y % 4) === 0 ? 0 : 1; x < 32; x += 2) {
+      setPx(c, x, y, tatamiDark);
+    }
+  }
+  // border (heri)
+  fillRect(c, 0, 15, 32, 2, edge);
+  return c;
+}
+
+// 石壁
+function makeStoneWall32() {
+  const c = makeCanvas(32, 32);
+  const stone = rgba(100, 95, 90, 255);
+  const stoneDark = rgba(70, 65, 60, 255);
+  const stoneLight = rgba(130, 125, 120, 255);
+  // base
+  fillRect(c, 0, 0, 32, 32, stone);
+  // stone blocks
+  for (let y = 0; y < 32; y += 8) {
+    const offset = (y % 16) === 0 ? 0 : 6;
+    for (let x = offset; x < 32; x += 12) {
+      fillRect(c, x, y, 10, 6, stoneDark);
+      fillRect(c, x + 1, y + 1, 8, 4, stoneLight);
+    }
+  }
+  // cracks
+  setPx(c, 5, 12, stoneDark);
+  setPx(c, 6, 13, stoneDark);
+  setPx(c, 20, 5, stoneDark);
+  setPx(c, 21, 6, stoneDark);
+  setPx(c, 22, 6, stoneDark);
+  return c;
+}
+
+// 通路床
+function makeCorridor32() {
+  const c = makeCanvas(32, 32);
+  const floor = rgba(80, 75, 70, 255);
+  const floorDark = rgba(60, 55, 50, 255);
+  // base
+  fillRect(c, 0, 0, 32, 32, floor);
+  // cobblestone pattern
+  for (let y = 0; y < 32; y += 6) {
+    const offset = (y % 12) === 0 ? 0 : 3;
+    for (let x = offset; x < 32; x += 6) {
+      fillRect(c, x, y, 5, 5, floorDark);
+      fillRect(c, x + 1, y + 1, 3, 3, floor);
+    }
+  }
+  return c;
+}
+
+// 階段
+function makeKaidan32() {
+  const c = makeCanvas(32, 32);
+  const stone = rgba(120, 115, 110, 255);
+  const stoneDark = rgba(80, 75, 70, 255);
+  const stoneLight = rgba(150, 145, 140, 255);
+  // steps going down
+  for (let i = 0; i < 5; i++) {
+    const y = 4 + i * 6;
+    const x = 2 + i * 2;
+    const w = 28 - i * 4;
+    fillRect(c, x, y, w, 5, stone);
+    fillRect(c, x, y, w, 1, stoneLight);
+    fillRect(c, x, y + 4, w, 1, stoneDark);
+  }
+  // darkness below
+  fillRect(c, 12, 28, 8, 4, PALETTE.ink);
+  return c;
+}
+
+// 罠（トゲ）
+function makeWana32() {
+  const c = makeCanvas(32, 32);
+  const floor = rgba(80, 75, 70, 255);
+  const spike = rgba(140, 140, 150, 255);
+  const spikeDark = rgba(100, 100, 110, 255);
+  // floor base
+  fillRect(c, 0, 0, 32, 32, floor);
+  // spikes
+  const spikes = [[8, 8], [16, 6], [24, 8], [6, 16], [16, 14], [26, 16], [10, 24], [16, 22], [22, 24]];
+  for (const [sx, sy] of spikes) {
+    // spike triangle
+    for (let i = 0; i < 6; i++) {
+      const w = 6 - i;
+      fillRect(c, sx - w / 2, sy + i, w, 1, spike);
+      if (i < 3) {
+        setPx(c, sx, sy + i, spikeDark);
+      }
+    }
+  }
+  return c;
+}
+
 function toSample(id, name, kind, canvas, tags) {
   return {
     id,
@@ -3866,7 +4689,43 @@ const samples = [
   toSampleAnimated2('samurai_32', 'さむらい', 'character', makeSamurai32(), ['キャラ', '32x32', '主人公', 'アクション'], { dy: 1 }),
   toSampleAnimated2('pumpkin_head_32', 'かぼちゃあたま', 'character', makePumpkinHead32(), ['キャラ', '32x32', 'モンスター', 'ハロウィン'], { dy: 1 }),
   toSampleAnimated2('snowman_32', 'ゆきだるま', 'character', makeSnowman32(), ['キャラ', '32x32', 'NPC', 'ふゆ'], { dy: 1 }),
-  toSampleAnimated2('wolf_32', 'オオカミ', 'character', makeWolf32(), ['キャラ', '32x32', 'どうぶつ', '敵'], { dy: 1 })
+  toSampleAnimated2('wolf_32', 'オオカミ', 'character', makeWolf32(), ['キャラ', '32x32', 'どうぶつ', '敵'], { dy: 1 }),
+
+  // ============================================
+  // 和風ローグライク「幽世の試練」用素材
+  // ============================================
+
+  // --- キャラクター（32x32）---
+  toSampleAnimated2('kagemaru_32', '影丸（かげまる）', 'character', makeKagemaru32(), ['ローグライク', '32x32', '主人公', '和風'], { dy: 1 }),
+  toSampleAnimated2('gaikotsu_32', '骸骨丸', 'character', makeGaikotsu32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSample('nurikabe_32', 'ぬりかべ', 'character', makeNurikabe32(), ['ローグライク', '32x32', 'モンスター', '和風']),
+  toSampleAnimated2('kappa_32', '河童', 'character', makeKappa32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSample('onibi_32', '鬼火', 'character', makeOnibi32(), ['ローグライク', '32x32', 'モンスター', '和風']),
+  toSampleAnimated2('kitsune_32', '野狐', 'character', makeKitsune32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSampleAnimated2('ochimusha_32', '落武者', 'character', makeOchimusha32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSampleAnimated2('gaki_32', '餓鬼', 'character', makeGaki32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSampleAnimated2('tengu_32', '天狗', 'character', makeTengu32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSampleAnimated2('hannya_32', '般若', 'character', makeHannya32(), ['ローグライク', '32x32', 'モンスター', '和風'], { dy: 1 }),
+  toSampleAnimated2('rinnemori_32', '輪廻守（ボス）', 'character', makeRinnemori32(), ['ローグライク', '32x32', 'ボス', '和風'], { dy: 1 }),
+
+  // --- アイテム（32x32）---
+  toSample('bokutou_32', '木刀', 'object', makeBokutou32(), ['ローグライク', '32x32', '武器', '和風']),
+  toSample('uchigatana_32', '打刀', 'object', makeUchigatana32(), ['ローグライク', '32x32', '武器', '和風']),
+  toSample('mokutate_32', '木盾', 'object', makeMokutate32(), ['ローグライク', '32x32', '防具', '和風']),
+  toSample('tetsutate_32', '鉄盾', 'object', makeTetsutate32(), ['ローグライク', '32x32', '防具', '和風']),
+  toSample('yakusou_32', '薬草', 'object', makeYakusou32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+  toSample('makimono_32', '巻物', 'object', makeMakimono32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+  toSample('tsue_32', '杖', 'object', makeTsue32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+  toSample('ya_32', '矢', 'object', makeYa32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+  toSample('tsubo_32', '壺', 'object', makeTsubo32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+  toSample('onigiri_32', 'おにぎり', 'object', makeOnigiri32(), ['ローグライク', '32x32', 'アイテム', '和風']),
+
+  // --- 地形タイル（32x32）---
+  toSample('tatami_floor_32', '畳床', 'tile', makeTatamiFloor32(), ['ローグライク', '32x32', 'タイル', '和風', '床']),
+  toSample('stone_wall_32', '石壁', 'tile', makeStoneWall32(), ['ローグライク', '32x32', 'タイル', '和風', '壁']),
+  toSample('corridor_32', '通路', 'tile', makeCorridor32(), ['ローグライク', '32x32', 'タイル', '和風', '床']),
+  toSample('kaidan_32', '階段', 'tile', makeKaidan32(), ['ローグライク', '32x32', 'タイル', '和風']),
+  toSample('wana_32', '罠', 'tile', makeWana32(), ['ローグライク', '32x32', 'タイル', '和風', 'トラップ'])
 ];
 
 const output = {
