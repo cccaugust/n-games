@@ -270,6 +270,14 @@ const games = [
     color: '#ff6b6b',
     icon: '🥊',
     link: '/games/battle-arena/'
+  },
+  {
+    id: 'kakuriyo',
+    title: '幽世の試練',
+    desc: '和風ローグライク！100階を踏破せよ',
+    color: '#1a1a2e',
+    icon: '⛩️',
+    link: '/games/kakuriyo/'
   }
 ];
 
