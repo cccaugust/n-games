@@ -676,6 +676,36 @@ body {
   background: var(--primary);
 }
 
+.hud-abilities {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+}
+
+.ability-icon {
+  font-size: 1.1rem;
+  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  animation: abilityPulse 2s ease-in-out infinite;
+}
+
+.ability-icon.hidden {
+  display: none;
+}
+
+.hud-abilities.hidden {
+  display: none;
+}
+
+@keyframes abilityPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
 .game-container {
   flex: 1;
   display: flex;
@@ -1006,6 +1036,15 @@ body {
   .hud-right .hud-item:nth-child(2),
   .hud-right .hud-item:nth-child(3) {
     display: none;
+  }
+
+  .hud-abilities {
+    padding: 3px 6px;
+  }
+
+  .ability-icon {
+    font-size: 0.9rem;
+    padding: 2px 3px;
   }
 }
 
