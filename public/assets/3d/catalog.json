@@ -102,6 +102,42 @@
       "variants": ["green", "blue", "red", "golden"]
     },
     {
+      "id": "inkling",
+      "name": "インクリング",
+      "category": "characters",
+      "description": "イカの触手風ヘアが特徴的なスプラトゥーン風キャラクター。インクバトルゲームやアクションゲームに最適",
+      "tags": ["player", "splatoon", "ink", "action", "cute", "humanoid"],
+      "animations": ["inklingIdle", "inklingWalk", "inklingShoot", "inklingVictory"],
+      "variants": ["orange", "cyan", "purple", "pink", "lime", "yellow"]
+    },
+    {
+      "id": "squid",
+      "name": "イカ",
+      "category": "characters",
+      "description": "スプラトゥーン風のかわいいイカ。泳ぎモードやインクの中を移動するキャラクターに",
+      "tags": ["animal", "splatoon", "ink", "cute", "swimming"],
+      "animations": ["squidIdle", "squidSwim"],
+      "variants": ["orange", "cyan", "purple", "pink", "lime", "yellow"]
+    },
+    {
+      "id": "octoling",
+      "name": "オクトリング",
+      "category": "characters",
+      "description": "タコの吸盤付き触手ヘアが特徴的なスプラトゥーン風キャラクター。敵キャラやライバルに最適",
+      "tags": ["player", "enemy", "splatoon", "ink", "action", "humanoid"],
+      "animations": ["inklingIdle", "inklingWalk", "inklingShoot", "inklingVictory"],
+      "variants": ["pink", "teal", "purple", "gold"]
+    },
+    {
+      "id": "octopus",
+      "name": "タコ",
+      "category": "characters",
+      "description": "8本の触手を持つスプラトゥーン風のタコ。敵キャラや泳ぎモードのキャラクターに",
+      "tags": ["animal", "splatoon", "ink", "enemy", "swimming"],
+      "animations": ["octopusIdle", "octopusSwim", "octopusWave"],
+      "variants": ["pink", "teal", "purple", "red"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
@@ -235,6 +271,24 @@
       "tags": ["magic", "teleport", "effect"],
       "animations": ["idle", "activate", "teleport"],
       "variants": ["blue", "purple", "gold", "dark"]
+    },
+    {
+      "id": "ink-splat",
+      "name": "インク飛沫",
+      "category": "props",
+      "description": "床に広がるスプラトゥーン風のインク。ステージ装飾やゲームエフェクトに",
+      "tags": ["splatoon", "ink", "effect", "decoration", "ground"],
+      "animations": ["none"],
+      "variants": ["orange", "cyan", "purple", "pink", "lime", "yellow"]
+    },
+    {
+      "id": "ink-tank",
+      "name": "インクタンク",
+      "category": "props",
+      "description": "インクを貯めるタンク。スプラトゥーン風ゲームの背負い装備に",
+      "tags": ["splatoon", "ink", "equipment", "item"],
+      "animations": ["none"],
+      "variants": ["orange", "cyan", "purple", "pink"]
     }
   ]
 }

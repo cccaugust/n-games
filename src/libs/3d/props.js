@@ -880,6 +880,226 @@ export class PropModels {
       defaultAnimation: 'portalIdle'
     }, this.animations);
   }
+
+  // ==================== インク飛沫 ====================
+  createInkSplat(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'orange';
+    const group = new THREE.Group();
+
+    // スプラトゥーン風カラーパレット
+    const colors = {
+      orange: { main: 0xff6b00, accent: 0xffaa00, glow: 0xff8844 },
+      cyan: { main: 0x00d4ff, accent: 0x00ffff, glow: 0x44ddff },
+      purple: { main: 0xaa00ff, accent: 0xdd66ff, glow: 0xcc44ff },
+      pink: { main: 0xff4488, accent: 0xff88aa, glow: 0xff66aa },
+      lime: { main: 0xaaff00, accent: 0xddff55, glow: 0xccff44 },
+      yellow: { main: 0xffdd00, accent: 0xffee55, glow: 0xffee44 }
+    };
+    const palette = colors[variant] || colors.orange;
+
+    // メインのインク溜まり（不規則な形状）
+    const createInkBlob = (x, z, size, height) => {
+      const blobGroup = new THREE.Group();
+
+      // メイン部分（平たい円形）
+      const mainGeo = new THREE.CylinderGeometry(size, size * 1.1, height, 16, 1);
+      const mainMat = this.materials.physical({
+        color: palette.main,
+        roughness: 0.3,
+        metalness: 0.1,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.2
+      });
+      const main = new THREE.Mesh(mainGeo, mainMat);
+      main.position.y = height / 2;
+      main.receiveShadow = true;
+      blobGroup.add(main);
+
+      // 不規則な縁（周囲に小さな飛沫）
+      const splashCount = 5 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < splashCount; i++) {
+        const angle = (i / splashCount) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = size * (0.7 + Math.random() * 0.4);
+        const splashSize = size * (0.2 + Math.random() * 0.3);
+
+        const splashGeo = new THREE.SphereGeometry(splashSize, 12, 8);
+        const splashMat = mainMat.clone();
+        const splash = new THREE.Mesh(splashGeo, splashMat);
+        splash.position.set(
+          Math.cos(angle) * dist,
+          height * 0.3,
+          Math.sin(angle) * dist
+        );
+        splash.scale.set(1, 0.3, 1);
+        splash.receiveShadow = true;
+        blobGroup.add(splash);
+      }
+
+      blobGroup.position.set(x, 0, z);
+      return blobGroup;
+    };
+
+    // 中央の大きなインク
+    group.add(createInkBlob(0, 0, 0.6, 0.08));
+
+    // 周囲の小さなインク
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2 + Math.random() * 0.5;
+      const dist = 0.5 + Math.random() * 0.3;
+      const size = 0.15 + Math.random() * 0.15;
+      group.add(createInkBlob(
+        Math.cos(angle) * dist,
+        Math.sin(angle) * dist,
+        size,
+        0.04
+      ));
+    }
+
+    // 飛び散ったインクの点々
+    for (let i = 0; i < 12; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 0.8 + Math.random() * 0.5;
+      const dotGeo = new THREE.SphereGeometry(0.03 + Math.random() * 0.03, 8, 8);
+      const dotMat = this.materials.physical({
+        color: palette.main,
+        roughness: 0.3,
+        clearcoat: 0.8
+      });
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.set(
+        Math.cos(angle) * dist,
+        0.02,
+        Math.sin(angle) * dist
+      );
+      dot.scale.set(1, 0.4, 1);
+      group.add(dot);
+    }
+
+    // インクの光沢ハイライト
+    const highlightGeo = new THREE.CircleGeometry(0.15, 16);
+    const highlightMat = this.materials.emissive({
+      color: palette.glow,
+      intensity: 0.2
+    });
+    highlightMat.transparent = true;
+    highlightMat.opacity = 0.4;
+    const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+    highlight.rotation.x = -Math.PI / 2;
+    highlight.position.set(0.1, 0.09, -0.1);
+    group.add(highlight);
+
+    group.userData.isInkSplat = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'ink-splat',
+      name: 'インク飛沫',
+      variant: variant,
+      defaultAnimation: 'none'
+    }, this.animations);
+  }
+
+  // ==================== インクタンク ====================
+  createInkTank(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'orange';
+    const group = new THREE.Group();
+
+    const colors = {
+      orange: { main: 0xff6b00, accent: 0xffaa00, glow: 0xff8844 },
+      cyan: { main: 0x00d4ff, accent: 0x00ffff, glow: 0x44ddff },
+      purple: { main: 0xaa00ff, accent: 0xdd66ff, glow: 0xcc44ff },
+      pink: { main: 0xff4488, accent: 0xff88aa, glow: 0xff66aa }
+    };
+    const palette = colors[variant] || colors.orange;
+
+    // タンク本体（透明な容器）
+    const tankGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.7, 16, 1, true);
+    const tankMat = this.materials.physical({
+      color: 0xffffff,
+      roughness: 0.1,
+      metalness: 0.0,
+      transmission: 0.9,
+      thickness: 0.1,
+      transparent: true,
+      opacity: 0.3
+    });
+    const tank = new THREE.Mesh(tankGeo, tankMat);
+    tank.position.y = 0.35;
+    group.add(tank);
+
+    // インク（中身）
+    const inkGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.5, 16);
+    const inkMat = this.materials.physical({
+      color: palette.main,
+      roughness: 0.2,
+      metalness: 0.1,
+      clearcoat: 0.5
+    });
+    const ink = new THREE.Mesh(inkGeo, inkMat);
+    ink.position.y = 0.3;
+    ink.name = 'ink';
+    group.add(ink);
+
+    // タンク上部キャップ
+    const topCapGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.08, 16);
+    const capMat = this.materials.metal({ color: 0x444444, roughness: 0.4 });
+    const topCap = new THREE.Mesh(topCapGeo, capMat);
+    topCap.position.y = 0.74;
+    topCap.castShadow = true;
+    group.add(topCap);
+
+    // タンク下部キャップ
+    const bottomCapGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.08, 16);
+    const bottomCap = new THREE.Mesh(bottomCapGeo, capMat.clone());
+    bottomCap.position.y = 0.04;
+    bottomCap.castShadow = true;
+    group.add(bottomCap);
+
+    // ストラップ金具
+    const createBuckle = (y) => {
+      const buckleGeo = new THREE.BoxGeometry(0.08, 0.12, 0.05);
+      const buckleMat = this.materials.metal({ color: 0x888888, roughness: 0.3 });
+      const buckle = new THREE.Mesh(buckleGeo, buckleMat);
+      buckle.position.set(0, y, 0.28);
+      return buckle;
+    };
+    group.add(createBuckle(0.55));
+    group.add(createBuckle(0.15));
+
+    // ストラップ
+    const strapGeo = new THREE.BoxGeometry(0.06, 0.5, 0.02);
+    const strapMat = this.materials.standard({ color: 0x222222, roughness: 0.9 });
+    const strap = new THREE.Mesh(strapGeo, strapMat);
+    strap.position.set(0, 0.35, 0.3);
+    group.add(strap);
+
+    // インク残量ゲージ
+    const gaugeGeo = new THREE.BoxGeometry(0.04, 0.5, 0.02);
+    const gaugeMat = this.materials.emissive({ color: palette.glow, intensity: 0.5 });
+    const gauge = new THREE.Mesh(gaugeGeo, gaugeMat);
+    gauge.position.set(0.27, 0.35, 0);
+    gauge.name = 'gauge';
+    group.add(gauge);
+
+    // ゲージ背景
+    const gaugeBgGeo = new THREE.BoxGeometry(0.06, 0.55, 0.03);
+    const gaugeBgMat = this.materials.standard({ color: 0x111111, roughness: 0.8 });
+    const gaugeBg = new THREE.Mesh(gaugeBgGeo, gaugeBgMat);
+    gaugeBg.position.set(0.27, 0.35, -0.01);
+    group.add(gaugeBg);
+
+    group.userData.isInkTank = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'ink-tank',
+      name: 'インクタンク',
+      variant: variant,
+      defaultAnimation: 'none'
+    }, this.animations);
+  }
 }
 
 export default PropModels;
