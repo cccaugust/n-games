@@ -138,6 +138,15 @@
       "variants": ["pink", "teal", "purple", "red"]
     },
     {
+      "id": "link",
+      "name": "リンク",
+      "category": "characters",
+      "description": "ゼルダ風の勇者キャラクター。緑のチュニックとエルフ耳が特徴。背中に剣と盾を背負った冒険者スタイル",
+      "tags": ["player", "hero", "zelda", "fantasy", "adventure", "sword", "shield"],
+      "animations": ["linkIdle", "linkWalk", "linkRun", "linkAttack", "linkBlock", "linkVictory"],
+      "variants": ["green", "blue", "red", "dark"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

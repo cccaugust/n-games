@@ -46,6 +46,8 @@ export class ModelFactory {
       squid: (opts) => this.characters.createSquid(opts),
       octoling: (opts) => this.characters.createOctoling(opts),
       octopus: (opts) => this.characters.createOctopus(opts),
+      // ゼルダ風キャラクター
+      link: (opts) => this.characters.createLink(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
