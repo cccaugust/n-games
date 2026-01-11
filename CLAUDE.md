@@ -205,14 +205,14 @@
 
 #### 配置
 
-- ライブラリ: `public/assets/3d/lib/`
+- ライブラリ: `src/libs/3d/`
 - カタログ: `public/assets/3d/catalog.json`
 - プレイグラウンド: `src/games/3d-assets-library/`
 
 #### 使い方
 
 ```javascript
-import { ModelFactory } from '/assets/3d/lib/model-factory.js';
+import { ModelFactory } from '../../libs/3d/model-factory.js';
 
 const factory = new ModelFactory(THREE);
 
