@@ -84,6 +84,24 @@
       "variants": ["tabby", "black", "white", "calico"]
     },
     {
+      "id": "horse",
+      "name": "馬",
+      "category": "characters",
+      "description": "優雅で力強い馬のキャラクター。騎乗ゲームやレースゲーム、ファンタジーRPGに最適",
+      "tags": ["mount", "animal", "majestic", "fantasy", "racing", "npc"],
+      "animations": ["horseIdle", "horseWalk", "horseTrot", "horseGallop", "horseRear", "horseNeigh"],
+      "variants": ["bay", "white", "black", "palomino"]
+    },
+    {
+      "id": "frog",
+      "name": "カエル",
+      "category": "characters",
+      "description": "かわいいカエルのキャラクター。ジャンプや舌を伸ばすアニメーションが特徴的。水辺のゲームやファンタジーに最適",
+      "tags": ["animal", "cute", "amphibian", "nature", "npc", "pet"],
+      "animations": ["frogIdle", "frogHop", "frogSwim", "frogCroak", "frogTongue", "frogSit"],
+      "variants": ["green", "blue", "red", "golden"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

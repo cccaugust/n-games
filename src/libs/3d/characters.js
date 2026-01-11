@@ -1806,6 +1806,772 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  // ==================== 馬 ====================
+  createHorse(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'bay';
+    const group = new THREE.Group();
+
+    // カラーパレット（毛色ごと）
+    const colors = {
+      bay: {
+        body: 0x8b4513,      // 鹿毛（赤茶色）
+        belly: 0xa0522d,     // やや明るい茶
+        mane: 0x1a1a1a,      // 黒いたてがみ
+        tail: 0x1a1a1a,      // 黒い尾
+        hoof: 0x2c2c2c,      // 蹄
+        nose: 0x3d2817,      // 鼻
+        eye: 0x2c1810
+      },
+      white: {
+        body: 0xf5f5f5,      // 白毛
+        belly: 0xffffff,
+        mane: 0xfaf0e6,      // クリーム色のたてがみ
+        tail: 0xfaf0e6,
+        hoof: 0x4a4a4a,
+        nose: 0xffb6c1,      // ピンクの鼻
+        eye: 0x4a3728
+      },
+      black: {
+        body: 0x1a1a1a,      // 黒毛
+        belly: 0x2d2d2d,
+        mane: 0x0a0a0a,
+        tail: 0x0a0a0a,
+        hoof: 0x1a1a1a,
+        nose: 0x2c2c2c,
+        eye: 0x1a1208
+      },
+      palomino: {
+        body: 0xdaa520,      // 月毛（金色）
+        belly: 0xe6be8a,
+        mane: 0xfaf0e6,      // 白いたてがみ
+        tail: 0xfaf0e6,
+        hoof: 0x4a4a4a,
+        nose: 0xd4a574,
+        eye: 0x4a3728
+      }
+    };
+    const palette = colors[variant] || colors.bay;
+
+    // === 胴体 ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // メインボディ（筋肉質な胴体）
+    const torsoGeo = new THREE.SphereGeometry(0.8, 32, 32);
+    const torsoMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.scale.set(0.9, 0.85, 1.6);
+    torso.castShadow = true;
+    torso.receiveShadow = true;
+    bodyGroup.add(torso);
+
+    // 胸部（前側の膨らみ）
+    const chestGeo = new THREE.SphereGeometry(0.5, 24, 24);
+    const chestMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const chest = new THREE.Mesh(chestGeo, chestMat);
+    chest.position.set(0, 0.1, 0.9);
+    chest.scale.set(0.9, 0.85, 0.8);
+    chest.castShadow = true;
+    bodyGroup.add(chest);
+
+    // 腹部（下側）
+    const bellyGeo = new THREE.SphereGeometry(0.55, 24, 24);
+    const bellyMat = this.materials.standard({ color: palette.belly, roughness: 0.8 });
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.position.set(0, -0.25, 0);
+    belly.scale.set(0.75, 0.5, 1.3);
+    bodyGroup.add(belly);
+
+    // 臀部（後ろの膨らみ）
+    const haunchGeo = new THREE.SphereGeometry(0.55, 24, 24);
+    const haunchMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const haunch = new THREE.Mesh(haunchGeo, haunchMat);
+    haunch.position.set(0, 0, -0.9);
+    haunch.scale.set(0.85, 0.8, 0.7);
+    haunch.castShadow = true;
+    bodyGroup.add(haunch);
+
+    bodyGroup.position.y = 1.5;
+    bodyGroup.userData.baseY = 1.5;
+    group.add(bodyGroup);
+
+    // === 首 ===
+    const neckGroup = new THREE.Group();
+    neckGroup.name = 'neck';
+
+    // 首のセグメント（滑らかな曲線）
+    const neckSegments = 6;
+    for (let i = 0; i < neckSegments; i++) {
+      const t = i / neckSegments;
+      const segRadius = 0.25 - t * 0.05;
+      const segGeo = new THREE.SphereGeometry(segRadius, 16, 16);
+      const segMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const seg = new THREE.Mesh(segGeo, segMat);
+
+      // 首の曲線（前上方向へ）
+      seg.position.set(
+        0,
+        t * 0.6 + t * t * 0.3,
+        t * 0.5
+      );
+      seg.scale.set(0.9, 1, 0.85);
+      seg.castShadow = true;
+      neckGroup.add(seg);
+    }
+
+    neckGroup.position.set(0, 1.7, 1.1);
+    neckGroup.rotation.x = -0.3;
+    group.add(neckGroup);
+
+    // === たてがみ ===
+    const maneGroup = new THREE.Group();
+    maneGroup.name = 'mane';
+
+    // たてがみのセグメント
+    const maneSegments = 10;
+    for (let i = 0; i < maneSegments; i++) {
+      const t = i / maneSegments;
+      const maneGeo = new THREE.BoxGeometry(0.04, 0.18 - t * 0.04, 0.08);
+      const maneMat = this.materials.standard({ color: palette.mane, roughness: 0.9 });
+      const maneSeg = new THREE.Mesh(maneGeo, maneMat);
+
+      maneSeg.position.set(
+        0,
+        0.25 + t * 0.55,
+        0.35 + t * 0.45
+      );
+      maneSeg.rotation.z = Math.sin(t * Math.PI) * 0.15;
+      maneSeg.name = `maneSeg_${i}`;
+      maneGroup.add(maneSeg);
+    }
+
+    // 額のたてがみ（前髪）
+    const forelock = new THREE.Group();
+    for (let i = 0; i < 5; i++) {
+      const forelockGeo = new THREE.BoxGeometry(0.03, 0.12, 0.04);
+      const forelockMat = this.materials.standard({ color: palette.mane, roughness: 0.9 });
+      const forelockSeg = new THREE.Mesh(forelockGeo, forelockMat);
+      forelockSeg.position.set((i - 2) * 0.04, 0, i % 2 * 0.02);
+      forelock.add(forelockSeg);
+    }
+    forelock.position.set(0, 0.95, 0.95);
+    forelock.rotation.x = 0.5;
+    maneGroup.add(forelock);
+
+    maneGroup.position.set(0, 1.55, 1.1);
+    maneGroup.rotation.x = -0.3;
+    group.add(maneGroup);
+
+    // === 頭部 ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 頭のベース（長い顔）
+    const headGeo = new THREE.SphereGeometry(0.25, 24, 24);
+    const headMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.scale.set(0.8, 0.9, 1.2);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // 顔の長い部分（鼻先）
+    const muzzleGeo = new THREE.CylinderGeometry(0.12, 0.15, 0.45, 16);
+    const muzzleMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const muzzle = new THREE.Mesh(muzzleGeo, muzzleMat);
+    muzzle.position.set(0, -0.1, 0.4);
+    muzzle.rotation.x = Math.PI / 2;
+    muzzle.castShadow = true;
+    headGroup.add(muzzle);
+
+    // 鼻先の丸み
+    const noseTipGeo = new THREE.SphereGeometry(0.13, 16, 16);
+    const noseTipMat = this.materials.standard({ color: palette.nose, roughness: 0.6 });
+    const noseTip = new THREE.Mesh(noseTipGeo, noseTipMat);
+    noseTip.position.set(0, -0.1, 0.62);
+    noseTip.scale.set(1, 0.8, 0.6);
+    headGroup.add(noseTip);
+
+    // 鼻の穴
+    const createNostril = (x) => {
+      const nostrilGeo = new THREE.SphereGeometry(0.035, 8, 8);
+      const nostrilMat = this.materials.standard({ color: 0x1a1a1a, roughness: 0.3 });
+      const nostril = new THREE.Mesh(nostrilGeo, nostrilMat);
+      nostril.position.set(x, -0.12, 0.68);
+      nostril.scale.set(0.8, 1, 0.5);
+      return nostril;
+    };
+    headGroup.add(createNostril(-0.06));
+    headGroup.add(createNostril(0.06));
+
+    // 目
+    const createEye = (x) => {
+      const eyeGroup = new THREE.Group();
+
+      // 白目
+      const whiteGeo = new THREE.SphereGeometry(0.065, 16, 16);
+      const whiteMat = this.materials.standard({ color: 0xffffff, roughness: 0.1 });
+      const white = new THREE.Mesh(whiteGeo, whiteMat);
+      eyeGroup.add(white);
+
+      // 瞳
+      const irisGeo = new THREE.SphereGeometry(0.05, 12, 12);
+      const irisMat = this.materials.standard({ color: palette.eye, roughness: 0.2 });
+      const iris = new THREE.Mesh(irisGeo, irisMat);
+      iris.position.z = 0.03;
+      eyeGroup.add(iris);
+
+      // 瞳孔（横長）
+      const pupilGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const pupilMat = this.materials.standard({ color: 0x000000 });
+      const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+      pupil.position.z = 0.045;
+      pupil.scale.set(1.5, 0.8, 1);
+      eyeGroup.add(pupil);
+
+      // ハイライト
+      const highlightGeo = new THREE.SphereGeometry(0.015, 8, 8);
+      const highlightMat = this.materials.emissive({ color: 0xffffff, intensity: 0.8 });
+      const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+      highlight.position.set(0.015, 0.02, 0.055);
+      eyeGroup.add(highlight);
+
+      eyeGroup.position.set(x, 0.08, 0.12);
+      return eyeGroup;
+    };
+
+    const leftEye = createEye(-0.14);
+    leftEye.name = 'leftEye';
+    headGroup.add(leftEye);
+
+    const rightEye = createEye(0.14);
+    rightEye.name = 'rightEye';
+    headGroup.add(rightEye);
+
+    // 耳
+    const createEar = (x, isLeft) => {
+      const earGroup = new THREE.Group();
+      earGroup.name = isLeft ? 'leftEar' : 'rightEar';
+
+      // 耳本体（先が尖った形）
+      const earGeo = new THREE.ConeGeometry(0.06, 0.18, 12);
+      const earMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const ear = new THREE.Mesh(earGeo, earMat);
+      ear.castShadow = true;
+      earGroup.add(ear);
+
+      // 耳の内側（ピンク）
+      const innerEarGeo = new THREE.ConeGeometry(0.04, 0.12, 12);
+      const innerEarMat = this.materials.standard({ color: 0xffcccc, roughness: 0.7 });
+      const innerEar = new THREE.Mesh(innerEarGeo, innerEarMat);
+      innerEar.position.z = 0.015;
+      innerEar.position.y = -0.02;
+      earGroup.add(innerEar);
+
+      earGroup.position.set(x, 0.3, -0.05);
+      earGroup.rotation.z = isLeft ? 0.15 : -0.15;
+      earGroup.rotation.x = 0.1;
+
+      return earGroup;
+    };
+
+    headGroup.add(createEar(-0.12, true));
+    headGroup.add(createEar(0.12, false));
+
+    // 口
+    const mouthGeo = new THREE.BoxGeometry(0.15, 0.01, 0.02);
+    const mouthMat = this.materials.standard({ color: 0x2c2c2c, roughness: 0.5 });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, -0.2, 0.58);
+    mouth.name = 'mouth';
+    headGroup.add(mouth);
+
+    headGroup.position.set(0, 2.55, 1.75);
+    headGroup.rotation.x = 0.15;
+    group.add(headGroup);
+
+    // === 脚 ===
+    const createLeg = (x, z, isFront) => {
+      const legGroup = new THREE.Group();
+      const legName = `${isFront ? 'front' : 'back'}${x < 0 ? 'Left' : 'Right'}Leg`;
+      legGroup.name = legName;
+
+      // 上部の脚（太もも/肩）
+      const upperLegGeo = new THREE.CylinderGeometry(0.12, 0.1, 0.55, 16);
+      const upperLegMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const upperLeg = new THREE.Mesh(upperLegGeo, upperLegMat);
+      upperLeg.position.y = -0.28;
+      upperLeg.castShadow = true;
+      upperLeg.name = 'upperLeg';
+      legGroup.add(upperLeg);
+
+      // 膝/関節
+      const kneeGeo = new THREE.SphereGeometry(0.1, 12, 12);
+      const kneeMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const knee = new THREE.Mesh(kneeGeo, kneeMat);
+      knee.position.y = -0.55;
+      knee.name = 'knee';
+      legGroup.add(knee);
+
+      // 下部の脚（すね）
+      const lowerLegGeo = new THREE.CylinderGeometry(0.08, 0.06, 0.55, 12);
+      const lowerLegMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const lowerLeg = new THREE.Mesh(lowerLegGeo, lowerLegMat);
+      lowerLeg.position.y = -0.85;
+      lowerLeg.castShadow = true;
+      lowerLeg.name = 'lowerLeg';
+      legGroup.add(lowerLeg);
+
+      // 足首
+      const ankleGeo = new THREE.SphereGeometry(0.06, 10, 10);
+      const ankleMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+      const ankle = new THREE.Mesh(ankleGeo, ankleMat);
+      ankle.position.y = -1.1;
+      legGroup.add(ankle);
+
+      // 蹄
+      const hoofGeo = new THREE.CylinderGeometry(0.08, 0.09, 0.12, 16);
+      const hoofMat = this.materials.standard({ color: palette.hoof, roughness: 0.4 });
+      const hoof = new THREE.Mesh(hoofGeo, hoofMat);
+      hoof.position.y = -1.2;
+      hoof.castShadow = true;
+      hoof.name = 'hoof';
+      legGroup.add(hoof);
+
+      legGroup.position.set(x, 1.5, z);
+
+      return legGroup;
+    };
+
+    // 前脚
+    group.add(createLeg(-0.3, 0.85, true));
+    group.add(createLeg(0.3, 0.85, true));
+    // 後脚
+    group.add(createLeg(-0.32, -0.85, false));
+    group.add(createLeg(0.32, -0.85, false));
+
+    // === しっぽ ===
+    const tailGroup = new THREE.Group();
+    tailGroup.name = 'tail';
+
+    // しっぽの付け根
+    const tailBaseGeo = new THREE.CylinderGeometry(0.08, 0.06, 0.2, 12);
+    const tailBaseMat = this.materials.standard({ color: palette.body, roughness: 0.75 });
+    const tailBase = new THREE.Mesh(tailBaseGeo, tailBaseMat);
+    tailBase.rotation.x = 0.8;
+    tailBase.castShadow = true;
+    tailGroup.add(tailBase);
+
+    // しっぽの毛（複数のセグメント）
+    const tailHairSegments = 15;
+    for (let i = 0; i < tailHairSegments; i++) {
+      const t = i / tailHairSegments;
+      const hairGeo = new THREE.BoxGeometry(0.02, 0.25 + t * 0.15, 0.02);
+      const hairMat = this.materials.standard({ color: palette.tail, roughness: 0.9 });
+      const hair = new THREE.Mesh(hairGeo, hairMat);
+
+      // 自然な垂れ下がり
+      const angle = t * 0.3;
+      hair.position.set(
+        Math.sin(i * 0.7) * 0.03,
+        -0.15 - t * 0.4,
+        -0.08 - t * 0.25
+      );
+      hair.rotation.x = 0.3 + t * 0.2;
+      hair.rotation.z = Math.sin(i * 1.2) * 0.1;
+      hair.name = `tailHair_${i}`;
+      tailGroup.add(hair);
+    }
+
+    tailGroup.position.set(0, 1.55, -1.45);
+    group.add(tailGroup);
+
+    // === 影 ===
+    const shadowGeo = new THREE.CircleGeometry(0.9, 32);
+    const shadowMat = this.materials.standard({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.01;
+    group.add(shadow);
+
+    // userData
+    group.userData.isHorse = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'horse',
+      name: '馬',
+      variant: variant,
+      defaultAnimation: 'horseIdle'
+    }, this.animations);
+  }
+
+  // ==================== カエル ====================
+  createFrog(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'green';
+    const group = new THREE.Group();
+
+    // カラーパレット（種類ごと）
+    const colors = {
+      green: {
+        body: 0x228b22,       // フォレストグリーン
+        belly: 0x90ee90,      // ライトグリーン
+        spots: 0x006400,      // ダークグリーン
+        eye: 0xffd700,        // 金色の目
+        pupil: 0x000000,
+        throat: 0xf0e68c      // 喉袋
+      },
+      blue: {
+        body: 0x1e90ff,       // ドジャーブルー（ヤドクガエル風）
+        belly: 0x87ceeb,      // スカイブルー
+        spots: 0x00008b,      // ダークブルー
+        eye: 0xff4500,        // オレンジレッド
+        pupil: 0x000000,
+        throat: 0xadd8e6
+      },
+      red: {
+        body: 0xdc143c,       // クリムゾン
+        belly: 0xffa07a,      // ライトサーモン
+        spots: 0x8b0000,      // ダークレッド
+        eye: 0xffd700,
+        pupil: 0x000000,
+        throat: 0xffb6c1
+      },
+      golden: {
+        body: 0xffd700,       // ゴールド
+        belly: 0xfffacd,      // レモンシフォン
+        spots: 0xdaa520,      // ゴールデンロッド
+        eye: 0xff6347,        // トマト
+        pupil: 0x000000,
+        throat: 0xffe4b5
+      }
+    };
+    const palette = colors[variant] || colors.green;
+
+    // === 胴体 ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // メインボディ（丸みのある体）
+    const torsoGeo = new THREE.SphereGeometry(0.5, 32, 32);
+    const torsoMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.scale.set(1.1, 0.8, 1.3);
+    torso.castShadow = true;
+    torso.receiveShadow = true;
+    bodyGroup.add(torso);
+
+    // お腹（明るい部分）
+    const bellyGeo = new THREE.SphereGeometry(0.4, 24, 24);
+    const bellyMat = this.materials.standard({ color: palette.belly, roughness: 0.7 });
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.position.set(0, -0.15, 0.1);
+    belly.scale.set(0.9, 0.6, 1.1);
+    bodyGroup.add(belly);
+
+    // 背中の模様（斑点）
+    const spotPositions = [
+      { x: 0.2, y: 0.25, z: 0.3, size: 0.08 },
+      { x: -0.15, y: 0.28, z: 0.15, size: 0.06 },
+      { x: 0.25, y: 0.2, z: -0.1, size: 0.07 },
+      { x: -0.2, y: 0.22, z: -0.2, size: 0.09 },
+      { x: 0.05, y: 0.3, z: 0.0, size: 0.05 },
+      { x: -0.25, y: 0.18, z: 0.25, size: 0.06 }
+    ];
+
+    spotPositions.forEach((spot) => {
+      const spotGeo = new THREE.SphereGeometry(spot.size, 12, 12);
+      const spotMat = this.materials.standard({ color: palette.spots, roughness: 0.6 });
+      const spotMesh = new THREE.Mesh(spotGeo, spotMat);
+      spotMesh.position.set(spot.x, spot.y, spot.z);
+      spotMesh.scale.set(1, 0.4, 1);
+      bodyGroup.add(spotMesh);
+    });
+
+    bodyGroup.position.y = 0.35;
+    bodyGroup.userData.baseY = 0.35;
+    group.add(bodyGroup);
+
+    // === 頭部 ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 頭のベース（幅広い頭）
+    const headGeo = new THREE.SphereGeometry(0.35, 24, 24);
+    const headMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.scale.set(1.3, 0.8, 1.1);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // 大きな目（横に張り出す）
+    const createEye = (x) => {
+      const eyeGroup = new THREE.Group();
+      eyeGroup.name = x < 0 ? 'leftEye' : 'rightEye';
+
+      // 目の球体（大きい）
+      const eyeBallGeo = new THREE.SphereGeometry(0.15, 20, 20);
+      const eyeBallMat = this.materials.standard({ color: palette.eye, roughness: 0.2 });
+      const eyeBall = new THREE.Mesh(eyeBallGeo, eyeBallMat);
+      eyeBall.castShadow = true;
+      eyeGroup.add(eyeBall);
+
+      // 瞳孔（縦長）
+      const pupilGeo = new THREE.SphereGeometry(0.07, 12, 12);
+      const pupilMat = this.materials.standard({ color: palette.pupil });
+      const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+      pupil.position.z = 0.1;
+      pupil.scale.set(0.6, 1.2, 0.5);
+      pupil.name = 'pupil';
+      eyeGroup.add(pupil);
+
+      // ハイライト
+      const highlightGeo = new THREE.SphereGeometry(0.03, 8, 8);
+      const highlightMat = this.materials.emissive({ color: 0xffffff, intensity: 0.8 });
+      const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+      highlight.position.set(0.03, 0.05, 0.12);
+      eyeGroup.add(highlight);
+
+      // まぶた（アニメーション用）
+      const eyelidGeo = new THREE.SphereGeometry(0.16, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const eyelidMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+      const eyelid = new THREE.Mesh(eyelidGeo, eyelidMat);
+      eyelid.rotation.x = Math.PI;
+      eyelid.position.y = 0.02;
+      eyelid.visible = false;
+      eyelid.name = 'eyelid';
+      eyeGroup.add(eyelid);
+
+      eyeGroup.position.set(x, 0.2, 0.15);
+      return eyeGroup;
+    };
+
+    headGroup.add(createEye(-0.25));
+    headGroup.add(createEye(0.25));
+
+    // 大きな口
+    const mouthGeo = new THREE.TorusGeometry(0.2, 0.03, 8, 24, Math.PI);
+    const mouthMat = this.materials.standard({ color: 0x2c2c2c, roughness: 0.5 });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, -0.12, 0.3);
+    mouth.rotation.x = Math.PI;
+    mouth.rotation.z = Math.PI;
+    mouth.name = 'mouth';
+    headGroup.add(mouth);
+
+    // 鼻の穴
+    const createNostril = (x) => {
+      const nostrilGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const nostrilMat = this.materials.standard({ color: 0x1a1a1a, roughness: 0.3 });
+      const nostril = new THREE.Mesh(nostrilGeo, nostrilMat);
+      nostril.position.set(x, 0.02, 0.35);
+      nostril.scale.set(1, 0.5, 0.5);
+      return nostril;
+    };
+    headGroup.add(createNostril(-0.08));
+    headGroup.add(createNostril(0.08));
+
+    // 喉袋（膨らむ部分）
+    const throatGeo = new THREE.SphereGeometry(0.15, 16, 16);
+    const throatMat = this.materials.standard({
+      color: palette.throat,
+      roughness: 0.5,
+      transparent: true,
+      opacity: 0.9
+    });
+    const throat = new THREE.Mesh(throatGeo, throatMat);
+    throat.position.set(0, -0.2, 0.25);
+    throat.scale.set(1, 0.6, 0.8);
+    throat.name = 'throat';
+    headGroup.add(throat);
+
+    // 舌（隠れている）
+    const tongueGroup = new THREE.Group();
+    tongueGroup.name = 'tongue';
+
+    const tongueBaseGeo = new THREE.CylinderGeometry(0.03, 0.04, 0.4, 12);
+    const tongueMat = this.materials.standard({ color: 0xff6b8a, roughness: 0.6 });
+    const tongueBase = new THREE.Mesh(tongueBaseGeo, tongueMat);
+    tongueBase.rotation.x = Math.PI / 2;
+    tongueBase.position.z = 0.2;
+    tongueGroup.add(tongueBase);
+
+    // 舌の先（丸い）
+    const tongueTipGeo = new THREE.SphereGeometry(0.05, 12, 12);
+    const tongueTip = new THREE.Mesh(tongueTipGeo, tongueMat);
+    tongueTip.position.z = 0.4;
+    tongueGroup.add(tongueTip);
+
+    tongueGroup.position.set(0, -0.1, 0.2);
+    tongueGroup.visible = false;
+    headGroup.add(tongueGroup);
+
+    headGroup.position.set(0, 0.5, 0.45);
+    group.add(headGroup);
+
+    // === 前脚（短い） ===
+    const createFrontLeg = (x) => {
+      const legGroup = new THREE.Group();
+      legGroup.name = x < 0 ? 'frontLeftLeg' : 'frontRightLeg';
+
+      // 上腕
+      const upperArmGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.2, 12);
+      const armMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+      const upperArm = new THREE.Mesh(upperArmGeo, armMat);
+      upperArm.position.y = -0.1;
+      upperArm.rotation.z = x < 0 ? 0.3 : -0.3;
+      upperArm.castShadow = true;
+      legGroup.add(upperArm);
+
+      // 前腕
+      const forearmGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.18, 12);
+      const forearm = new THREE.Mesh(forearmGeo, armMat);
+      forearm.position.set(x < 0 ? -0.08 : 0.08, -0.25, 0);
+      forearm.castShadow = true;
+      legGroup.add(forearm);
+
+      // 手（4本指の水かき）
+      const handGroup = new THREE.Group();
+      handGroup.name = 'hand';
+
+      for (let i = 0; i < 4; i++) {
+        const fingerGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.1, 8);
+        const finger = new THREE.Mesh(fingerGeo, armMat);
+        const angle = (i - 1.5) * 0.25;
+        finger.position.set(Math.sin(angle) * 0.05, -0.05, Math.cos(angle) * 0.03);
+        finger.rotation.z = angle * 0.5;
+        finger.rotation.x = 0.3;
+        handGroup.add(finger);
+
+        // 指先の吸盤
+        const padGeo = new THREE.SphereGeometry(0.025, 8, 8);
+        const padMat = this.materials.standard({ color: palette.belly, roughness: 0.4 });
+        const pad = new THREE.Mesh(padGeo, padMat);
+        pad.position.set(Math.sin(angle) * 0.05, -0.1, Math.cos(angle) * 0.03 + 0.02);
+        pad.scale.set(1, 0.6, 1);
+        handGroup.add(pad);
+      }
+
+      handGroup.position.set(x < 0 ? -0.1 : 0.1, -0.35, 0.05);
+      legGroup.add(handGroup);
+
+      legGroup.position.set(x, 0.3, 0.35);
+      return legGroup;
+    };
+
+    group.add(createFrontLeg(-0.35));
+    group.add(createFrontLeg(0.35));
+
+    // === 後脚（長くて強い） ===
+    const createBackLeg = (x) => {
+      const legGroup = new THREE.Group();
+      legGroup.name = x < 0 ? 'backLeftLeg' : 'backRightLeg';
+
+      // 太もも（太い）
+      const thighGeo = new THREE.SphereGeometry(0.15, 16, 16);
+      const legMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+      const thigh = new THREE.Mesh(thighGeo, legMat);
+      thigh.scale.set(0.8, 1.2, 1);
+      thigh.castShadow = true;
+      legGroup.add(thigh);
+
+      // すね
+      const shinGeo = new THREE.CylinderGeometry(0.06, 0.05, 0.35, 12);
+      const shin = new THREE.Mesh(shinGeo, legMat);
+      shin.position.set(x < 0 ? -0.1 : 0.1, -0.1, 0.15);
+      shin.rotation.x = -0.8;
+      shin.rotation.z = x < 0 ? 0.2 : -0.2;
+      shin.castShadow = true;
+      shin.name = 'shin';
+      legGroup.add(shin);
+
+      // 足（大きな水かき付き）
+      const footGroup = new THREE.Group();
+      footGroup.name = 'foot';
+
+      // 水かき付きの足（5本指）
+      for (let i = 0; i < 5; i++) {
+        const toeGeo = new THREE.CylinderGeometry(0.02, 0.025, 0.18, 8);
+        const toe = new THREE.Mesh(toeGeo, legMat);
+        const angle = (i - 2) * 0.3;
+        toe.position.set(Math.sin(angle) * 0.12, 0, Math.cos(angle) * 0.08);
+        toe.rotation.x = Math.PI / 2 - 0.2;
+        toe.rotation.z = angle * 0.3;
+        footGroup.add(toe);
+
+        // 指先の丸み
+        const toeTipGeo = new THREE.SphereGeometry(0.025, 8, 8);
+        const toeTip = new THREE.Mesh(toeTipGeo, legMat);
+        toeTip.position.set(
+          Math.sin(angle) * 0.12,
+          0.02,
+          Math.cos(angle) * 0.08 + 0.09
+        );
+        footGroup.add(toeTip);
+      }
+
+      // 水かき
+      const webShape = new THREE.Shape();
+      webShape.moveTo(-0.15, 0);
+      webShape.quadraticCurveTo(-0.08, 0.12, 0, 0.15);
+      webShape.quadraticCurveTo(0.08, 0.12, 0.15, 0);
+      webShape.lineTo(-0.15, 0);
+
+      const webGeo = new THREE.ShapeGeometry(webShape);
+      const webMat = this.materials.standard({
+        color: palette.belly,
+        roughness: 0.5,
+        transparent: true,
+        opacity: 0.7,
+        side: THREE.DoubleSide
+      });
+      const web = new THREE.Mesh(webGeo, webMat);
+      web.rotation.x = -Math.PI / 2 + 0.2;
+      web.position.set(0, -0.02, 0.05);
+      footGroup.add(web);
+
+      footGroup.position.set(x < 0 ? -0.2 : 0.2, -0.25, 0.35);
+      legGroup.add(footGroup);
+
+      legGroup.position.set(x * 0.8, 0.25, -0.35);
+      return legGroup;
+    };
+
+    group.add(createBackLeg(-0.4));
+    group.add(createBackLeg(0.4));
+
+    // === 影 ===
+    const shadowGeo = new THREE.CircleGeometry(0.5, 32);
+    const shadowMat = this.materials.standard({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.01;
+    shadow.name = 'shadow';
+    group.add(shadow);
+
+    // userData
+    group.userData.isFrog = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'frog',
+      name: 'カエル',
+      variant: variant,
+      defaultAnimation: 'frogIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**

@@ -623,6 +623,550 @@ export class AnimationSystem {
         }
       },
 
+      // ========== 馬専用 ==========
+      horseIdle: {
+        duration: 3.0,
+        loop: true,
+        update: (model, t, dt) => {
+          // ゆっくりとした呼吸
+          const breathe = Math.sin(t * 1.2) * 0.02;
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + breathe;
+          }
+
+          // 頭の小さな動き
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(t * 0.8) * 0.05;
+            model.parts.head.rotation.x = 0.15 + Math.sin(t * 1.0) * 0.02;
+          }
+
+          // 耳の動き
+          if (model.parts.leftEar) {
+            model.parts.leftEar.rotation.z = 0.15 + Math.sin(t * 2.5) * 0.08;
+          }
+          if (model.parts.rightEar) {
+            model.parts.rightEar.rotation.z = -0.15 + Math.sin(t * 2.5 + 0.5) * 0.08;
+          }
+
+          // しっぽの軽い揺れ
+          if (model.parts.tail) {
+            model.parts.tail.rotation.x = Math.sin(t * 1.5) * 0.1;
+            model.parts.tail.rotation.z = Math.sin(t * 2) * 0.05;
+          }
+
+          // たてがみの揺れ
+          if (model.parts.mane) {
+            model.parts.mane.children.forEach((seg, i) => {
+              if (seg.name && seg.name.startsWith('maneSeg')) {
+                seg.rotation.z = Math.sin(t * 2 + i * 0.3) * 0.08;
+              }
+            });
+          }
+        }
+      },
+
+      horseWalk: {
+        duration: 1.2,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 1.2;
+
+          // 4拍子の歩行（対角線の脚が同時に動く）
+          if (model.parts.frontLeftLeg) {
+            model.parts.frontLeftLeg.rotation.x = Math.sin(cycle) * 0.35;
+          }
+          if (model.parts.backRightLeg) {
+            model.parts.backRightLeg.rotation.x = Math.sin(cycle) * 0.35;
+          }
+          if (model.parts.frontRightLeg) {
+            model.parts.frontRightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.35;
+          }
+          if (model.parts.backLeftLeg) {
+            model.parts.backLeftLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.35;
+          }
+
+          // 体の上下動
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(cycle * 2) * 0.03;
+          }
+
+          // 頭の上下
+          if (model.parts.head) {
+            model.parts.head.rotation.x = 0.15 + Math.sin(cycle * 2) * 0.05;
+          }
+
+          // たてがみの揺れ
+          if (model.parts.mane) {
+            model.parts.mane.children.forEach((seg, i) => {
+              if (seg.name && seg.name.startsWith('maneSeg')) {
+                seg.rotation.z = Math.sin(cycle * 2 + i * 0.4) * 0.12;
+              }
+            });
+          }
+
+          // しっぽの揺れ
+          if (model.parts.tail) {
+            model.parts.tail.rotation.x = Math.sin(cycle) * 0.15;
+            model.parts.tail.children.forEach((hair, i) => {
+              if (hair.name && hair.name.startsWith('tailHair')) {
+                hair.rotation.z = Math.sin(cycle * 2 + i * 0.2) * 0.1;
+              }
+            });
+          }
+        }
+      },
+
+      horseTrot: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.8;
+
+          // 速歩（対角線の脚が同時に上がる2拍子）
+          if (model.parts.frontLeftLeg) {
+            model.parts.frontLeftLeg.rotation.x = Math.sin(cycle) * 0.5;
+          }
+          if (model.parts.backRightLeg) {
+            model.parts.backRightLeg.rotation.x = Math.sin(cycle) * 0.5;
+          }
+          if (model.parts.frontRightLeg) {
+            model.parts.frontRightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.5;
+          }
+          if (model.parts.backLeftLeg) {
+            model.parts.backLeftLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.5;
+          }
+
+          // 体の大きな上下動
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.abs(Math.sin(cycle)) * 0.08;
+          }
+
+          // 頭の動き
+          if (model.parts.head) {
+            model.parts.head.rotation.x = 0.15 + Math.sin(cycle * 2) * 0.08;
+          }
+
+          // たてがみの激しい揺れ
+          if (model.parts.mane) {
+            model.parts.mane.children.forEach((seg, i) => {
+              if (seg.name && seg.name.startsWith('maneSeg')) {
+                seg.rotation.z = Math.sin(cycle * 2 + i * 0.5) * 0.2;
+                seg.rotation.x = Math.sin(cycle * 2 + i * 0.3) * 0.1;
+              }
+            });
+          }
+
+          // しっぽの揺れ
+          if (model.parts.tail) {
+            model.parts.tail.rotation.x = Math.sin(cycle) * 0.2;
+            model.parts.tail.children.forEach((hair, i) => {
+              if (hair.name && hair.name.startsWith('tailHair')) {
+                hair.rotation.z = Math.sin(cycle * 2 + i * 0.25) * 0.15;
+              }
+            });
+          }
+        }
+      },
+
+      horseGallop: {
+        duration: 0.5,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.5;
+
+          // 駆け足（4拍子、前後の脚が交互に）
+          // 前脚を揃えて伸ばす
+          const frontPhase = Math.sin(cycle);
+          const backPhase = Math.sin(cycle - Math.PI * 0.3);
+
+          if (model.parts.frontLeftLeg) {
+            model.parts.frontLeftLeg.rotation.x = frontPhase * 0.7;
+          }
+          if (model.parts.frontRightLeg) {
+            model.parts.frontRightLeg.rotation.x = frontPhase * 0.7 - 0.15;
+          }
+          if (model.parts.backLeftLeg) {
+            model.parts.backLeftLeg.rotation.x = backPhase * 0.7;
+          }
+          if (model.parts.backRightLeg) {
+            model.parts.backRightLeg.rotation.x = backPhase * 0.7 - 0.15;
+          }
+
+          // 体の大きな上下動と前傾
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.abs(Math.sin(cycle)) * 0.15;
+            model.parts.body.rotation.x = Math.sin(cycle) * 0.05;
+          }
+
+          // 首と頭の動き
+          if (model.parts.neck) {
+            model.parts.neck.rotation.x = -0.3 + Math.sin(cycle) * 0.1;
+          }
+          if (model.parts.head) {
+            model.parts.head.rotation.x = 0.15 + Math.sin(cycle * 2) * 0.1;
+          }
+
+          // たてがみの激しい揺れ
+          if (model.parts.mane) {
+            model.parts.mane.children.forEach((seg, i) => {
+              if (seg.name && seg.name.startsWith('maneSeg')) {
+                seg.rotation.z = Math.sin(cycle * 2 + i * 0.6) * 0.3;
+                seg.rotation.x = Math.sin(cycle * 2 + i * 0.4) * 0.15;
+              }
+            });
+          }
+
+          // しっぽが大きく揺れる
+          if (model.parts.tail) {
+            model.parts.tail.rotation.x = 0.3 + Math.sin(cycle) * 0.3;
+            model.parts.tail.rotation.z = Math.sin(cycle * 1.5) * 0.2;
+            model.parts.tail.children.forEach((hair, i) => {
+              if (hair.name && hair.name.startsWith('tailHair')) {
+                hair.rotation.z = Math.sin(cycle * 2 + i * 0.3) * 0.25;
+              }
+            });
+          }
+        }
+      },
+
+      horseRear: {
+        duration: 1.5,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = Math.min(t / 1.5, 1);
+
+          // 前足を上げていななく
+          if (progress < 0.3) {
+            // 準備（少し沈み込む）
+            const prep = progress / 0.3;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY - prep * 0.1;
+            }
+            if (model.parts.backLeftLeg) {
+              model.parts.backLeftLeg.rotation.x = prep * 0.2;
+            }
+            if (model.parts.backRightLeg) {
+              model.parts.backRightLeg.rotation.x = prep * 0.2;
+            }
+          } else if (progress < 0.7) {
+            // 立ち上がり
+            const rise = (progress - 0.3) / 0.4;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY + rise * 0.4;
+              model.parts.body.rotation.x = -rise * 0.4;
+            }
+            if (model.parts.frontLeftLeg) {
+              model.parts.frontLeftLeg.rotation.x = -rise * 1.2;
+            }
+            if (model.parts.frontRightLeg) {
+              model.parts.frontRightLeg.rotation.x = -rise * 1.0;
+            }
+            if (model.parts.head) {
+              model.parts.head.rotation.x = 0.15 - rise * 0.3;
+            }
+          } else {
+            // 降りる
+            const down = (progress - 0.7) / 0.3;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY + (1 - down) * 0.4;
+              model.parts.body.rotation.x = -(1 - down) * 0.4;
+            }
+            if (model.parts.frontLeftLeg) {
+              model.parts.frontLeftLeg.rotation.x = -(1 - down) * 1.2;
+            }
+            if (model.parts.frontRightLeg) {
+              model.parts.frontRightLeg.rotation.x = -(1 - down) * 1.0;
+            }
+            if (model.parts.head) {
+              model.parts.head.rotation.x = 0.15 - (1 - down) * 0.3;
+            }
+          }
+
+          // たてがみが激しく揺れる
+          if (model.parts.mane) {
+            const intensity = Math.sin(progress * Math.PI);
+            model.parts.mane.children.forEach((seg, i) => {
+              if (seg.name && seg.name.startsWith('maneSeg')) {
+                seg.rotation.z = Math.sin(t * 8 + i * 0.5) * 0.3 * intensity;
+              }
+            });
+          }
+        }
+      },
+
+      horseNeigh: {
+        duration: 1.0,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = t / 1.0;
+
+          // 頭を上げて口を開ける
+          if (model.parts.head) {
+            const lift = Math.sin(progress * Math.PI);
+            model.parts.head.rotation.x = 0.15 - lift * 0.4;
+          }
+
+          // 口を開閉
+          if (model.parts.mouth) {
+            const mouthOpen = Math.sin(progress * Math.PI * 3) > 0;
+            model.parts.mouth.scale.y = mouthOpen ? 3 : 1;
+          }
+
+          // 耳を立てる
+          if (model.parts.leftEar) {
+            model.parts.leftEar.rotation.x = 0.3;
+            model.parts.leftEar.rotation.z = 0.05;
+          }
+          if (model.parts.rightEar) {
+            model.parts.rightEar.rotation.x = 0.3;
+            model.parts.rightEar.rotation.z = -0.05;
+          }
+
+          // 首の動き
+          if (model.parts.neck) {
+            model.parts.neck.rotation.x = -0.3 - Math.sin(progress * Math.PI) * 0.15;
+          }
+
+          // 体が少し揺れる
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(progress * Math.PI * 2) * 0.03;
+          }
+        }
+      },
+
+      // ========== カエル専用 ==========
+      frogIdle: {
+        duration: 3.0,
+        loop: true,
+        update: (model, t, dt) => {
+          // 喉袋の膨らみ（呼吸）
+          if (model.parts.throat) {
+            const pulse = 1 + Math.sin(t * 2) * 0.15;
+            model.parts.throat.scale.set(pulse, 0.6 * pulse, 0.8);
+          }
+
+          // 体の微細な動き
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(t * 1.5) * 0.01;
+          }
+
+          // 目のまばたき（たまに）
+          const blinkCycle = t % 4;
+          if (model.parts.leftEye && model.parts.rightEye) {
+            const shouldBlink = blinkCycle > 3.8 && blinkCycle < 4.0;
+            const leftEyelid = model.parts.leftEye.children.find(c => c.name === 'eyelid');
+            const rightEyelid = model.parts.rightEye.children.find(c => c.name === 'eyelid');
+            if (leftEyelid) leftEyelid.visible = shouldBlink;
+            if (rightEyelid) rightEyelid.visible = shouldBlink;
+          }
+
+          // 頭の動き（周囲を見回す）
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(t * 0.8) * 0.1;
+          }
+        }
+      },
+
+      frogHop: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t, dt) => {
+          const progress = (t % 0.8) / 0.8;
+
+          if (progress < 0.2) {
+            // 準備（縮む）
+            const prep = progress / 0.2;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY - prep * 0.1;
+              model.parts.body.scale.y = 0.8 - prep * 0.15;
+            }
+            if (model.parts.backLeftLeg) {
+              model.parts.backLeftLeg.rotation.x = prep * 0.5;
+            }
+            if (model.parts.backRightLeg) {
+              model.parts.backRightLeg.rotation.x = prep * 0.5;
+            }
+          } else if (progress < 0.5) {
+            // ジャンプ
+            const jump = (progress - 0.2) / 0.3;
+            const height = Math.sin(jump * Math.PI) * 0.6;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY + height;
+              model.parts.body.scale.y = 0.65 + jump * 0.5;
+            }
+            if (model.parts.backLeftLeg) {
+              model.parts.backLeftLeg.rotation.x = 0.5 - jump * 1.2;
+            }
+            if (model.parts.backRightLeg) {
+              model.parts.backRightLeg.rotation.x = 0.5 - jump * 1.2;
+            }
+            // 前脚を前に
+            if (model.parts.frontLeftLeg) {
+              model.parts.frontLeftLeg.rotation.x = -jump * 0.4;
+            }
+            if (model.parts.frontRightLeg) {
+              model.parts.frontRightLeg.rotation.x = -jump * 0.4;
+            }
+          } else {
+            // 着地
+            const land = (progress - 0.5) / 0.5;
+            if (model.parts.body) {
+              model.parts.body.position.y = model.parts.body.userData.baseY + (1 - land) * 0.1;
+              model.parts.body.scale.y = 1.15 - land * 0.35;
+            }
+            if (model.parts.backLeftLeg) {
+              model.parts.backLeftLeg.rotation.x = -0.7 + land * 0.7;
+            }
+            if (model.parts.backRightLeg) {
+              model.parts.backRightLeg.rotation.x = -0.7 + land * 0.7;
+            }
+            if (model.parts.frontLeftLeg) {
+              model.parts.frontLeftLeg.rotation.x = -0.4 + land * 0.4;
+            }
+            if (model.parts.frontRightLeg) {
+              model.parts.frontRightLeg.rotation.x = -0.4 + land * 0.4;
+            }
+          }
+        }
+      },
+
+      frogSwim: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2;
+
+          // 体の波打ち
+          if (model.parts.body) {
+            model.parts.body.rotation.x = Math.sin(cycle) * 0.1;
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(cycle) * 0.05;
+          }
+
+          // 後脚のキック（交互）
+          if (model.parts.backLeftLeg) {
+            model.parts.backLeftLeg.rotation.x = Math.sin(cycle) * 0.8;
+            model.parts.backLeftLeg.rotation.z = 0.3 + Math.sin(cycle) * 0.2;
+          }
+          if (model.parts.backRightLeg) {
+            model.parts.backRightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.8;
+            model.parts.backRightLeg.rotation.z = -0.3 - Math.sin(cycle + Math.PI) * 0.2;
+          }
+
+          // 前脚は体に沿わせる
+          if (model.parts.frontLeftLeg) {
+            model.parts.frontLeftLeg.rotation.x = 0.3;
+            model.parts.frontLeftLeg.rotation.z = 0.5;
+          }
+          if (model.parts.frontRightLeg) {
+            model.parts.frontRightLeg.rotation.x = 0.3;
+            model.parts.frontRightLeg.rotation.z = -0.5;
+          }
+        }
+      },
+
+      frogCroak: {
+        duration: 1.5,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = t / 1.5;
+
+          // 喉袋を大きく膨らませる
+          if (model.parts.throat) {
+            const inflate = Math.sin(progress * Math.PI);
+            model.parts.throat.scale.set(
+              1 + inflate * 1.5,
+              0.6 + inflate * 1.0,
+              0.8 + inflate * 0.8
+            );
+          }
+
+          // 口を開く
+          if (model.parts.mouth) {
+            const open = Math.sin(progress * Math.PI * 3) > 0;
+            model.parts.mouth.scale.y = open ? 1.5 : 1;
+          }
+
+          // 体が少し膨らむ
+          if (model.parts.body) {
+            const swell = Math.sin(progress * Math.PI) * 0.1;
+            model.parts.body.scale.set(1.1 + swell, 0.8 + swell * 0.5, 1.3);
+          }
+
+          // 頭を上げる
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -Math.sin(progress * Math.PI) * 0.2;
+          }
+        }
+      },
+
+      frogTongue: {
+        duration: 0.4,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = t / 0.4;
+
+          // 舌を出す
+          if (model.parts.tongue) {
+            if (progress < 0.3) {
+              // 舌を伸ばす
+              const extend = progress / 0.3;
+              model.parts.tongue.visible = true;
+              model.parts.tongue.scale.z = extend * 2;
+              model.parts.tongue.position.z = 0.2 + extend * 0.5;
+            } else if (progress < 0.5) {
+              // 最大
+              model.parts.tongue.scale.z = 2;
+            } else {
+              // 戻る
+              const retract = (progress - 0.5) / 0.5;
+              model.parts.tongue.scale.z = 2 * (1 - retract);
+              model.parts.tongue.position.z = 0.7 - retract * 0.5;
+              if (retract > 0.9) {
+                model.parts.tongue.visible = false;
+              }
+            }
+          }
+
+          // 頭を前に突き出す
+          if (model.parts.head) {
+            const thrust = Math.sin(progress * Math.PI);
+            model.parts.head.position.z = 0.45 + thrust * 0.1;
+          }
+        }
+      },
+
+      frogSit: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          // 座り姿勢（ほぼ動かない）
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY - 0.05;
+          }
+
+          // 喉袋の小さな動き
+          if (model.parts.throat) {
+            const pulse = 1 + Math.sin(t * 2) * 0.08;
+            model.parts.throat.scale.set(pulse, 0.6 * pulse, 0.8);
+          }
+
+          // まばたき
+          const blinkCycle = t % 3;
+          if (model.parts.leftEye && model.parts.rightEye) {
+            const shouldBlink = blinkCycle > 2.7 && blinkCycle < 2.9;
+            const leftEyelid = model.parts.leftEye.children.find(c => c.name === 'eyelid');
+            const rightEyelid = model.parts.rightEye.children.find(c => c.name === 'eyelid');
+            if (leftEyelid) leftEyelid.visible = shouldBlink;
+            if (rightEyelid) rightEyelid.visible = shouldBlink;
+          }
+
+          // 頭をゆっくり左右に
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(t * 0.5) * 0.15;
+          }
+        }
+      },
+
       // ========== 猫専用 ==========
       catIdle: {
         duration: 3.0,
