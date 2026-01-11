@@ -54,6 +54,7 @@ export class ModelFactory {
       lizalfos: (opts) => this.characters.createLizalfos(opts),
       lynel: (opts) => this.characters.createLynel(opts),
       hinox: (opts) => this.characters.createHinox(opts),
+      zora: (opts) => this.characters.createZora(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
