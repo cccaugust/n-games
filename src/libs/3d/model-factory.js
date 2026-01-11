@@ -35,6 +35,7 @@ export class ModelFactory {
       dog: (opts) => this.characters.createDog(opts),
       cat: (opts) => this.characters.createCat(opts),
       horse: (opts) => this.characters.createHorse(opts),
+      frog: (opts) => this.characters.createFrog(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

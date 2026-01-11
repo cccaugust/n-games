@@ -238,6 +238,7 @@ robot.update(deltaTime);
 - `dog` - 犬（shiba, husky, golden, dalmatian）
 - `cat` - 猫（tabby, black, white, calico）
 - `horse` - 馬（bay, white, black, palomino）
+- `frog` - カエル（green, blue, red, golden）
 
 **アイテム（items）:**
 - `coin` - コイン（gold, silver, bronze）

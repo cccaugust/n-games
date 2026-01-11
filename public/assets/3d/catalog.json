@@ -93,6 +93,15 @@
       "variants": ["bay", "white", "black", "palomino"]
     },
     {
+      "id": "frog",
+      "name": "カエル",
+      "category": "characters",
+      "description": "かわいいカエルのキャラクター。ジャンプや舌を伸ばすアニメーションが特徴的。水辺のゲームやファンタジーに最適",
+      "tags": ["animal", "cute", "amphibian", "nature", "npc", "pet"],
+      "animations": ["frogIdle", "frogHop", "frogSwim", "frogCroak", "frogTongue", "frogSit"],
+      "variants": ["green", "blue", "red", "golden"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
