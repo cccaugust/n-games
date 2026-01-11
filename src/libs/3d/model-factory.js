@@ -59,6 +59,7 @@ export class ModelFactory {
       gerudo: (opts) => this.characters.createGerudo(opts),
       rito: (opts) => this.characters.createRito(opts),
       korok: (opts) => this.characters.createKorok(opts),
+      'great-fairy': (opts) => this.characters.createGreatFairy(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
