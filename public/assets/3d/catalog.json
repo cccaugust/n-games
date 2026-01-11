@@ -75,6 +75,15 @@
       "variants": ["shiba", "husky", "golden", "dalmatian"]
     },
     {
+      "id": "cat",
+      "name": "猫",
+      "category": "characters",
+      "description": "優雅な猫のキャラクター。4種類の毛色バリエーションでペットやNPCに最適",
+      "tags": ["pet", "animal", "cute", "mysterious", "npc"],
+      "animations": ["catIdle", "catWalk", "catRun", "catSit", "catSleep", "catPounce"],
+      "variants": ["tabby", "black", "white", "calico"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

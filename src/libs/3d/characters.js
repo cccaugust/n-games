@@ -1416,6 +1416,396 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  // ==================== 猫 ====================
+  createCat(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'tabby';
+    const group = new THREE.Group();
+
+    // カラーパレット（猫種ごと）
+    const colors = {
+      tabby: {
+        body: 0x8b6914,
+        belly: 0xd4a574,
+        stripes: 0x4a3000,
+        nose: 0xffb6c1,
+        eye: 0x90b030,
+        collar: 0xe74c3c
+      },
+      black: {
+        body: 0x1a1a1a,
+        belly: 0x2a2a2a,
+        stripes: null,
+        nose: 0x333333,
+        eye: 0xf1c40f,
+        collar: 0xf39c12
+      },
+      white: {
+        body: 0xffffff,
+        belly: 0xf5f5f5,
+        stripes: null,
+        nose: 0xffb6c1,
+        eye: 0x5dade2,
+        collar: 0x3498db
+      },
+      calico: {
+        body: 0xffffff,
+        belly: 0xfff5ee,
+        patches: [0xf39c12, 0x1a1a1a],
+        nose: 0xffb6c1,
+        eye: 0x27ae60,
+        collar: 0x9b59b6
+      }
+    };
+    const palette = colors[variant] || colors.tabby;
+
+    // === 胴体 ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // メインボディ（猫は犬より細長い）
+    const torsoGeo = new THREE.SphereGeometry(0.45, 24, 24);
+    const torsoMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+    const torso = new THREE.Mesh(torsoGeo, torsoMat);
+    torso.scale.set(0.8, 0.7, 1.3);
+    torso.castShadow = true;
+    torso.receiveShadow = true;
+    bodyGroup.add(torso);
+
+    // お腹
+    const bellyGeo = new THREE.SphereGeometry(0.35, 20, 20);
+    const bellyMat = this.materials.standard({ color: palette.belly, roughness: 0.9 });
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.scale.set(0.7, 0.5, 1.1);
+    belly.position.set(0, -0.12, 0);
+    bodyGroup.add(belly);
+
+    // キジトラの縞模様
+    if (variant === 'tabby' && palette.stripes) {
+      for (let i = 0; i < 5; i++) {
+        const stripeGeo = new THREE.BoxGeometry(0.5, 0.03, 0.08);
+        const stripeMat = this.materials.standard({ color: palette.stripes, roughness: 0.9 });
+        const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+        stripe.position.set(0, 0.15 + i * 0.02, -0.3 + i * 0.15);
+        stripe.rotation.x = 0.1;
+        stripe.rotation.z = Math.sin(i * 0.5) * 0.1;
+        bodyGroup.add(stripe);
+      }
+    }
+
+    // 三毛猫のパッチ
+    if (variant === 'calico' && palette.patches) {
+      const patchPositions = [
+        { x: 0.25, y: 0.15, z: 0.2, size: 0.15, color: palette.patches[0] },
+        { x: -0.2, y: 0.1, z: -0.2, size: 0.18, color: palette.patches[1] },
+        { x: 0.15, y: 0.2, z: -0.35, size: 0.12, color: palette.patches[0] },
+        { x: -0.25, y: 0.18, z: 0.3, size: 0.14, color: palette.patches[1] }
+      ];
+      patchPositions.forEach(patch => {
+        const patchGeo = new THREE.SphereGeometry(patch.size, 12, 12);
+        const patchMat = this.materials.standard({ color: patch.color, roughness: 0.85 });
+        const patchMesh = new THREE.Mesh(patchGeo, patchMat);
+        patchMesh.position.set(patch.x, patch.y, patch.z);
+        patchMesh.scale.set(1, 0.4, 1);
+        bodyGroup.add(patchMesh);
+      });
+    }
+
+    // 首輪
+    const collarGeo = new THREE.TorusGeometry(0.28, 0.025, 8, 24);
+    const collarMat = this.materials.standard({ color: palette.collar, roughness: 0.5 });
+    const collar = new THREE.Mesh(collarGeo, collarMat);
+    collar.position.set(0, 0.05, 0.45);
+    collar.rotation.x = Math.PI / 2;
+    bodyGroup.add(collar);
+
+    // 鈴
+    const bellGeo = new THREE.SphereGeometry(0.04, 12, 12);
+    const bellMat = this.materials.gold();
+    const bell = new THREE.Mesh(bellGeo, bellMat);
+    bell.position.set(0, -0.08, 0.7);
+    bell.name = 'bell';
+    bodyGroup.add(bell);
+
+    bodyGroup.position.y = 0.65;
+    bodyGroup.userData.baseY = 0.65;
+    group.add(bodyGroup);
+
+    // === 頭部 ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 頭のベース（猫は丸い）
+    const headGeo = new THREE.SphereGeometry(0.35, 24, 24);
+    const headMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.scale.set(1, 0.95, 0.95);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // 顔の白い部分
+    const faceMaskGeo = new THREE.SphereGeometry(0.2, 16, 16);
+    const faceMaskMat = this.materials.standard({ color: palette.belly, roughness: 0.9 });
+    const faceMask = new THREE.Mesh(faceMaskGeo, faceMaskMat);
+    faceMask.position.set(0, -0.08, 0.22);
+    faceMask.scale.set(1, 0.7, 0.6);
+    headGroup.add(faceMask);
+
+    // マズル（猫は小さい）
+    const muzzleGeo = new THREE.SphereGeometry(0.1, 16, 16);
+    const muzzleMat = this.materials.standard({ color: palette.belly, roughness: 0.85 });
+    const muzzle = new THREE.Mesh(muzzleGeo, muzzleMat);
+    muzzle.position.set(0, -0.12, 0.28);
+    muzzle.scale.set(1, 0.6, 0.8);
+    headGroup.add(muzzle);
+
+    // 鼻（三角形）
+    const noseGeo = new THREE.ConeGeometry(0.04, 0.05, 3);
+    const noseMat = this.materials.standard({ color: palette.nose, roughness: 0.4 });
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.position.set(0, -0.1, 0.34);
+    nose.rotation.x = Math.PI;
+    headGroup.add(nose);
+
+    // 目（猫は大きくてアーモンド形）
+    const createEye = (x) => {
+      const eyeGroup = new THREE.Group();
+
+      // 白目
+      const whiteGeo = new THREE.SphereGeometry(0.1, 16, 16);
+      const whiteMat = this.materials.standard({ color: 0xffffff, roughness: 0.1 });
+      const white = new THREE.Mesh(whiteGeo, whiteMat);
+      white.scale.set(1, 1.3, 0.8);
+      eyeGroup.add(white);
+
+      // 虹彩
+      const irisGeo = new THREE.SphereGeometry(0.08, 16, 16);
+      const irisMat = this.materials.standard({
+        color: palette.eye,
+        roughness: 0.2,
+        emissive: palette.eye,
+        emissiveIntensity: 0.1
+      });
+      const iris = new THREE.Mesh(irisGeo, irisMat);
+      iris.position.z = 0.04;
+      iris.scale.set(1, 1.3, 0.6);
+      eyeGroup.add(iris);
+
+      // 縦長の瞳孔（猫特有）
+      const pupilGeo = new THREE.BoxGeometry(0.02, 0.12, 0.02);
+      const pupilMat = this.materials.standard({ color: 0x000000 });
+      const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+      pupil.position.z = 0.08;
+      eyeGroup.add(pupil);
+
+      // ハイライト
+      const highlightGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const highlightMat = this.materials.emissive({ color: 0xffffff, intensity: 1 });
+      const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+      highlight.position.set(0.02, 0.04, 0.09);
+      eyeGroup.add(highlight);
+
+      eyeGroup.position.set(x, 0.05, 0.25);
+      return eyeGroup;
+    };
+
+    const leftEye = createEye(-0.12);
+    leftEye.name = 'leftEye';
+    headGroup.add(leftEye);
+
+    const rightEye = createEye(0.12);
+    rightEye.name = 'rightEye';
+    headGroup.add(rightEye);
+
+    // ヒゲ
+    const createWhiskers = (x) => {
+      const whiskerGroup = new THREE.Group();
+      for (let i = 0; i < 3; i++) {
+        const whiskerGeo = new THREE.CylinderGeometry(0.003, 0.001, 0.2, 4);
+        const whiskerMat = this.materials.standard({ color: 0xffffff, roughness: 0.8 });
+        const whisker = new THREE.Mesh(whiskerGeo, whiskerMat);
+        whisker.position.set(0.08 * (x > 0 ? 1 : -1), (i - 1) * 0.03, 0);
+        whisker.rotation.z = Math.PI / 2 + (i - 1) * 0.15 * (x > 0 ? 1 : -1);
+        whiskerGroup.add(whisker);
+      }
+      whiskerGroup.position.set(x, -0.08, 0.3);
+      return whiskerGroup;
+    };
+
+    headGroup.add(createWhiskers(-0.08));
+    headGroup.add(createWhiskers(0.08));
+
+    // 口
+    const mouthShape = new THREE.Shape();
+    mouthShape.moveTo(-0.04, 0);
+    mouthShape.lineTo(0, -0.03);
+    mouthShape.lineTo(0.04, 0);
+
+    const mouthGeo = new THREE.ShapeGeometry(mouthShape);
+    const mouthMat = this.materials.standard({ color: 0x333333, side: THREE.DoubleSide });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, -0.16, 0.32);
+    mouth.name = 'mouth';
+    headGroup.add(mouth);
+
+    // 耳（三角形の立ち耳）
+    const createEar = (x, isLeft) => {
+      const earGroup = new THREE.Group();
+      earGroup.name = isLeft ? 'leftEar' : 'rightEar';
+
+      // 外耳
+      const earGeo = new THREE.ConeGeometry(0.1, 0.2, 3);
+      const earMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+      const ear = new THREE.Mesh(earGeo, earMat);
+      ear.rotation.y = Math.PI / 6 * (isLeft ? -1 : 1);
+      ear.castShadow = true;
+      earGroup.add(ear);
+
+      // 内耳（ピンク）
+      const innerEarGeo = new THREE.ConeGeometry(0.06, 0.15, 3);
+      const innerEarMat = this.materials.standard({ color: 0xffcccc, roughness: 0.8 });
+      const innerEar = new THREE.Mesh(innerEarGeo, innerEarMat);
+      innerEar.position.set(0, -0.02, 0.02);
+      innerEar.rotation.y = Math.PI / 6 * (isLeft ? -1 : 1);
+      earGroup.add(innerEar);
+
+      earGroup.position.set(x, 0.3, -0.05);
+      earGroup.rotation.x = -0.15;
+      earGroup.rotation.z = isLeft ? 0.25 : -0.25;
+
+      return earGroup;
+    };
+
+    headGroup.add(createEar(-0.18, true));
+    headGroup.add(createEar(0.18, false));
+
+    // 三毛猫の場合、頭にもパッチ
+    if (variant === 'calico' && palette.patches) {
+      const patchGeo = new THREE.SphereGeometry(0.1, 8, 8);
+      const patchMat = this.materials.standard({ color: palette.patches[0], roughness: 0.85 });
+      const patch = new THREE.Mesh(patchGeo, patchMat);
+      patch.position.set(0.15, 0.15, 0.1);
+      patch.scale.set(1, 0.5, 1);
+      headGroup.add(patch);
+    }
+
+    headGroup.position.set(0, 0.85, 0.55);
+    group.add(headGroup);
+
+    // === 脚 ===
+    const createLeg = (x, z, isFront) => {
+      const legGroup = new THREE.Group();
+      const legName = `${isFront ? 'front' : 'back'}${x < 0 ? 'Left' : 'Right'}Leg`;
+      legGroup.name = legName;
+
+      // 上部の脚（猫は細い）
+      const upperLegGeo = new THREE.CylinderGeometry(0.07, 0.05, 0.35, 12);
+      const upperLegMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+      const upperLeg = new THREE.Mesh(upperLegGeo, upperLegMat);
+      upperLeg.position.y = -0.18;
+      upperLeg.castShadow = true;
+      legGroup.add(upperLeg);
+
+      // 下部の脚
+      const lowerLegGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.3, 12);
+      const lowerLegMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+      const lowerLeg = new THREE.Mesh(lowerLegGeo, lowerLegMat);
+      lowerLeg.position.y = -0.48;
+      lowerLeg.castShadow = true;
+      legGroup.add(lowerLeg);
+
+      // 足先
+      const pawGeo = new THREE.SphereGeometry(0.06, 12, 12);
+      const pawMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+      const paw = new THREE.Mesh(pawGeo, pawMat);
+      paw.position.set(0, -0.65, 0.02);
+      paw.scale.set(1, 0.5, 1.2);
+      paw.castShadow = true;
+      legGroup.add(paw);
+
+      // 肉球（ピンク）
+      const padGeo = new THREE.SphereGeometry(0.03, 8, 8);
+      const padMat = this.materials.standard({ color: 0xffb6c1, roughness: 0.8 });
+      const pad = new THREE.Mesh(padGeo, padMat);
+      pad.position.set(0, -0.68, 0.02);
+      pad.scale.set(1.3, 0.4, 1);
+      legGroup.add(pad);
+
+      legGroup.position.set(x, 0.65, z);
+
+      return legGroup;
+    };
+
+    // 前脚
+    group.add(createLeg(-0.18, 0.35, true));
+    group.add(createLeg(0.18, 0.35, true));
+    // 後脚
+    group.add(createLeg(-0.2, -0.4, false));
+    group.add(createLeg(0.2, -0.4, false));
+
+    // === しっぽ（猫は長くてしなやか） ===
+    const tailGroup = new THREE.Group();
+    tailGroup.name = 'tail';
+
+    // しっぽをセグメントで構成（曲がりやすく）
+    const tailSegments = 12;
+    for (let i = 0; i < tailSegments; i++) {
+      const t = i / tailSegments;
+      const segRadius = 0.045 - t * 0.025;
+      const segGeo = new THREE.SphereGeometry(segRadius, 8, 8);
+      const segMat = this.materials.standard({ color: palette.body, roughness: 0.85 });
+      const seg = new THREE.Mesh(segGeo, segMat);
+
+      // S字カーブ
+      const curve = Math.sin(t * Math.PI * 0.8) * 0.15;
+      seg.position.set(
+        curve,
+        t * 0.4 + Math.sin(t * Math.PI) * 0.1,
+        -t * 0.5
+      );
+      seg.castShadow = true;
+      seg.name = `tailSeg_${i}`;
+      tailGroup.add(seg);
+    }
+
+    // キジトラのしっぽの縞
+    if (variant === 'tabby' && palette.stripes) {
+      for (let i = 2; i < tailSegments; i += 3) {
+        const stripeSeg = tailGroup.children[i];
+        if (stripeSeg) {
+          stripeSeg.material = this.materials.standard({ color: palette.stripes, roughness: 0.85 });
+        }
+      }
+    }
+
+    tailGroup.position.set(0, 0.6, -0.55);
+    group.add(tailGroup);
+
+    // === 影 ===
+    const shadowGeo = new THREE.CircleGeometry(0.45, 32);
+    const shadowMat = this.materials.standard({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.3,
+      side: THREE.DoubleSide
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.01;
+    group.add(shadow);
+
+    // userData
+    group.userData.isCat = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'cat',
+      name: '猫',
+      variant: variant,
+      defaultAnimation: 'catIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**
