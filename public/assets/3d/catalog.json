@@ -57,6 +57,15 @@
       "variants": ["blue", "red", "purple", "white"]
     },
     {
+      "id": "ghost",
+      "name": "ゴースト",
+      "category": "characters",
+      "description": "半透明で浮遊する幽霊。敵キャラやホラー演出に最適",
+      "tags": ["enemy", "fantasy", "horror", "floating"],
+      "animations": ["float", "haunt", "attack", "fade", "appear"],
+      "variants": ["white", "blue", "red", "shadow"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

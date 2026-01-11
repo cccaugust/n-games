@@ -234,6 +234,7 @@ robot.update(deltaTime);
 - `slime` - スライム（green, blue, red, gold, rainbow）
 - `knight` - 騎士（silver, gold, dark, royal）
 - `mage` - 魔法使い（blue, red, purple, white）
+- `ghost` - ゴースト（white, blue, red, shadow）
 
 **アイテム（items）:**
 - `coin` - コイン（gold, silver, bronze）
