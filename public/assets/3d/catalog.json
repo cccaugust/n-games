@@ -282,6 +282,15 @@
       "variants": ["green", "dry", "dark", "gold"]
     },
     {
+      "id": "toad",
+      "name": "キノピオ",
+      "category": "characters",
+      "description": "マリオ風のキノコ頭キャラクター。白いキノコ帽子と小さな体が特徴。NPCやサポートキャラに最適",
+      "tags": ["npc", "mario", "cute", "mushroom", "helper", "friendly"],
+      "animations": ["toadIdle", "toadWalk", "toadRun", "toadCheer", "toadScared"],
+      "variants": ["red", "blue", "yellow", "captain"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

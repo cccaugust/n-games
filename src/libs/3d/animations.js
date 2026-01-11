@@ -2268,6 +2268,187 @@ export class AnimationSystem {
             model.parts.tail.rotation.y = Math.sin(cycle * 1.5) * 0.3;
           }
         }
+      },
+
+      // ==================== キノピオアニメーション ====================
+
+      // キノピオ待機
+      toadIdle: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 2.0) * Math.PI * 2;
+
+          // 軽く上下に揺れる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.5;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.02;
+          }
+
+          // 頭を少し傾ける
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle * 0.5) * 0.05;
+          }
+
+          // 腕を軽く揺らす
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.3 + Math.sin(cycle) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.3 + Math.sin(cycle + Math.PI) * 0.05;
+          }
+        }
+      },
+
+      // キノピオ歩き
+      toadWalk: {
+        duration: 0.6,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.6) * Math.PI * 2;
+
+          // 小刻みに上下（ちょこちょこ歩き）
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.5;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle * 2)) * 0.04;
+          }
+
+          // 脚をパタパタ
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.4;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.4;
+          }
+
+          // 腕を振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.3;
+            model.parts.leftArm.rotation.z = 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.3;
+            model.parts.rightArm.rotation.z = -0.3;
+          }
+
+          // 頭が少し揺れる
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.08;
+          }
+        }
+      },
+
+      // キノピオ走り
+      toadRun: {
+        duration: 0.35,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.35) * Math.PI * 2;
+
+          // より大きく上下（一生懸命走る）
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.5;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle * 2)) * 0.08;
+          }
+
+          // 脚を大きく振る
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.6;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.6;
+          }
+
+          // 腕を大きく振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.5;
+            model.parts.leftArm.rotation.z = 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.5;
+            model.parts.rightArm.rotation.z = -0.4;
+          }
+
+          // 頭が揺れる
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.12;
+            model.parts.head.rotation.x = -0.1; // 前傾
+          }
+        }
+      },
+
+      // キノピオ喜び
+      toadCheer: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.0) * Math.PI * 2;
+
+          // ジャンプ
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY ?? 0;
+            model.mesh.position.y = baseY + Math.abs(Math.sin(cycle * 2)) * 0.25;
+          }
+
+          // 両腕を上げて振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -Math.PI * 0.7;
+            model.parts.leftArm.rotation.z = 0.2 + Math.sin(cycle * 4) * 0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.PI * 0.7;
+            model.parts.rightArm.rotation.z = -0.2 + Math.sin(cycle * 4 + Math.PI) * 0.2;
+          }
+
+          // 体を左右に揺らす
+          if (model.parts.body) {
+            model.parts.body.rotation.z = Math.sin(cycle * 2) * 0.1;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle * 2) * 0.15;
+          }
+        }
+      },
+
+      // キノピオ怖がり
+      toadScared: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.8) * Math.PI * 2;
+
+          // 震える
+          if (model.parts.body) {
+            model.parts.body.rotation.z = Math.sin(cycle * 8) * 0.05;
+            model.parts.body.position.x = Math.sin(cycle * 10) * 0.02;
+          }
+
+          // 頭も震える
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle * 8 + 0.5) * 0.08;
+            model.parts.head.rotation.x = 0.1; // 少し下を向く
+          }
+
+          // 腕を体に寄せる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.6;
+            model.parts.leftArm.rotation.x = 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.6;
+            model.parts.rightArm.rotation.x = 0.3;
+          }
+
+          // 脚を内股に
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.z = -0.1;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.z = 0.1;
+          }
+        }
       }
     };
   }
