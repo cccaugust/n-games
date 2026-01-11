@@ -49,6 +49,7 @@ export class ModelFactory {
       // ゼルダ風キャラクター
       link: (opts) => this.characters.createLink(opts),
       zelda: (opts) => this.characters.createZelda(opts),
+      ganondorf: (opts) => this.characters.createGanondorf(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

@@ -156,6 +156,15 @@
       "variants": ["pink", "white", "blue", "goddess"]
     },
     {
+      "id": "ganondorf",
+      "name": "ガノンドロフ",
+      "category": "characters",
+      "description": "ゼルダ風の魔王キャラクター。ゲルド族の緑の肌、燃える赤髪、重厚な黒鎧とマントが特徴。威圧的な体格",
+      "tags": ["enemy", "boss", "zelda", "fantasy", "villain", "dark", "gerudo"],
+      "animations": ["ganondorfIdle", "ganondorfWalk", "ganondorfAttack", "ganondorfMagic", "ganondorfLaugh"],
+      "variants": ["dark", "beast", "calamity", "gerudo"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
