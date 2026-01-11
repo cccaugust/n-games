@@ -174,6 +174,186 @@
       "variants": ["red", "blue", "black", "silver"]
     },
     {
+      "id": "lizalfos",
+      "name": "リザルフォス",
+      "category": "characters",
+      "description": "ゼルダ風のトカゲ戦士。俊敏な動きと長い尻尾、鋭い爪が特徴。中級の敵キャラに最適",
+      "tags": ["enemy", "zelda", "fantasy", "lizard", "monster", "warrior"],
+      "animations": ["lizalfosIdle", "lizalfosWalk", "lizalfosAttack", "lizalfosJump", "lizalfosTaunt"],
+      "variants": ["green", "blue", "fire", "ice"]
+    },
+    {
+      "id": "lynel",
+      "name": "ライネル",
+      "category": "characters",
+      "description": "ゼルダ風のケンタウロス型強敵。獅子の頭と馬の体を持つ威圧的なボスキャラ",
+      "tags": ["enemy", "boss", "zelda", "fantasy", "centaur", "monster", "elite"],
+      "animations": ["lynelIdle", "lynelWalk", "lynelCharge", "lynelAttack", "lynelRoar"],
+      "variants": ["red", "blue", "white", "silver"]
+    },
+    {
+      "id": "hinox",
+      "name": "ヒノックス",
+      "category": "characters",
+      "description": "ゼルダ風の一つ目巨人。巨大な体と一つ目が特徴。中ボスや障害物に最適",
+      "tags": ["enemy", "boss", "zelda", "fantasy", "cyclops", "giant", "monster"],
+      "animations": ["hinoxIdle", "hinoxWalk", "hinoxAttack", "hinoxSleep", "hinoxWake"],
+      "variants": ["red", "blue", "black", "stalnox"]
+    },
+    {
+      "id": "zora",
+      "name": "ゾーラ",
+      "category": "characters",
+      "description": "ゼルダ風の水棲族。魚のような優雅な姿と水中を泳ぐ能力が特徴。友好的なNPCに最適",
+      "tags": ["npc", "zelda", "fantasy", "aquatic", "fish", "friendly"],
+      "animations": ["zoraIdle", "zoraWalk", "zoraSwim", "zoraBow", "zoraWave"],
+      "variants": ["blue", "red", "silver", "royal"]
+    },
+    {
+      "id": "goron",
+      "name": "ゴロン",
+      "category": "characters",
+      "description": "ゼルダ風の岩石族。丸い体と岩のような肌が特徴。力強く友好的なNPCに最適",
+      "tags": ["npc", "zelda", "fantasy", "rock", "strong", "friendly"],
+      "animations": ["goronIdle", "goronWalk", "goronRoll", "goronPunch", "goronDance"],
+      "variants": ["brown", "red", "elder", "chief"]
+    },
+    {
+      "id": "gerudo",
+      "name": "ゲルド",
+      "category": "characters",
+      "description": "ゼルダ風の砂漠の戦士。褐色の肌と赤い髪、エキゾチックな装備が特徴。女戦士NPCに最適",
+      "tags": ["npc", "zelda", "fantasy", "desert", "warrior", "female"],
+      "animations": ["gerudoIdle", "gerudoWalk", "gerudoAttack", "gerudoGuard", "gerudoBow"],
+      "variants": ["warrior", "guard", "chief", "vai"]
+    },
+    {
+      "id": "rito",
+      "name": "リト",
+      "category": "characters",
+      "description": "ゼルダ風の鳥人族。翼のある腕と鳥の顔が特徴。空を飛ぶNPCに最適",
+      "tags": ["npc", "zelda", "fantasy", "bird", "flying", "friendly"],
+      "animations": ["ritoIdle", "ritoWalk", "ritoFly", "ritoLand", "ritoSing"],
+      "variants": ["blue", "red", "white", "elder"]
+    },
+    {
+      "id": "korok",
+      "name": "コログ",
+      "category": "characters",
+      "description": "ゼルダ風の森の精霊。葉っぱのお面と小さな木の体が特徴。隠れキャラやマスコットに最適",
+      "tags": ["npc", "zelda", "fantasy", "forest", "spirit", "cute", "hidden"],
+      "animations": ["korokIdle", "korokWalk", "korokHide", "korokDance", "korokSurprise"],
+      "variants": ["leaf", "flower", "acorn", "pinwheel"]
+    },
+    {
+      "id": "great-fairy",
+      "name": "大妖精",
+      "category": "characters",
+      "description": "ゼルダ風の大妖精。巨大で美しい姿と魔法の力が特徴。泉のNPCや強化イベントに最適",
+      "tags": ["npc", "zelda", "fantasy", "fairy", "magic", "beautiful", "giant"],
+      "animations": ["greatFairyIdle", "greatFairyAppear", "greatFairyBless", "greatFairyLaugh", "greatFairyKiss"],
+      "variants": ["pink", "blue", "green", "gold"]
+    },
+    {
+      "id": "mario",
+      "name": "マリオ",
+      "category": "characters",
+      "description": "マリオ風の配管工キャラクター。赤い帽子とオーバーオール、大きな口髭が特徴。プラットフォームゲームの主人公に最適",
+      "tags": ["player", "mario", "platformer", "hero", "plumber", "retro"],
+      "animations": ["marioIdle", "marioWalk", "marioRun", "marioJump", "marioVictory"],
+      "variants": ["red", "green", "fire", "gold"]
+    },
+    {
+      "id": "peach",
+      "name": "ピーチ姫",
+      "category": "characters",
+      "description": "マリオ風のプリンセスキャラクター。ピンクのドレスと金髪、ティアラが特徴。優雅なアニメーションが魅力",
+      "tags": ["npc", "mario", "princess", "cute", "royal", "female"],
+      "animations": ["peachIdle", "peachWalk", "peachWave", "peachFloat", "peachVictory"],
+      "variants": ["pink", "white", "sports", "gold"]
+    },
+    {
+      "id": "bowser",
+      "name": "クッパ",
+      "category": "characters",
+      "description": "マリオ風の大魔王キャラクター。緑の甲羅とトゲ、角、赤い鬣が特徴。ボスキャラやラスボスに最適",
+      "tags": ["enemy", "boss", "mario", "villain", "dragon", "turtle", "fire"],
+      "animations": ["bowserIdle", "bowserWalk", "bowserRoar", "bowserBreath", "bowserVictory"],
+      "variants": ["green", "dry", "dark", "gold"]
+    },
+    {
+      "id": "toad",
+      "name": "キノピオ",
+      "category": "characters",
+      "description": "マリオ風のキノコ頭キャラクター。白いキノコ帽子と小さな体が特徴。NPCやサポートキャラに最適",
+      "tags": ["npc", "mario", "cute", "mushroom", "helper", "friendly"],
+      "animations": ["toadIdle", "toadWalk", "toadRun", "toadCheer", "toadScared"],
+      "variants": ["red", "blue", "yellow", "captain"]
+    },
+    {
+      "id": "yoshi",
+      "name": "ヨッシー",
+      "category": "characters",
+      "description": "マリオ風の恐竜キャラクター。大きな鼻と赤い鞍、オレンジのブーツが特徴。乗り物やパートナーに最適",
+      "tags": ["player", "mario", "dinosaur", "mount", "cute", "friendly"],
+      "animations": ["yoshiIdle", "yoshiWalk", "yoshiRun", "yoshiTongue", "yoshiFlutter"],
+      "variants": ["green", "red", "blue", "yellow"]
+    },
+    {
+      "id": "luigi",
+      "name": "ルイージ",
+      "category": "characters",
+      "description": "マリオ風の配管工キャラクター。緑の帽子とLマーク、マリオより背が高いのが特徴。臆病だが勇敢な弟",
+      "tags": ["player", "mario", "platformer", "hero", "plumber", "brother"],
+      "animations": ["luigiIdle", "luigiWalk", "luigiRun", "luigiJump", "luigiScared"],
+      "variants": ["green", "fire", "mr-l", "gold"]
+    },
+    {
+      "id": "wario",
+      "name": "ワリオ",
+      "category": "characters",
+      "description": "マリオ風の悪役キャラクター。黄色い帽子とWマーク、太くて短い体、ピンクの大きな鼻とジグザグ髭が特徴。欲深いがパワフル",
+      "tags": ["player", "mario", "villain", "antihero", "strong", "greedy"],
+      "animations": ["warioIdle", "warioWalk", "warioRun", "warioPunch", "warioLaugh"],
+      "variants": ["yellow", "biker", "classic", "gold"]
+    },
+    {
+      "id": "waluigi",
+      "name": "ワルイージ",
+      "category": "characters",
+      "description": "マリオ風の悪役キャラクター。紫の帽子と逆さLマーク、非常に背が高く細い体、長い鼻と尖った髭が特徴。意地悪で挑発的",
+      "tags": ["player", "mario", "villain", "antihero", "tall", "sneaky"],
+      "animations": ["waluigiIdle", "waluigiWalk", "waluigiRun", "waluigiTaunt", "waluigiSpin"],
+      "variants": ["purple", "tennis", "classic", "gold"]
+    },
+    {
+      "id": "donkey-kong",
+      "name": "ドンキーコング",
+      "category": "characters",
+      "description": "大きなゴリラキャラクター。茶色い毛皮と赤いネクタイ（DKロゴ）、長い腕と短い脚が特徴。パワフルで愛嬌がある",
+      "tags": ["player", "mario", "gorilla", "strong", "hero", "jungle"],
+      "animations": ["dkIdle", "dkWalk", "dkRun", "dkPound", "dkChest"],
+      "variants": ["brown", "arcade", "funky", "gold"]
+    },
+    {
+      "id": "goomba",
+      "name": "クリボー",
+      "category": "characters",
+      "description": "キノコ型の敵キャラクター。茶色い傘型の頭、怒った眉毛、2本の牙が特徴。腕がなく足だけで歩くシンプルなデザイン。パラクリボー（羽付き）バリアントあり",
+      "tags": ["enemy", "mario", "mushroom", "cute", "classic"],
+      "animations": ["goombaIdle", "goombaWalk", "goombaTurn", "goombaSquash", "goombaAngry", "goombaFly"],
+      "variants": ["brown", "gold", "para", "underground"]
+    },
+    {
+      "id": "koopa",
+      "name": "ノコノコ",
+      "category": "characters",
+      "description": "カメ型の敵キャラクター。緑や赤の甲羅、黄色い体、オレンジのくちばしが特徴。踏まれると甲羅に入り、蹴ると転がる。パタパタ（羽付き）にもなれる",
+      "tags": ["enemy", "mario", "turtle", "shell", "classic"],
+      "animations": ["koopaIdle", "koopaWalk", "koopaShell", "koopaSpin", "koopaRevive", "koopaFly"],
+      "variants": ["green", "red", "blue", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

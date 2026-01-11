@@ -60,6 +60,18 @@ export class ModelFactory {
       rito: (opts) => this.characters.createRito(opts),
       korok: (opts) => this.characters.createKorok(opts),
       'great-fairy': (opts) => this.characters.createGreatFairy(opts),
+      // マリオ風キャラクター
+      mario: (opts) => this.characters.createMario(opts),
+      peach: (opts) => this.characters.createPeach(opts),
+      bowser: (opts) => this.characters.createBowser(opts),
+      toad: (opts) => this.characters.createToad(opts),
+      yoshi: (opts) => this.characters.createYoshi(opts),
+      luigi: (opts) => this.characters.createLuigi(opts),
+      wario: (opts) => this.characters.createWario(opts),
+      waluigi: (opts) => this.characters.createWaluigi(opts),
+      'donkey-kong': (opts) => this.characters.createDonkeyKong(opts),
+      goomba: (opts) => this.characters.createGoomba(opts),
+      koopa: (opts) => this.characters.createKoopa(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
