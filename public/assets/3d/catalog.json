@@ -138,6 +138,42 @@
       "variants": ["pink", "teal", "purple", "red"]
     },
     {
+      "id": "link",
+      "name": "リンク",
+      "category": "characters",
+      "description": "ゼルダ風の勇者キャラクター。緑のチュニックとエルフ耳が特徴。背中に剣と盾を背負った冒険者スタイル",
+      "tags": ["player", "hero", "zelda", "fantasy", "adventure", "sword", "shield"],
+      "animations": ["linkIdle", "linkWalk", "linkRun", "linkAttack", "linkBlock", "linkVictory"],
+      "variants": ["green", "blue", "red", "dark"]
+    },
+    {
+      "id": "zelda",
+      "name": "ゼルダ姫",
+      "category": "characters",
+      "description": "ゼルダ風のプリンセスキャラクター。長い金髪とティアラ、優雅なドレスが特徴。エルフ耳とイヤリングも",
+      "tags": ["npc", "princess", "zelda", "fantasy", "royal", "magic"],
+      "animations": ["zeldaIdle", "zeldaWalk", "zeldaMagic", "zeldaPray", "zeldaWave"],
+      "variants": ["pink", "white", "blue", "goddess"]
+    },
+    {
+      "id": "ganondorf",
+      "name": "ガノンドロフ",
+      "category": "characters",
+      "description": "ゼルダ風の魔王キャラクター。ゲルド族の緑の肌、燃える赤髪、重厚な黒鎧とマントが特徴。威圧的な体格",
+      "tags": ["enemy", "boss", "zelda", "fantasy", "villain", "dark", "gerudo"],
+      "animations": ["ganondorfIdle", "ganondorfWalk", "ganondorfAttack", "ganondorfMagic", "ganondorfLaugh"],
+      "variants": ["dark", "beast", "calamity", "gerudo"]
+    },
+    {
+      "id": "bokoblin",
+      "name": "ボコブリン",
+      "category": "characters",
+      "description": "ゼルダ風のゴブリン系敵キャラ。豚のような顔、垂れた耳、牙、小さな角が特徴。原始的な腰布を着用",
+      "tags": ["enemy", "zelda", "fantasy", "goblin", "monster", "mob"],
+      "animations": ["bokoblinIdle", "bokoblinWalk", "bokoblinAttack", "bokoblinDance", "bokoblinAlert"],
+      "variants": ["red", "blue", "black", "silver"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

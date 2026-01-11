@@ -46,6 +46,20 @@ export class ModelFactory {
       squid: (opts) => this.characters.createSquid(opts),
       octoling: (opts) => this.characters.createOctoling(opts),
       octopus: (opts) => this.characters.createOctopus(opts),
+      // ゼルダ風キャラクター
+      link: (opts) => this.characters.createLink(opts),
+      zelda: (opts) => this.characters.createZelda(opts),
+      ganondorf: (opts) => this.characters.createGanondorf(opts),
+      bokoblin: (opts) => this.characters.createBokoblin(opts),
+      lizalfos: (opts) => this.characters.createLizalfos(opts),
+      lynel: (opts) => this.characters.createLynel(opts),
+      hinox: (opts) => this.characters.createHinox(opts),
+      zora: (opts) => this.characters.createZora(opts),
+      goron: (opts) => this.characters.createGoron(opts),
+      gerudo: (opts) => this.characters.createGerudo(opts),
+      rito: (opts) => this.characters.createRito(opts),
+      korok: (opts) => this.characters.createKorok(opts),
+      'great-fairy': (opts) => this.characters.createGreatFairy(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
