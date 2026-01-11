@@ -237,6 +237,7 @@ robot.update(deltaTime);
 - `ghost` - ゴースト（white, blue, red, shadow）
 - `dog` - 犬（shiba, husky, golden, dalmatian）
 - `cat` - 猫（tabby, black, white, calico）
+- `horse` - 馬（bay, white, black, palomino）
 
 **アイテム（items）:**
 - `coin` - コイン（gold, silver, bronze）
