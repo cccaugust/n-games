@@ -147,6 +147,15 @@
       "variants": ["green", "blue", "red", "dark"]
     },
     {
+      "id": "zelda",
+      "name": "ゼルダ姫",
+      "category": "characters",
+      "description": "ゼルダ風のプリンセスキャラクター。長い金髪とティアラ、優雅なドレスが特徴。エルフ耳とイヤリングも",
+      "tags": ["npc", "princess", "zelda", "fantasy", "royal", "magic"],
+      "animations": ["zeldaIdle", "zeldaWalk", "zeldaMagic", "zeldaPray", "zeldaWave"],
+      "variants": ["pink", "white", "blue", "goddess"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

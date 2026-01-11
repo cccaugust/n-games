@@ -48,6 +48,7 @@ export class ModelFactory {
       octopus: (opts) => this.characters.createOctopus(opts),
       // ゼルダ風キャラクター
       link: (opts) => this.characters.createLink(opts),
+      zelda: (opts) => this.characters.createZelda(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
