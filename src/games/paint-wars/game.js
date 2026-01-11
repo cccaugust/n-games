@@ -222,6 +222,9 @@ async function startGame() {
   // Create players
   createPlayers();
 
+  // Set camera to player position immediately
+  renderer.setCameraToPlayer(player);
+
   // Reset stats
   gameTime = 180;
   playerStats = { paintPoints: 0, kills: 0, deaths: 0, assists: 0 };
@@ -357,6 +360,9 @@ function gameLoop(currentTime) {
 
   // Update
   update(deltaTime);
+
+  // Camera follow player
+  renderer.followPlayer(player);
 
   // Render
   renderer.render();

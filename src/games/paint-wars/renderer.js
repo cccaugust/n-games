@@ -500,6 +500,18 @@ export class GameRenderer {
     this.camera.lookAt(player.position.x * 0.5, 0, player.position.z * 0.5);
   }
 
+  // Set camera position immediately to player (for game start)
+  setCameraToPlayer(player) {
+    if (!player) return;
+
+    const targetX = player.position.x * 0.3;
+    const targetZ = player.position.z * 0.3 + 20;
+
+    this.camera.position.x = targetX;
+    this.camera.position.z = targetZ;
+    this.camera.lookAt(player.position.x * 0.5, 0, player.position.z * 0.5);
+  }
+
   getInkTexture() {
     return this.inkCanvas;
   }
