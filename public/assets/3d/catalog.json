@@ -309,6 +309,15 @@
       "variants": ["green", "fire", "mr-l", "gold"]
     },
     {
+      "id": "wario",
+      "name": "ワリオ",
+      "category": "characters",
+      "description": "マリオ風の悪役キャラクター。黄色い帽子とWマーク、太くて短い体、ピンクの大きな鼻とジグザグ髭が特徴。欲深いがパワフル",
+      "tags": ["player", "mario", "villain", "antihero", "strong", "greedy"],
+      "animations": ["warioIdle", "warioWalk", "warioRun", "warioPunch", "warioLaugh"],
+      "variants": ["yellow", "biker", "classic", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

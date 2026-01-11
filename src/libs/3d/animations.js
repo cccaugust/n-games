@@ -2841,6 +2841,210 @@ export class AnimationSystem {
             model.parts.rightLeg.rotation.z = 0.15;
           }
         }
+      },
+
+      // ==================== ワリオアニメーション ====================
+
+      // ワリオ待機（お腹をさする、鼻をほじる）
+      warioIdle: {
+        duration: 3.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 3.0) * Math.PI * 2;
+
+          // お腹をさする動き
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.75;
+            model.parts.body.position.y = baseY + Math.sin(cycle * 0.5) * 0.02;
+          }
+
+          // 頭を傾ける（偉そうに）
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.3) * 0.1;
+            model.parts.head.rotation.z = Math.sin(cycle * 0.4) * 0.05;
+          }
+
+          // 右腕でお腹をさする
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.3 + Math.sin(cycle) * 0.15;
+            model.parts.rightArm.rotation.x = 0.3 + Math.sin(cycle * 0.8) * 0.1;
+          }
+
+          // 左腕は腰に当てる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.6;
+            model.parts.leftArm.rotation.x = 0.2;
+          }
+        }
+      },
+
+      // ワリオ歩き（どっしり、重たい歩き）
+      warioWalk: {
+        duration: 0.9,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.9) * Math.PI * 2;
+
+          // 大きく上下に揺れる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.75;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.06;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.08; // 左右に揺れる
+          }
+
+          // 脚を動かす（重たい）
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.35;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.35;
+          }
+
+          // 腕を振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.25;
+            model.parts.leftArm.rotation.z = 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.25;
+            model.parts.rightArm.rotation.z = -0.3;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.06;
+          }
+        }
+      },
+
+      // ワリオ走り（ショルダータックル構え）
+      warioRun: {
+        duration: 0.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.5) * Math.PI * 2;
+
+          // 大きく上下
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.75;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.08;
+            model.parts.body.rotation.x = -0.2; // 前傾（突進姿勢）
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.1;
+          }
+
+          // 脚を大きく動かす
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.6;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.6;
+          }
+
+          // 腕を振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.5;
+            model.parts.leftArm.rotation.z = 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.5;
+            model.parts.rightArm.rotation.z = -0.4;
+          }
+
+          // 頭を下げる
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.1;
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+        }
+      },
+
+      // ワリオパンチ（ショルダータックル）
+      warioPunch: {
+        duration: 0.6,
+        loop: false,
+        update: (model, t) => {
+          const progress = t / 0.6;
+
+          // 構え → 突進 → 戻り
+          let power;
+          if (progress < 0.3) {
+            power = progress / 0.3; // 構え
+          } else if (progress < 0.5) {
+            power = 1.0; // 突進中
+          } else {
+            power = 1.0 - (progress - 0.5) / 0.5; // 戻り
+          }
+
+          // 体を前に突き出す
+          if (model.parts.body) {
+            model.parts.body.rotation.x = -0.3 * power;
+            model.parts.body.position.z = power * 0.2;
+          }
+
+          // 頭を下げる
+          if (model.parts.head) {
+            model.parts.head.rotation.x = 0.2 * power;
+          }
+
+          // 腕を後ろに引く
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = 0.5 * power;
+            model.parts.leftArm.rotation.z = 0.5 + 0.3 * power;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = 0.5 * power;
+            model.parts.rightArm.rotation.z = -0.5 - 0.3 * power;
+          }
+
+          // 脚を踏ん張る
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -0.3 * power;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = 0.3 * power;
+          }
+        }
+      },
+
+      // ワリオ笑い（悪い笑い）
+      warioLaugh: {
+        duration: 1.2,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.2) * Math.PI * 2;
+          const laughCycle = (t / 0.15) * Math.PI * 2; // 速い笑い
+
+          // 体を揺らす
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.75;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(laughCycle)) * 0.04;
+            model.parts.body.rotation.x = -0.1 + Math.sin(laughCycle) * 0.05;
+          }
+
+          // 頭を後ろに反らす
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.25 + Math.sin(laughCycle) * 0.08;
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+
+          // 腕を腰に当てる（偉そうに）
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.7;
+            model.parts.leftArm.rotation.x = 0.2 + Math.sin(laughCycle) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.7;
+            model.parts.rightArm.rotation.x = 0.2 + Math.sin(laughCycle + Math.PI) * 0.05;
+          }
+
+          // 脚を広げる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.z = -0.15;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.z = 0.15;
+          }
+        }
       }
     };
   }
