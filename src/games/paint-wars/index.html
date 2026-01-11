@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>PAINT WARS | N-Games</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- タイトル画面 -->
+  <div id="titleScreen" class="screen active">
+    <div class="title-container">
+      <div class="ink-splash left"></div>
+      <div class="ink-splash right"></div>
+      <h1 class="game-title">PAINT WARS</h1>
+      <p class="subtitle">塗りつくせ！勝利への道</p>
+
+      <div class="menu-buttons">
+        <button id="playBtn" class="menu-btn primary">
+          <span class="btn-icon">▶</span>
+          PLAY
+        </button>
+        <button id="howToPlayBtn" class="menu-btn">
+          <span class="btn-icon">❓</span>
+          あそびかた
+        </button>
+        <button id="settingsBtn" class="menu-btn">
+          <span class="btn-icon">⚙</span>
+          せってい
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- キャラクター選択画面 -->
+  <div id="characterScreen" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" data-screen="title">← もどる</button>
+      <h2>キャラクター選択</h2>
+    </div>
+    <div class="character-grid" id="characterGrid"></div>
+    <div class="character-preview">
+      <div id="characterPreview3D" class="preview-box"></div>
+      <div id="characterName" class="character-name">イカボーイ</div>
+    </div>
+    <button id="toWeaponSelectBtn" class="menu-btn primary next-btn">つぎへ →</button>
+  </div>
+
+  <!-- 武器選択画面 -->
+  <div id="weaponScreen" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" data-screen="character">← もどる</button>
+      <h2>武器選択</h2>
+    </div>
+    <div class="weapon-select-container">
+      <div class="weapon-preview">
+        <div id="weaponPreview3D" class="preview-box"></div>
+        <div id="weaponName" class="weapon-name">シューター</div>
+      </div>
+      <div class="weapon-grid" id="weaponGrid"></div>
+      <div class="weapon-stats" id="weaponStats">
+        <div class="stat-row">
+          <span class="stat-label">射程</span>
+          <div class="stat-bar"><div class="stat-fill" data-stat="range"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">連射</span>
+          <div class="stat-bar"><div class="stat-fill" data-stat="rate"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">塗り</span>
+          <div class="stat-bar"><div class="stat-fill" data-stat="paint"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">機動</span>
+          <div class="stat-bar"><div class="stat-fill" data-stat="mobility"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-weapon-section">
+      <h3>サブウェポン</h3>
+      <div class="sub-weapon-grid" id="subWeaponGrid"></div>
+    </div>
+
+    <button id="startBattleBtn" class="menu-btn primary start-btn">バトル開始！</button>
+  </div>
+
+  <!-- 遊び方画面 -->
+  <div id="howToPlayScreen" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" data-screen="title">← もどる</button>
+      <h2>あそびかた</h2>
+    </div>
+    <div class="how-to-play-content">
+      <div class="rule-section">
+        <h3>ルール</h3>
+        <ul>
+          <li>3分間でマップをより多く自分のチームの色で塗ろう！</li>
+          <li>終了時に塗り面積が多いチームの勝ち</li>
+          <li>倒されると3秒後にリスポーン</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>操作方法（PC）</h3>
+        <ul>
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> - 移動</li>
+          <li>マウス - 照準</li>
+          <li>左クリック - メイン攻撃</li>
+          <li>右クリック - サブウェポン</li>
+          <li><kbd>Q</kbd> - スペシャル</li>
+          <li><kbd>Shift</kbd> - スライド（デュアル専用）</li>
+        </ul>
+      </div>
+      <div class="rule-section">
+        <h3>ヒント</h3>
+        <ul>
+          <li>自分の色のインクの上では移動速度UP＆インク回復</li>
+          <li>敵の色のインクの上では移動速度DOWN</li>
+          <li>塗った面積でスペシャルゲージが溜まる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 設定画面 -->
+  <div id="settingsScreen" class="screen">
+    <div class="screen-header">
+      <button class="back-btn" data-screen="title">← もどる</button>
+      <h2>せってい</h2>
+    </div>
+    <div class="settings-content">
+      <div class="setting-item">
+        <span>サウンド</span>
+        <button id="soundToggle" class="toggle-btn on">ON</button>
+      </div>
+      <div class="setting-item">
+        <span>BGM音量</span>
+        <input type="range" id="bgmVolume" min="0" max="100" value="50" />
+      </div>
+      <div class="setting-item">
+        <span>効果音音量</span>
+        <input type="range" id="sfxVolume" min="0" max="100" value="70" />
+      </div>
+      <div class="setting-item">
+        <span>難易度</span>
+        <select id="difficultySelect">
+          <option value="easy">かんたん</option>
+          <option value="normal" selected>ふつう</option>
+          <option value="hard">むずかしい</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="gameScreen" class="screen">
+    <!-- HUD上部 -->
+    <div class="game-hud top">
+      <div class="hud-left">
+        <div class="timer" id="gameTimer">3:00</div>
+      </div>
+      <div class="hud-center">
+        <div class="team-score orange">
+          <span class="team-color"></span>
+          <span class="score-value" id="orangeScore">0%</span>
+        </div>
+        <div class="score-bar">
+          <div class="score-fill orange" id="orangeBar"></div>
+          <div class="score-fill blue" id="blueBar"></div>
+        </div>
+        <div class="team-score blue">
+          <span class="score-value" id="blueScore">0%</span>
+          <span class="team-color"></span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="minimap" id="minimap">
+          <canvas id="minimapCanvas" width="120" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3Dゲームビュー -->
+    <div id="gameContainer"></div>
+
+    <!-- HUD下部 -->
+    <div class="game-hud bottom">
+      <div class="hud-left">
+        <div class="weapon-icon" id="currentWeaponIcon"></div>
+      </div>
+      <div class="hud-center">
+        <div class="ink-gauge">
+          <div class="ink-fill" id="inkGauge"></div>
+          <span class="ink-label">INK</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="sub-weapon-status">
+          <span id="subWeaponIcon">💣</span>
+          <span id="subWeaponCooldown">OK</span>
+        </div>
+        <div class="special-gauge">
+          <div class="special-fill" id="specialGauge"></div>
+          <span class="special-label">SP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- モバイル操作パッド -->
+    <div class="mobile-controls" id="mobileControls">
+      <div class="joystick-container left">
+        <div class="joystick" id="moveJoystick">
+          <div class="joystick-knob"></div>
+        </div>
+      </div>
+      <div class="action-buttons">
+        <button class="action-btn fire" id="fireBtn">🔫</button>
+        <button class="action-btn sub" id="subBtn">💣</button>
+        <button class="action-btn special" id="specialBtn">⚡</button>
+      </div>
+      <div class="joystick-container right">
+        <div class="joystick" id="aimJoystick">
+          <div class="joystick-knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ポーズ画面 -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>ポーズ</h2>
+      <div class="overlay-buttons">
+        <button id="resumeBtn" class="menu-btn primary">つづける</button>
+        <button id="restartBtn" class="menu-btn">やりなおす</button>
+        <button id="quitGameBtn" class="menu-btn">タイトルへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- リスポーン画面 -->
+  <div id="respawnOverlay" class="overlay hidden">
+    <div class="overlay-content respawn">
+      <h2>やられた！</h2>
+      <div class="respawn-timer" id="respawnTimer">3</div>
+      <p>リスポーンまで...</p>
+    </div>
+  </div>
+
+  <!-- リザルト画面 -->
+  <div id="resultOverlay" class="overlay hidden">
+    <div class="overlay-content result">
+      <h2 id="resultTitle">VICTORY!</h2>
+      <div class="result-scores">
+        <div class="result-team orange">
+          <span class="team-label">ORANGE TEAM</span>
+          <span class="team-percent" id="resultOrangeScore">58.3%</span>
+        </div>
+        <span class="vs">vs</span>
+        <div class="result-team blue">
+          <span class="team-label">BLUE TEAM</span>
+          <span class="team-percent" id="resultBlueScore">41.7%</span>
+        </div>
+      </div>
+      <div class="result-map">
+        <canvas id="resultMapCanvas" width="300" height="300"></canvas>
+      </div>
+      <div class="your-stats">
+        <h3>あなたのせいせき</h3>
+        <div class="stat-item">
+          <span>塗りポイント</span>
+          <span id="statPaint">1,234p</span>
+        </div>
+        <div class="stat-item">
+          <span>キル</span>
+          <span id="statKills">5</span>
+        </div>
+        <div class="stat-item">
+          <span>デス</span>
+          <span id="statDeaths">2</span>
+        </div>
+        <div class="stat-item">
+          <span>アシスト</span>
+          <span id="statAssists">3</span>
+        </div>
+      </div>
+      <div class="overlay-buttons">
+        <button id="playAgainBtn" class="menu-btn primary">もういちど</button>
+        <button id="toTitleBtn" class="menu-btn">タイトルへ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- カウントダウン -->
+  <div id="countdownOverlay" class="overlay hidden">
+    <div class="countdown-number" id="countdownNumber">3</div>
+  </div>
+
+  <!-- 残り30秒警告 -->
+  <div id="timeWarning" class="time-warning hidden">
+    <span>残り30秒！</span>
+  </div>
+
+  <script type="module" src="game.js"></script>
+</body>
+</html>

@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'paint-wars',
+    title: 'PAINT WARS',
+    desc: '塗りつくせ！インクシューティング🎨',
+    color: '#ff6b35',
+    icon: '🎨',
+    link: '/games/paint-wars/'
+  },
+  {
     id: 'chase-survival',
     title: '逃走サバイバル',
     desc: 'ハンターから逃げて賞金を稼げ！3Dチェイス🏃',
