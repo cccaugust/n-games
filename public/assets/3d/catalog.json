@@ -165,6 +165,15 @@
       "variants": ["dark", "beast", "calamity", "gerudo"]
     },
     {
+      "id": "bokoblin",
+      "name": "ボコブリン",
+      "category": "characters",
+      "description": "ゼルダ風のゴブリン系敵キャラ。豚のような顔、垂れた耳、牙、小さな角が特徴。原始的な腰布を着用",
+      "tags": ["enemy", "zelda", "fantasy", "goblin", "monster", "mob"],
+      "animations": ["bokoblinIdle", "bokoblinWalk", "bokoblinAttack", "bokoblinDance", "bokoblinAlert"],
+      "variants": ["red", "blue", "black", "silver"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

@@ -50,6 +50,7 @@ export class ModelFactory {
       link: (opts) => this.characters.createLink(opts),
       zelda: (opts) => this.characters.createZelda(opts),
       ganondorf: (opts) => this.characters.createGanondorf(opts),
+      bokoblin: (opts) => this.characters.createBokoblin(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
