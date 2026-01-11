@@ -71,6 +71,7 @@ export class ModelFactory {
       waluigi: (opts) => this.characters.createWaluigi(opts),
       'donkey-kong': (opts) => this.characters.createDonkeyKong(opts),
       goomba: (opts) => this.characters.createGoomba(opts),
+      koopa: (opts) => this.characters.createKoopa(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

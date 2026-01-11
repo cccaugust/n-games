@@ -3632,6 +3632,244 @@ export class AnimationSystem {
             model.parts.rightWing.position.y = 0.65 + 0.3 + Math.sin(cycle) * 0.15;
           }
         }
+      },
+
+      // ========== ノコノコ ==========
+      // ノコノコ待機
+      koopaIdle: {
+        duration: 1.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.5) * Math.PI * 2;
+
+          // 体の上下ボビング
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.02;
+          }
+
+          // 頭のゆらゆら
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.5) * 0.1;
+          }
+
+          // 腕の微細な動き
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.4 + Math.sin(cycle) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.4 - Math.sin(cycle) * 0.05;
+          }
+        }
+      },
+
+      // ノコノコ歩行
+      koopaWalk: {
+        duration: 0.7,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.7) * Math.PI * 2;
+
+          // 体の上下動と左右揺れ
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.04;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.08;
+          }
+
+          // 頭の連動
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.05;
+          }
+
+          // 腕の振り
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.3;
+          }
+
+          // 脚の動き
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.4;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = -Math.sin(cycle) * 0.4;
+          }
+        }
+      },
+
+      // ノコノコ甲羅に入る
+      koopaShell: {
+        duration: 0.4,
+        loop: false,
+        update: (model, t) => {
+          const progress = Math.min(t / 0.4, 1);
+
+          // 頭を甲羅に引っ込める
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.95 - progress * 0.4;
+            model.parts.head.position.z = 0.25 - progress * 0.2;
+            model.parts.head.scale.setScalar(1 - progress * 0.5);
+          }
+
+          // 腕を引っ込める
+          if (model.parts.leftArm) {
+            model.parts.leftArm.position.x = -0.35 + progress * 0.2;
+            model.parts.leftArm.scale.setScalar(1 - progress * 0.8);
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.position.x = 0.35 - progress * 0.2;
+            model.parts.rightArm.scale.setScalar(1 - progress * 0.8);
+          }
+
+          // 脚を引っ込める
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.2 + progress * 0.3;
+            model.parts.leftLeg.scale.setScalar(1 - progress * 0.8);
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.2 + progress * 0.3;
+            model.parts.rightLeg.scale.setScalar(1 - progress * 0.8);
+          }
+
+          // 体が少し縮む
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY - progress * 0.15;
+          }
+        }
+      },
+
+      // ノコノコ甲羅スピン（蹴られた時）
+      koopaSpin: {
+        duration: 0.3,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.3) * Math.PI * 2;
+
+          // 甲羅全体が高速回転
+          if (model.mesh) {
+            model.mesh.rotation.y = cycle * 3;
+          }
+
+          // 体を低くする（甲羅だけ見える状態）
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY - 0.25;
+          }
+
+          // 他のパーツは隠す（甲羅に入った状態）
+          if (model.parts.head) {
+            model.parts.head.scale.setScalar(0.2);
+          }
+          if (model.parts.leftArm) {
+            model.parts.leftArm.scale.setScalar(0.2);
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.scale.setScalar(0.2);
+          }
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.scale.setScalar(0.2);
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.scale.setScalar(0.2);
+          }
+        }
+      },
+
+      // ノコノコ復活（甲羅から出る）
+      koopaRevive: {
+        duration: 0.6,
+        loop: false,
+        update: (model, t) => {
+          const progress = Math.min(t / 0.6, 1);
+
+          // 頭を出す
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + progress * 0.4;
+            model.parts.head.position.z = 0.05 + progress * 0.2;
+            model.parts.head.scale.setScalar(0.5 + progress * 0.5);
+          }
+
+          // 腕を出す
+          if (model.parts.leftArm) {
+            model.parts.leftArm.position.x = -0.15 - progress * 0.2;
+            model.parts.leftArm.scale.setScalar(0.2 + progress * 0.8);
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.position.x = 0.15 + progress * 0.2;
+            model.parts.rightArm.scale.setScalar(0.2 + progress * 0.8);
+          }
+
+          // 脚を出す
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.5 - progress * 0.3;
+            model.parts.leftLeg.scale.setScalar(0.2 + progress * 0.8);
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.5 - progress * 0.3;
+            model.parts.rightLeg.scale.setScalar(0.2 + progress * 0.8);
+          }
+
+          // 体を通常位置に
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY - 0.15 + progress * 0.15;
+          }
+        }
+      },
+
+      // パタパタ飛行
+      koopaFly: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.0) * Math.PI * 2;
+          const wingCycle = (t / 0.12) * Math.PI * 2; // 高速羽ばたき
+
+          // 体の上下浮遊
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.65;
+            model.parts.body.position.y = baseY + 0.3 + Math.sin(cycle) * 0.12;
+          }
+
+          // 頭の連動
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.95 + 0.3 + Math.sin(cycle) * 0.12;
+          }
+
+          // 腕がゆらゆら
+          if (model.parts.leftArm) {
+            model.parts.leftArm.position.y = 0.6 + 0.3 + Math.sin(cycle) * 0.12;
+            model.parts.leftArm.rotation.z = 0.4 + Math.sin(cycle * 2) * 0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.position.y = 0.6 + 0.3 + Math.sin(cycle) * 0.12;
+            model.parts.rightArm.rotation.z = -0.4 - Math.sin(cycle * 2) * 0.2;
+          }
+
+          // 脚が垂れる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.2 + 0.25 + Math.sin(cycle) * 0.12;
+            model.parts.leftLeg.rotation.x = 0.2;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.2 + 0.25 + Math.sin(cycle) * 0.12;
+            model.parts.rightLeg.rotation.x = 0.2;
+          }
+
+          // 羽ばたき
+          if (model.parts.leftWing) {
+            model.parts.leftWing.rotation.z = 0.5 + Math.sin(wingCycle) * 0.6;
+            model.parts.leftWing.position.y = 0.75 + 0.3 + Math.sin(cycle) * 0.12;
+          }
+          if (model.parts.rightWing) {
+            model.parts.rightWing.rotation.z = -0.5 - Math.sin(wingCycle) * 0.6;
+            model.parts.rightWing.position.y = 0.75 + 0.3 + Math.sin(cycle) * 0.12;
+          }
+        }
       }
     };
   }

@@ -345,6 +345,15 @@
       "variants": ["brown", "gold", "para", "underground"]
     },
     {
+      "id": "koopa",
+      "name": "ノコノコ",
+      "category": "characters",
+      "description": "カメ型の敵キャラクター。緑や赤の甲羅、黄色い体、オレンジのくちばしが特徴。踏まれると甲羅に入り、蹴ると転がる。パタパタ（羽付き）にもなれる",
+      "tags": ["enemy", "mario", "turtle", "shell", "classic"],
+      "animations": ["koopaIdle", "koopaWalk", "koopaShell", "koopaSpin", "koopaRevive", "koopaFly"],
+      "variants": ["green", "red", "blue", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
