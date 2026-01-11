@@ -291,6 +291,15 @@
       "variants": ["red", "blue", "yellow", "captain"]
     },
     {
+      "id": "yoshi",
+      "name": "ヨッシー",
+      "category": "characters",
+      "description": "マリオ風の恐竜キャラクター。大きな鼻と赤い鞍、オレンジのブーツが特徴。乗り物やパートナーに最適",
+      "tags": ["player", "mario", "dinosaur", "mount", "cute", "friendly"],
+      "animations": ["yoshiIdle", "yoshiWalk", "yoshiRun", "yoshiTongue", "yoshiFlutter"],
+      "variants": ["green", "red", "blue", "yellow"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

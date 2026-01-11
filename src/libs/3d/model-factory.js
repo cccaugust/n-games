@@ -65,6 +65,7 @@ export class ModelFactory {
       peach: (opts) => this.characters.createPeach(opts),
       bowser: (opts) => this.characters.createBowser(opts),
       toad: (opts) => this.characters.createToad(opts),
+      yoshi: (opts) => this.characters.createYoshi(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
