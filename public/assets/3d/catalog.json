@@ -336,6 +336,15 @@
       "variants": ["brown", "arcade", "funky", "gold"]
     },
     {
+      "id": "goomba",
+      "name": "クリボー",
+      "category": "characters",
+      "description": "キノコ型の敵キャラクター。茶色い傘型の頭、怒った眉毛、2本の牙が特徴。腕がなく足だけで歩くシンプルなデザイン。パラクリボー（羽付き）バリアントあり",
+      "tags": ["enemy", "mario", "mushroom", "cute", "classic"],
+      "animations": ["goombaIdle", "goombaWalk", "goombaTurn", "goombaSquash", "goombaAngry", "goombaFly"],
+      "variants": ["brown", "gold", "para", "underground"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

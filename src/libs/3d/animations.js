@@ -3441,6 +3441,197 @@ export class AnimationSystem {
             model.parts.rightLeg.rotation.z = 0.2;
           }
         }
+      },
+
+      // ========== クリボー ==========
+      // クリボー待機
+      goombaIdle: {
+        duration: 1.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.5) * Math.PI * 2;
+
+          // 体の上下ボビング
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.02;
+          }
+
+          // 顔も連動
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + Math.sin(cycle) * 0.02;
+          }
+
+          // 足の微細な動き
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.08 + Math.sin(cycle) * 0.01;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.08 + Math.sin(cycle + Math.PI) * 0.01;
+          }
+        }
+      },
+
+      // クリボー歩行
+      goombaWalk: {
+        duration: 0.6,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.6) * Math.PI * 2;
+
+          // 体の左右揺れ
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle * 2)) * 0.04;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.1;
+          }
+
+          // 顔も連動
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + Math.abs(Math.sin(cycle * 2)) * 0.04;
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+
+          // 足の前後動き（シャッフル）
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.z = 0.05 + Math.sin(cycle) * 0.08;
+            model.parts.leftLeg.position.y = 0.08 + Math.abs(Math.sin(cycle)) * 0.03;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.z = 0.05 + Math.sin(cycle + Math.PI) * 0.08;
+            model.parts.rightLeg.position.y = 0.08 + Math.abs(Math.sin(cycle + Math.PI)) * 0.03;
+          }
+        }
+      },
+
+      // クリボー方向転換
+      goombaTurn: {
+        duration: 0.4,
+        loop: false,
+        update: (model, t) => {
+          const progress = Math.min(t / 0.4, 1);
+          const turnAmount = Math.sin(progress * Math.PI);
+
+          // 体全体を回転
+          if (model.mesh) {
+            model.mesh.rotation.y = (model.mesh.userData?.baseRotY ?? 0) + Math.PI * progress;
+          }
+
+          // 回転中に少し跳ねる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            model.parts.body.position.y = baseY + turnAmount * 0.08;
+          }
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + turnAmount * 0.08;
+          }
+        }
+      },
+
+      // クリボー踏まれる
+      goombaSquash: {
+        duration: 0.5,
+        loop: false,
+        update: (model, t) => {
+          const progress = Math.min(t / 0.5, 1);
+
+          // 体がペシャンコになる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            const squashY = 1 - progress * 0.7; // Y軸が縮む
+            const squashXZ = 1 + progress * 0.4; // XZ軸が広がる
+            model.parts.body.scale.set(squashXZ, squashY, squashXZ);
+            model.parts.body.position.y = baseY * squashY;
+          }
+
+          // 顔も連動
+          if (model.parts.head) {
+            const squashY = 1 - progress * 0.7;
+            const squashXZ = 1 + progress * 0.4;
+            model.parts.head.scale.set(squashXZ, squashY, squashXZ);
+            model.parts.head.position.y = 0.55 * squashY;
+          }
+
+          // 足が外に広がる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.x = -0.15 - progress * 0.1;
+            model.parts.leftLeg.position.y = 0.08 * (1 - progress * 0.5);
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.x = 0.15 + progress * 0.1;
+            model.parts.rightLeg.position.y = 0.08 * (1 - progress * 0.5);
+          }
+        }
+      },
+
+      // クリボー怒り
+      goombaAngry: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.8) * Math.PI * 2;
+          const shakeCycle = (t / 0.05) * Math.PI * 2; // 高速振動
+
+          // 体が震える
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            model.parts.body.position.y = baseY + Math.sin(shakeCycle) * 0.015;
+            model.parts.body.rotation.z = Math.sin(shakeCycle) * 0.03;
+          }
+
+          // 顔も震える
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + Math.sin(shakeCycle) * 0.015;
+            model.parts.head.rotation.z = Math.sin(shakeCycle) * 0.03;
+          }
+
+          // 足で地団駄
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.08 + Math.abs(Math.sin(cycle * 3)) * 0.04;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.08 + Math.abs(Math.sin(cycle * 3 + Math.PI)) * 0.04;
+          }
+        }
+      },
+
+      // パラクリボー飛行
+      goombaFly: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.0) * Math.PI * 2;
+          const wingCycle = (t / 0.15) * Math.PI * 2; // 高速羽ばたき
+
+          // 体の上下浮遊
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.55;
+            model.parts.body.position.y = baseY + 0.3 + Math.sin(cycle) * 0.15;
+          }
+
+          // 顔も連動
+          if (model.parts.head) {
+            model.parts.head.position.y = 0.55 + 0.3 + Math.sin(cycle) * 0.15;
+          }
+
+          // 足が垂れる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.position.y = 0.08 + 0.2 + Math.sin(cycle) * 0.15;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.position.y = 0.08 + 0.2 + Math.sin(cycle) * 0.15;
+          }
+
+          // 羽ばたき
+          if (model.parts.leftWing) {
+            model.parts.leftWing.rotation.z = 0.5 + Math.sin(wingCycle) * 0.5;
+            model.parts.leftWing.position.y = 0.65 + 0.3 + Math.sin(cycle) * 0.15;
+          }
+          if (model.parts.rightWing) {
+            model.parts.rightWing.rotation.z = -0.5 - Math.sin(wingCycle) * 0.5;
+            model.parts.rightWing.position.y = 0.65 + 0.3 + Math.sin(cycle) * 0.15;
+          }
+        }
       }
     };
   }

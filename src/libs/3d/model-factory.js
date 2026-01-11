@@ -70,6 +70,7 @@ export class ModelFactory {
       wario: (opts) => this.characters.createWario(opts),
       waluigi: (opts) => this.characters.createWaluigi(opts),
       'donkey-kong': (opts) => this.characters.createDonkeyKong(opts),
+      goomba: (opts) => this.characters.createGoomba(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

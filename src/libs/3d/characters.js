@@ -11420,6 +11420,204 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  // ==================== クリボー ====================
+  createGoomba(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'brown';
+    const group = new THREE.Group();
+
+    // カラーパレット
+    const colors = {
+      brown: { cap: 0x8B4513, body: 0xD2691E, feet: 0xDEB887, face: 0xFFE4C4, eyebrow: 0x1a1a1a, fang: 0xFFFFF0 },
+      gold: { cap: 0xFFD700, body: 0xFFC125, feet: 0xFFEC8B, face: 0xFFF8DC, eyebrow: 0x8B6914, fang: 0xFFFFFF },
+      para: { cap: 0x8B4513, body: 0xD2691E, feet: 0xDEB887, face: 0xFFE4C4, eyebrow: 0x1a1a1a, fang: 0xFFFFF0, wing: 0xFFFFFF },
+      underground: { cap: 0x4A3728, body: 0x6B4423, feet: 0x8B7355, face: 0xCDAA7D, eyebrow: 0x0a0a0a, fang: 0xF5F5DC }
+    };
+    const palette = colors[variant] || colors.brown;
+
+    // === 体（キノコ型） ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // キノコの傘（上部） - 半球をやや潰した形
+    const capGeo = new THREE.SphereGeometry(0.5, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+    const capMat = this.materials.standard({ color: palette.cap, roughness: 0.7 });
+    const cap = new THREE.Mesh(capGeo, capMat);
+    cap.position.y = 0.35;
+    cap.scale.set(1, 0.7, 1);
+    cap.castShadow = true;
+    bodyGroup.add(cap);
+
+    // キノコの傘下部（リム）
+    const rimGeo = new THREE.TorusGeometry(0.45, 0.08, 8, 24);
+    const rimMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    rim.position.y = 0.15;
+    rim.rotation.x = Math.PI / 2;
+    bodyGroup.add(rim);
+
+    // 体の下部（茎のような部分）
+    const stemGeo = new THREE.CylinderGeometry(0.25, 0.3, 0.35, 16);
+    const stemMat = this.materials.standard({ color: palette.body, roughness: 0.6 });
+    const stem = new THREE.Mesh(stemGeo, stemMat);
+    stem.position.y = -0.05;
+    stem.castShadow = true;
+    bodyGroup.add(stem);
+
+    bodyGroup.position.y = 0.55;
+    bodyGroup.userData.baseY = 0.55;
+    group.add(bodyGroup);
+
+    // === 顔 ===
+    const faceGroup = new THREE.Group();
+    faceGroup.name = 'head';
+
+    // 顔のベース（肌色の部分）
+    const faceBaseGeo = new THREE.SphereGeometry(0.28, 16, 12);
+    const faceBaseMat = this.materials.standard({ color: palette.face, roughness: 0.5 });
+    const faceBase = new THREE.Mesh(faceBaseGeo, faceBaseMat);
+    faceBase.position.z = 0.15;
+    faceBase.scale.set(1, 0.9, 0.6);
+    faceGroup.add(faceBase);
+
+    // 目（大きくて怒った目）
+    const eyeGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    const eyeWhiteMat = this.materials.standard({ color: 0xFFFFFF, roughness: 0.3 });
+    const pupilGeo = new THREE.SphereGeometry(0.04, 8, 8);
+    const pupilMat = this.materials.standard({ color: 0x000000, roughness: 0.5 });
+
+    // 左目
+    const leftEye = new THREE.Mesh(eyeGeo, eyeWhiteMat);
+    leftEye.position.set(-0.12, 0.05, 0.25);
+    faceGroup.add(leftEye);
+    const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
+    leftPupil.position.set(-0.12, 0.05, 0.32);
+    faceGroup.add(leftPupil);
+
+    // 右目
+    const rightEye = new THREE.Mesh(eyeGeo, eyeWhiteMat.clone());
+    rightEye.position.set(0.12, 0.05, 0.25);
+    faceGroup.add(rightEye);
+    const rightPupil = new THREE.Mesh(pupilGeo, pupilMat.clone());
+    rightPupil.position.set(0.12, 0.05, 0.32);
+    faceGroup.add(rightPupil);
+
+    // 怒った眉毛（太くてV字型）
+    const eyebrowGeo = new THREE.BoxGeometry(0.18, 0.04, 0.06);
+    const eyebrowMat = this.materials.standard({ color: palette.eyebrow, roughness: 0.8 });
+
+    const leftEyebrow = new THREE.Mesh(eyebrowGeo, eyebrowMat);
+    leftEyebrow.position.set(-0.12, 0.15, 0.28);
+    leftEyebrow.rotation.z = 0.4; // 内側が下がる
+    leftEyebrow.name = 'leftEyebrow';
+    faceGroup.add(leftEyebrow);
+
+    const rightEyebrow = new THREE.Mesh(eyebrowGeo, eyebrowMat.clone());
+    rightEyebrow.position.set(0.12, 0.15, 0.28);
+    rightEyebrow.rotation.z = -0.4; // 内側が下がる
+    rightEyebrow.name = 'rightEyebrow';
+    faceGroup.add(rightEyebrow);
+
+    // 牙（2本）
+    const fangGeo = new THREE.ConeGeometry(0.03, 0.08, 6);
+    const fangMat = this.materials.standard({ color: palette.fang, roughness: 0.4 });
+
+    const leftFang = new THREE.Mesh(fangGeo, fangMat);
+    leftFang.position.set(-0.08, -0.1, 0.3);
+    leftFang.rotation.x = Math.PI; // 下向き
+    faceGroup.add(leftFang);
+
+    const rightFang = new THREE.Mesh(fangGeo, fangMat.clone());
+    rightFang.position.set(0.08, -0.1, 0.3);
+    rightFang.rotation.x = Math.PI;
+    faceGroup.add(rightFang);
+
+    faceGroup.position.y = 0.55;
+    group.add(faceGroup);
+
+    // === 足（2本、腕はなし） ===
+    // 左足
+    const leftFootGroup = new THREE.Group();
+    leftFootGroup.name = 'leftLeg';
+
+    const footGeo = new THREE.SphereGeometry(0.12, 12, 8);
+    const footMat = this.materials.standard({ color: palette.feet, roughness: 0.6 });
+    const leftFoot = new THREE.Mesh(footGeo, footMat);
+    leftFoot.scale.set(1.2, 0.6, 1.4);
+    leftFoot.castShadow = true;
+    leftFootGroup.add(leftFoot);
+
+    leftFootGroup.position.set(-0.15, 0.08, 0.05);
+    group.add(leftFootGroup);
+
+    // 右足
+    const rightFootGroup = new THREE.Group();
+    rightFootGroup.name = 'rightLeg';
+
+    const rightFoot = new THREE.Mesh(footGeo, footMat.clone());
+    rightFoot.scale.set(1.2, 0.6, 1.4);
+    rightFoot.castShadow = true;
+    rightFootGroup.add(rightFoot);
+
+    rightFootGroup.position.set(0.15, 0.08, 0.05);
+    group.add(rightFootGroup);
+
+    // パラクリボー（羽付き）
+    if (variant === 'para') {
+      const wingGeo = new THREE.CircleGeometry(0.25, 8);
+      const wingMat = this.materials.standard({
+        color: palette.wing,
+        roughness: 0.3,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide
+      });
+
+      // 左羽
+      const leftWingGroup = new THREE.Group();
+      leftWingGroup.name = 'leftWing';
+      const leftWing = new THREE.Mesh(wingGeo, wingMat);
+      leftWing.rotation.y = -0.3;
+      leftWingGroup.add(leftWing);
+      leftWingGroup.position.set(-0.4, 0.65, 0);
+      leftWingGroup.rotation.z = 0.5;
+      group.add(leftWingGroup);
+
+      // 右羽
+      const rightWingGroup = new THREE.Group();
+      rightWingGroup.name = 'rightWing';
+      const rightWing = new THREE.Mesh(wingGeo, wingMat.clone());
+      rightWing.rotation.y = 0.3;
+      rightWingGroup.add(rightWing);
+      rightWingGroup.position.set(0.4, 0.65, 0);
+      rightWingGroup.rotation.z = -0.5;
+      group.add(rightWingGroup);
+    }
+
+    // シャドウ
+    const shadowGeo = new THREE.CircleGeometry(0.35, 24);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.3,
+      depthWrite: false
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.01;
+    shadow.name = 'shadow';
+    group.add(shadow);
+
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'goomba',
+      name: 'クリボー',
+      variant: variant,
+      defaultAnimation: 'goombaIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**
