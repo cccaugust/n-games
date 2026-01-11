@@ -286,6 +286,50 @@
       color: white;
     }
 
+    /* ページネーション */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .pagination-btn {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all 0.15s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      min-width: 60px;
+      text-align: center;
+    }
+
     /* 配置済みリスト */
     .placed-list {
       display: flex;
@@ -598,6 +642,13 @@
         <div class="panel-content" id="panel-content">
           <!-- アセットグリッド -->
           <div class="asset-grid" id="asset-grid"></div>
+
+          <!-- ページネーション -->
+          <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-btn" id="page-prev" title="前のページ">◀</button>
+            <span class="pagination-info" id="page-info">1 / 1</span>
+            <button class="pagination-btn" id="page-next" title="次のページ">▶</button>
+          </div>
 
           <!-- バリアント選択 -->
           <div class="variant-selector" id="variant-selector" style="display: none;">

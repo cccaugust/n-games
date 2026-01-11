@@ -24,6 +24,11 @@ export class ModelFactory {
     this.items = new ItemModels(THREE, this.materials, this.animations);
     this.props = new PropModels(THREE, this.materials, this.animations);
 
+    // モデルキャッシュ（プロトタイプモデルを保持）
+    this._cache = new Map();
+    this._cacheEnabled = true;
+    this._maxCacheSize = 50;
+
     // モデルレジストリ
     this.registry = {
       // キャラクター
@@ -70,7 +75,63 @@ export class ModelFactory {
       console.warn(`Unknown model: ${id}`);
       return this.createPlaceholder(id);
     }
+
+    // キャッシュを使用する場合、クローンを返す
+    if (this._cacheEnabled) {
+      const cacheKey = `${id}_${options.variant || 'default'}`;
+
+      if (!this._cache.has(cacheKey)) {
+        // プロトタイプを作成してキャッシュ
+        const prototype = creator(options);
+        this._cache.set(cacheKey, prototype);
+
+        // キャッシュサイズ制限
+        if (this._cache.size > this._maxCacheSize) {
+          const firstKey = this._cache.keys().next().value;
+          const oldModel = this._cache.get(firstKey);
+          if (oldModel && oldModel.dispose) oldModel.dispose();
+          this._cache.delete(firstKey);
+        }
+      }
+
+      // キャッシュからクローンを返す
+      return this._cache.get(cacheKey).clone();
+    }
+
     return creator(options);
+  }
+
+  /**
+   * キャッシュを有効/無効にする
+   */
+  setCacheEnabled(enabled) {
+    this._cacheEnabled = enabled;
+  }
+
+  /**
+   * キャッシュをクリア
+   */
+  clearCache() {
+    this._cache.forEach(model => {
+      if (model && model.dispose) model.dispose();
+    });
+    this._cache.clear();
+  }
+
+  /**
+   * キャッシュを事前にウォームアップ
+   * @param {Array<{id: string, variant?: string}>} models - プリロードするモデルリスト
+   */
+  preload(models) {
+    models.forEach(({ id, variant }) => {
+      const cacheKey = `${id}_${variant || 'default'}`;
+      if (!this._cache.has(cacheKey)) {
+        const creator = this.registry[id];
+        if (creator) {
+          this._cache.set(cacheKey, creator({ variant }));
+        }
+      }
+    });
   }
 
   /**

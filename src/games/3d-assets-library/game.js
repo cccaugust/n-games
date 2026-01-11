@@ -38,6 +38,10 @@ class AssetLibraryGame {
     // カタログデータ
     this.catalog = null;
 
+    // ページネーション
+    this.currentPage = 0;
+    this.itemsPerPage = 6;
+
     this.init();
   }
 
@@ -186,6 +190,7 @@ class AssetLibraryGame {
     const grid = document.getElementById('asset-grid');
     const placedList = document.getElementById('placed-list');
     const variantSelector = document.getElementById('variant-selector');
+    const pagination = document.getElementById('pagination');
 
     if (!grid) {
       console.error('asset-grid element not found');
@@ -197,6 +202,7 @@ class AssetLibraryGame {
       grid.style.display = 'none';
       placedList.style.display = 'flex';
       variantSelector.style.display = 'none';
+      pagination.style.display = 'none';
       this.renderPlacedList();
       return;
     }
@@ -205,12 +211,22 @@ class AssetLibraryGame {
     placedList.style.display = 'none';
 
     // カテゴリに応じたアセットをフィルター
-    const assets = this.catalog?.assets?.filter(a => a.category === this.currentCategory) || [];
+    const allAssets = this.catalog?.assets?.filter(a => a.category === this.currentCategory) || [];
 
-    if (assets.length === 0) {
+    if (allAssets.length === 0) {
       grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">アセットがありません</div>';
+      pagination.style.display = 'none';
       return;
     }
+
+    // ページネーション計算
+    const totalPages = Math.ceil(allAssets.length / this.itemsPerPage);
+    this.currentPage = Math.min(this.currentPage, totalPages - 1);
+    this.currentPage = Math.max(0, this.currentPage);
+
+    const startIdx = this.currentPage * this.itemsPerPage;
+    const endIdx = Math.min(startIdx + this.itemsPerPage, allAssets.length);
+    const assets = allAssets.slice(startIdx, endIdx);
 
     grid.innerHTML = assets.map(asset => `
       <div class="asset-card ${this.selectedAssetId === asset.id ? 'selected' : ''}"
@@ -224,6 +240,16 @@ class AssetLibraryGame {
     assets.forEach(asset => {
       this.generatePreview(asset.id);
     });
+
+    // ページネーション表示
+    if (totalPages > 1) {
+      pagination.style.display = 'flex';
+      document.getElementById('page-info').textContent = `${this.currentPage + 1} / ${totalPages}`;
+      document.getElementById('page-prev').disabled = this.currentPage === 0;
+      document.getElementById('page-next').disabled = this.currentPage >= totalPages - 1;
+    } else {
+      pagination.style.display = 'none';
+    }
 
     // バリアント表示
     if (this.selectedAssetId) {
@@ -266,7 +292,8 @@ class AssetLibraryGame {
 
   getAssetIcon(id) {
     const icons = {
-      robot: '🤖', slime: '🟢', knight: '⚔️', mage: '🧙',
+      robot: '🤖', slime: '🟢', knight: '⚔️', mage: '🧙', ghost: '👻',
+      dog: '🐕', cat: '🐈', horse: '🐴', frog: '🐸',
       coin: '🪙', heart: '❤️', star: '⭐', chest: '📦',
       sword: '🗡️', staff: '🪄', potion: '🧪',
       tree: '🌳', rock: '🪨', crate: '📦', crystal: '💎',
@@ -301,6 +328,23 @@ class AssetLibraryGame {
         this.currentCategory = e.target.dataset.category;
         this.selectedAssetId = null;
         this.selectedVariant = null;
+        this.currentPage = 0; // ページをリセット
+        this.renderAssetGrid();
+      }
+    });
+
+    // ページネーション
+    document.getElementById('page-prev').addEventListener('click', () => {
+      if (this.currentPage > 0) {
+        this.currentPage--;
+        this.renderAssetGrid();
+      }
+    });
+    document.getElementById('page-next').addEventListener('click', () => {
+      const allAssets = this.catalog?.assets?.filter(a => a.category === this.currentCategory) || [];
+      const totalPages = Math.ceil(allAssets.length / this.itemsPerPage);
+      if (this.currentPage < totalPages - 1) {
+        this.currentPage++;
         this.renderAssetGrid();
       }
     });
