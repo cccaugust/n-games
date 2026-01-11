@@ -264,6 +264,15 @@
       "variants": ["red", "green", "fire", "gold"]
     },
     {
+      "id": "peach",
+      "name": "ピーチ姫",
+      "category": "characters",
+      "description": "マリオ風のプリンセスキャラクター。ピンクのドレスと金髪、ティアラが特徴。優雅なアニメーションが魅力",
+      "tags": ["npc", "mario", "princess", "cute", "royal", "female"],
+      "animations": ["peachIdle", "peachWalk", "peachWave", "peachFloat", "peachVictory"],
+      "variants": ["pink", "white", "sports", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

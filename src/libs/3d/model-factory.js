@@ -62,6 +62,7 @@ export class ModelFactory {
       'great-fairy': (opts) => this.characters.createGreatFairy(opts),
       // マリオ風キャラクター
       mario: (opts) => this.characters.createMario(opts),
+      peach: (opts) => this.characters.createPeach(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

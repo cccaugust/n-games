@@ -8791,6 +8791,404 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  // ==================== ピーチ姫（マリオ風プリンセス） ====================
+  createPeach(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'pink';
+    const scale = options.scale || 1;
+    const group = new THREE.Group();
+
+    // カラーパレット
+    const colors = {
+      pink: {
+        dress: 0xffb6c1, dressDark: 0xff69b4, skin: 0xffe4c4,
+        hair: 0xffd700, crown: 0xffd700, gem: 0x4169e1,
+        gloves: 0xffffff, shoes: 0xff69b4, lips: 0xff6b81, eyes: 0x4169e1
+      },
+      white: {
+        dress: 0xfffafa, dressDark: 0xfff0f5, skin: 0xffe4c4,
+        hair: 0xffd700, crown: 0xffd700, gem: 0xff69b4,
+        gloves: 0xffffff, shoes: 0xffffff, lips: 0xff6b81, eyes: 0x4169e1
+      },
+      sports: {
+        dress: 0xff69b4, dressDark: 0xff1493, skin: 0xffe4c4,
+        hair: 0xffd700, crown: 0xffd700, gem: 0x4169e1,
+        gloves: 0xffffff, shoes: 0xffffff, lips: 0xff6b81, eyes: 0x4169e1
+      },
+      gold: {
+        dress: 0xffd700, dressDark: 0xdaa520, skin: 0xffe4c4,
+        hair: 0xfffacd, crown: 0xffffff, gem: 0xff69b4,
+        gloves: 0xffffff, shoes: 0xffd700, lips: 0xff6b81, eyes: 0x4169e1
+      }
+    };
+    const palette = colors[variant] || colors.pink;
+
+    // === ドレス（スカート部分） ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // スカート（大きなベル型）
+    const skirtGeo = new THREE.CylinderGeometry(0.3, 0.9, 1.2, 24, 1, true);
+    const skirtMat = this.materials.standard({ color: palette.dress, roughness: 0.6, side: THREE.DoubleSide });
+    const skirt = new THREE.Mesh(skirtGeo, skirtMat);
+    skirt.position.y = -0.4;
+    skirt.castShadow = true;
+    bodyGroup.add(skirt);
+
+    // スカートの底（閉じる）
+    const skirtBottomGeo = new THREE.CircleGeometry(0.9, 24);
+    const skirtBottom = new THREE.Mesh(skirtBottomGeo, skirtMat.clone());
+    skirtBottom.position.y = -1.0;
+    skirtBottom.rotation.x = Math.PI / 2;
+    bodyGroup.add(skirtBottom);
+
+    // ドレスのフリル（裾）
+    const frillGeo = new THREE.TorusGeometry(0.88, 0.08, 8, 32);
+    const frillMat = this.materials.standard({ color: palette.dressDark, roughness: 0.5 });
+    const frill = new THREE.Mesh(frillGeo, frillMat);
+    frill.position.y = -0.95;
+    frill.rotation.x = Math.PI / 2;
+    bodyGroup.add(frill);
+
+    // 胸部（ドレス上部）
+    const bodiceGeo = new THREE.CylinderGeometry(0.28, 0.32, 0.5, 16);
+    const bodiceMat = this.materials.standard({ color: palette.dress, roughness: 0.6 });
+    const bodice = new THREE.Mesh(bodiceGeo, bodiceMat);
+    bodice.position.y = 0.4;
+    bodice.castShadow = true;
+    bodyGroup.add(bodice);
+
+    // 胸元の宝石ブローチ
+    const broochGeo = new THREE.OctahedronGeometry(0.08, 0);
+    const broochMat = this.materials.physical({
+      color: palette.gem,
+      roughness: 0.1,
+      metalness: 0.3,
+      emissive: palette.gem,
+      emissiveIntensity: 0.3
+    });
+    const brooch = new THREE.Mesh(broochGeo, broochMat);
+    brooch.position.set(0, 0.5, 0.3);
+    brooch.rotation.x = Math.PI / 4;
+    bodyGroup.add(brooch);
+
+    // パフスリーブ（左）
+    const sleeveGeo = new THREE.SphereGeometry(0.18, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+    const sleeveMat = this.materials.standard({ color: palette.dress, roughness: 0.6 });
+    const leftSleeve = new THREE.Mesh(sleeveGeo, sleeveMat);
+    leftSleeve.position.set(-0.38, 0.5, 0);
+    leftSleeve.rotation.z = 0.3;
+    bodyGroup.add(leftSleeve);
+
+    // パフスリーブ（右）
+    const rightSleeve = new THREE.Mesh(sleeveGeo, sleeveMat.clone());
+    rightSleeve.position.set(0.38, 0.5, 0);
+    rightSleeve.rotation.z = -0.3;
+    bodyGroup.add(rightSleeve);
+
+    bodyGroup.position.y = 1.5;
+    bodyGroup.userData.baseY = 1.5;
+    group.add(bodyGroup);
+
+    // === 頭部 ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 顔
+    const faceGeo = new THREE.SphereGeometry(0.35, 24, 24);
+    const faceMat = this.materials.standard({ color: palette.skin, roughness: 0.7 });
+    const face = new THREE.Mesh(faceGeo, faceMat);
+    face.scale.set(1, 1.1, 0.95);
+    face.castShadow = true;
+    headGroup.add(face);
+
+    // 耳（左）
+    const earGeo = new THREE.SphereGeometry(0.06, 12, 12);
+    const earMat = this.materials.standard({ color: palette.skin, roughness: 0.7 });
+    const leftEar = new THREE.Mesh(earGeo, earMat);
+    leftEar.position.set(-0.32, 0.05, 0);
+    leftEar.scale.set(0.5, 1, 0.8);
+    headGroup.add(leftEar);
+
+    // 耳（右）
+    const rightEar = new THREE.Mesh(earGeo, earMat.clone());
+    rightEar.position.set(0.32, 0.05, 0);
+    rightEar.scale.set(0.5, 1, 0.8);
+    headGroup.add(rightEar);
+
+    // イヤリング（左）
+    const earringGeo = new THREE.SphereGeometry(0.04, 8, 8);
+    const earringMat = this.materials.physical({
+      color: palette.gem,
+      roughness: 0.1,
+      metalness: 0.5,
+      emissive: palette.gem,
+      emissiveIntensity: 0.2
+    });
+    const leftEarring = new THREE.Mesh(earringGeo, earringMat);
+    leftEarring.position.set(-0.35, -0.05, 0.05);
+    headGroup.add(leftEarring);
+
+    // イヤリング（右）
+    const rightEarring = new THREE.Mesh(earringGeo, earringMat.clone());
+    rightEarring.position.set(0.35, -0.05, 0.05);
+    headGroup.add(rightEarring);
+
+    // 鼻
+    const noseGeo = new THREE.SphereGeometry(0.04, 12, 12);
+    const noseMat = this.materials.standard({ color: palette.skin, roughness: 0.6 });
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.position.set(0, -0.02, 0.35);
+    headGroup.add(nose);
+
+    // 目
+    const createEye = (x) => {
+      const eyeGroup = new THREE.Group();
+
+      // 白目
+      const whiteGeo = new THREE.SphereGeometry(0.08, 12, 12);
+      const whiteMat = this.materials.standard({ color: 0xffffff, roughness: 0.1 });
+      const white = new THREE.Mesh(whiteGeo, whiteMat);
+      white.scale.set(0.7, 1, 0.5);
+      eyeGroup.add(white);
+
+      // 虹彩
+      const irisGeo = new THREE.SphereGeometry(0.05, 12, 12);
+      const irisMat = this.materials.standard({ color: palette.eyes, roughness: 0.3 });
+      const iris = new THREE.Mesh(irisGeo, irisMat);
+      iris.position.z = 0.04;
+      eyeGroup.add(iris);
+
+      // 瞳孔
+      const pupilGeo = new THREE.SphereGeometry(0.025, 8, 8);
+      const pupilMat = this.materials.standard({ color: 0x000000 });
+      const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+      pupil.position.z = 0.06;
+      eyeGroup.add(pupil);
+
+      // ハイライト（大きめ）
+      const highlightGeo = new THREE.SphereGeometry(0.015, 6, 6);
+      const highlightMat = this.materials.emissive({ color: 0xffffff, intensity: 1 });
+      const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+      highlight.position.set(0.015, 0.02, 0.07);
+      eyeGroup.add(highlight);
+
+      // まつげ
+      const lashGeo = new THREE.BoxGeometry(0.08, 0.015, 0.01);
+      const lashMat = this.materials.standard({ color: 0x000000 });
+      const lash = new THREE.Mesh(lashGeo, lashMat);
+      lash.position.set(0, 0.08, 0.04);
+      lash.rotation.z = x < 0 ? 0.1 : -0.1;
+      eyeGroup.add(lash);
+
+      eyeGroup.position.set(x, 0.08, 0.28);
+      return eyeGroup;
+    };
+
+    const leftEye = createEye(-0.1);
+    leftEye.name = 'leftEye';
+    headGroup.add(leftEye);
+
+    const rightEye = createEye(0.1);
+    rightEye.name = 'rightEye';
+    headGroup.add(rightEye);
+
+    // 眉毛（細くアーチ状）
+    const browShape = new THREE.Shape();
+    browShape.moveTo(-0.04, 0);
+    browShape.quadraticCurveTo(0, 0.015, 0.04, 0);
+    const browGeo = new THREE.ShapeGeometry(browShape);
+    const browMat = this.materials.standard({ color: palette.hair, roughness: 0.9, side: THREE.DoubleSide });
+    const leftBrow = new THREE.Mesh(browGeo, browMat);
+    leftBrow.position.set(-0.1, 0.2, 0.32);
+    headGroup.add(leftBrow);
+
+    const rightBrow = new THREE.Mesh(browGeo, browMat.clone());
+    rightBrow.position.set(0.1, 0.2, 0.32);
+    headGroup.add(rightBrow);
+
+    // 口（小さなピンクの唇）
+    const lipShape = new THREE.Shape();
+    lipShape.moveTo(-0.04, 0);
+    lipShape.quadraticCurveTo(0, -0.02, 0.04, 0);
+    lipShape.quadraticCurveTo(0, 0.01, -0.04, 0);
+    const lipGeo = new THREE.ShapeGeometry(lipShape);
+    const lipMat = this.materials.standard({ color: palette.lips, roughness: 0.4, side: THREE.DoubleSide });
+    const lips = new THREE.Mesh(lipGeo, lipMat);
+    lips.position.set(0, -0.12, 0.32);
+    lips.name = 'mouth';
+    headGroup.add(lips);
+
+    // === 髪の毛（金髪ロングヘア） ===
+    const hairGroup = new THREE.Group();
+    hairGroup.name = 'hair';
+
+    // 前髪
+    const bangsGeo = new THREE.SphereGeometry(0.38, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.45);
+    const hairMat = this.materials.standard({ color: palette.hair, roughness: 0.8 });
+    const bangs = new THREE.Mesh(bangsGeo, hairMat);
+    bangs.position.y = 0.15;
+    bangs.scale.set(1, 0.7, 1);
+    hairGroup.add(bangs);
+
+    // サイドヘア（左）
+    const sideHairGeo = new THREE.CylinderGeometry(0.1, 0.06, 0.6, 12);
+    const leftSideHair = new THREE.Mesh(sideHairGeo, hairMat.clone());
+    leftSideHair.position.set(-0.32, -0.15, 0.1);
+    leftSideHair.rotation.z = 0.2;
+    hairGroup.add(leftSideHair);
+
+    // サイドヘア（右）
+    const rightSideHair = new THREE.Mesh(sideHairGeo, hairMat.clone());
+    rightSideHair.position.set(0.32, -0.15, 0.1);
+    rightSideHair.rotation.z = -0.2;
+    hairGroup.add(rightSideHair);
+
+    // 後ろ髪（長いポニーテール風）
+    const backHairGeo = new THREE.CylinderGeometry(0.25, 0.15, 1.2, 16);
+    const backHair = new THREE.Mesh(backHairGeo, hairMat.clone());
+    backHair.position.set(0, -0.4, -0.2);
+    backHair.rotation.x = 0.2;
+    hairGroup.add(backHair);
+
+    // 髪の毛先（カール）
+    const curlGeo = new THREE.TorusGeometry(0.12, 0.05, 8, 16, Math.PI);
+    const leftCurl = new THREE.Mesh(curlGeo, hairMat.clone());
+    leftCurl.position.set(-0.25, -1.0, -0.15);
+    leftCurl.rotation.set(0, Math.PI / 2, 0);
+    hairGroup.add(leftCurl);
+
+    const rightCurl = new THREE.Mesh(curlGeo, hairMat.clone());
+    rightCurl.position.set(0.25, -1.0, -0.15);
+    rightCurl.rotation.set(0, -Math.PI / 2, 0);
+    hairGroup.add(rightCurl);
+
+    headGroup.add(hairGroup);
+
+    // === ティアラ（王冠） ===
+    const crownGroup = new THREE.Group();
+    crownGroup.name = 'crown';
+
+    // 王冠のベース
+    const crownBaseGeo = new THREE.TorusGeometry(0.2, 0.03, 8, 24);
+    const crownMat = this.materials.metal({ color: palette.crown, roughness: 0.2, metalness: 0.9 });
+    const crownBase = new THREE.Mesh(crownBaseGeo, crownMat);
+    crownBase.rotation.x = Math.PI / 2;
+    crownGroup.add(crownBase);
+
+    // 王冠の突起
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI - Math.PI / 2;
+      const spikeGeo = new THREE.ConeGeometry(0.03, 0.12, 6);
+      const spike = new THREE.Mesh(spikeGeo, crownMat.clone());
+      spike.position.set(
+        Math.sin(angle) * 0.18,
+        0.06,
+        Math.cos(angle) * 0.18
+      );
+      crownGroup.add(spike);
+    }
+
+    // 中央の大きな宝石
+    const centerGemGeo = new THREE.OctahedronGeometry(0.06, 0);
+    const centerGem = new THREE.Mesh(centerGemGeo, broochMat.clone());
+    centerGem.position.set(0, 0.08, 0.18);
+    centerGem.rotation.x = Math.PI / 4;
+    crownGroup.add(centerGem);
+
+    crownGroup.position.y = 0.35;
+    headGroup.add(crownGroup);
+
+    headGroup.position.set(0, 2.55, 0);
+    group.add(headGroup);
+
+    // === 腕 ===
+    const createArm = (isLeft) => {
+      const armGroup = new THREE.Group();
+      armGroup.name = isLeft ? 'leftArm' : 'rightArm';
+
+      // 上腕（肌色）
+      const upperArmGeo = new THREE.CylinderGeometry(0.06, 0.07, 0.3, 12);
+      const upperArmMat = this.materials.standard({ color: palette.skin, roughness: 0.7 });
+      const upperArm = new THREE.Mesh(upperArmGeo, upperArmMat);
+      upperArm.position.y = -0.15;
+      upperArm.castShadow = true;
+      armGroup.add(upperArm);
+
+      // 前腕（白い手袋）
+      const forearmGeo = new THREE.CylinderGeometry(0.055, 0.06, 0.35, 12);
+      const forearmMat = this.materials.standard({ color: palette.gloves, roughness: 0.5 });
+      const forearm = new THREE.Mesh(forearmGeo, forearmMat);
+      forearm.position.y = -0.48;
+      forearm.castShadow = true;
+      armGroup.add(forearm);
+
+      // 手（白い手袋）
+      const handGeo = new THREE.SphereGeometry(0.07, 12, 12);
+      const handMat = this.materials.standard({ color: palette.gloves, roughness: 0.5 });
+      const hand = new THREE.Mesh(handGeo, handMat);
+      hand.position.y = -0.7;
+      hand.scale.set(0.8, 1, 0.6);
+      armGroup.add(hand);
+
+      const x = isLeft ? -0.45 : 0.45;
+      armGroup.position.set(x, 1.95, 0);
+
+      return armGroup;
+    };
+
+    group.add(createArm(true));
+    group.add(createArm(false));
+
+    // === 脚（ドレスで隠れるが、足先だけ見える） ===
+    const createFoot = (isLeft) => {
+      const footGroup = new THREE.Group();
+      footGroup.name = isLeft ? 'leftLeg' : 'rightLeg';
+
+      // ハイヒール
+      const heelGeo = new THREE.BoxGeometry(0.12, 0.08, 0.22, 2, 2, 2);
+      this.roundEdges(heelGeo, 0.02);
+      const heelMat = this.materials.standard({ color: palette.shoes, roughness: 0.4 });
+      const heel = new THREE.Mesh(heelGeo, heelMat);
+      heel.position.y = 0.04;
+      footGroup.add(heel);
+
+      // ヒール部分
+      const heelBackGeo = new THREE.CylinderGeometry(0.02, 0.025, 0.08, 8);
+      const heelBack = new THREE.Mesh(heelBackGeo, heelMat.clone());
+      heelBack.position.set(0, 0.02, -0.08);
+      footGroup.add(heelBack);
+
+      // つま先
+      const toeGeo = new THREE.SphereGeometry(0.06, 12, 12, 0, Math.PI, 0, Math.PI);
+      const toe = new THREE.Mesh(toeGeo, heelMat.clone());
+      toe.position.set(0, 0.04, 0.1);
+      toe.rotation.x = -Math.PI / 2;
+      footGroup.add(toe);
+
+      const x = isLeft ? -0.15 : 0.15;
+      footGroup.position.set(x, 0.5, 0.1);
+
+      return footGroup;
+    };
+
+    group.add(createFoot(true));
+    group.add(createFoot(false));
+
+    // スケール適用
+    group.scale.set(scale, scale, scale);
+
+    group.userData.isPeach = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'peach',
+      name: 'ピーチ姫',
+      variant: variant,
+      defaultAnimation: 'peachIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**

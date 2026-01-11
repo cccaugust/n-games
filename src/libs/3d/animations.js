@@ -1916,6 +1916,169 @@ export class AnimationSystem {
             model.parts.head.rotation.z = Math.sin(cycle * 0.5) * 0.05;
           }
         }
+      },
+
+      // ========== ピーチ姫 アニメーション ==========
+      peachIdle: {
+        duration: 2.5,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 2.5;
+
+          // 優雅な呼吸
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.5;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.015;
+          }
+
+          // 頭の軽い傾き
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle * 0.5) * 0.03;
+            model.parts.head.rotation.y = Math.sin(cycle * 0.3) * 0.02;
+          }
+
+          // 腕の優雅な動き
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.15 + Math.sin(cycle) * 0.03;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.15 - Math.sin(cycle) * 0.03;
+          }
+
+          // ドレスのスカートが軽く揺れる
+          if (model.parts.body) {
+            model.parts.body.rotation.y = Math.sin(cycle * 0.5) * 0.02;
+          }
+        }
+      },
+
+      peachWalk: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 1.0;
+
+          // 優雅な上下動（小さめ）
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.5;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.04;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.02;
+          }
+
+          // 腕振り（控えめ）
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.2;
+            model.parts.leftArm.rotation.z = -0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.2;
+            model.parts.rightArm.rotation.z = 0.2;
+          }
+
+          // 頭の安定
+          if (model.parts.head) {
+            model.parts.head.rotation.z = -Math.sin(cycle) * 0.015;
+          }
+        }
+      },
+
+      peachWave: {
+        duration: 1.5,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.4;
+
+          // 右腕を上げて振る
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.PI * 0.6;
+            model.parts.rightArm.rotation.z = 0.5 + Math.sin(cycle) * 0.3;
+          }
+
+          // 左腕は自然に
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.2;
+          }
+
+          // 体を少し傾ける
+          if (model.parts.body) {
+            model.parts.body.rotation.z = -0.05;
+          }
+
+          // 頭を傾けて微笑む
+          if (model.parts.head) {
+            model.parts.head.rotation.z = -0.1;
+            model.parts.head.rotation.y = 0.1;
+          }
+        }
+      },
+
+      peachFloat: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 2.0;
+
+          // ふわふわ浮遊
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY || 0;
+            model.mesh.position.y = baseY + 0.5 + Math.sin(cycle) * 0.2;
+          }
+
+          // 体を少し後ろに傾ける
+          if (model.parts.body) {
+            model.parts.body.rotation.x = -0.1;
+          }
+
+          // ドレスが広がる
+          if (model.parts.body) {
+            model.parts.body.scale.x = 1.05;
+            model.parts.body.scale.z = 1.05;
+          }
+
+          // 腕を広げる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.5 + Math.sin(cycle * 0.5) * 0.1;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.5 - Math.sin(cycle * 0.5) * 0.1;
+          }
+        }
+      },
+
+      peachVictory: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.8;
+          const slowCycle = t * Math.PI * 2 / 2.0;
+
+          // 軽くジャンプ
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY || 0;
+            model.mesh.position.y = baseY + Math.abs(Math.sin(slowCycle)) * 0.15;
+          }
+
+          // くるっと回転
+          if (model.mesh) {
+            const baseRotY = model.mesh.userData?.baseRotY || 0;
+            model.mesh.rotation.y = baseRotY + (t / 2.0) * Math.PI * 2;
+          }
+
+          // 両手を胸の前で合わせる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -0.3;
+            model.parts.leftArm.rotation.z = 0.5;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -0.3;
+            model.parts.rightArm.rotation.z = -0.5;
+          }
+
+          // 嬉しそうに頭を傾ける
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+        }
       }
     };
   }
