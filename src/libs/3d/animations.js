@@ -1513,6 +1513,230 @@ export class AnimationSystem {
             });
           }
         }
+      },
+
+      // ========== インクリング/オクトリング専用 ==========
+      inklingIdle: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          // 軽やかな待機モーション
+          const bounce = Math.sin(t * 3) * 0.03;
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + bounce;
+          }
+
+          // 頭の軽い揺れ
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(t * 1.5) * 0.05;
+            model.parts.head.rotation.y = Math.sin(t * 0.8) * 0.08;
+          }
+
+          // 腕の自然な揺れ
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.1 + Math.sin(t * 1.2) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.1 + Math.sin(t * 1.2 + 0.5) * 0.05;
+          }
+        }
+      },
+
+      inklingWalk: {
+        duration: 0.6,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.6;
+
+          // 軽快な歩行
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.6;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = -Math.sin(cycle) * 0.6;
+          }
+
+          // 腕振り
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -Math.sin(cycle) * 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.4;
+          }
+
+          // 体のバウンス
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.abs(Math.sin(cycle)) * 0.08;
+          }
+
+          // 頭の揺れ
+          if (model.parts.head) {
+            model.parts.head.rotation.x = Math.sin(cycle * 2) * 0.05;
+          }
+        }
+      },
+
+      inklingShoot: {
+        duration: 0.4,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = Math.min(t / 0.4, 1);
+
+          // 右腕でシューター構え
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -1.2;
+            model.parts.rightArm.rotation.z = -0.3;
+
+            // 発射時の反動
+            if (progress > 0.2 && progress < 0.5) {
+              const recoil = Math.sin((progress - 0.2) / 0.3 * Math.PI) * 0.3;
+              model.parts.rightArm.rotation.x = -1.2 + recoil;
+            }
+          }
+
+          // 体を少し前傾
+          if (model.parts.body) {
+            model.parts.body.rotation.x = 0.1;
+          }
+        }
+      },
+
+      inklingVictory: {
+        duration: 1.5,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2;
+
+          // 元気なジャンプ
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.abs(Math.sin(cycle * 1.5)) * 0.25;
+          }
+
+          // 両腕を上げて振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -2.8 + Math.sin(cycle * 3) * 0.4;
+            model.parts.leftArm.rotation.z = 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -2.8 + Math.sin(cycle * 3 + Math.PI) * 0.4;
+            model.parts.rightArm.rotation.z = -0.4;
+          }
+
+          // 頭を左右に振る
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle * 2) * 0.15;
+          }
+        }
+      },
+
+      // ========== イカ専用 ==========
+      squidIdle: {
+        duration: 2.5,
+        loop: true,
+        update: (model, t, dt) => {
+          // ゆらゆら浮遊
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(t * 1.5) * 0.1;
+            model.parts.body.scale.x = 1 + Math.sin(t * 2) * 0.05;
+            model.parts.body.scale.z = 1 + Math.sin(t * 2 + 0.5) * 0.05;
+          }
+
+          // 触手のうねり
+          model.mesh.traverse(child => {
+            if (child.userData && child.userData.isTentacle) {
+              const offset = child.userData.tentacleIndex || 0;
+              child.rotation.x = Math.sin(t * 1.5 + offset) * 0.2;
+              child.rotation.z = Math.sin(t * 1.2 + offset * 0.5) * 0.15;
+            }
+          });
+        }
+      },
+
+      squidSwim: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.8;
+
+          // 体の収縮・膨張（推進）
+          if (model.parts.body) {
+            const pulse = Math.sin(cycle);
+            model.parts.body.scale.y = 1 + pulse * 0.15;
+            model.parts.body.scale.x = 1 - pulse * 0.08;
+            model.parts.body.scale.z = 1 - pulse * 0.08;
+          }
+
+          // 高速移動の上下動
+          if (model.mesh) {
+            model.mesh.position.y = model.mesh.userData.baseY + Math.sin(cycle * 2) * 0.05;
+          }
+        }
+      },
+
+      // ========== タコ専用 ==========
+      octopusIdle: {
+        duration: 3.0,
+        loop: true,
+        update: (model, t, dt) => {
+          // ゆったり浮遊
+          if (model.parts.body) {
+            model.parts.body.position.y = model.parts.body.userData.baseY + Math.sin(t * 1.2) * 0.12;
+            model.parts.body.rotation.y = Math.sin(t * 0.5) * 0.1;
+          }
+
+          // 8本の触手を個別に動かす
+          for (let i = 0; i < 8; i++) {
+            const tentacle = model.parts[`tentacle${i}`];
+            if (tentacle) {
+              const phase = (i / 8) * Math.PI * 2;
+              tentacle.rotation.x = Math.sin(t * 1.5 + phase) * 0.2;
+              tentacle.rotation.z = Math.sin(t * 1.2 + phase * 0.5) * 0.15;
+            }
+          }
+        }
+      },
+
+      octopusSwim: {
+        duration: 1.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 1.0;
+
+          // 水を吹き出す動き
+          if (model.parts.body) {
+            const pulse = Math.sin(cycle);
+            model.parts.body.scale.y = 0.85 + pulse * 0.1;
+            model.parts.body.scale.x = 1 - pulse * 0.05;
+          }
+
+          // 触手を後ろに流す
+          for (let i = 0; i < 8; i++) {
+            const tentacle = model.parts[`tentacle${i}`];
+            if (tentacle) {
+              const phase = (i / 8) * Math.PI * 2;
+              tentacle.rotation.x = 0.3 + Math.sin(cycle + phase) * 0.2;
+            }
+          }
+        }
+      },
+
+      octopusWave: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2;
+
+          // 触手でウェーブ
+          for (let i = 0; i < 8; i++) {
+            const tentacle = model.parts[`tentacle${i}`];
+            if (tentacle) {
+              const phase = (i / 8) * Math.PI * 2;
+              const wave = Math.sin(cycle * 2 - phase);
+              tentacle.rotation.y = wave * 0.3;
+              tentacle.position.y = 0.4 + wave * 0.1;
+            }
+          }
+        }
       }
     };
   }

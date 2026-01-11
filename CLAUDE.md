@@ -239,6 +239,10 @@ robot.update(deltaTime);
 - `cat` - 猫（tabby, black, white, calico）
 - `horse` - 馬（bay, white, black, palomino）
 - `frog` - カエル（green, blue, red, golden）
+- `inkling` - インクリング（orange, cyan, purple, pink, lime, yellow）★スプラトゥーン風
+- `squid` - イカ（orange, cyan, purple, pink, lime, yellow）★スプラトゥーン風
+- `octoling` - オクトリング（pink, teal, purple, gold）★スプラトゥーン風
+- `octopus` - タコ（pink, teal, purple, red）★スプラトゥーン風
 
 **アイテム（items）:**
 - `coin` - コイン（gold, silver, bronze）
@@ -258,6 +262,8 @@ robot.update(deltaTime);
 - `grass` - 草（green, tall, flowers）
 - `fence` - 柵（wood, stone, iron）
 - `portal` - ポータル（blue, purple, gold, dark）
+- `ink-splat` - インク飛沫（orange, cyan, purple, pink, lime, yellow）★スプラトゥーン風
+- `ink-tank` - インクタンク（orange, cyan, purple, pink）★スプラトゥーン風
 
 #### 3Dゲーム開発時のガイドライン
 

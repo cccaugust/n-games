@@ -41,6 +41,11 @@ export class ModelFactory {
       cat: (opts) => this.characters.createCat(opts),
       horse: (opts) => this.characters.createHorse(opts),
       frog: (opts) => this.characters.createFrog(opts),
+      // スプラトゥーン風キャラクター
+      inkling: (opts) => this.characters.createInkling(opts),
+      squid: (opts) => this.characters.createSquid(opts),
+      octoling: (opts) => this.characters.createOctoling(opts),
+      octopus: (opts) => this.characters.createOctopus(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
@@ -60,6 +65,9 @@ export class ModelFactory {
       grass: (opts) => this.props.createGrass(opts),
       fence: (opts) => this.props.createFence(opts),
       portal: (opts) => this.props.createPortal(opts),
+      // スプラトゥーン風プロップ
+      'ink-splat': (opts) => this.props.createInkSplat(opts),
+      'ink-tank': (opts) => this.props.createInkTank(opts),
     };
   }
 
