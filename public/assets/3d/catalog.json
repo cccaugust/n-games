@@ -1,0 +1,195 @@
+{
+  "version": "1.0.0",
+  "description": "N-Games 3D Asset Library - 高品質なゲーム用3Dモデルカタログ",
+  "categories": {
+    "characters": {
+      "name": "キャラクター",
+      "description": "プレイヤーや敵として使えるキャラクターモデル"
+    },
+    "items": {
+      "name": "アイテム",
+      "description": "収集物や装備品"
+    },
+    "props": {
+      "name": "オブジェクト",
+      "description": "環境装飾やステージ構成要素"
+    },
+    "effects": {
+      "name": "エフェクト",
+      "description": "パーティクルやビジュアルエフェクト"
+    }
+  },
+  "assets": [
+    {
+      "id": "robot",
+      "name": "ロボット",
+      "category": "characters",
+      "description": "汎用ロボットキャラクター。メカニカルなデザインで様々なゲームに対応",
+      "tags": ["player", "enemy", "sci-fi", "mechanical"],
+      "animations": ["idle", "walk", "attack", "damage", "victory"],
+      "variants": ["blue", "red", "green", "gold"]
+    },
+    {
+      "id": "slime",
+      "name": "スライム",
+      "category": "characters",
+      "description": "ぷるぷる動く半透明スライム。敵キャラの定番",
+      "tags": ["enemy", "fantasy", "cute"],
+      "animations": ["idle", "hop", "attack", "split", "merge"],
+      "variants": ["green", "blue", "red", "gold", "rainbow"]
+    },
+    {
+      "id": "knight",
+      "name": "騎士",
+      "category": "characters",
+      "description": "重装備の騎士。プレイヤーキャラに最適",
+      "tags": ["player", "fantasy", "warrior"],
+      "animations": ["idle", "walk", "run", "attack", "block", "victory"],
+      "variants": ["silver", "gold", "dark", "royal"]
+    },
+    {
+      "id": "mage",
+      "name": "魔法使い",
+      "category": "characters",
+      "description": "ローブを纏った魔法使い。魔法エフェクト付き",
+      "tags": ["player", "fantasy", "magic"],
+      "animations": ["idle", "walk", "cast", "channel", "teleport"],
+      "variants": ["blue", "red", "purple", "white"]
+    },
+    {
+      "id": "coin",
+      "name": "コイン",
+      "category": "items",
+      "description": "回転する金貨。収集アイテムの定番",
+      "tags": ["collectible", "currency", "shiny"],
+      "animations": ["spin", "collect", "shine"],
+      "variants": ["gold", "silver", "bronze"]
+    },
+    {
+      "id": "heart",
+      "name": "ハート",
+      "category": "items",
+      "description": "脈打つハート。回復アイテムに",
+      "tags": ["health", "collectible", "cute"],
+      "animations": ["beat", "collect", "glow"],
+      "variants": ["red", "pink", "gold"]
+    },
+    {
+      "id": "star",
+      "name": "スター",
+      "category": "items",
+      "description": "輝く星。パワーアップやボーナスに",
+      "tags": ["powerup", "collectible", "shiny"],
+      "animations": ["spin", "twinkle", "collect"],
+      "variants": ["gold", "silver", "rainbow"]
+    },
+    {
+      "id": "chest",
+      "name": "宝箱",
+      "category": "items",
+      "description": "開閉できる宝箱。報酬演出に",
+      "tags": ["container", "treasure", "fantasy"],
+      "animations": ["idle", "shake", "open", "glow"],
+      "variants": ["wood", "iron", "gold", "legendary"]
+    },
+    {
+      "id": "sword",
+      "name": "剣",
+      "category": "items",
+      "description": "両刃の剣。近接武器の基本",
+      "tags": ["weapon", "melee", "fantasy"],
+      "animations": ["idle", "swing", "shine"],
+      "variants": ["iron", "steel", "gold", "legendary"]
+    },
+    {
+      "id": "staff",
+      "name": "魔法の杖",
+      "category": "items",
+      "description": "宝石が輝く魔法の杖",
+      "tags": ["weapon", "magic", "fantasy"],
+      "animations": ["idle", "cast", "glow"],
+      "variants": ["fire", "ice", "lightning", "arcane"]
+    },
+    {
+      "id": "potion",
+      "name": "ポーション",
+      "category": "items",
+      "description": "泡立つ魔法の薬。回復やバフに",
+      "tags": ["consumable", "health", "magic"],
+      "animations": ["idle", "bubble", "drink"],
+      "variants": ["health", "mana", "speed", "power"]
+    },
+    {
+      "id": "tree",
+      "name": "木",
+      "category": "props",
+      "description": "葉が揺れるファンタジーな木",
+      "tags": ["nature", "environment", "forest"],
+      "animations": ["sway", "leaves_fall"],
+      "variants": ["oak", "pine", "sakura", "autumn"]
+    },
+    {
+      "id": "rock",
+      "name": "岩",
+      "category": "props",
+      "description": "複雑な形状の自然な岩",
+      "tags": ["nature", "environment", "obstacle"],
+      "animations": ["none"],
+      "variants": ["gray", "brown", "mossy", "crystal"]
+    },
+    {
+      "id": "crate",
+      "name": "木箱",
+      "category": "props",
+      "description": "破壊可能な木箱",
+      "tags": ["container", "breakable", "obstacle"],
+      "animations": ["idle", "shake", "break"],
+      "variants": ["wood", "metal", "explosive"]
+    },
+    {
+      "id": "crystal",
+      "name": "クリスタル",
+      "category": "props",
+      "description": "輝く魔法のクリスタル",
+      "tags": ["magic", "environment", "shiny"],
+      "animations": ["glow", "pulse", "shatter"],
+      "variants": ["blue", "red", "green", "purple", "rainbow"]
+    },
+    {
+      "id": "torch",
+      "name": "松明",
+      "category": "props",
+      "description": "燃える松明。ダンジョンの照明に",
+      "tags": ["light", "environment", "dungeon"],
+      "animations": ["burn", "flicker"],
+      "variants": ["wall", "standing", "magic"]
+    },
+    {
+      "id": "grass",
+      "name": "草",
+      "category": "props",
+      "description": "風に揺れる草むら",
+      "tags": ["nature", "environment", "decoration"],
+      "animations": ["sway"],
+      "variants": ["green", "tall", "flowers"]
+    },
+    {
+      "id": "fence",
+      "name": "柵",
+      "category": "props",
+      "description": "木製の柵。区切りや装飾に",
+      "tags": ["barrier", "environment", "decoration"],
+      "animations": ["none"],
+      "variants": ["wood", "stone", "iron"]
+    },
+    {
+      "id": "portal",
+      "name": "ポータル",
+      "category": "props",
+      "description": "異世界への扉。ワープポイントに",
+      "tags": ["magic", "teleport", "effect"],
+      "animations": ["idle", "activate", "teleport"],
+      "variants": ["blue", "purple", "gold", "dark"]
+    }
+  ]
+}

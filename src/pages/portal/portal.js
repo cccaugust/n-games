@@ -40,6 +40,14 @@ const games = [
     link: '/games/bomberman/'
   },
   {
+    id: '3d-assets-library',
+    title: '3Dアセットライブラリ',
+    desc: '3Dモデルを自由に配置して遊ぼう！🎮',
+    color: '#6366f1',
+    icon: '🏰',
+    link: '/games/3d-assets-library/'
+  },
+  {
     id: 'voice-beat-lab',
     title: 'ボイスビートラボ',
     desc: 'こえでドラム！ヘンテコ曲づくり🎤',
