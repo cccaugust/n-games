@@ -58,15 +58,17 @@ class AssetLibraryGame {
   }
 
   async loadCatalog() {
+    // GitHub Pages対応: 相対パスを使用
+    const catalogPath = '../../assets/3d/catalog.json';
     try {
-      const res = await fetch('/assets/3d/catalog.json');
+      const res = await fetch(catalogPath);
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
       this.catalog = await res.json();
       console.log('カタログ読み込み成功:', this.catalog.assets?.length || 0, 'アセット');
     } catch (e) {
-      console.error('カタログ読み込みエラー:', e);
+      console.error('カタログ読み込みエラー:', catalogPath, e);
       this.catalog = { assets: [] };
     }
   }
