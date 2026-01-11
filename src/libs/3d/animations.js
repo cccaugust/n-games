@@ -1737,6 +1737,185 @@ export class AnimationSystem {
             }
           }
         }
+      },
+
+      // ========== マリオ アニメーション ==========
+      marioIdle: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 2.0;
+
+          // 軽い呼吸
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.2;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.02;
+            model.parts.body.scale.x = 1 + Math.sin(cycle) * 0.01;
+            model.parts.body.scale.z = 1 - Math.sin(cycle) * 0.01;
+          }
+
+          // 頭の軽い動き
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.5) * 0.05;
+          }
+
+          // 腕の軽いスイング
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.05;
+          }
+        }
+      },
+
+      marioWalk: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.8;
+
+          // 体の上下動
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.2;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.08;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.03;
+          }
+
+          // 頭の安定
+          if (model.parts.head) {
+            model.parts.head.rotation.z = -Math.sin(cycle) * 0.02;
+          }
+
+          // 腕振り
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.5;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.5;
+          }
+
+          // 脚の動き
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -Math.sin(cycle) * 0.5;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle) * 0.5;
+          }
+        }
+      },
+
+      marioRun: {
+        duration: 0.4,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.4;
+
+          // 体の大きな上下動
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.2;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.15;
+            model.parts.body.rotation.x = 0.1; // 前傾姿勢
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.05;
+          }
+
+          // 頭の安定
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.05;
+          }
+
+          // 激しい腕振り
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.8;
+            model.parts.leftArm.rotation.z = -0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.8;
+            model.parts.rightArm.rotation.z = 0.2;
+          }
+
+          // 大きな脚の動き
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -Math.sin(cycle) * 0.9;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle) * 0.9;
+          }
+        }
+      },
+
+      marioJump: {
+        duration: 1.0,
+        loop: false,
+        update: (model, t, dt) => {
+          const jumpProgress = t / 1.0;
+          const jumpHeight = Math.sin(jumpProgress * Math.PI) * 1.5;
+
+          // 体全体のジャンプ
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY || 0;
+            model.mesh.position.y = baseY + jumpHeight;
+          }
+
+          // ジャンプ中のポーズ
+          if (model.parts.body) {
+            model.parts.body.rotation.x = jumpProgress < 0.5 ? -0.1 : 0.1;
+          }
+
+          // 腕を上げる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -Math.PI * 0.3 * Math.sin(jumpProgress * Math.PI);
+            model.parts.leftArm.rotation.z = -0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.PI * 0.5 * Math.sin(jumpProgress * Math.PI);
+            model.parts.rightArm.rotation.z = 0.3;
+          }
+
+          // 脚を曲げる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = 0.3 * Math.sin(jumpProgress * Math.PI);
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = -0.2 * Math.sin(jumpProgress * Math.PI);
+          }
+        }
+      },
+
+      marioVictory: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.5;
+          const jumpCycle = t * Math.PI * 2 / 2.0;
+
+          // 小さなジャンプ
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY || 0;
+            model.mesh.position.y = baseY + Math.abs(Math.sin(jumpCycle)) * 0.3;
+          }
+
+          // 体の動き
+          if (model.parts.body) {
+            model.parts.body.rotation.y = Math.sin(cycle * 0.25) * 0.1;
+          }
+
+          // 両手を上げて振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -Math.PI * 0.6;
+            model.parts.leftArm.rotation.z = -0.3 + Math.sin(cycle) * 0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.PI * 0.6;
+            model.parts.rightArm.rotation.z = 0.3 - Math.sin(cycle) * 0.2;
+          }
+
+          // 頭を左右に振る
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.5) * 0.15;
+            model.parts.head.rotation.z = Math.sin(cycle * 0.5) * 0.05;
+          }
+        }
       }
     };
   }

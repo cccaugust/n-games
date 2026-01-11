@@ -174,6 +174,15 @@
       "variants": ["red", "blue", "black", "silver"]
     },
     {
+      "id": "mario",
+      "name": "マリオ",
+      "category": "characters",
+      "description": "マリオ風の配管工キャラクター。赤い帽子とオーバーオール、大きな口髭が特徴。プラットフォームゲームの主人公に最適",
+      "tags": ["player", "mario", "platformer", "hero", "plumber", "retro"],
+      "animations": ["marioIdle", "marioWalk", "marioRun", "marioJump", "marioVictory"],
+      "variants": ["red", "green", "fire", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

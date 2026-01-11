@@ -60,6 +60,8 @@ export class ModelFactory {
       rito: (opts) => this.characters.createRito(opts),
       korok: (opts) => this.characters.createKorok(opts),
       'great-fairy': (opts) => this.characters.createGreatFairy(opts),
+      // マリオ風キャラクター
+      mario: (opts) => this.characters.createMario(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
