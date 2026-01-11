@@ -6477,6 +6477,354 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  /**
+   * ゴロン族 - 岩のような体を持つ種族
+   * バリアント: brown, gray, elder, fire
+   */
+  createGoron(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'brown';
+    const group = new THREE.Group();
+
+    // カラーパレット
+    const colors = {
+      brown: {
+        skin: 0x8b6914,
+        rock: 0x5a4a3a,
+        belly: 0xd4a574,
+        markings: 0x4a3a2a,
+        eyes: 0x2a1a0a
+      },
+      gray: {
+        skin: 0x6a6a6a,
+        rock: 0x4a4a4a,
+        belly: 0x9a9a9a,
+        markings: 0x3a3a3a,
+        eyes: 0x1a1a1a
+      },
+      elder: {
+        skin: 0x7a5a2a,
+        rock: 0x4a3a2a,
+        belly: 0xc4956a,
+        markings: 0xffd700,
+        eyes: 0x2a1a0a
+      },
+      fire: {
+        skin: 0x8b4513,
+        rock: 0x5a2a0a,
+        belly: 0xff6b35,
+        markings: 0xff4500,
+        eyes: 0xff0000
+      }
+    };
+
+    const palette = colors[variant] || colors.brown;
+
+    // スケール（ゴロン族は大きい）
+    const scale = variant === 'elder' ? 1.3 : 1.2;
+
+    // マテリアル
+    const skinMat = this.materials.standard({
+      color: palette.skin,
+      roughness: 0.9,
+      metalness: 0.1
+    });
+
+    const rockMat = this.materials.standard({
+      color: palette.rock,
+      roughness: 1.0,
+      metalness: 0.0
+    });
+
+    const bellyMat = this.materials.standard({
+      color: palette.belly,
+      roughness: 0.7,
+      metalness: 0.0
+    });
+
+    // === 胴体（非常に丸い） ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // メイン胴体（球形）
+    const bodyGeo = new THREE.SphereGeometry(0.9, 24, 24);
+    const body = new THREE.Mesh(bodyGeo, skinMat);
+    body.scale.set(1, 0.95, 0.9);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    bodyGroup.add(body);
+
+    // お腹（明るい色の部分）
+    const bellyGeo = new THREE.SphereGeometry(0.6, 20, 20);
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.position.set(0, -0.1, 0.45);
+    belly.scale.set(0.9, 0.85, 0.5);
+    bodyGroup.add(belly);
+
+    // 背中の岩（ゴツゴツした岩の塊）
+    const createBackRock = (x, y, z, size) => {
+      const rockGeo = new THREE.DodecahedronGeometry(size, 0);
+      const rock = new THREE.Mesh(rockGeo, rockMat);
+      rock.position.set(x, y, z);
+      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      rock.castShadow = true;
+      return rock;
+    };
+
+    // 背中に複数の岩を配置
+    bodyGroup.add(createBackRock(0, 0.3, -0.7, 0.25));
+    bodyGroup.add(createBackRock(-0.3, 0.2, -0.6, 0.2));
+    bodyGroup.add(createBackRock(0.3, 0.2, -0.6, 0.2));
+    bodyGroup.add(createBackRock(0, 0.5, -0.5, 0.18));
+    bodyGroup.add(createBackRock(-0.2, 0.4, -0.55, 0.15));
+    bodyGroup.add(createBackRock(0.2, 0.4, -0.55, 0.15));
+
+    // 肩の岩
+    bodyGroup.add(createBackRock(-0.7, 0.2, -0.2, 0.22));
+    bodyGroup.add(createBackRock(0.7, 0.2, -0.2, 0.22));
+
+    bodyGroup.position.set(0, 1.2, 0);
+    group.add(bodyGroup);
+
+    // === 頭（丸い） ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 頭部（岩のようにゴツゴツ）
+    const headGeo = new THREE.SphereGeometry(0.5, 20, 20);
+    const head = new THREE.Mesh(headGeo, skinMat.clone());
+    head.scale.set(1, 0.9, 0.95);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // 額の岩
+    const foreheadRockGeo = new THREE.DodecahedronGeometry(0.15, 0);
+    const foreheadRock = new THREE.Mesh(foreheadRockGeo, rockMat.clone());
+    foreheadRock.position.set(0, 0.3, 0.2);
+    foreheadRock.rotation.set(0.3, 0, 0);
+    headGroup.add(foreheadRock);
+
+    // 頭頂の小さな岩
+    const topRockGeo = new THREE.DodecahedronGeometry(0.1, 0);
+    const topRock = new THREE.Mesh(topRockGeo, rockMat.clone());
+    topRock.position.set(0, 0.45, 0);
+    headGroup.add(topRock);
+
+    // 目
+    const eyeWhiteGeo = new THREE.SphereGeometry(0.1, 12, 12);
+    const eyeWhiteMat = this.materials.standard({ color: 0xffffff, roughness: 0.3 });
+    const eyePupilGeo = new THREE.SphereGeometry(0.05, 10, 10);
+    const eyePupilMat = this.materials.standard({ color: palette.eyes, roughness: 0.2 });
+
+    const createEye = (isLeft) => {
+      const eyeGroup = new THREE.Group();
+      const eyeWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+      eyeWhite.scale.set(1, 0.8, 0.6);
+      eyeGroup.add(eyeWhite);
+
+      const pupil = new THREE.Mesh(eyePupilGeo, eyePupilMat);
+      pupil.position.z = 0.06;
+      eyeGroup.add(pupil);
+
+      eyeGroup.position.set(isLeft ? -0.18 : 0.18, 0.05, 0.4);
+      return eyeGroup;
+    };
+
+    headGroup.add(createEye(true));
+    headGroup.add(createEye(false));
+
+    // 眉（太い岩のような眉）
+    const browGeo = new THREE.BoxGeometry(0.15, 0.06, 0.08);
+    const browMat = this.materials.standard({ color: palette.rock, roughness: 0.9 });
+
+    const leftBrow = new THREE.Mesh(browGeo, browMat);
+    leftBrow.position.set(-0.18, 0.18, 0.38);
+    leftBrow.rotation.z = 0.2;
+    headGroup.add(leftBrow);
+
+    const rightBrow = new THREE.Mesh(browGeo, browMat.clone());
+    rightBrow.position.set(0.18, 0.18, 0.38);
+    rightBrow.rotation.z = -0.2;
+    headGroup.add(rightBrow);
+
+    // 鼻（大きくて丸い）
+    const noseGeo = new THREE.SphereGeometry(0.12, 12, 12);
+    const nose = new THREE.Mesh(noseGeo, skinMat.clone());
+    nose.position.set(0, -0.05, 0.48);
+    nose.scale.set(1, 0.8, 0.7);
+    headGroup.add(nose);
+
+    // 口（にっこり）
+    const mouthShape = new THREE.Shape();
+    mouthShape.moveTo(-0.15, 0);
+    mouthShape.quadraticCurveTo(0, -0.1, 0.15, 0);
+
+    const mouthGeo = new THREE.ShapeGeometry(mouthShape);
+    const mouthMat = this.materials.standard({ color: 0x4a2a1a, roughness: 0.5 });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, -0.22, 0.44);
+    headGroup.add(mouth);
+
+    // 長老の場合、白い髭を追加
+    if (variant === 'elder') {
+      const beardGeo = new THREE.ConeGeometry(0.2, 0.4, 8);
+      const beardMat = this.materials.standard({ color: 0xeeeeee, roughness: 0.8 });
+      const beard = new THREE.Mesh(beardGeo, beardMat);
+      beard.position.set(0, -0.4, 0.3);
+      beard.rotation.x = 0.3;
+      headGroup.add(beard);
+    }
+
+    headGroup.position.set(0, 2.3, 0.1);
+    group.add(headGroup);
+
+    // === 腕（太くて力強い） ===
+    const createArm = (isLeft) => {
+      const armGroup = new THREE.Group();
+      armGroup.name = isLeft ? 'leftArm' : 'rightArm';
+
+      // 上腕（非常に太い）
+      const upperArmGeo = new THREE.CylinderGeometry(0.22, 0.25, 0.5, 12);
+      const upperArm = new THREE.Mesh(upperArmGeo, skinMat.clone());
+      upperArm.position.y = -0.25;
+      upperArm.castShadow = true;
+      armGroup.add(upperArm);
+
+      // 肘の岩
+      const elbowRockGeo = new THREE.DodecahedronGeometry(0.1, 0);
+      const elbowRock = new THREE.Mesh(elbowRockGeo, rockMat.clone());
+      elbowRock.position.set(isLeft ? -0.15 : 0.15, -0.5, -0.1);
+      armGroup.add(elbowRock);
+
+      // 前腕
+      const forearmGeo = new THREE.CylinderGeometry(0.18, 0.2, 0.45, 12);
+      const forearm = new THREE.Mesh(forearmGeo, skinMat.clone());
+      forearm.position.y = -0.72;
+      forearm.castShadow = true;
+      armGroup.add(forearm);
+
+      // 手（大きくてゴツい）
+      const handGeo = new THREE.SphereGeometry(0.2, 12, 12);
+      const hand = new THREE.Mesh(handGeo, skinMat.clone());
+      hand.position.y = -1.0;
+      hand.scale.set(1, 0.7, 0.9);
+      armGroup.add(hand);
+
+      // 指（太い3本指）
+      for (let i = 0; i < 3; i++) {
+        const fingerGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.15, 8);
+        const finger = new THREE.Mesh(fingerGeo, skinMat.clone());
+        finger.position.set((i - 1) * 0.1, -1.15, 0.08);
+        finger.rotation.x = 0.4;
+        armGroup.add(finger);
+      }
+
+      const x = isLeft ? -0.85 : 0.85;
+      armGroup.position.set(x, 1.5, 0);
+      armGroup.rotation.z = isLeft ? 0.2 : -0.2;
+
+      return armGroup;
+    };
+
+    group.add(createArm(true));
+    group.add(createArm(false));
+
+    // === 脚（短くて太い） ===
+    const createLeg = (isLeft) => {
+      const legGroup = new THREE.Group();
+      legGroup.name = isLeft ? 'leftLeg' : 'rightLeg';
+
+      // 太もも（非常に太い）
+      const thighGeo = new THREE.CylinderGeometry(0.25, 0.22, 0.35, 12);
+      const thigh = new THREE.Mesh(thighGeo, skinMat.clone());
+      thigh.position.y = -0.18;
+      thigh.castShadow = true;
+      legGroup.add(thigh);
+
+      // 膝の岩
+      const kneeRockGeo = new THREE.DodecahedronGeometry(0.08, 0);
+      const kneeRock = new THREE.Mesh(kneeRockGeo, rockMat.clone());
+      kneeRock.position.set(0, -0.38, 0.15);
+      legGroup.add(kneeRock);
+
+      // 脛
+      const shinGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.3, 12);
+      const shin = new THREE.Mesh(shinGeo, skinMat.clone());
+      shin.position.y = -0.5;
+      shin.castShadow = true;
+      legGroup.add(shin);
+
+      // 足（大きくて平ら）
+      const footGeo = new THREE.SphereGeometry(0.2, 12, 12);
+      const foot = new THREE.Mesh(footGeo, skinMat.clone());
+      foot.position.set(0, -0.7, 0.08);
+      foot.scale.set(1.2, 0.4, 1.4);
+      legGroup.add(foot);
+
+      // 足の指（2本の太い指）
+      for (let i = 0; i < 2; i++) {
+        const toeGeo = new THREE.SphereGeometry(0.08, 8, 8);
+        const toe = new THREE.Mesh(toeGeo, skinMat.clone());
+        toe.position.set((i - 0.5) * 0.15, -0.72, 0.25);
+        toe.scale.set(1, 0.6, 1.2);
+        legGroup.add(toe);
+      }
+
+      const x = isLeft ? -0.35 : 0.35;
+      legGroup.position.set(x, 0.35, 0);
+
+      return legGroup;
+    };
+
+    group.add(createLeg(true));
+    group.add(createLeg(false));
+
+    // === 模様（ゴロンの特徴的な模様） ===
+    const markingMat = this.materials.standard({
+      color: palette.markings,
+      roughness: 0.8,
+      metalness: variant === 'elder' ? 0.5 : 0.0
+    });
+
+    // 胸の模様（渦巻き風）
+    const spiralShape = new THREE.Shape();
+    spiralShape.absarc(0, 0, 0.15, 0, Math.PI * 1.5, false);
+    spiralShape.absarc(0.05, 0, 0.1, Math.PI * 1.5, 0, true);
+
+    const spiralGeo = new THREE.ShapeGeometry(spiralShape);
+    const spiral = new THREE.Mesh(spiralGeo, markingMat);
+    spiral.position.set(0, 1.1, 0.88);
+    group.add(spiral);
+
+    // ファイアゴロンの場合、体が発光
+    if (variant === 'fire') {
+      const glowGeo = new THREE.SphereGeometry(0.95, 20, 20);
+      const glowMat = this.materials.standard({
+        color: 0xff4500,
+        emissive: 0xff2200,
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.3
+      });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.set(0, 1.2, 0);
+      group.add(glow);
+    }
+
+    // スケール適用
+    group.scale.set(scale, scale, scale);
+
+    group.userData.isGoron = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'goron',
+      name: 'ゴロン族',
+      variant: variant,
+      defaultAnimation: 'goronIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**
