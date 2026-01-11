@@ -56,6 +56,7 @@ export class ModelFactory {
       hinox: (opts) => this.characters.createHinox(opts),
       zora: (opts) => this.characters.createZora(opts),
       goron: (opts) => this.characters.createGoron(opts),
+      gerudo: (opts) => this.characters.createGerudo(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

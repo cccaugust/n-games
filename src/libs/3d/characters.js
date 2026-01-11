@@ -6825,6 +6825,426 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  /**
+   * ゲルド族 - 砂漠の女戦士
+   * バリアント: warrior, chief, vai, thunder
+   */
+  createGerudo(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'warrior';
+    const group = new THREE.Group();
+
+    // カラーパレット
+    const colors = {
+      warrior: {
+        skin: 0xc68642,
+        hair: 0xcc3300,
+        outfit: 0x2266aa,
+        accent: 0xffd700,
+        jewelry: 0xffd700,
+        eyes: 0xffaa00
+      },
+      chief: {
+        skin: 0xb5651d,
+        hair: 0xaa2200,
+        outfit: 0x880088,
+        accent: 0xffd700,
+        jewelry: 0xffd700,
+        eyes: 0xff6600
+      },
+      vai: {
+        skin: 0xd4956a,
+        hair: 0xff4422,
+        outfit: 0x22aa66,
+        accent: 0x44ddaa,
+        jewelry: 0xc0c0c0,
+        eyes: 0x44aa88
+      },
+      thunder: {
+        skin: 0xc68642,
+        hair: 0xff6600,
+        outfit: 0x00aacc,
+        accent: 0x00ffff,
+        jewelry: 0x00ffff,
+        eyes: 0x00ddff
+      }
+    };
+
+    const palette = colors[variant] || colors.warrior;
+
+    // スケール（ゲルドは背が高い）
+    const scale = variant === 'chief' ? 1.15 : 1.1;
+
+    // マテリアル
+    const skinMat = this.materials.standard({
+      color: palette.skin,
+      roughness: 0.6,
+      metalness: 0.1
+    });
+
+    const hairMat = this.materials.standard({
+      color: palette.hair,
+      roughness: 0.4,
+      metalness: 0.2
+    });
+
+    const outfitMat = this.materials.standard({
+      color: palette.outfit,
+      roughness: 0.5,
+      metalness: 0.1
+    });
+
+    const jewelryMat = this.materials.metal({
+      color: palette.jewelry,
+      roughness: 0.2,
+      metalness: 0.9
+    });
+
+    // === 胴体 ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // 胴体（スリムで引き締まった体型）
+    const torsoGeo = new THREE.CylinderGeometry(0.28, 0.25, 0.7, 16);
+    const torso = new THREE.Mesh(torsoGeo, skinMat);
+    torso.castShadow = true;
+    torso.receiveShadow = true;
+    bodyGroup.add(torso);
+
+    // 腹部（引き締まった腹筋）
+    const absGeo = new THREE.SphereGeometry(0.24, 16, 16);
+    const abs = new THREE.Mesh(absGeo, skinMat.clone());
+    abs.position.set(0, -0.15, 0.08);
+    abs.scale.set(1, 0.7, 0.6);
+    bodyGroup.add(abs);
+
+    // ビキニトップ/胸当て
+    const topGeo = new THREE.CylinderGeometry(0.3, 0.28, 0.2, 16);
+    const top = new THREE.Mesh(topGeo, outfitMat);
+    top.position.set(0, 0.25, 0);
+    top.castShadow = true;
+    bodyGroup.add(top);
+
+    // 胸の装飾
+    const chestOrnamentGeo = new THREE.TorusGeometry(0.08, 0.02, 8, 16);
+    const chestOrnament = new THREE.Mesh(chestOrnamentGeo, jewelryMat);
+    chestOrnament.position.set(0, 0.25, 0.28);
+    chestOrnament.rotation.x = Math.PI / 2;
+    bodyGroup.add(chestOrnament);
+
+    // 腰布/サロン
+    const waistClothGeo = new THREE.CylinderGeometry(0.32, 0.4, 0.35, 16, 1, true);
+    const waistCloth = new THREE.Mesh(waistClothGeo, outfitMat.clone());
+    waistCloth.position.set(0, -0.5, 0);
+    waistCloth.castShadow = true;
+    bodyGroup.add(waistCloth);
+
+    // 腰ベルト
+    const beltGeo = new THREE.TorusGeometry(0.28, 0.03, 8, 24);
+    const belt = new THREE.Mesh(beltGeo, jewelryMat.clone());
+    belt.position.set(0, -0.32, 0);
+    belt.rotation.x = Math.PI / 2;
+    bodyGroup.add(belt);
+
+    // ベルトの宝石
+    const beltGemGeo = new THREE.OctahedronGeometry(0.05);
+    const beltGemMat = this.materials.crystal({ color: palette.accent });
+    const beltGem = new THREE.Mesh(beltGemGeo, beltGemMat);
+    beltGem.position.set(0, -0.32, 0.3);
+    bodyGroup.add(beltGem);
+
+    bodyGroup.position.set(0, 1.35, 0);
+    group.add(bodyGroup);
+
+    // === 頭 ===
+    const headGroup = new THREE.Group();
+    headGroup.name = 'head';
+
+    // 頭部
+    const headGeo = new THREE.SphereGeometry(0.28, 20, 20);
+    const head = new THREE.Mesh(headGeo, skinMat.clone());
+    head.scale.set(1, 1.1, 0.95);
+    head.castShadow = true;
+    headGroup.add(head);
+
+    // 特徴的な鼻（鷲鼻）
+    const noseGeo = new THREE.ConeGeometry(0.04, 0.12, 8);
+    const nose = new THREE.Mesh(noseGeo, skinMat.clone());
+    nose.position.set(0, -0.02, 0.26);
+    nose.rotation.x = -0.3;
+    headGroup.add(nose);
+
+    // 目
+    const eyeGeo = new THREE.SphereGeometry(0.05, 12, 12);
+    const eyeMat = this.materials.standard({ color: palette.eyes, emissive: palette.eyes, emissiveIntensity: 0.2 });
+    const eyeWhiteMat = this.materials.standard({ color: 0xffffff, roughness: 0.3 });
+
+    const createEye = (isLeft) => {
+      const eyeGroup = new THREE.Group();
+
+      // 白目
+      const eyeWhite = new THREE.Mesh(eyeGeo, eyeWhiteMat);
+      eyeWhite.scale.set(1, 0.6, 0.5);
+      eyeGroup.add(eyeWhite);
+
+      // 瞳
+      const pupilGeo = new THREE.SphereGeometry(0.025, 10, 10);
+      const pupil = new THREE.Mesh(pupilGeo, eyeMat);
+      pupil.position.z = 0.025;
+      eyeGroup.add(pupil);
+
+      eyeGroup.position.set(isLeft ? -0.1 : 0.1, 0.05, 0.22);
+      return eyeGroup;
+    };
+
+    headGroup.add(createEye(true));
+    headGroup.add(createEye(false));
+
+    // アイライン（特徴的なメイク）
+    const eyelinerGeo = new THREE.BoxGeometry(0.12, 0.015, 0.01);
+    const eyelinerMat = this.materials.standard({ color: 0x1a1a1a });
+
+    const leftLiner = new THREE.Mesh(eyelinerGeo, eyelinerMat);
+    leftLiner.position.set(-0.1, 0.02, 0.26);
+    leftLiner.rotation.z = 0.1;
+    headGroup.add(leftLiner);
+
+    const rightLiner = new THREE.Mesh(eyelinerGeo, eyelinerMat.clone());
+    rightLiner.position.set(0.1, 0.02, 0.26);
+    rightLiner.rotation.z = -0.1;
+    headGroup.add(rightLiner);
+
+    // 眉
+    const browGeo = new THREE.BoxGeometry(0.08, 0.02, 0.02);
+    const browMat = this.materials.standard({ color: palette.hair, roughness: 0.5 });
+
+    const leftBrow = new THREE.Mesh(browGeo, browMat);
+    leftBrow.position.set(-0.1, 0.12, 0.24);
+    leftBrow.rotation.z = 0.15;
+    headGroup.add(leftBrow);
+
+    const rightBrow = new THREE.Mesh(browGeo, browMat.clone());
+    rightBrow.position.set(0.1, 0.12, 0.24);
+    rightBrow.rotation.z = -0.15;
+    headGroup.add(rightBrow);
+
+    // 唇
+    const lipsGeo = new THREE.TorusGeometry(0.04, 0.015, 8, 12, Math.PI);
+    const lipsMat = this.materials.standard({ color: 0x994444, roughness: 0.4 });
+    const lips = new THREE.Mesh(lipsGeo, lipsMat);
+    lips.position.set(0, -0.12, 0.23);
+    lips.rotation.x = Math.PI;
+    headGroup.add(lips);
+
+    // 髪（ポニーテール風）
+    const hairBaseGeo = new THREE.SphereGeometry(0.3, 16, 16);
+    const hairBase = new THREE.Mesh(hairBaseGeo, hairMat);
+    hairBase.position.set(0, 0.05, -0.05);
+    hairBase.scale.set(1, 1, 0.9);
+    headGroup.add(hairBase);
+
+    // ポニーテール
+    const ponytailGeo = new THREE.CylinderGeometry(0.08, 0.04, 0.6, 12);
+    const ponytail = new THREE.Mesh(ponytailGeo, hairMat.clone());
+    ponytail.position.set(0, -0.1, -0.3);
+    ponytail.rotation.x = 0.5;
+    headGroup.add(ponytail);
+
+    // 髪飾り（金の輪）
+    const hairRingGeo = new THREE.TorusGeometry(0.1, 0.015, 8, 16);
+    const hairRing = new THREE.Mesh(hairRingGeo, jewelryMat.clone());
+    hairRing.position.set(0, 0.15, -0.28);
+    hairRing.rotation.x = 0.5;
+    headGroup.add(hairRing);
+
+    // 額の宝石
+    const foreheadGemGeo = new THREE.OctahedronGeometry(0.04);
+    const foreheadGem = new THREE.Mesh(foreheadGemGeo, beltGemMat.clone());
+    foreheadGem.position.set(0, 0.2, 0.26);
+    foreheadGem.rotation.x = Math.PI / 4;
+    headGroup.add(foreheadGem);
+
+    // イヤリング
+    const earringGeo = new THREE.TorusGeometry(0.04, 0.01, 8, 12);
+    const leftEarring = new THREE.Mesh(earringGeo, jewelryMat.clone());
+    leftEarring.position.set(-0.28, -0.05, 0);
+    leftEarring.rotation.y = Math.PI / 2;
+    headGroup.add(leftEarring);
+
+    const rightEarring = new THREE.Mesh(earringGeo, jewelryMat.clone());
+    rightEarring.position.set(0.28, -0.05, 0);
+    rightEarring.rotation.y = Math.PI / 2;
+    headGroup.add(rightEarring);
+
+    // チーフの場合、ティアラを追加
+    if (variant === 'chief') {
+      const tiaraGeo = new THREE.TorusGeometry(0.2, 0.025, 8, 24, Math.PI);
+      const tiara = new THREE.Mesh(tiaraGeo, jewelryMat.clone());
+      tiara.position.set(0, 0.25, 0.1);
+      tiara.rotation.x = -0.3;
+      headGroup.add(tiara);
+
+      // ティアラの宝石
+      for (let i = 0; i < 3; i++) {
+        const tiaraGemGeo = new THREE.OctahedronGeometry(0.03);
+        const tiaraGem = new THREE.Mesh(tiaraGemGeo, beltGemMat.clone());
+        const angle = (i - 1) * 0.4;
+        tiaraGem.position.set(Math.sin(angle) * 0.2, 0.28, Math.cos(angle) * 0.2 + 0.1);
+        headGroup.add(tiaraGem);
+      }
+    }
+
+    headGroup.position.set(0, 2.05, 0);
+    group.add(headGroup);
+
+    // === 腕 ===
+    const createArm = (isLeft) => {
+      const armGroup = new THREE.Group();
+      armGroup.name = isLeft ? 'leftArm' : 'rightArm';
+
+      // 上腕（筋肉質だがスリム）
+      const upperArmGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.4, 12);
+      const upperArm = new THREE.Mesh(upperArmGeo, skinMat.clone());
+      upperArm.position.y = -0.2;
+      upperArm.castShadow = true;
+      armGroup.add(upperArm);
+
+      // 腕輪（上腕）
+      const armletGeo = new THREE.TorusGeometry(0.085, 0.015, 8, 16);
+      const armlet = new THREE.Mesh(armletGeo, jewelryMat.clone());
+      armlet.position.y = -0.1;
+      armlet.rotation.x = Math.PI / 2;
+      armGroup.add(armlet);
+
+      // 前腕
+      const forearmGeo = new THREE.CylinderGeometry(0.055, 0.07, 0.35, 12);
+      const forearm = new THREE.Mesh(forearmGeo, skinMat.clone());
+      forearm.position.y = -0.58;
+      forearm.castShadow = true;
+      armGroup.add(forearm);
+
+      // ブレスレット
+      const braceletGeo = new THREE.TorusGeometry(0.065, 0.012, 8, 16);
+      const bracelet = new THREE.Mesh(braceletGeo, jewelryMat.clone());
+      bracelet.position.y = -0.7;
+      bracelet.rotation.x = Math.PI / 2;
+      armGroup.add(bracelet);
+
+      // 手
+      const handGeo = new THREE.SphereGeometry(0.055, 12, 12);
+      const hand = new THREE.Mesh(handGeo, skinMat.clone());
+      hand.position.y = -0.82;
+      hand.scale.set(1, 0.7, 0.8);
+      armGroup.add(hand);
+
+      // 指
+      for (let i = 0; i < 4; i++) {
+        const fingerGeo = new THREE.CylinderGeometry(0.012, 0.01, 0.08, 6);
+        const finger = new THREE.Mesh(fingerGeo, skinMat.clone());
+        finger.position.set((i - 1.5) * 0.025, -0.9, 0.02);
+        finger.rotation.x = 0.2;
+        armGroup.add(finger);
+      }
+
+      const x = isLeft ? -0.35 : 0.35;
+      armGroup.position.set(x, 1.65, 0);
+
+      return armGroup;
+    };
+
+    group.add(createArm(true));
+    group.add(createArm(false));
+
+    // === 脚 ===
+    const createLeg = (isLeft) => {
+      const legGroup = new THREE.Group();
+      legGroup.name = isLeft ? 'leftLeg' : 'rightLeg';
+
+      // 太もも（長くてスリム）
+      const thighGeo = new THREE.CylinderGeometry(0.1, 0.08, 0.55, 12);
+      const thigh = new THREE.Mesh(thighGeo, skinMat.clone());
+      thigh.position.y = -0.28;
+      thigh.castShadow = true;
+      legGroup.add(thigh);
+
+      // 膝
+      const kneeGeo = new THREE.SphereGeometry(0.075, 10, 10);
+      const knee = new THREE.Mesh(kneeGeo, skinMat.clone());
+      knee.position.y = -0.58;
+      legGroup.add(knee);
+
+      // 脛
+      const shinGeo = new THREE.CylinderGeometry(0.06, 0.07, 0.5, 12);
+      const shin = new THREE.Mesh(shinGeo, skinMat.clone());
+      shin.position.y = -0.85;
+      shin.castShadow = true;
+      legGroup.add(shin);
+
+      // アンクレット
+      const ankletGeo = new THREE.TorusGeometry(0.07, 0.01, 8, 16);
+      const anklet = new THREE.Mesh(ankletGeo, jewelryMat.clone());
+      anklet.position.y = -1.05;
+      anklet.rotation.x = Math.PI / 2;
+      legGroup.add(anklet);
+
+      // 足
+      const footGeo = new THREE.BoxGeometry(0.08, 0.05, 0.15);
+      const foot = new THREE.Mesh(footGeo, skinMat.clone());
+      foot.position.set(0, -1.15, 0.04);
+      legGroup.add(foot);
+
+      // サンダル
+      const sandalGeo = new THREE.BoxGeometry(0.1, 0.02, 0.18);
+      const sandalMat = this.materials.standard({ color: 0x8b4513, roughness: 0.8 });
+      const sandal = new THREE.Mesh(sandalGeo, sandalMat);
+      sandal.position.set(0, -1.19, 0.04);
+      legGroup.add(sandal);
+
+      const x = isLeft ? -0.15 : 0.15;
+      legGroup.position.set(x, 0.65, 0);
+
+      return legGroup;
+    };
+
+    group.add(createLeg(true));
+    group.add(createLeg(false));
+
+    // サンダーヘルムの場合、電撃エフェクト
+    if (variant === 'thunder') {
+      const createLightning = (x, y, z) => {
+        const lightningGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.3, 4);
+        const lightningMat = this.materials.standard({
+          color: 0x00ffff,
+          emissive: 0x00ffff,
+          emissiveIntensity: 0.8,
+          transparent: true,
+          opacity: 0.7
+        });
+        const lightning = new THREE.Mesh(lightningGeo, lightningMat);
+        lightning.position.set(x, y, z);
+        lightning.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+        return lightning;
+      };
+
+      group.add(createLightning(0.4, 1.5, 0.2));
+      group.add(createLightning(-0.4, 1.6, -0.1));
+      group.add(createLightning(0.2, 2.3, 0.15));
+    }
+
+    // スケール適用
+    group.scale.set(scale, scale, scale);
+
+    group.userData.isGerudo = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'gerudo',
+      name: 'ゲルド族',
+      variant: variant,
+      defaultAnimation: 'gerudoIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**
