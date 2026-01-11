@@ -5,7 +5,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { ModelFactory } from '/assets/3d/lib/model-factory.js';
+import { ModelFactory } from '../../libs/3d/model-factory.js';
 
 class AssetLibraryGame {
   constructor() {
