@@ -453,6 +453,28 @@ function updateHUD() {
   document.getElementById('fireRange').textContent = player.fireRange;
   document.getElementById('speedLevel').textContent = Math.floor(player.speed * 10) / 10;
 
+  // Update ability icons
+  const abilitiesContainer = document.querySelector('.hud-abilities');
+  const penetrateIcon = document.getElementById('abilityPenetrate');
+  const kickIcon = document.getElementById('abilityKick');
+  const shieldIcon = document.getElementById('abilityShield');
+
+  if (penetrateIcon) {
+    penetrateIcon.classList.toggle('hidden', !player.hasPenetrate);
+  }
+  if (kickIcon) {
+    kickIcon.classList.toggle('hidden', !player.hasKick);
+  }
+  if (shieldIcon) {
+    shieldIcon.classList.toggle('hidden', !player.hasShield);
+  }
+
+  // Hide abilities container if no abilities are active
+  const hasAnyAbility = player.hasPenetrate || player.hasKick || player.hasShield;
+  if (abilitiesContainer) {
+    abilitiesContainer.classList.toggle('hidden', !hasAnyAbility);
+  }
+
   // Time warning
   if (timeRemaining <= 30 && timeRemaining > 0 && timeRemaining % 5 === 0) {
     playSound('time_warning');
