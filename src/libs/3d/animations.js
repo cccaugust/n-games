@@ -2079,6 +2079,195 @@ export class AnimationSystem {
             model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
           }
         }
+      },
+
+      // ========== クッパ アニメーション ==========
+      bowserIdle: {
+        duration: 2.0,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 2.0;
+
+          // 重厚な呼吸
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.2;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.03;
+            model.parts.body.scale.x = 1 + Math.sin(cycle) * 0.02;
+            model.parts.body.scale.z = 1 - Math.sin(cycle) * 0.015;
+          }
+
+          // 頭をゆっくり動かす
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.5) * 0.1;
+          }
+
+          // 尻尾を揺らす
+          if (model.parts.tail) {
+            model.parts.tail.rotation.y = Math.sin(cycle) * 0.15;
+          }
+
+          // 腕を少し動かす
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.2 + Math.sin(cycle) * 0.05;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.2 - Math.sin(cycle) * 0.05;
+          }
+        }
+      },
+
+      bowserWalk: {
+        duration: 0.8,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 0.8;
+
+          // 重い足取り
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY || 1.2;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.06;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.04;
+          }
+
+          // 頭を安定させる
+          if (model.parts.head) {
+            model.parts.head.rotation.z = -Math.sin(cycle) * 0.02;
+          }
+
+          // 腕振り
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle) * 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -Math.sin(cycle) * 0.4;
+          }
+
+          // 脚の動き
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -Math.sin(cycle) * 0.4;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle) * 0.4;
+          }
+
+          // 尻尾を揺らす
+          if (model.parts.tail) {
+            model.parts.tail.rotation.y = Math.sin(cycle * 2) * 0.2;
+          }
+        }
+      },
+
+      bowserRoar: {
+        duration: 1.5,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = t / 1.5;
+          const roarIntensity = Math.sin(progress * Math.PI);
+
+          // 体を後ろに反らす
+          if (model.parts.body) {
+            model.parts.body.rotation.x = -0.2 * roarIntensity;
+          }
+
+          // 頭を上げて咆哮
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.4 * roarIntensity;
+          }
+
+          // 両腕を広げる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.5 - 0.5 * roarIntensity;
+            model.parts.leftArm.rotation.x = -0.3 * roarIntensity;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.5 + 0.5 * roarIntensity;
+            model.parts.rightArm.rotation.x = -0.3 * roarIntensity;
+          }
+
+          // 尻尾を立てる
+          if (model.parts.tail) {
+            model.parts.tail.rotation.x = -0.3 * roarIntensity;
+          }
+        }
+      },
+
+      bowserBreath: {
+        duration: 2.0,
+        loop: false,
+        update: (model, t, dt) => {
+          const progress = t / 2.0;
+
+          // 息を吸う（前半）→ 吐く（後半）
+          if (progress < 0.4) {
+            // 息を吸う
+            const inhale = progress / 0.4;
+            if (model.parts.body) {
+              model.parts.body.scale.x = 1 + inhale * 0.1;
+              model.parts.body.scale.z = 1 + inhale * 0.08;
+            }
+            if (model.parts.head) {
+              model.parts.head.rotation.x = inhale * 0.2;
+            }
+          } else {
+            // 火を吐く
+            const exhale = (progress - 0.4) / 0.6;
+            if (model.parts.body) {
+              model.parts.body.scale.x = 1.1 - exhale * 0.15;
+              model.parts.body.scale.z = 1.08 - exhale * 0.1;
+            }
+            if (model.parts.head) {
+              model.parts.head.rotation.x = 0.2 - exhale * 0.4;
+            }
+          }
+
+          // 腕を構える
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = -0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.4;
+          }
+        }
+      },
+
+      bowserVictory: {
+        duration: 2.5,
+        loop: true,
+        update: (model, t, dt) => {
+          const cycle = t * Math.PI * 2 / 1.0;
+          const slowCycle = t * Math.PI * 2 / 2.5;
+
+          // 勝ち誇った姿勢
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY || 0;
+            model.mesh.position.y = baseY + Math.abs(Math.sin(slowCycle)) * 0.1;
+          }
+
+          // 笑うように体を揺らす
+          if (model.parts.body) {
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.05;
+          }
+
+          // 頭を上げて笑う
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.15;
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.08;
+          }
+
+          // 片腕を振り上げる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -Math.PI * 0.4;
+            model.parts.leftArm.rotation.z = -0.3 + Math.sin(cycle) * 0.15;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = 0.3;
+          }
+
+          // 尻尾を振る
+          if (model.parts.tail) {
+            model.parts.tail.rotation.y = Math.sin(cycle * 1.5) * 0.3;
+          }
+        }
       }
     };
   }

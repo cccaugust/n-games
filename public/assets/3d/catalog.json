@@ -273,6 +273,15 @@
       "variants": ["pink", "white", "sports", "gold"]
     },
     {
+      "id": "bowser",
+      "name": "クッパ",
+      "category": "characters",
+      "description": "マリオ風の大魔王キャラクター。緑の甲羅とトゲ、角、赤い鬣が特徴。ボスキャラやラスボスに最適",
+      "tags": ["enemy", "boss", "mario", "villain", "dragon", "turtle", "fire"],
+      "animations": ["bowserIdle", "bowserWalk", "bowserRoar", "bowserBreath", "bowserVictory"],
+      "variants": ["green", "dry", "dark", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

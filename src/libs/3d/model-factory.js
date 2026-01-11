@@ -63,6 +63,7 @@ export class ModelFactory {
       // マリオ風キャラクター
       mario: (opts) => this.characters.createMario(opts),
       peach: (opts) => this.characters.createPeach(opts),
+      bowser: (opts) => this.characters.createBowser(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),
