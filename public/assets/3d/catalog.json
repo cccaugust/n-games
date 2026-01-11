@@ -327,6 +327,15 @@
       "variants": ["purple", "tennis", "classic", "gold"]
     },
     {
+      "id": "donkey-kong",
+      "name": "ドンキーコング",
+      "category": "characters",
+      "description": "大きなゴリラキャラクター。茶色い毛皮と赤いネクタイ（DKロゴ）、長い腕と短い脚が特徴。パワフルで愛嬌がある",
+      "tags": ["player", "mario", "gorilla", "strong", "hero", "jungle"],
+      "animations": ["dkIdle", "dkWalk", "dkRun", "dkPound", "dkChest"],
+      "variants": ["brown", "arcade", "funky", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",

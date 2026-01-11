@@ -3240,6 +3240,207 @@ export class AnimationSystem {
             model.parts.rightLeg.rotation.x = 0.3 * legCurve;
           }
         }
+      },
+
+      // ==================== ドンキーコングアニメーション ====================
+
+      // DK待機（胸を叩く、頭をかく）
+      dkIdle: {
+        duration: 3.0,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 3.0) * Math.PI * 2;
+
+          // 軽く呼吸
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.025;
+            model.parts.body.scale.x = 1 + Math.sin(cycle) * 0.02;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.5) * 0.1;
+            model.parts.head.rotation.z = Math.sin(cycle * 0.3) * 0.05;
+          }
+
+          // 腕を揺らす（長い腕なので大きく）
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.4 + Math.sin(cycle * 0.7) * 0.1;
+            model.parts.leftArm.rotation.x = Math.sin(cycle * 0.5) * 0.1;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.4 + Math.sin(cycle * 0.7 + Math.PI) * 0.1;
+            model.parts.rightArm.rotation.x = Math.sin(cycle * 0.5 + Math.PI) * 0.1;
+          }
+        }
+      },
+
+      // DK歩き（ナックルウォーク風）
+      dkWalk: {
+        duration: 0.9,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.9) * Math.PI * 2;
+
+          // 大きく揺れる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.06;
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.08;
+          }
+
+          // 脚を動かす
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.35;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.35;
+          }
+
+          // 腕を大きく振る（ゴリラらしく）
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.4;
+            model.parts.leftArm.rotation.z = 0.4 + Math.abs(Math.sin(cycle)) * 0.15;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.4;
+            model.parts.rightArm.rotation.z = -0.4 - Math.abs(Math.sin(cycle)) * 0.15;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+        }
+      },
+
+      // DK走り（四つ足走り風）
+      dkRun: {
+        duration: 0.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.5) * Math.PI * 2;
+
+          // 大きく上下
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.1;
+            model.parts.body.rotation.x = -0.2; // 前傾
+            model.parts.body.rotation.z = Math.sin(cycle) * 0.1;
+          }
+
+          // 脚を速く動かす
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.6;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.6;
+          }
+
+          // 腕で地面を蹴る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.7;
+            model.parts.leftArm.rotation.z = 0.6;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.7;
+            model.parts.rightArm.rotation.z = -0.6;
+          }
+
+          // 頭を下げる
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.15;
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.1;
+          }
+        }
+      },
+
+      // DKグラウンドパウンド
+      dkPound: {
+        duration: 0.8,
+        loop: false,
+        update: (model, t) => {
+          const progress = t / 0.8;
+
+          // 構え → ジャンプ → 叩きつけ
+          let jumpPhase;
+          let armPower;
+          if (progress < 0.3) {
+            jumpPhase = -0.3 * (progress / 0.3); // しゃがみ
+            armPower = progress / 0.3;
+          } else if (progress < 0.5) {
+            jumpPhase = Math.sin((progress - 0.3) / 0.2 * Math.PI) * 0.6; // ジャンプ
+            armPower = 1.0;
+          } else {
+            jumpPhase = -(progress - 0.5) / 0.5 * 0.3; // 着地
+            armPower = 1.0 - (progress - 0.5) / 0.5;
+          }
+
+          // 体を上下
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY ?? 0;
+            model.mesh.position.y = baseY + jumpPhase;
+          }
+
+          // 両腕を振り上げてから叩きつけ
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -armPower * 2.0;
+            model.parts.leftArm.rotation.z = 0.8;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -armPower * 2.0;
+            model.parts.rightArm.rotation.z = -0.8;
+          }
+
+          // 脚を曲げる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -0.3 * armPower;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = -0.3 * armPower;
+          }
+        }
+      },
+
+      // DK胸叩き（勝利ポーズ）
+      dkChest: {
+        duration: 1.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 1.5) * Math.PI * 2;
+          const beatCycle = (t / 0.15) * Math.PI * 2; // 速い胸叩き
+
+          // 体を反らす
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(beatCycle)) * 0.03;
+            model.parts.body.rotation.x = -0.15;
+          }
+
+          // 頭を後ろに
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -0.25 + Math.sin(beatCycle) * 0.05;
+          }
+
+          // 両腕で胸を叩く
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 1.0 + Math.sin(beatCycle) * 0.3;
+            model.parts.leftArm.rotation.x = 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -1.0 + Math.sin(beatCycle + Math.PI) * 0.3;
+            model.parts.rightArm.rotation.x = 0.3;
+          }
+
+          // 脚を広げる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.z = -0.2;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.z = 0.2;
+          }
+        }
       }
     };
   }
