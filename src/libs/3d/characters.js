@@ -7604,6 +7604,315 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  /**
+   * コログ - 森の妖精
+   * バリアント: leaf, acorn, flower, mushroom
+   */
+  createKorok(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'leaf';
+    const group = new THREE.Group();
+
+    // カラーパレット
+    const colors = {
+      leaf: {
+        body: 0x8b6914,
+        mask: 0x228833,
+        maskAccent: 0x44aa44,
+        eyes: 0x111111,
+        propeller: 0x33aa33
+      },
+      acorn: {
+        body: 0x9b7924,
+        mask: 0x885522,
+        maskAccent: 0xaa7744,
+        eyes: 0x111111,
+        propeller: 0x66aa33
+      },
+      flower: {
+        body: 0x7a5a14,
+        mask: 0xff6699,
+        maskAccent: 0xffaacc,
+        eyes: 0x111111,
+        propeller: 0xff99bb
+      },
+      mushroom: {
+        body: 0x8b6914,
+        mask: 0xcc3333,
+        maskAccent: 0xffffff,
+        eyes: 0x111111,
+        propeller: 0x88cc88
+      }
+    };
+
+    const palette = colors[variant] || colors.leaf;
+
+    // スケール（コログは小さい）
+    const scale = 0.5;
+
+    // マテリアル
+    const bodyMat = this.materials.standard({
+      color: palette.body,
+      roughness: 0.8,
+      metalness: 0.0
+    });
+
+    const maskMat = this.materials.standard({
+      color: palette.mask,
+      roughness: 0.6,
+      metalness: 0.0
+    });
+
+    const maskAccentMat = this.materials.standard({
+      color: palette.maskAccent,
+      roughness: 0.6,
+      metalness: 0.0
+    });
+
+    // === 体（木の幹のような丸い体） ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // メイン体
+    const bodyGeo = new THREE.SphereGeometry(0.35, 16, 16);
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.scale.set(1, 1.1, 0.9);
+    body.castShadow = true;
+    body.receiveShadow = true;
+    bodyGroup.add(body);
+
+    // 木目模様（リング状）
+    for (let i = 0; i < 3; i++) {
+      const ringGeo = new THREE.TorusGeometry(0.25 - i * 0.05, 0.015, 8, 24);
+      const ringMat = this.materials.standard({
+        color: 0x6a4a0a,
+        roughness: 0.9
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.y = -0.1 + i * 0.1;
+      ring.rotation.x = Math.PI / 2;
+      bodyGroup.add(ring);
+    }
+
+    bodyGroup.position.set(0, 0.5, 0);
+    group.add(bodyGroup);
+
+    // === 葉っぱのお面 ===
+    const maskGroup = new THREE.Group();
+    maskGroup.name = 'mask';
+
+    if (variant === 'leaf') {
+      // 葉っぱ型マスク
+      const leafShape = new THREE.Shape();
+      leafShape.moveTo(0, -0.25);
+      leafShape.quadraticCurveTo(0.25, -0.1, 0.2, 0.15);
+      leafShape.quadraticCurveTo(0.1, 0.3, 0, 0.35);
+      leafShape.quadraticCurveTo(-0.1, 0.3, -0.2, 0.15);
+      leafShape.quadraticCurveTo(-0.25, -0.1, 0, -0.25);
+
+      const leafGeo = new THREE.ShapeGeometry(leafShape);
+      const leaf = new THREE.Mesh(leafGeo, maskMat);
+      leaf.position.z = 0.01;
+      maskGroup.add(leaf);
+
+      // 葉脈
+      const veinGeo = new THREE.BoxGeometry(0.02, 0.4, 0.01);
+      const vein = new THREE.Mesh(veinGeo, maskAccentMat);
+      vein.position.set(0, 0.05, 0.02);
+      maskGroup.add(vein);
+
+    } else if (variant === 'acorn') {
+      // どんぐり型マスク
+      const acornGeo = new THREE.SphereGeometry(0.22, 16, 16);
+      const acorn = new THREE.Mesh(acornGeo, maskMat);
+      acorn.scale.set(1, 1.2, 0.5);
+      maskGroup.add(acorn);
+
+      // どんぐりの帽子
+      const capGeo = new THREE.SphereGeometry(0.18, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+      const cap = new THREE.Mesh(capGeo, maskAccentMat);
+      cap.position.y = 0.15;
+      cap.scale.set(1.1, 0.6, 0.6);
+      maskGroup.add(cap);
+
+    } else if (variant === 'flower') {
+      // 花型マスク
+      for (let i = 0; i < 5; i++) {
+        const petalGeo = new THREE.SphereGeometry(0.12, 12, 12);
+        const petal = new THREE.Mesh(petalGeo, maskMat);
+        const angle = (i / 5) * Math.PI * 2;
+        petal.position.set(Math.cos(angle) * 0.15, Math.sin(angle) * 0.15, 0);
+        petal.scale.set(1, 1, 0.3);
+        maskGroup.add(petal);
+      }
+
+      // 花の中心
+      const centerGeo = new THREE.SphereGeometry(0.1, 12, 12);
+      const center = new THREE.Mesh(centerGeo, maskAccentMat);
+      center.position.z = 0.02;
+      center.scale.z = 0.5;
+      maskGroup.add(center);
+
+    } else if (variant === 'mushroom') {
+      // キノコ型マスク
+      const capGeo = new THREE.SphereGeometry(0.25, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+      const cap = new THREE.Mesh(capGeo, maskMat);
+      cap.rotation.x = Math.PI;
+      cap.position.y = 0.1;
+      cap.scale.set(1, 0.7, 0.6);
+      maskGroup.add(cap);
+
+      // キノコの斑点
+      for (let i = 0; i < 4; i++) {
+        const spotGeo = new THREE.SphereGeometry(0.05, 8, 8);
+        const spot = new THREE.Mesh(spotGeo, maskAccentMat);
+        const angle = (i / 4) * Math.PI * 2 + 0.3;
+        spot.position.set(Math.cos(angle) * 0.12, 0.12, Math.sin(angle) * 0.08 + 0.1);
+        spot.scale.z = 0.5;
+        maskGroup.add(spot);
+      }
+    }
+
+    // 目（全バリアント共通）
+    const eyeGeo = new THREE.SphereGeometry(0.04, 10, 10);
+    const eyeMat = this.materials.standard({ color: palette.eyes, roughness: 0.2 });
+
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.08, 0, 0.15);
+    maskGroup.add(leftEye);
+
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat.clone());
+    rightEye.position.set(0.08, 0, 0.15);
+    maskGroup.add(rightEye);
+
+    // 目のハイライト
+    const highlightGeo = new THREE.SphereGeometry(0.015, 8, 8);
+    const highlightMat = this.materials.standard({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.3 });
+
+    const leftHighlight = new THREE.Mesh(highlightGeo, highlightMat);
+    leftHighlight.position.set(-0.06, 0.02, 0.18);
+    maskGroup.add(leftHighlight);
+
+    const rightHighlight = new THREE.Mesh(highlightGeo, highlightMat.clone());
+    rightHighlight.position.set(0.1, 0.02, 0.18);
+    maskGroup.add(rightHighlight);
+
+    maskGroup.position.set(0, 0.75, 0.25);
+    group.add(maskGroup);
+
+    // === 頭のプロペラ葉っぱ ===
+    const propellerGroup = new THREE.Group();
+    propellerGroup.name = 'propeller';
+
+    for (let i = 0; i < 2; i++) {
+      const propLeafShape = new THREE.Shape();
+      propLeafShape.moveTo(0, 0);
+      propLeafShape.quadraticCurveTo(0.08, 0.15, 0.05, 0.35);
+      propLeafShape.quadraticCurveTo(0, 0.38, -0.05, 0.35);
+      propLeafShape.quadraticCurveTo(-0.08, 0.15, 0, 0);
+
+      const propLeafGeo = new THREE.ShapeGeometry(propLeafShape);
+      const propLeafMat = this.materials.standard({
+        color: palette.propeller,
+        roughness: 0.5,
+        side: THREE.DoubleSide
+      });
+      const propLeaf = new THREE.Mesh(propLeafGeo, propLeafMat);
+      propLeaf.rotation.y = i * Math.PI;
+      propLeaf.rotation.x = -0.3;
+      propellerGroup.add(propLeaf);
+    }
+
+    // 茎
+    const stemGeo = new THREE.CylinderGeometry(0.02, 0.025, 0.15, 8);
+    const stemMat = this.materials.standard({ color: 0x44aa44, roughness: 0.7 });
+    const stem = new THREE.Mesh(stemGeo, stemMat);
+    stem.position.y = -0.08;
+    propellerGroup.add(stem);
+
+    propellerGroup.position.set(0, 1.05, 0);
+    group.add(propellerGroup);
+
+    // === 腕（小さな枝のような腕） ===
+    const createArm = (isLeft) => {
+      const armGroup = new THREE.Group();
+      armGroup.name = isLeft ? 'leftArm' : 'rightArm';
+
+      // 腕
+      const armGeo = new THREE.CylinderGeometry(0.03, 0.04, 0.25, 8);
+      const arm = new THREE.Mesh(armGeo, bodyMat.clone());
+      arm.position.y = -0.12;
+      arm.rotation.z = isLeft ? 0.5 : -0.5;
+      armGroup.add(arm);
+
+      // 手（小さな葉っぱ）
+      const handShape = new THREE.Shape();
+      handShape.moveTo(0, 0);
+      handShape.quadraticCurveTo(0.05, 0.03, 0.04, 0.08);
+      handShape.quadraticCurveTo(0, 0.1, -0.04, 0.08);
+      handShape.quadraticCurveTo(-0.05, 0.03, 0, 0);
+
+      const handGeo = new THREE.ShapeGeometry(handShape);
+      const handMat = this.materials.standard({
+        color: palette.propeller,
+        roughness: 0.6,
+        side: THREE.DoubleSide
+      });
+      const hand = new THREE.Mesh(handGeo, handMat);
+      hand.position.set(isLeft ? -0.08 : 0.08, -0.25, 0);
+      hand.rotation.z = isLeft ? 0.3 : -0.3;
+      armGroup.add(hand);
+
+      const x = isLeft ? -0.3 : 0.3;
+      armGroup.position.set(x, 0.55, 0);
+
+      return armGroup;
+    };
+
+    group.add(createArm(true));
+    group.add(createArm(false));
+
+    // === 脚（短い根っこのような脚） ===
+    const createLeg = (isLeft) => {
+      const legGroup = new THREE.Group();
+      legGroup.name = isLeft ? 'leftLeg' : 'rightLeg';
+
+      // 脚
+      const legGeo = new THREE.CylinderGeometry(0.05, 0.04, 0.15, 8);
+      const leg = new THREE.Mesh(legGeo, bodyMat.clone());
+      leg.position.y = -0.08;
+      legGroup.add(leg);
+
+      // 足（小さな根）
+      const footGeo = new THREE.SphereGeometry(0.05, 8, 8);
+      const foot = new THREE.Mesh(footGeo, bodyMat.clone());
+      foot.position.set(0, -0.15, 0.02);
+      foot.scale.set(1, 0.5, 1.2);
+      legGroup.add(foot);
+
+      const x = isLeft ? -0.12 : 0.12;
+      legGroup.position.set(x, 0.15, 0);
+
+      return legGroup;
+    };
+
+    group.add(createLeg(true));
+    group.add(createLeg(false));
+
+    // スケール適用
+    group.scale.set(scale, scale, scale);
+
+    group.userData.isKorok = true;
+    group.userData.variant = variant;
+
+    return new Model3D(group, {
+      id: 'korok',
+      name: 'コログ',
+      variant: variant,
+      defaultAnimation: 'korokIdle'
+    }, this.animations);
+  }
+
   // ========== ユーティリティ ==========
 
   /**
