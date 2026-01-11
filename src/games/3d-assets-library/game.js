@@ -60,7 +60,11 @@ class AssetLibraryGame {
   async loadCatalog() {
     try {
       const res = await fetch('/assets/3d/catalog.json');
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
       this.catalog = await res.json();
+      console.log('カタログ読み込み成功:', this.catalog.assets?.length || 0, 'アセット');
     } catch (e) {
       console.error('カタログ読み込みエラー:', e);
       this.catalog = { assets: [] };
@@ -181,6 +185,11 @@ class AssetLibraryGame {
     const placedList = document.getElementById('placed-list');
     const variantSelector = document.getElementById('variant-selector');
 
+    if (!grid) {
+      console.error('asset-grid element not found');
+      return;
+    }
+
     // 配置済みタブ
     if (this.currentCategory === 'placed') {
       grid.style.display = 'none';
@@ -194,7 +203,12 @@ class AssetLibraryGame {
     placedList.style.display = 'none';
 
     // カテゴリに応じたアセットをフィルター
-    const assets = this.catalog.assets.filter(a => a.category === this.currentCategory);
+    const assets = this.catalog?.assets?.filter(a => a.category === this.currentCategory) || [];
+
+    if (assets.length === 0) {
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">アセットがありません</div>';
+      return;
+    }
 
     grid.innerHTML = assets.map(asset => `
       <div class="asset-card ${this.selectedAssetId === asset.id ? 'selected' : ''}"
@@ -340,7 +354,7 @@ class AssetLibraryGame {
     document.getElementById('btn-clear').addEventListener('click', () => this.clearAll());
     document.getElementById('btn-screenshot').addEventListener('click', () => this.takeScreenshot());
     document.getElementById('btn-panel-toggle').addEventListener('click', () => {
-      document.getElementById('side-panel').classList.toggle('open');
+      document.getElementById('side-panel').classList.toggle('closed');
     });
   }
 
@@ -422,9 +436,22 @@ class AssetLibraryGame {
       return;
     }
 
-    const model = this.factory.create(this.selectedAssetId, {
-      variant: this.selectedVariant
-    });
+    let model;
+    try {
+      model = this.factory.create(this.selectedAssetId, {
+        variant: this.selectedVariant
+      });
+    } catch (e) {
+      console.error('モデル作成エラー:', this.selectedAssetId, e);
+      this.showHint('モデルの作成に失敗しました');
+      return;
+    }
+
+    if (!model || !model.mesh) {
+      console.error('モデルまたはメッシュが無効:', this.selectedAssetId);
+      this.showHint('モデルが無効です');
+      return;
+    }
 
     model.mesh.position.copy(position);
     model.mesh.userData.placedIndex = this.placedObjects.length;
