@@ -581,6 +581,216 @@ export class CharacterModels {
     }, this.animations);
   }
 
+  // ==================== ゴースト ====================
+  createGhost(options = {}) {
+    const THREE = this.THREE;
+    const variant = options.variant || 'white';
+    const group = new THREE.Group();
+
+    const colors = {
+      white: { body: 0xeeeeff, glow: 0xaabbff, eye: 0x4444ff },
+      blue: { body: 0x4488dd, glow: 0x66ccff, eye: 0x00ffff },
+      red: { body: 0xdd4455, glow: 0xff6666, eye: 0xff0000 },
+      shadow: { body: 0x333344, glow: 0x6644aa, eye: 0xaa00ff }
+    };
+    const palette = colors[variant] || colors.white;
+
+    // === メインボディ（幽霊らしい形状） ===
+    const bodyGroup = new THREE.Group();
+    bodyGroup.name = 'body';
+
+    // 頭部〜胴体（スムーズにつながった形状）
+    const bodyPoints = [];
+    for (let i = 0; i <= 20; i++) {
+      const t = i / 20;
+      // 頭は丸く、下に行くほど細くなり、裾は広がる
+      let radius;
+      if (t < 0.3) {
+        // 頭部（球状）
+        radius = 0.8 * Math.sin(t / 0.3 * Math.PI / 2);
+      } else if (t < 0.7) {
+        // 胴体（くびれ）
+        radius = 0.8 - (t - 0.3) * 0.5;
+      } else {
+        // 裾（広がる）
+        radius = 0.6 + (t - 0.7) * 1.5;
+      }
+      bodyPoints.push(new THREE.Vector2(radius, (1 - t) * 2.5 - 0.5));
+    }
+
+    const bodyGeo = new THREE.LatheGeometry(bodyPoints, 32);
+    const bodyMat = this.materials.ghost({ color: palette.body, glowColor: palette.glow });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.castShadow = false; // ゴーストは影を落とさない
+    body.name = 'mainBody';
+    bodyGroup.add(body);
+
+    // 内部の光るコア
+    const coreGeo = new THREE.SphereGeometry(0.3, 16, 16);
+    const coreMat = this.materials.emissive({ color: palette.glow, intensity: 0.8 });
+    coreMat.transparent = true;
+    coreMat.opacity = 0.6;
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    core.position.set(0, 1.2, 0);
+    core.name = 'core';
+    bodyGroup.add(core);
+
+    // ふわふわした裾の装飾（波打つエフェクト用のパーツ）
+    for (let i = 0; i < 6; i++) {
+      const tailGeo = new THREE.ConeGeometry(0.3, 0.8, 8);
+      const tailMat = this.materials.ghost({ color: palette.body, glowColor: palette.glow });
+      const tail = new THREE.Mesh(tailGeo, tailMat);
+      const angle = (i / 6) * Math.PI * 2;
+      tail.position.set(
+        Math.cos(angle) * 0.8,
+        -0.8,
+        Math.sin(angle) * 0.8
+      );
+      tail.rotation.x = Math.PI;
+      tail.rotation.z = Math.cos(angle) * 0.3;
+      tail.rotation.x += Math.sin(angle) * 0.3;
+      tail.name = `tail_${i}`;
+      bodyGroup.add(tail);
+    }
+
+    bodyGroup.position.y = 0.5;
+    bodyGroup.userData.baseY = 0.5;
+    group.add(bodyGroup);
+
+    // === 顔 ===
+    const faceGroup = new THREE.Group();
+    faceGroup.name = 'face';
+
+    // 目（大きな光る目）
+    const createEye = (x) => {
+      const eyeGroup = new THREE.Group();
+
+      // 目の本体（楕円形の光）
+      const eyeGeo = new THREE.SphereGeometry(0.18, 16, 16);
+      const eyeMat = this.materials.emissive({ color: palette.eye, intensity: 1.2 });
+      const eye = new THREE.Mesh(eyeGeo, eyeMat);
+      eye.scale.set(0.8, 1.2, 0.5);
+      eyeGroup.add(eye);
+
+      // 瞳孔（中心の暗い部分）
+      const pupilGeo = new THREE.SphereGeometry(0.08, 12, 12);
+      const pupilMat = this.materials.standard({ color: 0x000011 });
+      const pupil = new THREE.Mesh(pupilGeo, pupilMat);
+      pupil.position.z = 0.1;
+      pupil.scale.set(0.8, 1.2, 0.5);
+      eyeGroup.add(pupil);
+
+      // 光の反射
+      const glowGeo = new THREE.SphereGeometry(0.05, 8, 8);
+      const glowMat = this.materials.emissive({ color: 0xffffff, intensity: 2 });
+      const glow = new THREE.Mesh(glowGeo, glowMat);
+      glow.position.set(0.05, 0.08, 0.15);
+      eyeGroup.add(glow);
+
+      eyeGroup.position.set(x, 1.6, 0.6);
+      return eyeGroup;
+    };
+
+    const leftEye = createEye(-0.25);
+    leftEye.name = 'leftEye';
+    faceGroup.add(leftEye);
+
+    const rightEye = createEye(0.25);
+    rightEye.name = 'rightEye';
+    faceGroup.add(rightEye);
+
+    // 口（不気味に開いた口）
+    const mouthShape = new THREE.Shape();
+    mouthShape.moveTo(-0.2, 0);
+    mouthShape.quadraticCurveTo(-0.15, -0.15, 0, -0.2);
+    mouthShape.quadraticCurveTo(0.15, -0.15, 0.2, 0);
+    mouthShape.quadraticCurveTo(0.1, 0.05, 0, 0.03);
+    mouthShape.quadraticCurveTo(-0.1, 0.05, -0.2, 0);
+
+    const mouthGeo = new THREE.ShapeGeometry(mouthShape);
+    const mouthMat = this.materials.standard({
+      color: 0x111122,
+      side: THREE.DoubleSide
+    });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, 1.2, 0.75);
+    mouth.name = 'mouth';
+    faceGroup.add(mouth);
+
+    // 口の中の暗闘
+    const innerMouthGeo = new THREE.SphereGeometry(0.15, 12, 12);
+    const innerMouthMat = this.materials.standard({ color: 0x000011 });
+    const innerMouth = new THREE.Mesh(innerMouthGeo, innerMouthMat);
+    innerMouth.position.set(0, 1.15, 0.65);
+    innerMouth.scale.set(1, 0.5, 0.3);
+    faceGroup.add(innerMouth);
+
+    group.add(faceGroup);
+
+    // === 腕（幽霊らしい曖昧な腕） ===
+    const createArm = (isLeft) => {
+      const armGroup = new THREE.Group();
+      armGroup.name = isLeft ? 'leftArm' : 'rightArm';
+
+      // 腕の形状（テーパー状）
+      const armPoints = [];
+      for (let i = 0; i <= 10; i++) {
+        const t = i / 10;
+        const radius = 0.15 * (1 - t * 0.6);
+        armPoints.push(new THREE.Vector2(radius, t * 0.8));
+      }
+
+      const armGeo = new THREE.LatheGeometry(armPoints, 12);
+      const armMat = this.materials.ghost({ color: palette.body, glowColor: palette.glow });
+      const arm = new THREE.Mesh(armGeo, armMat);
+      arm.rotation.z = isLeft ? 0.8 : -0.8;
+      arm.rotation.x = -0.3;
+      armGroup.add(arm);
+
+      // 指先の光
+      const fingerGlowGeo = new THREE.SphereGeometry(0.08, 8, 8);
+      const fingerGlowMat = this.materials.emissive({ color: palette.glow, intensity: 0.5 });
+      fingerGlowMat.transparent = true;
+      fingerGlowMat.opacity = 0.7;
+      const fingerGlow = new THREE.Mesh(fingerGlowGeo, fingerGlowMat);
+      fingerGlow.position.set(isLeft ? -0.5 : 0.5, 0.3, 0);
+      armGroup.add(fingerGlow);
+
+      const x = isLeft ? -0.6 : 0.6;
+      armGroup.position.set(x, 1.3, 0.2);
+
+      return armGroup;
+    };
+
+    group.add(createArm(true));
+    group.add(createArm(false));
+
+    // === オーラエフェクト（周囲のぼんやりした光） ===
+    const auraGeo = new THREE.SphereGeometry(1.2, 16, 16);
+    const auraMat = this.materials.standard({
+      color: palette.glow,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.BackSide
+    });
+    const aura = new THREE.Mesh(auraGeo, auraMat);
+    aura.position.y = 1.0;
+    aura.scale.set(1, 1.5, 1);
+    aura.name = 'aura';
+    group.add(aura);
+
+    // 浮遊する粒子エフェクト用マーカー
+    group.userData.isGhost = true;
+    group.userData.floatOffset = Math.random() * Math.PI * 2;
+
+    return new Model3D(group, {
+      id: 'ghost',
+      name: 'ゴースト',
+      variant: variant,
+      defaultAnimation: 'ghostFloat'
+    }, this.animations);
+  }
+
   // ==================== 魔法使い ====================
   createMage(options = {}) {
     const THREE = this.THREE;

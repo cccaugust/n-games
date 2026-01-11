@@ -207,6 +207,30 @@ export class MaterialLib {
   }
 
   /**
+   * ゴースト（幽霊）マテリアル
+   */
+  ghost(options = {}) {
+    const THREE = this.THREE;
+    const color = options.color || 0xeeeeff;
+    const glowColor = options.glowColor || 0xaabbff;
+
+    return new THREE.MeshPhysicalMaterial({
+      color: color,
+      roughness: 0.2,
+      metalness: 0.0,
+      transmission: 0.7,
+      thickness: 0.8,
+      ior: 1.2,
+      transparent: true,
+      opacity: 0.65,
+      emissive: glowColor,
+      emissiveIntensity: 0.15,
+      side: THREE.DoubleSide,
+      ...options
+    });
+  }
+
+  /**
    * クリスタルマテリアル
    */
   crystal(options = {}) {
