@@ -2653,6 +2653,194 @@ export class AnimationSystem {
             model.parts.tail.rotation.y = Math.sin(cycle * 3) * 0.2;
           }
         }
+      },
+
+      // ==================== ルイージアニメーション ====================
+
+      // ルイージ待機（マリオより少し臆病）
+      luigiIdle: {
+        duration: 2.5,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 2.5) * Math.PI * 2;
+
+          // 軽く呼吸
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.sin(cycle) * 0.015;
+          }
+
+          // 頭をキョロキョロ（臆病な感じ）
+          if (model.parts.head) {
+            model.parts.head.rotation.y = Math.sin(cycle * 0.8) * 0.15;
+            model.parts.head.rotation.z = Math.sin(cycle * 0.5) * 0.03;
+          }
+
+          // 腕を軽く揺らす
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.2 + Math.sin(cycle) * 0.03;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.2 + Math.sin(cycle + Math.PI) * 0.03;
+          }
+        }
+      },
+
+      // ルイージ歩き
+      luigiWalk: {
+        duration: 0.7,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.7) * Math.PI * 2;
+
+          // 上下に揺れる
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.04;
+          }
+
+          // 脚を動かす（マリオより足が長いので大きめ）
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.45;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.45;
+          }
+
+          // 腕を振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.35;
+            model.parts.leftArm.rotation.z = 0.2;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.35;
+            model.parts.rightArm.rotation.z = -0.2;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.05;
+          }
+        }
+      },
+
+      // ルイージ走り
+      luigiRun: {
+        duration: 0.4,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.4) * Math.PI * 2;
+
+          // 大きく上下
+          if (model.parts.body) {
+            const baseY = model.parts.body.userData?.baseY ?? 0.9;
+            model.parts.body.position.y = baseY + Math.abs(Math.sin(cycle)) * 0.08;
+            model.parts.body.rotation.x = -0.1; // 前傾
+          }
+
+          // 脚を大きく動かす
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = Math.sin(cycle) * 0.7;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = Math.sin(cycle + Math.PI) * 0.7;
+          }
+
+          // 腕を大きく振る
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = Math.sin(cycle + Math.PI) * 0.6;
+            model.parts.leftArm.rotation.z = 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = Math.sin(cycle) * 0.6;
+            model.parts.rightArm.rotation.z = -0.3;
+          }
+
+          // 頭を揺らす
+          if (model.parts.head) {
+            model.parts.head.rotation.z = Math.sin(cycle) * 0.08;
+            model.parts.head.rotation.x = -0.1;
+          }
+        }
+      },
+
+      // ルイージジャンプ（マリオより高くジャンプ）
+      luigiJump: {
+        duration: 0.8,
+        loop: false,
+        update: (model, t) => {
+          const progress = t / 0.8;
+          const jumpCurve = Math.sin(progress * Math.PI);
+
+          // 高くジャンプ
+          if (model.mesh) {
+            const baseY = model.mesh.userData?.baseY ?? 0;
+            model.mesh.position.y = baseY + jumpCurve * 1.2; // マリオより高い
+          }
+
+          // 脚を曲げる
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.x = -0.5 + jumpCurve * 0.3;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.x = 0.3 - jumpCurve * 0.3;
+          }
+
+          // 腕を上げる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.x = -jumpCurve * 0.8;
+            model.parts.leftArm.rotation.z = 0.3 + jumpCurve * 0.3;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.x = -jumpCurve * 0.5;
+            model.parts.rightArm.rotation.z = -0.3 - jumpCurve * 0.2;
+          }
+
+          // 頭を上げる
+          if (model.parts.head) {
+            model.parts.head.rotation.x = -jumpCurve * 0.2;
+          }
+        }
+      },
+
+      // ルイージ怖がり（ルイージマンション風）
+      luigiScared: {
+        duration: 0.6,
+        loop: true,
+        update: (model, t) => {
+          const cycle = (t / 0.6) * Math.PI * 2;
+
+          // 震える
+          if (model.parts.body) {
+            model.parts.body.rotation.z = Math.sin(cycle * 10) * 0.04;
+            model.parts.body.position.x = Math.sin(cycle * 12) * 0.015;
+          }
+
+          // 頭を縮める
+          if (model.parts.head) {
+            model.parts.head.position.y = 1.6; // 少し下げる
+            model.parts.head.rotation.x = 0.15; // 下を向く
+            model.parts.head.rotation.z = Math.sin(cycle * 10 + 0.5) * 0.06;
+          }
+
+          // 腕を体に寄せる
+          if (model.parts.leftArm) {
+            model.parts.leftArm.rotation.z = 0.8;
+            model.parts.leftArm.rotation.x = 0.4;
+          }
+          if (model.parts.rightArm) {
+            model.parts.rightArm.rotation.z = -0.8;
+            model.parts.rightArm.rotation.x = 0.4;
+          }
+
+          // 脚を内股に
+          if (model.parts.leftLeg) {
+            model.parts.leftLeg.rotation.z = -0.15;
+          }
+          if (model.parts.rightLeg) {
+            model.parts.rightLeg.rotation.z = 0.15;
+          }
+        }
       }
     };
   }

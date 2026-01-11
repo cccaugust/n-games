@@ -300,6 +300,15 @@
       "variants": ["green", "red", "blue", "yellow"]
     },
     {
+      "id": "luigi",
+      "name": "ルイージ",
+      "category": "characters",
+      "description": "マリオ風の配管工キャラクター。緑の帽子とLマーク、マリオより背が高いのが特徴。臆病だが勇敢な弟",
+      "tags": ["player", "mario", "platformer", "hero", "plumber", "brother"],
+      "animations": ["luigiIdle", "luigiWalk", "luigiRun", "luigiJump", "luigiScared"],
+      "variants": ["green", "fire", "mr-l", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
