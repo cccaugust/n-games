@@ -197,6 +197,70 @@
 - サンプルデータ: `src/pages/pixel-art-maker/samples.json`
 - 追加/更新スクリプト: `scripts/generate_pixel_art_samples.mjs`
 
+### 3Dアセットライブラリ（Three.js用）
+
+**3Dゲームを作るときは積極的に使ってください！**
+
+高品質な3Dモデルをプログラム的に生成するライブラリです。外部モデルファイル不要でキャラクター、アイテム、環境オブジェクトを作成できます。
+
+#### 配置
+
+- ライブラリ: `public/assets/3d/lib/`
+- カタログ: `public/assets/3d/catalog.json`
+- プレイグラウンド: `src/games/3d-assets-library/`
+
+#### 使い方
+
+```javascript
+import { ModelFactory } from '/assets/3d/lib/model-factory.js';
+
+const factory = new ModelFactory(THREE);
+
+// モデル作成
+const robot = factory.create('robot', { variant: 'blue' });
+scene.add(robot.mesh);
+
+// アニメーション
+robot.animate('idle');
+
+// 毎フレーム更新
+robot.update(deltaTime);
+```
+
+#### 利用可能なモデル
+
+**キャラクター（characters）:**
+- `robot` - ロボット（blue, red, green, gold）
+- `slime` - スライム（green, blue, red, gold, rainbow）
+- `knight` - 騎士（silver, gold, dark, royal）
+- `mage` - 魔法使い（blue, red, purple, white）
+
+**アイテム（items）:**
+- `coin` - コイン（gold, silver, bronze）
+- `heart` - ハート（red, pink, gold）
+- `star` - スター（gold, silver, rainbow）
+- `chest` - 宝箱（wood, iron, gold, legendary）
+- `sword` - 剣（iron, steel, gold, legendary）
+- `staff` - 魔法の杖（fire, ice, lightning, arcane）
+- `potion` - ポーション（health, mana, speed, power）
+
+**環境オブジェクト（props）:**
+- `tree` - 木（oak, pine, sakura, autumn）
+- `rock` - 岩（gray, brown, mossy, crystal）
+- `crate` - 木箱（wood, metal, explosive）
+- `crystal` - クリスタル（blue, red, green, purple, rainbow）
+- `torch` - 松明（standing, wall, magic）
+- `grass` - 草（green, tall, flowers）
+- `fence` - 柵（wood, stone, iron）
+- `portal` - ポータル（blue, purple, gold, dark）
+
+#### 3Dゲーム開発時のガイドライン
+
+1. **キャラクターはライブラリのモデルを使う** - Paint Warsのようなプリミティブ組み合わせより統一感が出る
+2. **バリアントで色違いを表現** - 敵味方の区別、レアリティ表現など
+3. **アニメーションを活用** - idle, walk, attack などが用意されている
+4. **新しいモデルが必要な場合** - ライブラリに追加して再利用可能にする
+
 ---
 
 ## 進め方（推奨ワークフロー）

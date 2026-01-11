@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>3D Assets Library - N-Games</title>
+  <style>
+    :root {
+      --bg-dark: #0a0a1a;
+      --bg-surface: #1a1a2e;
+      --bg-card: #252540;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaacc;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #22c55e;
+      --accent-warning: #f59e0b;
+      --border-color: #3a3a5c;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    #app {
+      width: 100vw;
+      height: 100svh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ヘッダー */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    /* メインエリア */
+    main {
+      flex: 1;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 3Dキャンバス */
+    #canvas-container {
+      flex: 1;
+      position: relative;
+    }
+
+    #game-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* サイドパネル */
+    .side-panel {
+      width: 280px;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .side-panel.collapsed {
+      transform: translateX(100%);
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    /* カテゴリタブ */
+    .category-tabs {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+
+    .tab-btn.active {
+      color: var(--text-primary);
+      background: var(--accent-primary);
+    }
+
+    /* アセットグリッド */
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .asset-card {
+      background: var(--bg-card);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .asset-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+
+    .asset-card.selected {
+      border-color: var(--accent-success);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .asset-preview {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--bg-dark);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      overflow: hidden;
+    }
+
+    .asset-preview canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .asset-name {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* バリアント選択 */
+    .variant-selector {
+      margin-top: 12px;
+      padding: 12px;
+      background: var(--bg-card);
+      border-radius: 8px;
+    }
+
+    .variant-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .variant-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .variant-btn {
+      padding: 6px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .variant-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+    }
+
+    .variant-btn.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: white;
+    }
+
+    /* 配置済みリスト */
+    .placed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .placed-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-card);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .placed-item:hover {
+      background: var(--bg-surface);
+    }
+
+    .placed-item.selected {
+      border: 1px solid var(--accent-primary);
+    }
+
+    .placed-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--bg-dark);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .placed-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .placed-name {
+      font-size: 0.8rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .placed-variant {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .placed-delete {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .placed-delete:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* ツールバー */
+    .toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .tool-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-card);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.15s;
+    }
+
+    .tool-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+
+    .tool-btn.active {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* ヒント */
+    .hint {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .hint.visible {
+      opacity: 1;
+    }
+
+    /* 情報パネル */
+    .info-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      min-width: 200px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+
+    .info-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .info-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .info-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .info-tag {
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* モバイル対応 */
+    @media (max-width: 768px) {
+      .side-panel {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 50;
+        transform: translateX(100%);
+      }
+
+      .side-panel.open {
+        transform: translateX(0);
+      }
+
+      .toolbar {
+        bottom: env(safe-area-inset-bottom, 20px);
+      }
+
+      header {
+        padding: 8px 12px;
+      }
+
+      .logo {
+        font-size: 1rem;
+      }
+
+      .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+    }
+
+    /* ローディング */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.5s;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--bg-card);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- ローディング -->
+    <div class="loading-overlay" id="loading">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">3Dアセットを読み込み中...</div>
+    </div>
+
+    <!-- ヘッダー -->
+    <header>
+      <div class="logo">3D Assets Library</div>
+      <div class="header-controls">
+        <button class="btn" id="btn-clear" title="全てクリア">
+          <span>クリア</span>
+        </button>
+        <button class="btn" id="btn-screenshot" title="スクリーンショット">
+          <span>撮影</span>
+        </button>
+        <button class="btn btn-icon" id="btn-panel-toggle" title="パネル表示切替">
+          <span>≡</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- メインエリア -->
+    <main>
+      <!-- 3Dキャンバス -->
+      <div id="canvas-container">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- ヒント -->
+        <div class="hint" id="hint">クリックしてモデルを配置</div>
+
+        <!-- 情報パネル -->
+        <div class="info-panel" id="info-panel">
+          <div class="info-title" id="info-title">-</div>
+          <div class="info-desc" id="info-desc">-</div>
+          <div class="info-tags" id="info-tags"></div>
+        </div>
+
+        <!-- ツールバー -->
+        <div class="toolbar">
+          <button class="tool-btn active" data-tool="place" title="配置">+</button>
+          <button class="tool-btn" data-tool="move" title="移動">↔</button>
+          <button class="tool-btn" data-tool="rotate" title="回転">↻</button>
+          <button class="tool-btn" data-tool="scale" title="拡大縮小">⇲</button>
+          <button class="tool-btn" data-tool="delete" title="削除">×</button>
+        </div>
+      </div>
+
+      <!-- サイドパネル -->
+      <div class="side-panel" id="side-panel">
+        <div class="category-tabs" id="category-tabs">
+          <button class="tab-btn active" data-category="characters">キャラ</button>
+          <button class="tab-btn" data-category="items">アイテム</button>
+          <button class="tab-btn" data-category="props">環境</button>
+          <button class="tab-btn" data-category="placed">配置済</button>
+        </div>
+
+        <div class="panel-content" id="panel-content">
+          <!-- アセットグリッド -->
+          <div class="asset-grid" id="asset-grid"></div>
+
+          <!-- バリアント選択 -->
+          <div class="variant-selector" id="variant-selector" style="display: none;">
+            <div class="variant-label">バリエーション</div>
+            <div class="variant-list" id="variant-list"></div>
+          </div>
+
+          <!-- 配置済みリスト -->
+          <div class="placed-list" id="placed-list" style="display: none;"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
