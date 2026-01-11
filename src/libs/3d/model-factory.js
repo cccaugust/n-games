@@ -68,6 +68,7 @@ export class ModelFactory {
       yoshi: (opts) => this.characters.createYoshi(opts),
       luigi: (opts) => this.characters.createLuigi(opts),
       wario: (opts) => this.characters.createWario(opts),
+      waluigi: (opts) => this.characters.createWaluigi(opts),
 
       // アイテム
       coin: (opts) => this.items.createCoin(opts),

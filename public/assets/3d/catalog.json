@@ -318,6 +318,15 @@
       "variants": ["yellow", "biker", "classic", "gold"]
     },
     {
+      "id": "waluigi",
+      "name": "ワルイージ",
+      "category": "characters",
+      "description": "マリオ風の悪役キャラクター。紫の帽子と逆さLマーク、非常に背が高く細い体、長い鼻と尖った髭が特徴。意地悪で挑発的",
+      "tags": ["player", "mario", "villain", "antihero", "tall", "sneaky"],
+      "animations": ["waluigiIdle", "waluigiWalk", "waluigiRun", "waluigiTaunt", "waluigiSpin"],
+      "variants": ["purple", "tennis", "classic", "gold"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
