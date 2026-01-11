@@ -66,6 +66,15 @@
       "variants": ["white", "blue", "red", "shadow"]
     },
     {
+      "id": "dog",
+      "name": "犬",
+      "category": "characters",
+      "description": "かわいい犬のキャラクター。4種類の犬種バリエーションでペットやNPCに最適",
+      "tags": ["pet", "animal", "cute", "friendly", "npc"],
+      "animations": ["dogIdle", "dogWalk", "dogRun", "dogSit", "dogTailWag", "dogBark"],
+      "variants": ["shiba", "husky", "golden", "dalmatian"]
+    },
+    {
       "id": "coin",
       "name": "コイン",
       "category": "items",
