@@ -101,6 +101,7 @@ math-battle/
 - フォント: M PLUS Rounded 1c (Google Fonts)
 - 効果音: Web Audio API による動的生成
 - アイコン: 絵文字を使用
+- モンスター画像: `public/games/math-battle/assets/monsters/`（一部モンスターで使用）
 
 ## TODO / 既知の課題
 

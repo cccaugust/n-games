@@ -163,6 +163,11 @@ function renderMonsterCard(monster, level = 1, size = 'normal') {
 }
 
 function renderMonsterIcon(monster) {
+    // 画像があるモンスターは画像を優先表示（算数バトル専用assets）
+    if (typeof monster.image === 'string' && monster.image) {
+        return `<img src="${monster.image}" alt="${monster.name}" class="monster-img">`;
+    }
+
     const color = TYPE_COLORS[monster.types[0]];
     const secondary = monster.types[1] ? TYPE_COLORS[monster.types[1]] : color;
 

@@ -4,6 +4,41 @@
  * パラメータは小学生が計算しやすい範囲に設定（1~100程度）
  */
 
+import { resolvePath } from '../../js/config.js';
+
+// ポケモン図鑑由来の画像（算数バトル側に複製したもの）
+// - 図鑑と算数バトルのデータは別管理にする前提
+// - 画像だけは算数バトルの public 配下から参照する
+const POKEDEX_IMAGE_MAP = {
+    // id here is "pokedex id" for reference only; math-battle monsters use Mxxx.
+    'カイケフポトリ': 'kaikefupotori.png',
+    'ゴダンギル': 'godangiru.png',
+    'カメラマン': 'cameraman.png',
+    'カマサウルス': 'kamasaurus.png',
+    'グレートマイテシ': 'greatmaitesh.png',
+    'メガグレートマイテシ': 'mega_greatmaitesh.png',
+    'ボトルマン': 'bottleman.png',
+    'ヘビキング': 'hebiking.png',
+    'カワボウ': 'kawabo.png',
+    'タマウソ': 'tamauso.png',
+    'ライジュウソ': 'raijuuso.png',
+    'ピコチャージ': 'picocharge.png',
+    'メガハブ': 'megahub.png',
+    'ギガアウトレット': 'gigaoutlet.png',
+    'ガイアドライバー': 'gaiadriver.png',
+    'プロミネンス': 'prominess.png',
+    'アビスウォーカー': 'abysswalker.png',
+    'プラズマカイザー': 'plasmakaiser.png',
+    'ウォンプ': 'womp.png',
+    'ダイコ': 'daiko.png',
+    'コインコイ': 'coinkoi.png'
+};
+
+function resolveMonsterImageByName(name) {
+    const file = POKEDEX_IMAGE_MAP[name];
+    return file ? resolvePath(`/games/math-battle/assets/monsters/${file}`) : null;
+}
+
 // タイプ定義
 export const TYPES = {
     FIRE: 'fire',
@@ -498,6 +533,7 @@ export const MONSTERS = [
         id: 'M021',
         name: 'カイケフポトリ',
         description: '異次元から来た謎の存在。空間を操る。',
+        image: resolveMonsterImageByName('カイケフポトリ'),
         types: [TYPES.PSYCHIC, TYPES.FAIRY],
         rarity: RARITY.EPIC,
         baseStats: { hp: 80, attack: 40, defense: 25 },
@@ -509,6 +545,7 @@ export const MONSTERS = [
         id: 'M022',
         name: 'ゴダンギル',
         description: '5本の剣を持つ騎士。連続攻撃が得意。',
+        image: resolveMonsterImageByName('ゴダンギル'),
         types: [TYPES.STEEL, TYPES.GHOST],
         rarity: RARITY.EPIC,
         baseStats: { hp: 75, attack: 45, defense: 28 },
@@ -520,6 +557,7 @@ export const MONSTERS = [
         id: 'M023',
         name: 'カマサウルス',
         description: '3匹が一体となった海の支配者。',
+        image: resolveMonsterImageByName('カマサウルス'),
         types: [TYPES.WATER, TYPES.DRAGON],
         rarity: RARITY.EPIC,
         baseStats: { hp: 78, attack: 42, defense: 24 },
@@ -531,6 +569,7 @@ export const MONSTERS = [
         id: 'M024',
         name: 'プラズマカイザー',
         description: '雷の化身。稲妻のごとく素早い。',
+        image: resolveMonsterImageByName('プラズマカイザー'),
         types: [TYPES.ELECTRIC, TYPES.FIGHTING],
         rarity: RARITY.EPIC,
         baseStats: { hp: 70, attack: 48, defense: 20 },

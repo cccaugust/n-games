@@ -1398,6 +1398,14 @@ body {
     height: 100%;
 }
 
+.monster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
 .card-info-bar {
     background: rgba(0,0,0,0.6);
     padding: 4px 8px;
