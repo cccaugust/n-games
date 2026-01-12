@@ -504,6 +504,52 @@ function showStageSelect(grade, category) {
 // ===========================================
 // バトルシステム
 // ===========================================
+
+/**
+ * ステージの敵タイプに合うモンスターを選択
+ * 進化系モンスターを優先（ガチャで出ないレアな敵として）
+ */
+function selectEnemyMonster(enemyTypes, stageLevel) {
+    // 進化系モンスターのIDセット
+    const evolutionIds = new Set(
+        MONSTERS.filter(m => m.evolution).map(m => m.evolution)
+    );
+
+    // タイプが一致するモンスターを探す
+    const typeMatch = (monsterTypes, targetTypes) => {
+        return targetTypes.some(t => monsterTypes.includes(t));
+    };
+
+    // 進化系で タイプ一致するもの（優先）
+    let candidates = MONSTERS.filter(m =>
+        evolutionIds.has(m.id) && typeMatch(m.types, enemyTypes)
+    );
+
+    // なければ進化系全体から
+    if (candidates.length === 0) {
+        candidates = MONSTERS.filter(m => evolutionIds.has(m.id));
+    }
+
+    // それでもなければ全モンスターからタイプ一致
+    if (candidates.length === 0) {
+        candidates = MONSTERS.filter(m => typeMatch(m.types, enemyTypes));
+    }
+
+    // 最終フォールバック
+    if (candidates.length === 0) {
+        candidates = MONSTERS;
+    }
+
+    // ステージレベルに応じてレア度でフィルタ（上級ほど強いモンスター）
+    const minRarity = Math.min(stageLevel, 3);
+    const rarityFiltered = candidates.filter(m => m.rarity >= minRarity);
+    if (rarityFiltered.length > 0) {
+        candidates = rarityFiltered;
+    }
+
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
 function startBattle(stage) {
     // パーティが空の場合はバトルを開始できない
     if (!currentPlayer.party || currentPlayer.party.length === 0) {
@@ -513,6 +559,9 @@ function startBattle(stage) {
 
     const questions = generateStageQuestions(stage.grade, stage.category, stage.questionCount);
 
+    // 敵モンスターを選択
+    const enemyMonster = selectEnemyMonster(stage.enemy.types, stage.level);
+
     battleState = {
         stage: stage,
         questions: questions,
@@ -521,6 +570,7 @@ function startBattle(stage) {
         startTime: Date.now(),
         enemyHp: stage.enemy.hp,
         enemyMaxHp: stage.enemy.hp,
+        enemyMonster: enemyMonster, // 敵モンスターデータを保存
         partyHp: currentPlayer.party.map(idx => {
             const m = currentPlayer.monsters[idx];
             if (!m) return 0;
@@ -596,9 +646,10 @@ function renderBattle() {
                         <span class="hp-text">${bs.enemyHp} / ${bs.enemyMaxHp}</span>
                     </div>
                     <div class="enemy-visual" id="enemyVisual">
-                        <div class="enemy-sprite" style="background: linear-gradient(135deg, ${TYPE_COLORS[stage.enemy.types[0]]}, ${stage.enemy.types[1] ? TYPE_COLORS[stage.enemy.types[1]] : TYPE_COLORS[stage.enemy.types[0]]})">
-                            ${stage.enemy.name.charAt(0)}
+                        <div class="enemy-monster-display">
+                            ${renderMonsterIcon(bs.enemyMonster)}
                         </div>
+                        <span class="enemy-monster-name">${bs.enemyMonster.name}</span>
                     </div>
                 </div>
 
