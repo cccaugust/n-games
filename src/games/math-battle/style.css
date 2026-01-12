@@ -556,6 +556,8 @@ body {
 .battle-screen {
     padding: 10px;
     gap: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
 .battle-field {
@@ -884,6 +886,12 @@ body {
 
 .gacha-desc {
     color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.gacha-hint {
+    color: var(--accent-green);
+    font-size: 0.95rem;
     margin-bottom: 20px;
 }
 
@@ -899,24 +907,91 @@ body {
 }
 
 .gacha-game-screen {
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 10px;
+    position: relative;
+    overflow: hidden;
 }
 
-.gacha-timer {
-    font-size: 4rem;
-    font-weight: 900;
-    color: var(--accent-primary);
+.gacha-header {
+    width: 100%;
+    max-width: 500px;
     margin-bottom: 20px;
 }
 
-.gacha-timer .timer-label {
-    font-size: 1.5rem;
+.gacha-timer-bar {
+    width: 100%;
+    height: 16px;
+    background: #333;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
 }
 
-.gacha-score {
+.timer-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), #88ff88);
+    transition: width 0.3s ease;
+    border-radius: 8px;
+}
+
+.timer-fill.warning {
+    background: linear-gradient(90deg, var(--accent-primary), #ff8888);
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+.gacha-timer {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent-primary);
+    text-align: center;
+}
+
+.gacha-timer .timer-label {
+    font-size: 1rem;
+}
+
+.gacha-eggs-area {
+    background: linear-gradient(135deg, var(--bg-card), rgba(255, 215, 0, 0.1));
+    border: 2px solid var(--accent-gold);
+    border-radius: var(--radius-lg);
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.gacha-eggs-area.bounce {
+    animation: bounceEgg 0.3s ease;
+}
+
+@keyframes bounceEgg {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.eggs-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.eggs-display {
+    font-size: 2rem;
+    margin-bottom: 4px;
+    min-height: 40px;
+    letter-spacing: 4px;
+}
+
+.eggs-count {
     font-size: 1.5rem;
+    font-weight: 900;
     color: var(--accent-gold);
-    margin-bottom: 30px;
+}
+
+.gacha-question-area {
+    width: 100%;
+    max-width: 500px;
 }
 
 .gacha-question {
@@ -954,11 +1029,18 @@ body {
 .gacha-result-screen h2 {
     font-size: 2rem;
     color: var(--accent-gold);
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+}
+
+.gacha-correct-count {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-bottom: 8px;
 }
 
 .gacha-result-count {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 900;
     color: var(--accent-green);
     margin-bottom: 24px;
 }
@@ -975,6 +1057,42 @@ body {
 .no-monster {
     color: var(--text-muted);
     margin-bottom: 24px;
+}
+
+/* ===========================================
+   パーティクルエフェクト
+=========================================== */
+.particle-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: particleExplode 0.8s ease-out forwards;
+}
+
+@keyframes particleExplode {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(calc(-50% + var(--x) * 0.5), calc(-50% + var(--y) * 0.5)) scale(1) rotate(calc(var(--rotation) * 0.5));
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(0.5) rotate(var(--rotation));
+    }
 }
 
 /* ===========================================

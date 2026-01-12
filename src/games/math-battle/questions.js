@@ -685,33 +685,46 @@ export function generateStageQuestions(grade, category, count = 5) {
 }
 
 /**
- * ガチャ用の簡単な問題を生成
+ * ガチャ用の簡単な問題を生成（1桁の四則演算）
  */
 export function generateGachaQuestion() {
-    const type = randChoice(['add', 'sub', 'mult']);
+    const type = randChoice(['add', 'sub', 'mult', 'div']);
     switch (type) {
         case 'add': {
-            const a = randInt(1, 20);
-            const b = randInt(1, 20);
+            // 1桁 + 1桁（答えが18以下）
+            const a = randInt(1, 9);
+            const b = randInt(1, 9);
             return {
                 question: `${a} + ${b}`,
                 answer: a + b
             };
         }
         case 'sub': {
-            const a = randInt(10, 30);
-            const b = randInt(1, a);
+            // 1桁 - 1桁（答えが正の数）
+            const a = randInt(2, 9);
+            const b = randInt(1, a - 1);
             return {
                 question: `${a} - ${b}`,
                 answer: a - b
             };
         }
         case 'mult': {
+            // 1桁 × 1桁（九九の範囲）
             const a = randInt(1, 9);
             const b = randInt(1, 9);
             return {
                 question: `${a} × ${b}`,
                 answer: a * b
+            };
+        }
+        case 'div': {
+            // 割り切れる割り算（答えが1桁）
+            const b = randInt(1, 9);
+            const answer = randInt(1, 9);
+            const a = b * answer;
+            return {
+                question: `${a} ÷ ${b}`,
+                answer: answer
             };
         }
     }
