@@ -58,6 +58,15 @@ const POKEDEX_IMAGE_MAP = {
     'ウォーベア': 'warbear.png',
     'マスマジシャン': 'mathmagician.png',
     'インフィニティ': 'infinity.png',
+    'ボムペン': 'bombpen.png',
+    'ダイナペン': 'dynapen.png',
+    'バクゲキング': 'blastking.png',
+    'スクショッピ': 'scushoppi.png',
+    'キャプチャル': 'captural.png',
+    '４Ｋドン': 'fourkdon.png',
+    'ワルラッコ': 'warurakko.png',
+    'グレラッコ': 'gurerakko.png',
+    'ゴクアクラッコ': 'gokuakurakko.png',
     'コインコイ': 'coinkoi.png'
 };
 
@@ -709,6 +718,117 @@ export const MONSTERS = [
         types: [TYPES.FIGHTING, TYPES.STEEL],
         rarity: RARITY.EPIC,
         baseStats: { hp: 80, attack: 45, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：爆弾ペンギン系
+    {
+        id: 'M032',
+        name: 'ボムペン',
+        description: '導火線のついたペンギン。怒ると爆発する。',
+        image: resolveMonsterImageByName('ボムペン'),
+        types: [TYPES.WATER],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 15, defense: 5 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M033',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M033',
+        name: 'ダイナペン',
+        description: 'ボムペンが成長した姿。ダイナマイトを抱えて突撃する。',
+        image: resolveMonsterImageByName('ダイナペン'),
+        types: [TYPES.WATER, TYPES.FIRE],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 25, defense: 10 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M034',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M034',
+        name: 'バクゲキング',
+        description: 'ダイナペンの最終進化。全身兵器の破壊王。',
+        image: resolveMonsterImageByName('バクゲキング'),
+        types: [TYPES.WATER, TYPES.FIRE],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 70, attack: 40, defense: 20 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：スクショッピ系
+    {
+        id: 'M035',
+        name: 'スクショッピ',
+        description: '瞬間を切り取る能力を持つ。大事な場面を見逃さない。',
+        image: resolveMonsterImageByName('スクショッピ'),
+        types: [TYPES.ELECTRIC, TYPES.NORMAL],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 30, attack: 12, defense: 8 },
+        skill: SKILLS.LUCKY_50,
+        evolution: 'M036',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M036',
+        name: 'キャプチャル',
+        description: 'あらゆるデータを保存する。記憶力は無限大。',
+        image: resolveMonsterImageByName('キャプチャル'),
+        types: [TYPES.ELECTRIC, TYPES.STEEL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 20, defense: 15 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M037',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M037',
+        name: '４Ｋドン',
+        description: '超高画質で世界を記録する巨体。その瞳には世界の全てが映る。',
+        image: resolveMonsterImageByName('４Ｋドン'),
+        types: [TYPES.ELECTRIC, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 35, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：悪いラッコ系
+    {
+        id: 'M038',
+        name: 'ワルラッコ',
+        description: '悪戯好きなラッコ。気に入らない石は投げつける。',
+        image: resolveMonsterImageByName('ワルラッコ'),
+        types: [TYPES.WATER, TYPES.FIGHTING],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 15, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M039',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M039',
+        name: 'グレラッコ',
+        description: 'ワルラッコが成長して更に凶暴になった。貝殻を砕く腕力を持つ。',
+        image: resolveMonsterImageByName('グレラッコ'),
+        types: [TYPES.WATER, TYPES.FIGHTING],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 60, attack: 25, defense: 15 },
+        skill: SKILLS.LUCKY_50,
+        evolution: 'M040',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M040',
+        name: 'ゴクアクラッコ',
+        description: '海のギャングスター。その強さは海を支配するほど。',
+        image: resolveMonsterImageByName('ゴクアクラッコ'),
+        types: [TYPES.WATER, TYPES.FIGHTING],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 85, attack: 45, defense: 25 },
         skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
