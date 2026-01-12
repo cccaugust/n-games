@@ -4,74 +4,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>日本マップクエスト | N-Games</title>
+  <title>日本探検クエスト | N-Games</title>
   <link rel="stylesheet" href="../../style.css">
   <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
-  <div class="container jm-container">
-    <a class="jm-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+  <div id="app">
+    <!-- API Key設定画面 -->
+    <div id="apiKeyScreen" class="screen">
+      <div class="setup-card">
+        <h1>日本探検クエスト</h1>
+        <p class="setup-desc">Google Mapsで日本を探検して、各地の特産物を集めよう！</p>
 
-    <div class="jm-header">
-      <div>
-        <h2 class="jm-title">日本マップクエスト 🗾</h2>
-        <p class="jm-subtitle">ドラクエ風フィールドで 県をめぐろう！</p>
-      </div>
+        <div class="setup-form">
+          <label for="apiKeyInput">Google Maps API Key</label>
+          <input type="text" id="apiKeyInput" placeholder="AIza...">
+          <p class="setup-hint">
+            <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener">Google Cloud Console</a>
+            でMaps JavaScript APIを有効にしてキーを取得してください
+          </p>
+          <button id="startBtn" class="btn-primary">ゲームスタート</button>
+        </div>
 
-      <div class="jm-actions">
-        <button class="btn-primary jm-btn" id="newMissionBtn">ミッション変更</button>
-        <button class="jm-btn-secondary" id="resetBtn">東京にもどる</button>
+        <div class="setup-alt">
+          <p>APIキーがない場合：</p>
+          <button id="demoBtn" class="btn-secondary">デモモードで遊ぶ</button>
+        </div>
+
+        <a class="back-link" href="../../pages/portal/portal.html">&larr; もどる</a>
       </div>
     </div>
 
-    <div class="jm-layout">
-      <div class="jm-stage card">
-        <div class="jm-hud">
-          <div class="jm-hud-row">
-            <div class="jm-pill">いま：<span id="currentPref">-</span></div>
-            <div class="jm-pill">ちけい：<span id="currentTerrain">-</span></div>
+    <!-- ゲーム画面 -->
+    <div id="gameScreen" class="screen hidden">
+      <div class="game-container">
+        <!-- ヘッダー -->
+        <header class="game-header">
+          <a class="back-btn" href="../../pages/portal/portal.html">&larr;</a>
+          <h1 class="game-title">日本探検クエスト</h1>
+          <div class="header-stats">
+            <span class="stat-badge" id="collectedCount">0</span>
+            <span class="stat-sep">/</span>
+            <span class="stat-badge stat-total" id="totalCount">47</span>
           </div>
-          <div class="jm-hud-row">
-            <div class="jm-mission">
-              <span class="jm-mission-label">ミッション</span>
-              <span id="missionText">-</span>
-              <span id="missionStatus" class="jm-mission-status"></span>
+        </header>
+
+        <!-- メインエリア -->
+        <main class="game-main">
+          <!-- 地図 -->
+          <div id="map" class="map-view"></div>
+
+          <!-- デモモード用のキャンバス -->
+          <canvas id="demoCanvas" class="demo-canvas hidden"></canvas>
+
+          <!-- 現在地表示 -->
+          <div class="location-bar" id="locationBar">
+            <span class="location-label">いまいる場所：</span>
+            <span class="location-name" id="currentLocation">東京都</span>
+          </div>
+
+          <!-- ミッション表示 -->
+          <div class="mission-panel" id="missionPanel">
+            <div class="mission-header">
+              <span class="mission-icon">🎯</span>
+              <span class="mission-title">ミッション</span>
             </div>
+            <div class="mission-content" id="missionContent">
+              <span class="mission-pref" id="missionPref">北海道</span>の
+              <span class="mission-item" id="missionItem">メロン</span>を手に入れろ！
+            </div>
+            <button class="mission-skip" id="skipMissionBtn">スキップ</button>
           </div>
-        </div>
 
-        <div class="jm-canvas-wrap">
-          <canvas id="worldCanvas" class="jm-world" aria-label="日本マップ"></canvas>
-          <div class="jm-toast" id="toast" aria-live="polite"></div>
-        </div>
-
-        <div class="jm-controls" id="controls">
-          <button class="jm-pad" data-dir="up" aria-label="上">▲</button>
-          <div class="jm-pad-row">
-            <button class="jm-pad" data-dir="left" aria-label="左">◀</button>
-            <button class="jm-pad" data-dir="down" aria-label="下">▼</button>
-            <button class="jm-pad" data-dir="right" aria-label="右">▶</button>
+          <!-- 特産物ゲット通知 -->
+          <div class="item-toast hidden" id="itemToast">
+            <span class="toast-icon" id="toastIcon">🍎</span>
+            <span class="toast-text" id="toastText">りんごをゲット！</span>
           </div>
-          <div class="jm-help">PC: 矢印 / WASD　スマホ: ボタン</div>
+        </main>
+
+        <!-- 下部メニュー -->
+        <footer class="game-footer">
+          <button class="footer-btn" id="collectionBtn">
+            <span class="footer-icon">📦</span>
+            <span class="footer-label">コレクション</span>
+          </button>
+          <button class="footer-btn" id="streetViewBtn">
+            <span class="footer-icon">🚶</span>
+            <span class="footer-label">歩く</span>
+          </button>
+          <button class="footer-btn" id="mapViewBtn">
+            <span class="footer-icon">🗺️</span>
+            <span class="footer-label">地図</span>
+          </button>
+        </footer>
+      </div>
+
+      <!-- コレクション画面 -->
+      <div class="modal hidden" id="collectionModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>コレクション</h2>
+            <button class="modal-close" id="closeCollectionBtn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div class="collection-grid" id="collectionGrid"></div>
+          </div>
         </div>
       </div>
 
-      <aside class="jm-side card">
-        <h3 class="jm-side-title">ミニマップ</h3>
-        <canvas id="miniCanvas" class="jm-mini" aria-label="ミニマップ"></canvas>
-        <div class="jm-legend">
-          <div class="jm-legend-item"><span class="jm-dot jm-dot-player"></span>あなた</div>
-          <div class="jm-legend-item"><span class="jm-dot jm-dot-target"></span>目的地</div>
+      <!-- クリア画面 -->
+      <div class="modal hidden" id="clearModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content clear-content">
+          <h2>🎉 コンプリート！ 🎉</h2>
+          <p>47都道府県の特産物をすべて集めました！</p>
+          <button class="btn-primary" id="restartBtn">もう一度遊ぶ</button>
         </div>
-        <div class="jm-note">
-          県の境界は「ざっくり版」です（今後、精度アップ可能）。
-        </div>
-      </aside>
+      </div>
     </div>
   </div>
 
-  <script type="module" src="./game.js"></script>
+  <script src="./game.js" type="module"></script>
 </body>
 
 </html>
