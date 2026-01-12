@@ -377,15 +377,16 @@ export function calculateRank(clearTime, correctRate, questionCount) {
  */
 export function calculateRewards(stage, rank, isFirstClear) {
     let coins = stage.rewards.base;
-    let gradeCoins = stage.rewards.gradeBase || 0;
+    let gradeCoins = 0;
 
     if (isFirstClear) {
+        // 初回クリア時のみ学年コインを付与
         coins += stage.rewards.firstClear;
-        gradeCoins += stage.rewards.gradeFirstClear || 0;
+        gradeCoins = (stage.rewards.gradeBase || 0) + (stage.rewards.gradeFirstClear || 0);
+        gradeCoins += (stage.rewards.gradeRankBonus && stage.rewards.gradeRankBonus[rank]) || 0;
     }
 
     coins += stage.rewards.rankBonus[rank] || 0;
-    gradeCoins += (stage.rewards.gradeRankBonus && stage.rewards.gradeRankBonus[rank]) || 0;
 
     return {
         coins,
