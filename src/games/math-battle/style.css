@@ -1,0 +1,1413 @@
+/* ===========================================
+   算数バトル - スタイルシート
+   タブレット最適化・子ども向けUI
+=========================================== */
+
+/* CSS変数 */
+:root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-card: #0f3460;
+    --text-primary: #fff;
+    --text-secondary: #a0a0c0;
+    --text-muted: #606080;
+    --accent-primary: #e94560;
+    --accent-secondary: #0f4c75;
+    --accent-gold: #ffd700;
+    --accent-green: #00d26a;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 30px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* リセット */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#app {
+    height: 100svh;
+    width: 100%;
+    overflow: hidden;
+    padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+/* ===========================================
+   共通コンポーネント
+=========================================== */
+
+/* 画面 */
+.screen {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ボタン */
+.btn {
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 14px 32px;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    touch-action: manipulation;
+    min-height: 50px;
+}
+
+.btn:active {
+    transform: scale(0.95);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-primary), #ff6b6b);
+    color: white;
+    box-shadow: var(--shadow-md), 0 4px 0 #b83344;
+}
+
+.btn-primary:active:not(:disabled) {
+    box-shadow: var(--shadow-sm), 0 2px 0 #b83344;
+    transform: translateY(2px) scale(0.98);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 2px solid var(--text-muted);
+}
+
+.btn-ghost:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+.btn-large {
+    font-size: 1.3rem;
+    padding: 18px 48px;
+    min-height: 60px;
+}
+
+.back-btn {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+/* ===========================================
+   タイトル画面
+=========================================== */
+.title-screen {
+    justify-content: center;
+    position: relative;
+}
+
+.title-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    overflow: hidden;
+}
+
+.floating-shapes {
+    position: absolute;
+    inset: 0;
+}
+
+.floating-shapes::before,
+.floating-shapes::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-shapes::before {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(233,69,96,0.3), transparent);
+    top: 10%;
+    left: 10%;
+}
+
+.floating-shapes::after {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(15,76,117,0.4), transparent);
+    bottom: 20%;
+    right: 15%;
+    animation-delay: -3s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.1); }
+}
+
+.title-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.game-title {
+    font-size: clamp(2.5rem, 10vw, 5rem);
+    font-weight: 900;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.title-math {
+    color: var(--accent-gold);
+    display: block;
+}
+
+.title-battle {
+    color: var(--accent-primary);
+    display: block;
+    font-size: 0.8em;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 40px;
+}
+
+/* ===========================================
+   プレイヤー選択
+=========================================== */
+.player-select-screen h2,
+.new-player-screen h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    color: var(--accent-gold);
+}
+
+.player-list {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: var(--bg-card);
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.player-item:active {
+    transform: scale(0.98);
+    background: var(--bg-secondary);
+}
+
+.player-item.new-player {
+    background: transparent;
+    border: 2px dashed var(--text-muted);
+    color: var(--text-secondary);
+}
+
+.player-item .plus {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.player-arrow {
+    color: var(--accent-primary);
+}
+
+/* 新規プレイヤー */
+.name-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 16px 24px;
+    font-size: 1.3rem;
+    font-family: inherit;
+    background: var(--bg-card);
+    border: 2px solid var(--text-muted);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.name-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.starter-select {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 30px;
+}
+
+.starter-select h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+}
+
+.starter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+@media (min-width: 600px) {
+    .starter-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.starter-option {
+    padding: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 3px solid transparent;
+}
+
+.starter-option:active {
+    transform: scale(0.95);
+}
+
+.starter-option.selected {
+    border-color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.starter-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+/* ===========================================
+   メインメニュー
+=========================================== */
+.main-menu-screen {
+    padding-top: 0;
+}
+
+.menu-header {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    margin-bottom: 30px;
+}
+
+.player-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.player-info .player-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.coin-display {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 400px;
+    flex: 1;
+    align-content: center;
+}
+
+.menu-item {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.menu-item:active {
+    transform: scale(0.95);
+}
+
+.menu-icon {
+    font-size: 3rem;
+}
+
+.menu-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ===========================================
+   学年・分野・ステージ選択
+=========================================== */
+.grade-select-screen h2,
+.category-select-screen h2,
+.stage-select-screen h2 {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    color: var(--accent-gold);
+}
+
+.grade-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.grade-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 16px;
+    background: var(--bg-card);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.grade-btn:active {
+    transform: scale(0.95);
+}
+
+.grade-num {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent-primary);
+}
+
+.grade-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.category-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--bg-card);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.category-btn:active {
+    transform: scale(0.95);
+}
+
+.category-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.category-progress {
+    font-size: 0.9rem;
+    color: var(--accent-green);
+    margin-top: 4px;
+}
+
+.stage-list {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stage-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    background: var(--bg-card);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    text-align: left;
+}
+
+.stage-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.stage-btn.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stage-btn.cleared {
+    background: linear-gradient(135deg, var(--bg-card), rgba(0,210,106,0.2));
+}
+
+.stage-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+}
+
+.stage-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: block;
+    margin-top: 4px;
+}
+
+.rank {
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.rank-s { color: #fa0; text-shadow: 0 0 10px #fa0; }
+.rank-a { color: #48f; }
+.rank-b { color: #4a4; }
+.rank-c { color: #888; }
+
+/* ===========================================
+   バトル画面
+=========================================== */
+.battle-screen {
+    padding: 10px;
+    gap: 10px;
+}
+
+.battle-field {
+    flex: 1;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.enemy-area {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.enemy-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.enemy-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.enemy-types {
+    display: flex;
+    gap: 4px;
+}
+
+.type-badge-small {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: white;
+}
+
+.enemy-hp-bar {
+    width: 100%;
+    height: 24px;
+    background: #333;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff8888);
+    transition: width 0.3s ease;
+    border-radius: 12px;
+}
+
+.hp-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.enemy-visual {
+    position: relative;
+}
+
+.enemy-sprite {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.party-area {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+}
+
+.party-member {
+    position: relative;
+}
+
+.party-member.fainted {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+.hp-bar-mini {
+    width: 100%;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.hp-bar-mini .hp-fill {
+    background: linear-gradient(90deg, #00d26a, #88ff88);
+}
+
+.question-area {
+    width: 100%;
+    max-width: 600px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-primary), #ff8888);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+}
+
+.question-box {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.question-text {
+    font-size: clamp(1.3rem, 5vw, 2rem);
+    font-weight: 700;
+}
+
+.answer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.answer-btn {
+    padding: 16px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--bg-card);
+    border: 3px solid transparent;
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 60px;
+}
+
+.answer-btn:active {
+    transform: scale(0.95);
+    background: var(--accent-secondary);
+}
+
+.answer-btn.correct {
+    background: var(--accent-green);
+    border-color: #00ff88;
+}
+
+.answer-btn.wrong {
+    background: var(--accent-primary);
+    border-color: #ff4444;
+}
+
+/* ダメージエフェクト */
+.damage-effect {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--accent-primary);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    animation: damageFloat 0.5s ease-out forwards;
+    pointer-events: none;
+}
+
+.damage-effect.enemy-damage {
+    color: #ff4444;
+}
+
+@keyframes damageFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+/* ===========================================
+   結果画面
+=========================================== */
+.result-screen {
+    justify-content: center;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 30px;
+}
+
+.victory .result-title {
+    color: var(--accent-gold);
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.defeat .result-title {
+    color: var(--accent-primary);
+}
+
+.result-details {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 30px;
+    min-width: 280px;
+}
+
+.rank-display {
+    margin-bottom: 20px;
+}
+
+.rank-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.rank-display .rank {
+    font-size: 4rem;
+}
+
+.reward-display {
+    font-size: 1.3rem;
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+.first-clear {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--accent-green);
+    margin-top: 8px;
+}
+
+.stats-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.defeat-message {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.result-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ===========================================
+   ガチャ
+=========================================== */
+.gacha-screen {
+    text-align: center;
+}
+
+.gacha-screen h2 {
+    font-size: 2rem;
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+.gacha-desc {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.gacha-cost {
+    font-size: 1.5rem;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+}
+
+.current-coins {
+    color: var(--text-muted);
+    margin-bottom: 30px;
+}
+
+.gacha-game-screen {
+    justify-content: center;
+}
+
+.gacha-timer {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--accent-primary);
+    margin-bottom: 20px;
+}
+
+.gacha-timer .timer-label {
+    font-size: 1.5rem;
+}
+
+.gacha-score {
+    font-size: 1.5rem;
+    color: var(--accent-gold);
+    margin-bottom: 30px;
+}
+
+.gacha-question {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--bg-card);
+    padding: 24px 40px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+}
+
+.gacha-input-area {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.gacha-input {
+    width: 150px;
+    padding: 16px;
+    font-size: 1.5rem;
+    font-family: inherit;
+    text-align: center;
+    background: var(--bg-card);
+    border: 2px solid var(--text-muted);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+}
+
+.gacha-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.gacha-result-screen h2 {
+    font-size: 2rem;
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+.gacha-result-count {
+    font-size: 1.5rem;
+    color: var(--accent-green);
+    margin-bottom: 24px;
+}
+
+.gacha-monsters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    max-width: 500px;
+}
+
+.no-monster {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+/* ===========================================
+   パーティ編成
+=========================================== */
+.party-screen h2 {
+    font-size: 1.5rem;
+    color: var(--accent-gold);
+    margin-bottom: 24px;
+}
+
+.party-slots {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 24px;
+}
+
+.party-slots h3,
+.monster-box h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.party-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.party-slot {
+    aspect-ratio: 1;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.party-slot.empty {
+    border: 2px dashed var(--text-muted);
+    background: transparent;
+}
+
+.party-slot.empty span {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    border: none;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.monster-box {
+    width: 100%;
+    max-width: 500px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.monster-box-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.box-monster {
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.box-monster:active {
+    transform: scale(0.95);
+}
+
+.box-monster.in-party {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* ===========================================
+   図鑑
+=========================================== */
+.monster-book-screen h2 {
+    font-size: 1.5rem;
+    color: var(--accent-gold);
+    margin-bottom: 12px;
+}
+
+.book-progress {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.book-entry {
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.book-entry:active {
+    transform: scale(0.95);
+}
+
+.book-entry.undiscovered {
+    pointer-events: none;
+}
+
+.unknown-monster {
+    aspect-ratio: 1;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.unknown-icon {
+    font-size: 2rem;
+    color: var(--text-muted);
+}
+
+.unknown-rarity {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* モンスター詳細 */
+.monster-detail-screen {
+    text-align: center;
+}
+
+.detail-card-large {
+    margin-bottom: 20px;
+}
+
+.detail-info {
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+}
+
+.detail-info h2 {
+    font-size: 1.8rem;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.detail-desc {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.detail-stats {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bg-secondary);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+}
+
+.stat-value {
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.detail-skill {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.detail-skill h3 {
+    font-size: 1rem;
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.detail-skill p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.evolution-info {
+    background: rgba(255, 215, 0, 0.1);
+    border: 2px solid var(--accent-gold);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.evolution-info p {
+    color: var(--accent-gold);
+    margin-bottom: 12px;
+}
+
+/* パーティなし警告 */
+.no-party-screen {
+    justify-content: center;
+    text-align: center;
+}
+
+.no-party-screen h2 {
+    font-size: 1.8rem;
+    color: var(--accent-primary);
+    margin-bottom: 16px;
+}
+
+.no-party-screen p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+/* ===========================================
+   モンスターカード
+=========================================== */
+.monster-card {
+    --card-width: 100px;
+    width: var(--card-width);
+    aspect-ratio: 3/4;
+    position: relative;
+}
+
+.monster-card-small {
+    --card-width: 70px;
+}
+
+.monster-card-large {
+    --card-width: 180px;
+}
+
+.card-frame {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #2a2a4a, #1a1a2e);
+    border-radius: var(--radius-md);
+    border: 3px solid var(--rarity-color);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md), 0 0 10px var(--rarity-color);
+}
+
+.card-bg {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.card-icon {
+    width: 70%;
+    height: 70%;
+}
+
+.monster-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.card-info-bar {
+    background: rgba(0,0,0,0.6);
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-name {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-level {
+    font-size: 0.55rem;
+    color: var(--accent-gold);
+    font-weight: 700;
+}
+
+.card-rarity {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.card-types {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.type-badge {
+    font-size: 0.5rem;
+    padding: 1px 4px;
+    border-radius: 4px;
+    color: white;
+}
+
+.card-stats {
+    background: rgba(0,0,0,0.8);
+    padding: 4px 8px;
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.monster-card-large .card-name {
+    font-size: 1rem;
+}
+
+.monster-card-large .card-level {
+    font-size: 0.8rem;
+}
+
+.monster-card-large .card-rarity {
+    font-size: 0.8rem;
+}
+
+.monster-card-large .type-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+}
+
+.monster-card-large .card-stats {
+    font-size: 0.75rem;
+}
+
+/* ===========================================
+   レスポンシブ調整
+=========================================== */
+@media (min-width: 768px) {
+    .battle-screen {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .battle-field {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .question-area {
+        flex: 1;
+        max-width: 400px;
+    }
+
+    .grade-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .answer-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* ===========================================
+   アニメーション
+=========================================== */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.screen > * {
+    animation: slideIn 0.3s ease-out;
+}
