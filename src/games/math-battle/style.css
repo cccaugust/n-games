@@ -1922,3 +1922,259 @@ body {
 .screen > * {
     animation: slideIn 0.3s ease-out;
 }
+
+/* ===========================================
+   ガチャ選択画面
+=========================================== */
+.gacha-select-screen {
+    gap: 16px;
+}
+
+.gacha-select-screen h2 {
+    font-size: 2rem;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+}
+
+.gacha-section {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 16px;
+}
+
+.gacha-section h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--bg-card);
+}
+
+.section-hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+/* コイン表示 */
+.coins-display {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.coin-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-card);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+}
+
+.coin-icon {
+    font-size: 1.2rem;
+}
+
+.coin-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+/* 学年コイン表示 */
+.grade-coins-display {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.grade-coin-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-card);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+}
+
+.grade-coin-icon {
+    font-size: 1.2rem;
+}
+
+.grade-coin-amount {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* ガチャタイプカード */
+.gacha-types-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.gacha-type-card {
+    background: linear-gradient(135deg, var(--bg-card), var(--bg-secondary));
+    border: 2px solid var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.gacha-type-card:hover:not(.disabled) {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.gacha-type-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.gacha-type-card.normal {
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+.gacha-type-name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.gacha-type-cost {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 4px;
+}
+
+.gacha-type-owned {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.gacha-type-rates {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.75rem;
+}
+
+.gacha-type-rates .rate {
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.gacha-type-rates .rate.legendary {
+    color: var(--accent-gold);
+}
+
+.gacha-type-rates .rate.epic {
+    color: #a4f;
+}
+
+/* ガチャ確認画面 */
+.gacha-confirm-screen {
+    gap: 16px;
+}
+
+.gacha-rates-detail {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.gacha-rates-detail h4 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.rates-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rate-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.rarity-5 { color: var(--accent-gold); }
+.rarity-4 { color: #a4f; }
+.rarity-3 { color: #48f; }
+.rarity-2 { color: #4a4; }
+.rarity-1 { color: var(--text-muted); }
+
+/* ガチャ結果画面 */
+.gacha-type-label {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+/* 報酬表示（バトル結果） */
+.reward-display {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    text-align: center;
+    margin: 16px 0;
+}
+
+.reward-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    margin: 4px 0;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.reward-label {
+    font-size: 0.95rem;
+}
+
+.reward-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.reward-row.grade-coin .reward-value {
+    color: var(--accent-green);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+    .gacha-types-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grade-coins-display {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .gacha-type-card {
+        padding: 12px;
+    }
+
+    .gacha-type-name {
+        font-size: 0.9rem;
+    }
+}

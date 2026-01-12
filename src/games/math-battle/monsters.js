@@ -316,13 +316,113 @@ export const RARITY_COLORS = {
     [RARITY.LEGENDARY]: '#fa0'
 };
 
-// レアリティのドロップ率（ガチャ用）
+// レアリティのドロップ率（ガチャ用）- レガシー、参照用
 export const RARITY_RATES = {
     [RARITY.COMMON]: 50,
     [RARITY.UNCOMMON]: 30,
     [RARITY.RARE]: 15,
     [RARITY.EPIC]: 4,
     [RARITY.LEGENDARY]: 1
+};
+
+// ガチャタイプ定義
+export const GACHA_TYPES = {
+    NORMAL: 'normal',      // 通常ガチャ（通常コイン使用）
+    GRADE_1: 'grade_1',    // 1年ガチャ
+    GRADE_2: 'grade_2',    // 2年ガチャ
+    GRADE_3: 'grade_3',    // 3年ガチャ
+    GRADE_4: 'grade_4',    // 4年ガチャ
+    GRADE_5: 'grade_5',    // 5年ガチャ
+    GRADE_6: 'grade_6'     // 6年ガチャ
+};
+
+// ガチャタイプ別レアリティ確率
+// 通常ガチャ: ★1と★2のみ
+// 学年ガチャ: 学年が上がるほどレアが出やすい
+export const GACHA_RARITY_RATES = {
+    // 通常ガチャ: ★1と★2のみ
+    [GACHA_TYPES.NORMAL]: {
+        [RARITY.COMMON]: 70,
+        [RARITY.UNCOMMON]: 30,
+        [RARITY.RARE]: 0,
+        [RARITY.EPIC]: 0,
+        [RARITY.LEGENDARY]: 0
+    },
+    // 1年ガチャ
+    [GACHA_TYPES.GRADE_1]: {
+        [RARITY.COMMON]: 55,
+        [RARITY.UNCOMMON]: 32,
+        [RARITY.RARE]: 10,
+        [RARITY.EPIC]: 2.5,
+        [RARITY.LEGENDARY]: 0.5
+    },
+    // 2年ガチャ
+    [GACHA_TYPES.GRADE_2]: {
+        [RARITY.COMMON]: 50,
+        [RARITY.UNCOMMON]: 32,
+        [RARITY.RARE]: 13,
+        [RARITY.EPIC]: 4,
+        [RARITY.LEGENDARY]: 1
+    },
+    // 3年ガチャ
+    [GACHA_TYPES.GRADE_3]: {
+        [RARITY.COMMON]: 45,
+        [RARITY.UNCOMMON]: 32,
+        [RARITY.RARE]: 16,
+        [RARITY.EPIC]: 5.5,
+        [RARITY.LEGENDARY]: 1.5
+    },
+    // 4年ガチャ
+    [GACHA_TYPES.GRADE_4]: {
+        [RARITY.COMMON]: 40,
+        [RARITY.UNCOMMON]: 30,
+        [RARITY.RARE]: 20,
+        [RARITY.EPIC]: 7.5,
+        [RARITY.LEGENDARY]: 2.5
+    },
+    // 5年ガチャ
+    [GACHA_TYPES.GRADE_5]: {
+        [RARITY.COMMON]: 35,
+        [RARITY.UNCOMMON]: 28,
+        [RARITY.RARE]: 23,
+        [RARITY.EPIC]: 10,
+        [RARITY.LEGENDARY]: 4
+    },
+    // 6年ガチャ（最高レア率）
+    [GACHA_TYPES.GRADE_6]: {
+        [RARITY.COMMON]: 30,
+        [RARITY.UNCOMMON]: 25,
+        [RARITY.RARE]: 26,
+        [RARITY.EPIC]: 13,
+        [RARITY.LEGENDARY]: 6
+    }
+};
+
+// ガチャのコスト（学年コイン）
+export const GACHA_COSTS = {
+    [GACHA_TYPES.NORMAL]: { type: 'coins', amount: 100 },
+    [GACHA_TYPES.GRADE_1]: { type: 'gradeCoins', grade: 1, amount: 50 },
+    [GACHA_TYPES.GRADE_2]: { type: 'gradeCoins', grade: 2, amount: 50 },
+    [GACHA_TYPES.GRADE_3]: { type: 'gradeCoins', grade: 3, amount: 50 },
+    [GACHA_TYPES.GRADE_4]: { type: 'gradeCoins', grade: 4, amount: 50 },
+    [GACHA_TYPES.GRADE_5]: { type: 'gradeCoins', grade: 5, amount: 50 },
+    [GACHA_TYPES.GRADE_6]: { type: 'gradeCoins', grade: 6, amount: 50 }
+};
+
+// 学年からガチャタイプを取得
+export function getGachaTypeForGrade(grade) {
+    return `grade_${grade}`;
+}
+
+// ガチャタイプの表示名
+export const GACHA_TYPE_NAMES = {
+    [GACHA_TYPES.NORMAL]: 'ノーマルガチャ',
+    [GACHA_TYPES.GRADE_1]: '1ねんガチャ',
+    [GACHA_TYPES.GRADE_2]: '2年ガチャ',
+    [GACHA_TYPES.GRADE_3]: '3年ガチャ',
+    [GACHA_TYPES.GRADE_4]: '4年ガチャ',
+    [GACHA_TYPES.GRADE_5]: '5年ガチャ',
+    [GACHA_TYPES.GRADE_6]: '6年ガチャ'
 };
 
 /**
