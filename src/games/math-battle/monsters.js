@@ -54,6 +54,8 @@ const POKEDEX_IMAGE_MAP = {
     'サイコロン': 'psychoron.png',
     'ヘキサマインド': 'hexamind.png',
     'テサロード': 'tesserlord.png',
+    'バトルン': 'battleun.png',
+    'ウォーベア': 'warbear.png',
     'コインコイ': 'coinkoi.png'
 };
 
@@ -514,12 +516,13 @@ export const MONSTERS = [
         id: 'M016',
         name: 'バトルン',
         description: '闘志あふれる戦士。正解への情熱は誰にも負けない。',
+        image: resolveMonsterImageByName('バトルン'),
         types: [TYPES.FIGHTING],
         rarity: RARITY.RARE,
         baseStats: { hp: 60, attack: 30, defense: 12 },
         skill: SKILLS.POWER_UP_2,
-        evolution: null,
-        evolutionLevel: null
+        evolution: 'M031',
+        evolutionLevel: 30
     },
     {
         id: 'M017',
@@ -689,6 +692,19 @@ export const MONSTERS = [
         types: [TYPES.PSYCHIC, TYPES.STEEL],
         rarity: RARITY.EPIC, // 設定上はほぼレジェンダリー
         baseStats: { hp: 85, attack: 52, defense: 38 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：バトルン進化系
+    {
+        id: 'M031',
+        name: 'ウォーベア',
+        description: 'バトルンが成長した姿。強靭な肉体と鎧で戦場を駆ける。',
+        image: resolveMonsterImageByName('ウォーベア'),
+        types: [TYPES.FIGHTING, TYPES.STEEL],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 80, attack: 45, defense: 25 },
         skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
