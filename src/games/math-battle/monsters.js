@@ -56,6 +56,8 @@ const POKEDEX_IMAGE_MAP = {
     'テサロード': 'tesserlord.png',
     'バトルン': 'battleun.png',
     'ウォーベア': 'warbear.png',
+    'マスマジシャン': 'mathmagician.png',
+    'インフィニティ': 'infinity.png',
     'コインコイ': 'coinkoi.png'
 };
 
@@ -628,6 +630,7 @@ export const MONSTERS = [
         id: 'M025',
         name: 'マスマジシャン',
         description: '算数の魔術師。あらゆる数字を操る伝説のモンスター。',
+        image: resolveMonsterImageByName('マスマジシャン'),
         types: [TYPES.PSYCHIC, TYPES.DRAGON],
         rarity: RARITY.LEGENDARY,
         baseStats: { hp: 100, attack: 50, defense: 30 },
@@ -639,6 +642,7 @@ export const MONSTERS = [
         id: 'M026',
         name: 'インフィニティ',
         description: '無限の力を秘めた究極のモンスター。',
+        image: resolveMonsterImageByName('インフィニティ'),
         types: [TYPES.DRAGON, TYPES.FAIRY],
         rarity: RARITY.LEGENDARY,
         baseStats: { hp: 95, attack: 55, defense: 28 },
