@@ -104,6 +104,14 @@ const games = [
     link: '/games/brick-breaker/'
   },
   {
+    id: 'math-battle',
+    title: '算数バトル',
+    desc: 'モンスターと算数でバトル！パズドラ風RPG⚔️',
+    color: '#e94560',
+    icon: '⚔️',
+    link: '/games/math-battle/'
+  },
+  {
     id: 'math-quiz',
     title: 'さんすうクイズ',
     desc: 'めざせ！けいさんマスター',
