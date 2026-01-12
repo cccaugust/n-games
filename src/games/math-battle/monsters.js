@@ -110,7 +110,8 @@ const POKEDEX_IMAGE_MAP = {
     'ナイトメアハウンド': 'nightmarehound.png',
     'コインコイ': 'coinkoi.png',
     'M080': 'm080.png',
-    'M081': 'm081.png'
+    'M081': 'm081.png',
+    'ダイコ': 'daiko.png'
 };
 
 function resolveMonsterImageByName(name) {
@@ -1406,6 +1407,211 @@ export const MONSTERS = [
         types: [TYPES.DARK, TYPES.GHOST],
         rarity: RARITY.RARE, // 2段階進化なのでレア扱い
         baseStats: { hp: 80, attack: 45, defense: 20 },
+        skill: SKILLS.LUCKY_50,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：ポケモン図鑑からの移植組
+    {
+        id: 'M082',
+        name: 'カメラマン',
+        description: '首のカメラで珍しい瞬間を記録する。ドローンを飛ばして遠くも撮影できる。',
+        image: resolveMonsterImageByName('カメラマン'),
+        types: [TYPES.GRASS, TYPES.ELECTRIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 70, attack: 40, defense: 45 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M083',
+        name: 'グレートマイテシ',
+        description: '超極小ナノマシンでできた体を持つ。壊れてもすぐに再生する。',
+        image: resolveMonsterImageByName('グレートマイテシ'),
+        types: [TYPES.WATER, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 25, defense: 40 },
+        skill: SKILLS.HEAL_HALF,
+        evolution: 'M084',
+        evolutionLevel: 40
+    },
+    {
+        id: 'M084',
+        name: 'メガグレートマイテシ',
+        description: 'ナノマシンが活性化した姿。プラズマをまとい音速で泳ぐ。',
+        image: resolveMonsterImageByName('メガグレートマイテシ'),
+        types: [TYPES.WATER, TYPES.ELECTRIC],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 85, attack: 45, defense: 45 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M085',
+        name: 'ボトルマン',
+        description: '魔法の宿った湧き水。水の剣で敵を浄化する。',
+        image: resolveMonsterImageByName('ボトルマン'),
+        types: [TYPES.WATER, TYPES.PSYCHIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 60, attack: 35, defense: 30 },
+        skill: SKILLS.HEAL_THIRD,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M086',
+        name: 'ヘビキング',
+        description: '3つの頭を持つ王家の守護神。過去・現在・未来を見通すという。',
+        image: resolveMonsterImageByName('ヘビキング'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 80, attack: 40, defense: 35 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M087',
+        name: 'カワボウ',
+        description: 'お気に入りの小石を持ったカワウソ。好奇心が旺盛。',
+        image: resolveMonsterImageByName('カワボウ'),
+        types: [TYPES.WATER],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 15, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M088',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M088',
+        name: 'タマウソ',
+        description: '小石が宝珠に変わった。精神を統一して水を操る。',
+        image: resolveMonsterImageByName('タマウソ'),
+        types: [TYPES.WATER],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 25, defense: 20 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M089',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M089',
+        name: 'ライジュウソ',
+        description: '雷の力を得たタマウソの最終進化。嵐を呼ぶ力を持つ。',
+        image: resolveMonsterImageByName('ライジュウソ'),
+        types: [TYPES.WATER, TYPES.ELECTRIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 45, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M090',
+        name: 'ピコチャージ',
+        description: 'コンセントから電気を食べる小さなポケモン。',
+        image: resolveMonsterImageByName('ピコチャージ'),
+        types: [TYPES.ELECTRIC],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 30, attack: 15, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M091',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M091',
+        name: 'メガハブ',
+        description: 'たくさんのケーブルで電気を分け与える。群れの司令塔。',
+        image: resolveMonsterImageByName('メガハブ'),
+        types: [TYPES.ELECTRIC, TYPES.STEEL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 20, defense: 25 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M092',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M092',
+        name: 'ギガアウトレット',
+        description: '溢れ出るエネルギーで変形した姿。近づくと感電する。',
+        image: resolveMonsterImageByName('ギガアウトレット'),
+        types: [TYPES.ELECTRIC, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 70, attack: 40, defense: 40 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M093',
+        name: 'ガイアドライバー',
+        description: '森の規律を守る騎士。両腕の植物エネルギーで悪を討つ。',
+        image: resolveMonsterImageByName('ガイアドライバー'),
+        types: [TYPES.GRASS, TYPES.FIGHTING],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 85, attack: 50, defense: 35 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M094',
+        name: 'プロミネンス',
+        description: 'マグマから生まれた戦士。燃える拳で全てを灰にする。',
+        image: resolveMonsterImageByName('プロミネンス'),
+        types: [TYPES.FIRE, TYPES.FIGHTING],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 80, attack: 55, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M095',
+        name: 'アビスウォーカー',
+        description: '深海の騎士。水圧を操り、地上でも活動できる。',
+        image: resolveMonsterImageByName('アビスウォーカー'),
+        types: [TYPES.WATER, TYPES.FIGHTING],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 85, attack: 48, defense: 40 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M096',
+        name: 'ウォンプ',
+        description: '金属のような体を持つ音符のポケモン。不思議な音色を奏でる。',
+        image: resolveMonsterImageByName('ウォンプ'),
+        types: [TYPES.GHOST, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 60, attack: 30, defense: 35 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M097',
+        name: 'ダイコ',
+        description: 'お腹の太鼓でリズムを刻む。音を聞くと力が湧いてくる。',
+        image: resolveMonsterImageByName('ダイコ'),
+        types: [TYPES.FIGHTING, TYPES.NORMAL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 40, defense: 30 },
+        skill: SKILLS.POWER_UP_1_5,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M098',
+        name: 'コインコイ',
+        description: 'コインを背負った美しい鯉。光を集めるのが大好き。',
+        image: resolveMonsterImageByName('コインコイ'),
+        types: [TYPES.WATER, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 65, attack: 30, defense: 40 },
         skill: SKILLS.LUCKY_50,
         evolution: null,
         evolutionLevel: null
