@@ -1,6 +1,7 @@
 // ===== PAINT WARS - Three.js Renderer =====
 
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { ModelFactory } from '../../libs/3d/model-factory.js';
 
 export class GameRenderer {
   constructor(container) {
@@ -10,10 +11,14 @@ export class GameRenderer {
     this.renderer = null;
     this.canvas = null;
 
+    // Model factory for 3D assets
+    this.modelFactory = null;
+
     // Objects
     this.floor = null;
     this.walls = [];
     this.playerMeshes = new Map();
+    this.playerModels = new Map(); // Store Model3D instances
     this.projectiles = [];
     this.inkSplats = [];
     this.effects = [];
@@ -61,6 +66,9 @@ export class GameRenderer {
 
     // Add lights
     this.createLights();
+
+    // Initialize model factory
+    this.modelFactory = new ModelFactory(THREE);
 
     return this;
   }
@@ -253,48 +261,81 @@ export class GameRenderer {
 
   addPlayer(player) {
     const color = player.team === 'orange' ? 0xff6b35 : 0x3498db;
-
-    // Player body
-    const bodyGeometry = new THREE.CapsuleGeometry(0.5, 1, 8, 16);
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-      color: color,
-      roughness: 0.5,
-      metalness: 0.2
-    });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    body.position.y = 1;
-    body.castShadow = true;
-
-    // Player group
     const playerGroup = new THREE.Group();
-    playerGroup.add(body);
 
-    // Eyes (for direction indication)
-    const eyeGeometry = new THREE.SphereGeometry(0.15, 8, 8);
-    const eyeMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      emissive: 0xffffff,
-      emissiveIntensity: 0.3
-    });
+    // Try to use 3D model from asset library
+    const modelId = player.character?.modelId || player.character?.id;
+    let model3D = null;
 
-    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(-0.2, 1.3, 0.4);
-    playerGroup.add(leftEye);
+    if (modelId && this.modelFactory) {
+      try {
+        // Determine variant based on team or player selection
+        let variant = player.variant;
+        if (!variant) {
+          // Use team-appropriate variant if not specified
+          variant = player.team === 'orange' ? 'orange' : 'cyan';
+        }
 
-    const rightEye = leftEye.clone();
-    rightEye.position.x = 0.2;
-    playerGroup.add(rightEye);
+        model3D = this.modelFactory.create(modelId, { variant });
 
-    // Weapon indicator
-    const weaponGeometry = new THREE.BoxGeometry(0.3, 0.2, 0.8);
-    const weaponMaterial = new THREE.MeshStandardMaterial({
-      color: 0x333333,
-      roughness: 0.3,
-      metalness: 0.7
-    });
-    const weapon = new THREE.Mesh(weaponGeometry, weaponMaterial);
-    weapon.position.set(0.6, 0.8, 0.5);
-    playerGroup.add(weapon);
+        if (model3D && model3D.mesh) {
+          // Scale and position the model
+          const box = new THREE.Box3().setFromObject(model3D.mesh);
+          const size = box.getSize(new THREE.Vector3());
+          const maxSize = Math.max(size.x, size.y, size.z);
+          const scale = 1.2 / maxSize;
+          model3D.mesh.scale.setScalar(scale);
+
+          // Center horizontally
+          const center = box.getCenter(new THREE.Vector3());
+          model3D.mesh.position.x = -center.x * scale;
+          model3D.mesh.position.y = 0;
+          model3D.mesh.position.z = -center.z * scale;
+
+          model3D.mesh.castShadow = true;
+          playerGroup.add(model3D.mesh);
+
+          // Store model for animation updates
+          this.playerModels.set(player, model3D);
+
+          // Start idle animation
+          if (model3D.animate) {
+            model3D.animate('idle');
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load player model:', modelId, error);
+        model3D = null;
+      }
+    }
+
+    // Fallback to simple capsule if model failed
+    if (!model3D || !model3D.mesh) {
+      const bodyGeometry = new THREE.CapsuleGeometry(0.5, 1, 8, 16);
+      const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.5,
+        metalness: 0.2
+      });
+      const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+      body.position.y = 1;
+      body.castShadow = true;
+      playerGroup.add(body);
+
+      // Eyes
+      const eyeGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+      const eyeMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.3
+      });
+      const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+      leftEye.position.set(-0.2, 1.3, 0.4);
+      playerGroup.add(leftEye);
+      const rightEye = leftEye.clone();
+      rightEye.position.x = 0.2;
+      playerGroup.add(rightEye);
+    }
 
     // Player marker (for visibility from above)
     if (player.isPlayer) {
@@ -525,6 +566,13 @@ export class GameRenderer {
       this.updatePlayer(player);
     });
 
+    // Update 3D model animations
+    this.playerModels.forEach((model, player) => {
+      if (model && model.update) {
+        model.update(1 / 60);
+      }
+    });
+
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -544,6 +592,14 @@ export class GameRenderer {
       this.scene.remove(mesh);
     });
     this.playerMeshes.clear();
+
+    // Dispose 3D models
+    this.playerModels.forEach((model, player) => {
+      if (model && model.dispose) {
+        model.dispose();
+      }
+    });
+    this.playerModels.clear();
 
     this.projectiles.forEach(({ mesh }) => {
       this.scene.remove(mesh);
