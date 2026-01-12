@@ -1151,16 +1151,75 @@ function showPartyScreen() {
         ...m, data: getMonsterById(m.monsterId), idx
     }));
 
+    // パーティ全体のステータスを計算
+    let totalHp = 0;
+    let totalAttack = 0;
+    let totalDefense = 0;
+    const partySkills = [];
+
+    partyMonsters.forEach(pm => {
+        if (pm && pm.data) {
+            const stats = calculateStats(pm.data, pm.level);
+            totalHp += stats.hp;
+            totalAttack += stats.attack;
+            totalDefense += stats.defense;
+            if (pm.data.skill) {
+                partySkills.push({
+                    name: pm.data.skill.name,
+                    description: pm.data.skill.description,
+                    monsterName: pm.data.name
+                });
+            }
+        }
+    });
+
     app.innerHTML = `
         <div class="screen party-screen">
             <h2>パーティ編成</h2>
+
+            <!-- パーティサマリー -->
+            ${partyMonsters.length > 0 ? `
+            <div class="party-summary">
+                <div class="party-stats-row">
+                    <div class="party-stat">
+                        <span class="stat-icon">❤️</span>
+                        <span class="stat-name">HP</span>
+                        <span class="stat-total">${totalHp}</span>
+                    </div>
+                    <div class="party-stat">
+                        <span class="stat-icon">⚔️</span>
+                        <span class="stat-name">攻撃</span>
+                        <span class="stat-total">${totalAttack}</span>
+                    </div>
+                    <div class="party-stat">
+                        <span class="stat-icon">🛡️</span>
+                        <span class="stat-name">防御</span>
+                        <span class="stat-total">${totalDefense}</span>
+                    </div>
+                </div>
+                ${partySkills.length > 0 ? `
+                <div class="party-skills">
+                    <div class="skills-label">スキル</div>
+                    <div class="skills-list">
+                        ${partySkills.map(s => `
+                            <div class="skill-item">
+                                <span class="skill-name">${s.name}</span>
+                                <span class="skill-owner">(${s.monsterName})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            ` : ''}
+
             <div class="party-slots">
                 <h3>パーティ (${currentPlayer.party.length}/4)</h3>
                 <div class="party-grid">
                     ${[0, 1, 2, 3].map(i => {
         const pm = partyMonsters[i];
         return pm ? `
-                            <div class="party-slot filled" data-party-idx="${i}">
+                            <div class="party-slot filled" data-party-idx="${i}" data-monster-idx="${pm.idx}">
                                 ${renderMonsterCard(pm.data, pm.level, 'small', pm.isShiny)}
                                 <button class="remove-btn" data-party-idx="${i}">×</button>
                             </div>
@@ -1185,7 +1244,25 @@ function showPartyScreen() {
             </div>
             <button class="btn btn-ghost back-btn" id="backToMenu">もどる</button>
         </div>
+
+        <!-- モンスター詳細モーダル -->
+        <div class="monster-detail-modal" id="monsterDetailModal" style="display: none;">
+            <div class="modal-overlay" id="modalOverlay"></div>
+            <div class="modal-content" id="modalContent"></div>
+        </div>
     `;
+
+    // パーティスロットのモンスターをタップで詳細表示
+    document.querySelectorAll('.party-slot.filled').forEach(slot => {
+        slot.onclick = (e) => {
+            // 削除ボタン以外をタップした場合
+            if (!e.target.classList.contains('remove-btn')) {
+                playSound('click');
+                const monsterIdx = parseInt(slot.dataset.monsterIdx);
+                showPartyMonsterDetail(monsterIdx, true);
+            }
+        };
+    });
 
     // パーティから外す
     document.querySelectorAll('.remove-btn').forEach(btn => {
@@ -1199,15 +1276,13 @@ function showPartyScreen() {
         };
     });
 
-    // パーティに追加
-    document.querySelectorAll('.box-monster:not(.in-party)').forEach(el => {
+    // 所持モンスターをタップで詳細表示
+    document.querySelectorAll('.box-monster').forEach(el => {
         el.onclick = () => {
-            if (currentPlayer.party.length >= 4) return;
             playSound('click');
             const monsterIdx = parseInt(el.dataset.monsterIdx);
-            addToParty(currentPlayer, monsterIdx);
-            currentPlayer = loadPlayerData(currentPlayer.id);
-            showPartyScreen();
+            const isInParty = currentPlayer.party.includes(monsterIdx);
+            showPartyMonsterDetail(monsterIdx, isInParty);
         };
     });
 
@@ -1215,6 +1290,112 @@ function showPartyScreen() {
         playSound('click');
         showMainMenu();
     };
+}
+
+// パーティ編成画面用のモンスター詳細モーダル
+function showPartyMonsterDetail(monsterIdx, isInParty) {
+    const m = currentPlayer.monsters[monsterIdx];
+    const monster = getMonsterById(m.monsterId);
+    const stats = calculateStats(monster, m.level);
+    const canEvo = canEvolve(currentPlayer, monsterIdx, MONSTERS);
+
+    const modal = document.getElementById('monsterDetailModal');
+    const content = document.getElementById('modalContent');
+
+    content.innerHTML = `
+        <button class="modal-close-btn" id="closeModal">×</button>
+        <div class="modal-monster-card">
+            ${renderMonsterCard(monster, m.level, 'large', m.isShiny)}
+        </div>
+        <div class="modal-info">
+            <h3>${m.isShiny ? '✨ ' : ''}${monster.name}${m.isShiny ? ' ✨' : ''}</h3>
+            <p class="modal-desc">${monster.description}</p>
+            <div class="modal-stats">
+                <div class="modal-stat-row">
+                    <span class="stat-label">HP</span>
+                    <span class="stat-value">${stats.hp}</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span class="stat-label">こうげき</span>
+                    <span class="stat-value">${stats.attack}</span>
+                </div>
+                <div class="modal-stat-row">
+                    <span class="stat-label">ぼうぎょ</span>
+                    <span class="stat-value">${stats.defense}</span>
+                </div>
+            </div>
+            <div class="modal-skill">
+                <h4>スキル: ${monster.skill.name}</h4>
+                <p>${monster.skill.description}</p>
+            </div>
+            ${monster.evolution ? `
+                <div class="modal-evolution">
+                    <p>進化: Lv.${monster.evolutionLevel}で ${getMonsterById(monster.evolution)?.name || '???'} に進化</p>
+                    ${canEvo ? `<button class="btn btn-primary btn-small" id="evolveBtn">進化する！</button>` : ''}
+                </div>
+            ` : ''}
+            <div class="modal-actions">
+                ${isInParty ? `
+                    <button class="btn btn-ghost" id="removeFromPartyBtn">パーティから外す</button>
+                ` : currentPlayer.party.length < 4 ? `
+                    <button class="btn btn-primary" id="addToPartyBtn">パーティに入れる</button>
+                ` : `
+                    <p class="party-full-msg">パーティがいっぱいです</p>
+                `}
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+
+    // モーダルを閉じる
+    document.getElementById('closeModal').onclick = () => {
+        playSound('click');
+        modal.style.display = 'none';
+    };
+
+    document.getElementById('modalOverlay').onclick = () => {
+        playSound('click');
+        modal.style.display = 'none';
+    };
+
+    // 進化ボタン
+    if (canEvo) {
+        document.getElementById('evolveBtn').onclick = () => {
+            playSound('levelup');
+            evolveMonster(currentPlayer, monsterIdx, MONSTERS);
+            currentPlayer = loadPlayerData(currentPlayer.id);
+            modal.style.display = 'none';
+            showPartyScreen();
+        };
+    }
+
+    // パーティに追加
+    const addBtn = document.getElementById('addToPartyBtn');
+    if (addBtn) {
+        addBtn.onclick = () => {
+            playSound('click');
+            addToParty(currentPlayer, monsterIdx);
+            currentPlayer = loadPlayerData(currentPlayer.id);
+            modal.style.display = 'none';
+            showPartyScreen();
+        };
+    }
+
+    // パーティから外す
+    const removeBtn = document.getElementById('removeFromPartyBtn');
+    if (removeBtn) {
+        removeBtn.onclick = () => {
+            playSound('click');
+            const partyIdx = currentPlayer.party.indexOf(monsterIdx);
+            if (partyIdx >= 0) {
+                removeFromParty(currentPlayer, partyIdx);
+                currentPlayer = loadPlayerData(currentPlayer.id);
+            }
+            modal.style.display = 'none';
+            showPartyScreen();
+        };
+    }
 }
 
 // ===========================================
