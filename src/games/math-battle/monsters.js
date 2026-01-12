@@ -337,16 +337,16 @@ export const GACHA_TYPES = {
 };
 
 // ガチャタイプ別レアリティ確率
-// 通常ガチャ: レアは出にくい
+// 通常ガチャ: ★1と★2のみ
 // 学年ガチャ: 学年が上がるほどレアが出やすい
 export const GACHA_RARITY_RATES = {
-    // 通常ガチャ: コモンとアンコモンが中心
+    // 通常ガチャ: ★1と★2のみ
     [GACHA_TYPES.NORMAL]: {
-        [RARITY.COMMON]: 65,
-        [RARITY.UNCOMMON]: 28,
-        [RARITY.RARE]: 6,
-        [RARITY.EPIC]: 0.9,
-        [RARITY.LEGENDARY]: 0.1
+        [RARITY.COMMON]: 70,
+        [RARITY.UNCOMMON]: 30,
+        [RARITY.RARE]: 0,
+        [RARITY.EPIC]: 0,
+        [RARITY.LEGENDARY]: 0
     },
     // 1年ガチャ
     [GACHA_TYPES.GRADE_1]: {
