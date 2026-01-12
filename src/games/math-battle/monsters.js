@@ -67,7 +67,50 @@ const POKEDEX_IMAGE_MAP = {
     'ワルラッコ': 'warurakko.png',
     'グレラッコ': 'gurerakko.png',
     'ゴクアクラッコ': 'gokuakurakko.png',
-    'コインコイ': 'coinkoi.png'
+    'クラドペン': 'cloudpen.png',
+    'レインペン': 'rainpen.png',
+    'サンダペン': 'thunderpen.png',
+    'ジャキリン': 'jakirin.png',
+    'マガキリン': 'magakirin.png',
+    'デモキリン': 'demokirin.png',
+    'トゲマル': 'togemaru.png',
+    'アイストゲウォー': 'icetogewar.png',
+    'ブリザホッグ': 'blizzhog.png',
+    'フライマウス': 'flymouse.png',
+    'ウインラット': 'wingrat.png',
+    'ジェットラット': 'jetrat.png',
+    'キノコ': 'kinoko.png',
+    'マッシュランナー': 'mashrunner.png',
+    'キングファンガス': 'kingfungus.png',
+    'フェアリル': 'fairill.png',
+    'ピクシリル': 'pixrill.png',
+    'オベリル': 'oberill.png',
+    'イシキ': 'ishiki.png',
+    'モクガン': 'mokugan.png',
+    'ガイアフォート': 'gaiafort.png',
+    'ファイピダー': 'firepider.png',
+    'バーンウェブ': 'burnweb.png',
+    'ヴォルカニド': 'volcanid.png',
+    'トリケラボルト': 'triceravolt.png',
+    'スパークトップス': 'sparktops.png',
+    'ギガボルトプス': 'gigavoltops.png',
+    'ティラノフラワー': 'tyranoflower.png',
+    'ジュラシックブルーム': 'jurassicbloom.png',
+    'フォレストキング': 'forestking.png',
+    'ステゴクリスタル': 'stegocrystal.png',
+    'ステゴフロスト': 'stegofrost.png',
+    'ステゴグラシア': 'stegoglacier.png',
+    'スピノエンバー': 'spinoember.png',
+    'スピノマグマ': 'spinomagma.png',
+    'スピノボルケーノ': 'spinovolcano.png',
+    'ポヨン': 'poyon.png',
+    'ベトベト': 'betobeto.png',
+    'ドクイキング': 'dokuking.png',
+    'シャドウパップ': 'shadowpup.png',
+    'ナイトメアハウンド': 'nightmarehound.png',
+    'コインコイ': 'coinkoi.png',
+    'M080': 'm080.png',
+    'M081': 'm081.png'
 };
 
 function resolveMonsterImageByName(name) {
@@ -87,7 +130,14 @@ export const TYPES = {
     STEEL: 'steel',
     GHOST: 'ghost',
     FAIRY: 'fairy',
-    NORMAL: 'normal'
+    NORMAL: 'normal',
+    ICE: 'ice',
+    POISON: 'poison',
+    FLYING: 'flying',
+    GROUND: 'ground',
+    ROCK: 'rock',
+    BUG: 'bug',
+    DARK: 'dark'
 };
 
 // タイプ相性表（攻撃側 → 防御側の倍率）
@@ -158,7 +208,14 @@ export const TYPE_CHART = {
     [TYPES.NORMAL]: {
         [TYPES.GHOST]: 0,
         [TYPES.STEEL]: 0.5
-    }
+    },
+    [TYPES.ICE]: {},
+    [TYPES.POISON]: {},
+    [TYPES.FLYING]: {},
+    [TYPES.GROUND]: {},
+    [TYPES.ROCK]: {},
+    [TYPES.BUG]: {},
+    [TYPES.DARK]: {}
 };
 
 // タイプ相性を計算
@@ -185,7 +242,14 @@ export const TYPE_NAMES = {
     [TYPES.STEEL]: 'はがね',
     [TYPES.GHOST]: 'ゴースト',
     [TYPES.FAIRY]: 'フェアリー',
-    [TYPES.NORMAL]: 'ノーマル'
+    [TYPES.NORMAL]: 'ノーマル',
+    [TYPES.ICE]: 'こおり',
+    [TYPES.POISON]: 'どく',
+    [TYPES.FLYING]: 'ひこう',
+    [TYPES.GROUND]: 'じめん',
+    [TYPES.ROCK]: 'いわ',
+    [TYPES.BUG]: 'むし',
+    [TYPES.DARK]: 'あく'
 };
 
 // タイプの色
@@ -200,7 +264,14 @@ export const TYPE_COLORS = {
     [TYPES.STEEL]: '#B8B8D0',
     [TYPES.GHOST]: '#705898',
     [TYPES.FAIRY]: '#EE99AC',
-    [TYPES.NORMAL]: '#A8A878'
+    [TYPES.NORMAL]: '#A8A878',
+    [TYPES.ICE]: '#96D9D6',
+    [TYPES.POISON]: '#A040A0',
+    [TYPES.FLYING]: '#A890F0',
+    [TYPES.GROUND]: '#E0C068',
+    [TYPES.ROCK]: '#B8A038',
+    [TYPES.BUG]: '#A8B820',
+    [TYPES.DARK]: '#705848'
 };
 
 // レアリティ定義
@@ -830,6 +901,512 @@ export const MONSTERS = [
         rarity: RARITY.RARE,
         baseStats: { hp: 85, attack: 45, defense: 25 },
         skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：雷雲ペンギン系
+    {
+        id: 'M041',
+        name: 'クラドペン',
+        description: '雲のような体毛を持つペンギン。空をふわふわと飛ぶ。',
+        image: resolveMonsterImageByName('クラドペン'),
+        types: [TYPES.FLYING],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 30, attack: 10, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M042',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M042',
+        name: 'レインペン',
+        description: '雨雲を呼ぶペンギン。常に涙目で雨を降らせている。',
+        image: resolveMonsterImageByName('レインペン'),
+        types: [TYPES.FLYING, TYPES.WATER],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 20, defense: 15 },
+        skill: SKILLS.HEAL_HALF,
+        evolution: 'M043',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M043',
+        name: 'サンダペン',
+        description: '雷雲を纏ったペンギン王。怒りの雷撃で敵を貫く。',
+        image: resolveMonsterImageByName('サンダペン'),
+        types: [TYPES.FLYING, TYPES.ELECTRIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 40, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：悪キリン系
+    {
+        id: 'M044',
+        name: 'ジャキリン',
+        description: '邪悪な心を宿したキリン。闇の力で植物を枯らす。',
+        image: resolveMonsterImageByName('ジャキリン'),
+        types: [TYPES.DARK],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 15, defense: 5 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M045',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M045',
+        name: 'マガキリン',
+        description: '禍々しいオーラを纏ったキリン。その視線は相手をすくませる。',
+        image: resolveMonsterImageByName('マガキリン'),
+        types: [TYPES.DARK, TYPES.GHOST],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 25, defense: 10 },
+        skill: SKILLS.LUCKY_50,
+        evolution: 'M046',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M046',
+        name: 'デモキリン',
+        description: '悪魔の契約を結んだキリン。漆黒の雷で全てを焼き尽くす。',
+        image: resolveMonsterImageByName('デモキリン'),
+        types: [TYPES.DARK, TYPES.ELECTRIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 45, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：氷トゲネズミ系
+    {
+        id: 'M047',
+        name: 'トゲマル',
+        description: '氷のトゲで身を守る臆病なモンスター。寒い場所を好む。',
+        image: resolveMonsterImageByName('トゲマル'),
+        types: [TYPES.WATER],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 12, defense: 18 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M048',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M048',
+        name: 'アイストゲウォー',
+        description: '氷の鎧が厚くなり、二足歩行を始めた。トゲを飛ばして攻撃する。',
+        image: resolveMonsterImageByName('アイストゲウォー'),
+        types: [TYPES.WATER, TYPES.STEEL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 22, defense: 28 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M049',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M049',
+        name: 'ブリザホッグ',
+        description: '絶対零度の冷気を操る氷の要塞。近づくもの全てを凍らせる。',
+        image: resolveMonsterImageByName('ブリザホッグ'),
+        types: [TYPES.WATER, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 40, defense: 40 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：飛行ネズミ系
+    {
+        id: 'M050',
+        name: 'フライマウス',
+        description: '翼を持つネズミ。小回りの利く飛行で攻撃をかわす。',
+        image: resolveMonsterImageByName('フライマウス'),
+        types: [TYPES.FLYING],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 30, attack: 14, defense: 6 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M051',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M051',
+        name: 'ウインラット',
+        description: '大きな翼で自在に空を飛ぶ。素早い動きで相手を翻弄する。',
+        image: resolveMonsterImageByName('ウインラット'),
+        types: [TYPES.FLYING],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 24, defense: 12 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M052',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M052',
+        name: 'ジェットラット',
+        description: 'ジェットパックで音速を超える。空の王者として君臨する。',
+        image: resolveMonsterImageByName('ジェットラット'),
+        types: [TYPES.FLYING, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 42, defense: 28 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：キノコ系
+    {
+        id: 'M053',
+        name: 'キノコ',
+        description: '森の奥深くに住む小さなキノコ。踏まれると怒る。',
+        image: resolveMonsterImageByName('キノコ'),
+        types: [TYPES.GRASS],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 10, defense: 10 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M054',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M054',
+        name: 'マッシュランナー',
+        description: '旅をするキノコ。胞子をまき散らしながら各地を巡る。',
+        image: resolveMonsterImageByName('マッシュランナー'),
+        types: [TYPES.GRASS, TYPES.GROUND],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 60, attack: 20, defense: 15 },
+        skill: SKILLS.LUCKY_50,
+        evolution: 'M055',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M055',
+        name: 'キングファンガス',
+        description: '森の賢者と呼ばれるキノコの王。杖から不思議な魔力を放つ。',
+        image: resolveMonsterImageByName('キングファンガス'),
+        types: [TYPES.GRASS, TYPES.PSYCHIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 85, attack: 35, defense: 35 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：マンドリフェアリー系
+    {
+        id: 'M056',
+        name: 'フェアリル',
+        description: 'カラフルな体毛を持つサルの妖精。森の中でダンスを踊る。',
+        image: resolveMonsterImageByName('フェアリル'),
+        types: [TYPES.FAIRY],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 14, defense: 8 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M057',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M057',
+        name: 'ピクシリル',
+        description: '羽が生えたマンドリル。いたずら好きで、幻を見せる魔法を使う。',
+        image: resolveMonsterImageByName('ピクシリル'),
+        types: [TYPES.FAIRY, TYPES.NORMAL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 24, defense: 14 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M058',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M058',
+        name: 'オベリル',
+        description: '妖精界の王とも呼ばれる。虹色のオーラで味方を守る。',
+        image: resolveMonsterImageByName('オベリル'),
+        types: [TYPES.FAIRY, TYPES.NORMAL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 42, defense: 30 },
+        skill: SKILLS.HEAL_HALF,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：石×木系
+    {
+        id: 'M059',
+        name: 'イシキ',
+        description: '石のかけらから生えた木の芽。動くとポロポロと小石が落ちる。',
+        image: resolveMonsterImageByName('イシキ'),
+        types: [TYPES.GRASS, TYPES.STEEL],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 38, attack: 12, defense: 15 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M060',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M060',
+        name: 'モクガン',
+        description: '木と岩が融合したモンスター。硬い皮と強い根を持つ。',
+        image: resolveMonsterImageByName('モクガン'),
+        types: [TYPES.GRASS, TYPES.STEEL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 60, attack: 22, defense: 25 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M061',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M061',
+        name: 'ガイアフォート',
+        description: '大地の要塞。背中の木々はあらゆる生命の源となる。',
+        image: resolveMonsterImageByName('ガイアフォート'),
+        types: [TYPES.GRASS, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 90, attack: 38, defense: 45 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：炎×蜘蛛系
+    {
+        id: 'M062',
+        name: 'ファイピダー',
+        description: '燃える体を持つ子蜘蛛。糸も熱を帯びている。',
+        image: resolveMonsterImageByName('ファイピダー'),
+        types: [TYPES.FIRE, TYPES.GHOST],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 30, attack: 14, defense: 8 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M063',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M063',
+        name: 'バーンウェブ',
+        description: '背中が溶岩のように煮えたぎる蜘蛛。炎の巣で獲物を捕らえる。',
+        image: resolveMonsterImageByName('バーンウェブ'),
+        types: [TYPES.FIRE, TYPES.GHOST],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 50, attack: 26, defense: 12 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M064',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M064',
+        name: 'ヴォルカニド',
+        description: '火山の主と呼ばれる巨大蜘蛛。足先からマグマを噴出する。',
+        image: resolveMonsterImageByName('ヴォルカニド'),
+        types: [TYPES.FIRE, TYPES.GHOST],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 45, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：トリケラトプス×電気系
+    {
+        id: 'M065',
+        name: 'トリケラボルト',
+        description: '電気を帯びた角を持つ恐竜の子供。怒ると放電する。',
+        image: resolveMonsterImageByName('トリケラボルト'),
+        types: [TYPES.ELECTRIC, TYPES.DRAGON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 32, attack: 13, defense: 9 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M066',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M066',
+        name: 'スパークトップス',
+        description: '3本の角から激しい電流を放つ。その威力は雷並み。',
+        image: resolveMonsterImageByName('スパークトップス'),
+        types: [TYPES.ELECTRIC, TYPES.DRAGON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 22, defense: 14 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M067',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M067',
+        name: 'ギガボルトプス',
+        description: '雷雲を呼び寄せる伝説の雷竜。全身が発電器官となっている。',
+        image: resolveMonsterImageByName('ギガボルトプス'),
+        types: [TYPES.ELECTRIC, TYPES.DRAGON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 42, defense: 28 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：ティラノサウルス×草系
+    {
+        id: 'M068',
+        name: 'ティラノフラワー',
+        description: '花を頭に乗せた恐竜の子供。日向ぼっこで光合成をする。',
+        image: resolveMonsterImageByName('ティラノフラワー'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 15, defense: 8 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M069',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M069',
+        name: 'ジュラシックブルーム',
+        description: '全身に美しい花を咲かせた恐竜。香りにつられて虫が集まる。',
+        image: resolveMonsterImageByName('ジュラシックブルーム'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 60, attack: 25, defense: 12 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M070',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M070',
+        name: 'フォレストキング',
+        description: '背中に森を背負う巨大な恐竜。歩く姿は移動する森そのもの。',
+        image: resolveMonsterImageByName('フォレストキング'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 90, attack: 45, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：氷×ステゴサウルス系
+    {
+        id: 'M071',
+        name: 'ステゴクリスタル',
+        description: '背中の結晶で冷気を集めるステゴサウルスの子供。',
+        image: resolveMonsterImageByName('ステゴクリスタル'),
+        types: [TYPES.ICE, TYPES.DRAGON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 12, defense: 15 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M072',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M072',
+        name: 'ステゴフロスト',
+        description: '全身が氷の鎧で覆われた。鋭い背びれで体当たりする。',
+        image: resolveMonsterImageByName('ステゴフロスト'),
+        types: [TYPES.ICE, TYPES.DRAGON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 22, defense: 25 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M073',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M073',
+        name: 'ステゴグラシア',
+        description: '氷河の如く巨大な体を誇る。吹雪を起こしてあたりを凍らせる。',
+        image: resolveMonsterImageByName('ステゴグラシア'),
+        types: [TYPES.ICE, TYPES.DRAGON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 90, attack: 40, defense: 45 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：炎×スピノサウルス系
+    {
+        id: 'M074',
+        name: 'スピノエンバー',
+        description: '背中の帆が赤く燃えるスピノサウルスの子供。水辺を好むが泳ぐと水が沸騰する。',
+        image: resolveMonsterImageByName('スピノエンバー'),
+        types: [TYPES.FIRE, TYPES.DRAGON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 16, defense: 6 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M075',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M075',
+        name: 'スピノマグマ',
+        description: '体内をマグマが循環している。怒ると背中の帆から炎を噴き上げる。',
+        image: resolveMonsterImageByName('スピノマグマ'),
+        types: [TYPES.FIRE, TYPES.DRAGON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 28, defense: 10 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M076',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M076',
+        name: 'スピノボルケーノ',
+        description: '背中に火山を背負ったような姿。咆哮と共に周囲を火の海に変える。',
+        image: resolveMonsterImageByName('スピノボルケーノ'),
+        types: [TYPES.FIRE, TYPES.DRAGON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 85, attack: 50, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：毒タイプ（スライム系）
+    {
+        id: 'M077',
+        name: 'ポヨン',
+        description: '紫色のスライム。いつも気だるげな表情をしている。',
+        image: resolveMonsterImageByName('ポヨン'),
+        types: [TYPES.POISON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 10, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M078',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M078',
+        name: 'ベトベト',
+        description: 'ポヨンが成長した姿。体が溶けて地面を汚しながら進む。',
+        image: resolveMonsterImageByName('ベトベト'),
+        types: [TYPES.POISON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 65, attack: 18, defense: 15 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: 'M079',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M079',
+        name: 'ドクイキング',
+        description: '毒の沼地の王様。体から生える結晶には猛毒が含まれている。',
+        image: resolveMonsterImageByName('ドクイキング'),
+        types: [TYPES.POISON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 100, attack: 35, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：悪×犬系
+    {
+        id: 'M080',
+        name: 'シャドウパップ',
+        description: '影から生まれた子犬。暗闇に溶け込んで移動する。',
+        image: resolveMonsterImageByName('シャドウパップ'),
+        types: [TYPES.DARK],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 35, attack: 18, defense: 5 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M081',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M081',
+        name: 'ナイトメアハウンド',
+        description: '悪夢を具現化した魔獣。その遠吠えは聞く者を恐怖に陥れる。',
+        image: resolveMonsterImageByName('ナイトメアハウンド'),
+        types: [TYPES.DARK, TYPES.GHOST],
+        rarity: RARITY.RARE, // 2段階進化なのでレア扱い
+        baseStats: { hp: 80, attack: 45, defense: 20 },
+        skill: SKILLS.LUCKY_50,
         evolution: null,
         evolutionLevel: null
     }
