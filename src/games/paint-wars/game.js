@@ -4,7 +4,8 @@ import { GameRenderer } from './renderer.js';
 import { InkSystem } from './ink-system.js';
 import { Player, CPUPlayer, setStatsCallbacks } from './entities.js';
 import { WEAPONS, SUB_WEAPONS, SPECIAL_WEAPONS } from './weapons.js';
-import { CHARACTERS } from './characters.js';
+import { loadCharactersFromCatalog, CHARACTERS as FALLBACK_CHARACTERS } from './characters.js';
+import { CharacterPreview } from './character-preview.js';
 
 // ===== Game State =====
 let gameState = 'title';
@@ -19,8 +20,13 @@ let allPlayers = [];
 
 // Selected options
 let selectedCharacter = 0;
+let selectedVariant = 0;
 let selectedWeapon = 0;
 let selectedSubWeapon = 0;
+
+// Characters loaded from catalog
+let CHARACTERS = FALLBACK_CHARACTERS;
+let characterPreview = null;
 
 // Game timing
 let gameTime = 180; // 3 minutes
@@ -79,10 +85,19 @@ const overlays = {
 async function init() {
   isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
+  // Load characters from 3D asset catalog
+  CHARACTERS = await loadCharactersFromCatalog();
+
   setupEventListeners();
   renderCharacterGrid();
   renderWeaponGrid();
   renderSubWeaponGrid();
+
+  // Initialize 3D character preview
+  const previewContainer = document.getElementById('characterPreview3D');
+  characterPreview = new CharacterPreview(previewContainer);
+  await characterPreview.init();
+  updateCharacterPreview();
 
   showScreen('title');
 }
@@ -126,21 +141,101 @@ function renderCharacterGrid() {
     grid.appendChild(card);
   });
 
+  renderVariantGrid();
   updateCharacterPreview();
 }
 
 function selectCharacter(index) {
   selectedCharacter = index;
+  selectedVariant = 0; // Reset variant when character changes
   document.querySelectorAll('.character-card').forEach((card, i) => {
     card.classList.toggle('selected', i === index);
+  });
+  renderVariantGrid();
+  updateCharacterPreview();
+}
+
+function renderVariantGrid() {
+  const grid = document.getElementById('variantGrid');
+  if (!grid) return;
+
+  const char = CHARACTERS[selectedCharacter];
+  const variants = char.variants || [];
+
+  grid.innerHTML = '';
+
+  if (variants.length <= 1) {
+    grid.style.display = 'none';
+    return;
+  }
+
+  grid.style.display = 'flex';
+
+  variants.forEach((variant, index) => {
+    const btn = document.createElement('button');
+    btn.className = `variant-btn ${index === selectedVariant ? 'selected' : ''}`;
+    btn.style.backgroundColor = getVariantColor(variant);
+    btn.title = variant;
+    btn.addEventListener('click', () => selectVariant(index));
+    grid.appendChild(btn);
+  });
+}
+
+function selectVariant(index) {
+  selectedVariant = index;
+  document.querySelectorAll('.variant-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === index);
   });
   updateCharacterPreview();
 }
 
+function getVariantColor(variant) {
+  const colorMap = {
+    // Team/General colors
+    'orange': '#ff6b35',
+    'cyan': '#00bcd4',
+    'purple': '#9c27b0',
+    'pink': '#e91e63',
+    'lime': '#8bc34a',
+    'yellow': '#ffeb3b',
+    'blue': '#2196f3',
+    'red': '#f44336',
+    'green': '#4caf50',
+    'gold': '#ffd700',
+    'silver': '#c0c0c0',
+    'white': '#ffffff',
+    'black': '#333333',
+    'dark': '#1a1a1a',
+    'teal': '#009688',
+    'brown': '#795548',
+    'rainbow': 'linear-gradient(45deg, red, orange, yellow, green, blue, purple)',
+    // Character-specific
+    'shiba': '#d4a574',
+    'husky': '#607d8b',
+    'golden': '#daa520',
+    'dalmatian': '#f5f5f5',
+    'tabby': '#d4a574',
+    'calico': '#f5deb3',
+    'bay': '#8b4513',
+    'palomino': '#daa520',
+    'fire': '#ff5722',
+    'ice': '#00bcd4',
+    'royal': '#4a148c',
+    'default': '#888888'
+  };
+  return colorMap[variant] || colorMap['default'];
+}
+
 function updateCharacterPreview() {
   const char = CHARACTERS[selectedCharacter];
-  document.getElementById('characterPreview3D').innerHTML = `<span style="font-size:6rem">${char.icon}</span>`;
+  const variant = char.variants?.[selectedVariant] || char.defaultVariant || 'default';
+
   document.getElementById('characterName').textContent = char.name;
+
+  // Update 3D preview
+  if (characterPreview) {
+    characterPreview.setCharacter(char.modelId || char.id, variant);
+  }
 }
 
 function renderWeaponGrid() {
@@ -211,6 +306,11 @@ function selectSubWeapon(index) {
 async function startGame() {
   showScreen('game');
 
+  // Stop character preview animation during game
+  if (characterPreview) {
+    characterPreview.stopAnimation();
+  }
+
   // Initialize renderer
   const container = document.getElementById('gameContainer');
   renderer = new GameRenderer(container);
@@ -240,6 +340,7 @@ async function startGame() {
 
 function createPlayers() {
   const character = CHARACTERS[selectedCharacter];
+  const variant = character.variants?.[selectedVariant] || character.defaultVariant || 'orange';
   const weapon = WEAPONS[selectedWeapon];
   const subWeapon = SUB_WEAPONS[selectedSubWeapon];
 
@@ -247,6 +348,7 @@ function createPlayers() {
   player = new Player({
     team: 'orange',
     character: character,
+    variant: variant,
     weapon: weapon,
     subWeapon: subWeapon,
     position: { x: -20, z: 0 },
@@ -564,6 +666,11 @@ function cleanup() {
   teamBlue = [];
   allPlayers = [];
   isPaused = true;
+
+  // Restart character preview after game cleanup
+  if (characterPreview) {
+    characterPreview.startAnimation();
+  }
 }
 
 // ===== Event Listeners =====
