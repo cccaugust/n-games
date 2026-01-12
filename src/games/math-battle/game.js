@@ -57,12 +57,18 @@ function playSound(type) {
 
     switch (type) {
         case 'correct':
-            osc.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            osc.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            // より派手な正解音（ファンファーレ風）
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.16); // G5
+            osc.frequency.setValueAtTime(1046.5, audioContext.currentTime + 0.24); // C6
+            gain.gain.setValueAtTime(0.25, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.35, audioContext.currentTime + 0.16);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
             osc.start();
-            osc.stop(audioContext.currentTime + 0.3);
+            osc.stop(audioContext.currentTime + 0.5);
             break;
         case 'wrong':
             osc.type = 'sawtooth';
@@ -610,6 +616,7 @@ function renderBattle() {
                     `).join('')}
                 </div>
             </div>
+            <div id="particleContainer" class="particle-container"></div>
         </div>
     `;
 
@@ -626,6 +633,9 @@ function handleAnswer(answer) {
     if (isCorrect) {
         playSound('correct');
         bs.correctCount++;
+
+        // パーティクルエフェクト
+        spawnParticles(document.getElementById('particleContainer'), 'correct');
 
         // ダメージ計算
         let totalDamage = 0;
@@ -797,13 +807,14 @@ function showBattleResult(isVictory, data) {
 // ガチャシステム
 // ===========================================
 const GACHA_COST = 50;
-const GACHA_TIME = 5; // 秒
+const GACHA_TIME = 10; // 秒
 
 function showGachaScreen() {
     app.innerHTML = `
         <div class="screen gacha-screen">
             <h2>ガチャ</h2>
-            <p class="gacha-desc">5秒間で問題を解いて、モンスターをゲット！</p>
+            <p class="gacha-desc">10秒間で問題を解いて、モンスターをゲット！</p>
+            <p class="gacha-hint">正解するほど卵が増える！（最低1個はもらえるよ）</p>
             <p class="gacha-cost">💰 ${GACHA_COST} コイン</p>
             <p class="current-coins">所持: 💰 ${currentPlayer.coins}</p>
             <button class="btn btn-primary btn-large" id="startGachaBtn" ${currentPlayer.coins < GACHA_COST ? 'disabled' : ''}>
@@ -851,23 +862,36 @@ function startGacha() {
 
 function renderGachaGame() {
     const q = gachaState.currentQuestion;
+    // 1個は最低保証なので、正解数+1を表示
+    const eggCount = gachaState.correctCount + 1;
+    const eggs = '🥚'.repeat(Math.min(eggCount, 10)) + (eggCount > 10 ? `+${eggCount - 10}` : '');
 
     app.innerHTML = `
         <div class="screen gacha-game-screen">
-            <div class="gacha-timer" id="gachaTimer">
-                <span class="timer-value">${gachaState.timeLeft}</span>
-                <span class="timer-label">秒</span>
+            <div class="gacha-header">
+                <div class="gacha-timer-bar">
+                    <div class="timer-fill" id="timerFill" style="width: ${(gachaState.timeLeft / GACHA_TIME) * 100}%"></div>
+                </div>
+                <div class="gacha-timer" id="gachaTimer">
+                    <span class="timer-value">${gachaState.timeLeft}</span>
+                    <span class="timer-label">秒</span>
+                </div>
             </div>
-            <div class="gacha-score">
-                正解: <span id="gachaScore">${gachaState.correctCount}</span>
+            <div class="gacha-eggs-area" id="eggsArea">
+                <div class="eggs-label">ゲットする卵</div>
+                <div class="eggs-display" id="eggsDisplay">${eggs}</div>
+                <div class="eggs-count">${eggCount}個</div>
             </div>
-            <div class="gacha-question" id="gachaQuestion">
-                ${q.question} = ?
+            <div class="gacha-question-area">
+                <div class="gacha-question" id="gachaQuestion">
+                    ${q.question} = ?
+                </div>
+                <div class="gacha-input-area">
+                    <input type="number" id="gachaInput" class="gacha-input" inputmode="numeric" autofocus>
+                    <button class="btn btn-primary" id="gachaSubmit">OK</button>
+                </div>
             </div>
-            <div class="gacha-input-area">
-                <input type="number" id="gachaInput" class="gacha-input" inputmode="numeric" autofocus>
-                <button class="btn btn-primary" id="gachaSubmit">OK</button>
-            </div>
+            <div id="particleContainer" class="particle-container"></div>
         </div>
     `;
 
@@ -881,9 +905,26 @@ function renderGachaGame() {
         if (userAnswer === gachaState.currentQuestion.answer) {
             playSound('correct');
             gachaState.correctCount++;
-            document.getElementById('gachaScore').textContent = gachaState.correctCount;
+
+            // 卵表示を更新
+            const newEggCount = gachaState.correctCount + 1;
+            const newEggs = '🥚'.repeat(Math.min(newEggCount, 10)) + (newEggCount > 10 ? `+${newEggCount - 10}` : '');
+            document.getElementById('eggsDisplay').textContent = newEggs;
+            document.querySelector('.eggs-count').textContent = `${newEggCount}個`;
+
+            // 卵エリアをバウンスアニメーション
+            const eggsArea = document.getElementById('eggsArea');
+            eggsArea.classList.add('bounce');
+            setTimeout(() => eggsArea.classList.remove('bounce'), 300);
+
+            // パーティクルエフェクト
+            spawnParticles(document.getElementById('particleContainer'), 'correct');
         } else {
             playSound('wrong');
+            // 問題エリアを揺らす
+            const questionArea = document.querySelector('.gacha-question-area');
+            questionArea.classList.add('shake');
+            setTimeout(() => questionArea.classList.remove('shake'), 300);
         }
 
         // 次の問題
@@ -903,10 +944,42 @@ function renderGachaGame() {
     input.focus();
 }
 
+// パーティクルエフェクトを生成
+function spawnParticles(container, type = 'correct') {
+    if (!container) return;
+
+    const colors = type === 'correct'
+        ? ['#ffd700', '#ffeb3b', '#ff9800', '#4caf50', '#00bcd4']
+        : ['#f44336', '#e91e63'];
+
+    for (let i = 0; i < 15; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.setProperty('--x', `${(Math.random() - 0.5) * 200}px`);
+        particle.style.setProperty('--y', `${(Math.random() - 0.5) * 200}px`);
+        particle.style.setProperty('--rotation', `${Math.random() * 720}deg`);
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        container.appendChild(particle);
+
+        setTimeout(() => particle.remove(), 800);
+    }
+}
+
 function updateGachaTimer() {
     const timer = document.getElementById('gachaTimer');
     if (timer) {
         timer.querySelector('.timer-value').textContent = gachaState.timeLeft;
+    }
+    // タイマーバーも更新
+    const timerFill = document.getElementById('timerFill');
+    if (timerFill) {
+        timerFill.style.width = `${(gachaState.timeLeft / GACHA_TIME) * 100}%`;
+        // 残り3秒以下で警告色
+        if (gachaState.timeLeft <= 3) {
+            timerFill.classList.add('warning');
+        }
     }
 }
 
@@ -914,9 +987,11 @@ function finishGacha() {
     playSound('gacha');
     recordGachaRoll(currentPlayer, 1);
 
-    // 獲得モンスターを決定
+    // 獲得モンスターを決定（最低1体は保証）
     const monstersWon = [];
-    for (let i = 0; i < gachaState.correctCount; i++) {
+    const monsterCount = Math.max(1, gachaState.correctCount + 1); // 正解数+1、最低1体
+
+    for (let i = 0; i < monsterCount; i++) {
         const monster = rollGacha();
         monstersWon.push(monster);
         addMonsterToPlayer(currentPlayer, monster.id);
@@ -924,7 +999,7 @@ function finishGacha() {
 
     currentPlayer = loadPlayerData(currentPlayer.id);
 
-    showGachaResult(monstersWon);
+    showGachaResult(monstersWon, gachaState.correctCount);
 }
 
 function rollGacha() {
@@ -946,15 +1021,15 @@ function rollGacha() {
     return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function showGachaResult(monsters) {
+function showGachaResult(monsters, correctCount = 0) {
     app.innerHTML = `
         <div class="screen gacha-result-screen">
             <h2>ガチャ結果</h2>
-            <p class="gacha-result-count">${monsters.length}体ゲット！</p>
+            <p class="gacha-correct-count">正解数: ${correctCount}問</p>
+            <p class="gacha-result-count">${monsters.length}体ゲット！🎉</p>
             <div class="gacha-monsters">
                 ${monsters.map(m => renderMonsterCard(m, 1, 'normal')).join('')}
             </div>
-            ${monsters.length === 0 ? '<p class="no-monster">残念...次は頑張ろう！</p>' : ''}
             <div class="result-buttons">
                 <button class="btn btn-primary" id="gachaAgainBtn" ${currentPlayer.coins < GACHA_COST ? 'disabled' : ''}>
                     もう一回 (💰${GACHA_COST})
