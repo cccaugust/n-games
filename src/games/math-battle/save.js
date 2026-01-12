@@ -137,9 +137,15 @@ export function loadPlayerData(playerId) {
 
 /**
  * モンスターをプレイヤーに追加
+ * @param {Object} player - プレイヤーデータ
+ * @param {string} monsterId - モンスターID
+ * @param {boolean} isShiny - 色違いかどうか
  */
-export function addMonsterToPlayer(player, monsterId) {
-    const existingMonster = player.monsters.find(m => m.monsterId === monsterId);
+export function addMonsterToPlayer(player, monsterId, isShiny = false) {
+    // 色違いかどうかで別モンスターとして扱う
+    const existingMonster = player.monsters.find(
+        m => m.monsterId === monsterId && m.isShiny === isShiny
+    );
 
     if (existingMonster) {
         // 既に持っている場合は経験値を付与（重複ボーナス）
@@ -149,13 +155,15 @@ export function addMonsterToPlayer(player, monsterId) {
         player.monsters.push({
             monsterId: monsterId,
             level: 1,
-            exp: 0
+            exp: 0,
+            isShiny: isShiny
         });
     }
 
-    // 図鑑に登録
-    if (!player.discoveredMonsters.includes(monsterId)) {
-        player.discoveredMonsters.push(monsterId);
+    // 図鑑に登録（色違いは別枠で記録）
+    const discoveryKey = isShiny ? `${monsterId}_shiny` : monsterId;
+    if (!player.discoveredMonsters.includes(discoveryKey)) {
+        player.discoveredMonsters.push(discoveryKey);
     }
 
     savePlayerData(player);

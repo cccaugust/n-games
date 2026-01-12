@@ -269,9 +269,11 @@ function calculateEnemyStats(grade, stageNumber) {
     return { hp: baseHp, attack: baseAttack };
 }
 
-// 報酬計算
+// 報酬計算（バランス調整済み）
+// 小1: 約10回初回クリアでガチャ1回
+// 小4: 約2回初回クリアでガチャ1回
 function calculateBaseReward(grade, level) {
-    return grade * 10 * level;
+    return grade * 3 * level;
 }
 
 /**
@@ -310,7 +312,7 @@ export function generateAllStages() {
                     },
                     rewards: {
                         base: baseReward,
-                        firstClear: baseReward * 3,
+                        firstClear: Math.floor(baseReward * 2.5),
                         rankBonus: {
                             [RANKS.C]: 0,
                             [RANKS.B]: Math.floor(baseReward * 0.2),

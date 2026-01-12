@@ -633,19 +633,33 @@ body {
 
 .enemy-visual {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.enemy-sprite {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+.enemy-monster-display {
+    width: 120px;
+    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    font-weight: 900;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+
+.enemy-monster-display .monster-svg,
+.enemy-monster-display .monster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.enemy-monster-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-align: center;
 }
 
 .party-area {
@@ -1481,6 +1495,122 @@ body {
 
 .monster-card-large .card-stats {
     font-size: 0.75rem;
+}
+
+/* ===========================================
+   色違いモンスター
+=========================================== */
+.monster-card.shiny .card-frame {
+    border-color: #ffd700;
+    box-shadow: var(--shadow-md),
+                0 0 15px #ffd700,
+                0 0 30px rgba(255, 215, 0, 0.5),
+                inset 0 0 20px rgba(255, 215, 0, 0.1);
+    animation: shiny-glow 2s ease-in-out infinite;
+}
+
+@keyframes shiny-glow {
+    0%, 100% { box-shadow: var(--shadow-md), 0 0 15px #ffd700, 0 0 30px rgba(255, 215, 0, 0.5); }
+    50% { box-shadow: var(--shadow-md), 0 0 25px #ffd700, 0 0 50px rgba(255, 215, 0, 0.7); }
+}
+
+.shiny-icon {
+    filter: hue-rotate(180deg) saturate(1.3);
+}
+
+.shiny-icon .monster-img {
+    filter: hue-rotate(180deg) saturate(1.3) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.shiny-sparkle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.shiny-sparkle::before,
+.shiny-sparkle::after {
+    content: '✨';
+    position: absolute;
+    font-size: 0.8rem;
+    animation: sparkle-float 2s ease-in-out infinite;
+}
+
+.shiny-sparkle::before {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shiny-sparkle::after {
+    top: 20%;
+    right: 10%;
+    animation-delay: 1s;
+}
+
+@keyframes sparkle-float {
+    0%, 100% { opacity: 0.3; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-5px) scale(1.2); }
+}
+
+/* ガチャ結果画面の色違いアラート */
+.shiny-alert {
+    background: linear-gradient(90deg, #ffd700, #ffec8b, #ffd700);
+    background-size: 200% 100%;
+    animation: shiny-text-shimmer 2s linear infinite;
+    color: #333;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    border-radius: var(--radius-lg);
+    margin: 10px 0;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes shiny-text-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.gacha-result-screen.has-shiny {
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1) 0%, transparent 60%);
+}
+
+/* 図鑑の色違いバッジ */
+.book-entry {
+    position: relative;
+}
+
+.shiny-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
+    animation: sparkle-float 2s ease-in-out infinite;
+    z-index: 10;
+}
+
+/* 詳細画面の色違い切り替え */
+.shiny-toggle {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+    justify-content: center;
+}
+
+.shiny-toggle .btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.monster-detail-screen.showing-shiny {
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.1) 0%, transparent 60%);
 }
 
 /* ===========================================
