@@ -133,7 +133,23 @@ const POKEDEX_IMAGE_MAP = {
     'ヤキボン': 'yakibon.png',
     'ゴウカボン': 'goukabon.png',
     'アイスレオ': 'iceleo.png',
-    'グラシアレオ': 'glacialeo.png'
+    'グラシアレオ': 'glacialeo.png',
+    'シズクン': 'shizukun.png',
+    'プカリン': 'pukarin.png',
+    'メバエル': 'mebaeru.png',
+    'ボンサイン': 'bonsain.png',
+    'ホータン': 'houtan.png',
+    'ファラオン': 'faraon.png',
+    'シロビ': 'shirohono1.png',
+    'ホワフレア': 'shirohono2.png',
+    'シロエンオウ': 'shirohono3.png',
+    'クロリン': 'kurofairy1.png',
+    'ノワリン': 'kurofairy2.png',
+    'ノワールン': 'kurofairy3.png',
+    'アオボルト': 'aoidenki1.png',
+    'ボルリン': 'aoidenki2.png',
+    'サンダリオン': 'aoidenki3.png',
+    'アカレイス': 'akaghost3.png'
 };
 
 
@@ -2009,6 +2025,207 @@ export const MONSTERS = [
         rarity: RARITY.RARE,
         baseStats: { hp: 80, attack: 55, defense: 40 },
         skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // ===== 新規追加モンスター（M121〜M126）=====
+    // 水タイプ進化ライン
+    {
+        id: 'M121',
+        name: 'シズクン',
+        description: 'しずくの姿をした水の精霊。頭の水滴は気分によって大きさが変わる。',
+        image: resolveMonsterImageByName('シズクン'),
+        types: [TYPES.WATER],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 35, attack: 13, defense: 10 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M122',
+        evolutionLevel: 18
+    },
+    {
+        id: 'M122',
+        name: 'プカリン',
+        description: 'シズクンが進化した姿。体の浮き輪で水の上をプカプカと浮かぶ。',
+        image: resolveMonsterImageByName('プカリン'),
+        types: [TYPES.WATER],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 55, attack: 22, defense: 18 },
+        skill: SKILLS.HEAL_THIRD,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 草タイプ進化ライン
+    {
+        id: 'M123',
+        name: 'メバエル',
+        description: '双葉のような耳と枝の手足を持つ植物モンスター。陽の光を浴びると元気になる。',
+        image: resolveMonsterImageByName('メバエル'),
+        types: [TYPES.GRASS],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 32, attack: 14, defense: 11 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M124',
+        evolutionLevel: 20
+    },
+    {
+        id: 'M124',
+        name: 'ボンサイン',
+        description: 'メバエルが成長した姿。植木鉢から離れられないが、触手で自由に動ける。',
+        image: resolveMonsterImageByName('ボンサイン'),
+        types: [TYPES.GRASS],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 52, attack: 24, defense: 20 },
+        skill: SKILLS.POWER_UP_1_5,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // ゴーストタイプ進化ライン（ミイラ）
+    {
+        id: 'M125',
+        name: 'ホータン',
+        description: '古代遺跡で目覚めた包帯のモンスター。紫の霊気を出している。',
+        image: resolveMonsterImageByName('ホータン'),
+        types: [TYPES.GHOST],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 30, attack: 15, defense: 12 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: 'M126',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M126',
+        name: 'ファラオン',
+        description: 'ホータンが王の力を取り戻した姿。周囲に呪いの炎を漂わせる。',
+        image: resolveMonsterImageByName('ファラオン'),
+        types: [TYPES.GHOST],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 50, attack: 28, defense: 22 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // ===== 追加モンスター（M127〜M136）=====
+    // 白いほのおタイプ進化ライン
+    {
+        id: 'M127',
+        name: 'シロビ',
+        description: '白い体に炎を灯すキツネ。大きな耳がチャームポイント。',
+        image: resolveMonsterImageByName('シロビ'),
+        types: [TYPES.FIRE],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 28, attack: 14, defense: 8 },
+        skill: SKILLS.POWER_UP_1_2,
+        evolution: 'M128',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M128',
+        name: 'ホワフレア',
+        description: 'シロビが成長した姿。尻尾の炎が大きくなった。',
+        image: resolveMonsterImageByName('ホワフレア'),
+        types: [TYPES.FIRE],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 45, attack: 24, defense: 14 },
+        skill: SKILLS.POWER_UP_1_5,
+        evolution: 'M129',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M129',
+        name: 'シロエンオウ',
+        description: 'ホワフレアが究極進化した姿。白銀の炎を操る王。',
+        image: resolveMonsterImageByName('シロエンオウ'),
+        types: [TYPES.FIRE],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 70, attack: 40, defense: 25 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 黒色フェアリータイプ進化ライン
+    {
+        id: 'M130',
+        name: 'クロリン',
+        description: '黒い体にピンクの羽を持つ妖精。夜になると光る。',
+        image: resolveMonsterImageByName('クロリン'),
+        types: [TYPES.FAIRY, TYPES.DARK],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 26, attack: 10, defense: 12 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M131',
+        evolutionLevel: 18
+    },
+    {
+        id: 'M131',
+        name: 'ノワリン',
+        description: 'クロリンが成長した姿。魔法の渦を操れるようになった。',
+        image: resolveMonsterImageByName('ノワリン'),
+        types: [TYPES.FAIRY, TYPES.DARK],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 42, attack: 18, defense: 20 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: 'M132',
+        evolutionLevel: 32
+    },
+    {
+        id: 'M132',
+        name: 'ノワールン',
+        description: 'ノワリンの最終進化。闇と光を自在に操る。',
+        image: resolveMonsterImageByName('ノワールン'),
+        types: [TYPES.FAIRY, TYPES.DARK],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 65, attack: 32, defense: 35 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 青いでんきタイプ進化ライン
+    {
+        id: 'M133',
+        name: 'アオボルト',
+        description: '青いトゲトゲの体から電気を放つ。元気いっぱい。',
+        image: resolveMonsterImageByName('アオボルト'),
+        types: [TYPES.ELECTRIC],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 25, attack: 16, defense: 8 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M134',
+        evolutionLevel: 16
+    },
+    {
+        id: 'M134',
+        name: 'ボルリン',
+        description: 'アオボルトが成長した姿。稲妻を纏う。',
+        image: resolveMonsterImageByName('ボルリン'),
+        types: [TYPES.ELECTRIC],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 40, attack: 28, defense: 14 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M135',
+        evolutionLevel: 32
+    },
+    {
+        id: 'M135',
+        name: 'サンダリオン',
+        description: 'ボルリンの最終進化。雷の王と呼ばれる。',
+        image: resolveMonsterImageByName('サンダリオン'),
+        types: [TYPES.ELECTRIC],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 62, attack: 45, defense: 22 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 赤いゴースト（単体）
+    {
+        id: 'M136',
+        name: 'アカレイス',
+        description: '赤い炎のようなオーラを纏うゴースト。実はとても寂しがり。',
+        image: resolveMonsterImageByName('アカレイス'),
+        types: [TYPES.GHOST, TYPES.FIRE],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 48, attack: 30, defense: 18 },
+        skill: SKILLS.POWER_UP_1_5,
         evolution: null,
         evolutionLevel: null
     }
