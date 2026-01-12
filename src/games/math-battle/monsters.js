@@ -12,6 +12,9 @@ import { resolvePath } from '../../js/config.js';
 const POKEDEX_IMAGE_MAP = {
     // id here is "pokedex id" for reference only; math-battle monsters use Mxxx.
     'カイケフポトリ': 'kaikefupotori.png',
+    'ヒノコン': 'hinokon.png',
+    'フレイマー': 'flamer.png',
+    'インフェルノ': 'inferno.png',
     'ゴダンギル': 'godangiru.png',
     'カメラマン': 'cameraman.png',
     'カマサウルス': 'kamasaurus.png',
@@ -307,6 +310,7 @@ export const MONSTERS = [
         id: 'M001',
         name: 'ヒノコン',
         description: 'しっぽの火が元気のバロメーター。計算問題を解くとよく燃える。',
+        image: resolveMonsterImageByName('ヒノコン'),
         types: [TYPES.FIRE],
         rarity: RARITY.COMMON,
         baseStats: { hp: 30, attack: 12, defense: 8 },
@@ -397,6 +401,7 @@ export const MONSTERS = [
         id: 'M009',
         name: 'フレイマー',
         description: 'ヒノコンが成長した姿。炎の勢いが増した。',
+        image: resolveMonsterImageByName('フレイマー'),
         types: [TYPES.FIRE],
         rarity: RARITY.UNCOMMON,
         baseStats: { hp: 50, attack: 20, defense: 12 },
@@ -487,6 +492,7 @@ export const MONSTERS = [
         id: 'M017',
         name: 'インフェルノ',
         description: 'フレイマーの最終進化。灼熱の炎を操る。',
+        image: resolveMonsterImageByName('インフェルノ'),
         types: [TYPES.FIRE, TYPES.DRAGON],
         rarity: RARITY.RARE,
         baseStats: { hp: 70, attack: 35, defense: 18 },
