@@ -811,7 +811,7 @@ function showBattleResult(isVictory, data) {
 // ===========================================
 // ガチャシステム
 // ===========================================
-const GACHA_COST = 50;
+const GACHA_COST = 100;
 const GACHA_TIME = 10; // 秒
 
 function showGachaScreen() {
@@ -1007,6 +1007,11 @@ function finishGacha() {
     showGachaResult(monstersWon, gachaState.correctCount);
 }
 
+// 進化系モンスターのIDセットを作成（他のモンスターのevolutionとして参照されているもの）
+const EVOLUTION_MONSTER_IDS = new Set(
+    MONSTERS.filter(m => m.evolution).map(m => m.evolution)
+);
+
 function rollGacha() {
     // レアリティを決定
     const roll = Math.random() * 100;
@@ -1021,8 +1026,18 @@ function rollGacha() {
         }
     }
 
-    // そのレアリティのモンスターからランダムに選択
-    const candidates = MONSTERS.filter(m => m.rarity === rarity);
+    // そのレアリティのモンスターからランダムに選択（進化系は除外）
+    let candidates = MONSTERS.filter(m =>
+        m.rarity === rarity && !EVOLUTION_MONSTER_IDS.has(m.id)
+    );
+
+    // 該当レアリティにガチャ対象がない場合はCOMMONにフォールバック
+    if (candidates.length === 0) {
+        candidates = MONSTERS.filter(m =>
+            m.rarity === RARITY.COMMON && !EVOLUTION_MONSTER_IDS.has(m.id)
+        );
+    }
+
     return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
