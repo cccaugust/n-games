@@ -122,7 +122,7 @@ function playSound(type) {
 // ===========================================
 // モンスターカード描画
 // ===========================================
-function renderMonsterCard(monster, level = 1, size = 'normal') {
+function renderMonsterCard(monster, level = 1, size = 'normal', isShiny = false) {
     const monsterData = typeof monster === 'string' ? getMonsterById(monster) : monster;
     if (!monsterData) return '<div class="monster-card empty"></div>';
 
@@ -133,17 +133,19 @@ function renderMonsterCard(monster, level = 1, size = 'normal') {
     const stars = '★'.repeat(monsterData.rarity);
 
     const sizeClass = size === 'small' ? 'monster-card-small' : size === 'large' ? 'monster-card-large' : '';
+    const shinyClass = isShiny ? 'shiny' : '';
 
     return `
-        <div class="monster-card ${sizeClass}" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --rarity-color: ${rarityColor}">
+        <div class="monster-card ${sizeClass} ${shinyClass}" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --rarity-color: ${rarityColor}">
             <div class="card-frame">
+                ${isShiny ? '<div class="shiny-sparkle"></div>' : ''}
                 <div class="card-bg" style="background: linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}40)">
-                    <div class="card-icon">
+                    <div class="card-icon ${isShiny ? 'shiny-icon' : ''}">
                         ${renderMonsterIcon(monsterData)}
                     </div>
                 </div>
                 <div class="card-info-bar">
-                    <span class="card-name">${monsterData.name}</span>
+                    <span class="card-name">${isShiny ? '✨ ' : ''}${monsterData.name}${isShiny ? ' ✨' : ''}</span>
                     <span class="card-level">Lv.${level}</span>
                 </div>
                 <div class="card-rarity" style="color: ${rarityColor}">${stars}</div>
@@ -571,7 +573,7 @@ function renderBattle() {
         const hpPercent = Math.max(0, bs.partyHp[i] / bs.partyMaxHp[i] * 100);
         return `
             <div class="party-member ${bs.partyHp[i] <= 0 ? 'fainted' : ''}">
-                ${renderMonsterCard(data, m.level, 'small')}
+                ${renderMonsterCard(data, m.level, 'small', m.isShiny)}
                 <div class="hp-bar-mini">
                     <div class="hp-fill" style="width: ${hpPercent}%"></div>
                 </div>
@@ -813,6 +815,7 @@ function showBattleResult(isVictory, data) {
 // ===========================================
 const GACHA_COST = 100;
 const GACHA_TIME = 10; // 秒
+const SHINY_RATE = 5; // 色違い出現率 5%
 
 function showGachaScreen() {
     app.innerHTML = `
@@ -995,16 +998,19 @@ function finishGacha() {
     // 獲得モンスターを決定（最低1体は保証）
     const monstersWon = [];
     const monsterCount = Math.max(1, gachaState.correctCount + 1); // 正解数+1、最低1体
+    let hasShiny = false;
 
     for (let i = 0; i < monsterCount; i++) {
         const monster = rollGacha();
-        monstersWon.push(monster);
-        addMonsterToPlayer(currentPlayer, monster.id);
+        const isShiny = Math.random() * 100 < SHINY_RATE;
+        if (isShiny) hasShiny = true;
+        monstersWon.push({ monster, isShiny });
+        addMonsterToPlayer(currentPlayer, monster.id, isShiny);
     }
 
     currentPlayer = loadPlayerData(currentPlayer.id);
 
-    showGachaResult(monstersWon, gachaState.correctCount);
+    showGachaResult(monstersWon, gachaState.correctCount, hasShiny);
 }
 
 // 進化系モンスターのIDセットを作成（他のモンスターのevolutionとして参照されているもの）
@@ -1041,14 +1047,22 @@ function rollGacha() {
     return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function showGachaResult(monsters, correctCount = 0) {
+function showGachaResult(monsters, correctCount = 0, hasShiny = false) {
+    // 色違いがいたら特別なSE
+    if (hasShiny) {
+        playSound('levelup');
+    }
+
+    const shinyCount = monsters.filter(m => m.isShiny).length;
+
     app.innerHTML = `
-        <div class="screen gacha-result-screen">
+        <div class="screen gacha-result-screen ${hasShiny ? 'has-shiny' : ''}">
             <h2>ガチャ結果</h2>
             <p class="gacha-correct-count">正解数: ${correctCount}問</p>
             <p class="gacha-result-count">${monsters.length}体ゲット！🎉</p>
+            ${hasShiny ? `<p class="shiny-alert">✨ 色違いが ${shinyCount}体 出た！ ✨</p>` : ''}
             <div class="gacha-monsters">
-                ${monsters.map(m => renderMonsterCard(m, 1, 'normal')).join('')}
+                ${monsters.map(({ monster, isShiny }) => renderMonsterCard(monster, 1, 'normal', isShiny)).join('')}
             </div>
             <div class="result-buttons">
                 <button class="btn btn-primary" id="gachaAgainBtn" ${currentPlayer.coins < GACHA_COST ? 'disabled' : ''}>
@@ -1096,7 +1110,7 @@ function showPartyScreen() {
         const pm = partyMonsters[i];
         return pm ? `
                             <div class="party-slot filled" data-party-idx="${i}">
-                                ${renderMonsterCard(pm.data, pm.level, 'small')}
+                                ${renderMonsterCard(pm.data, pm.level, 'small', pm.isShiny)}
                                 <button class="remove-btn" data-party-idx="${i}">×</button>
                             </div>
                         ` : `
@@ -1113,7 +1127,7 @@ function showPartyScreen() {
                     ${allMonsters.map(m => `
                         <div class="box-monster ${currentPlayer.party.includes(m.idx) ? 'in-party' : ''}"
                              data-monster-idx="${m.idx}">
-                            ${renderMonsterCard(m.data, m.level, 'small')}
+                            ${renderMonsterCard(m.data, m.level, 'small', m.isShiny)}
                         </div>
                     `).join('')}
                 </div>
@@ -1158,18 +1172,28 @@ function showPartyScreen() {
 function showMonsterBook() {
     const discovered = currentPlayer.discoveredMonsters;
 
+    // 通常と色違いそれぞれの発見数をカウント
+    const normalDiscovered = discovered.filter(d => !d.endsWith('_shiny')).length;
+    const shinyDiscovered = discovered.filter(d => d.endsWith('_shiny')).length;
+    const totalPossible = MONSTERS.length * 2; // 通常 + 色違い
+
     app.innerHTML = `
         <div class="screen monster-book-screen">
             <h2>モンスターずかん</h2>
-            <p class="book-progress">発見: ${discovered.length} / ${MONSTERS.length}</p>
+            <p class="book-progress">発見: ${normalDiscovered}体 + ✨${shinyDiscovered}体 / ${MONSTERS.length}種類</p>
             <div class="book-grid">
                 ${MONSTERS.map(m => {
         const isDiscovered = discovered.includes(m.id);
-        const owned = currentPlayer.monsters.find(om => om.monsterId === m.id);
+        const hasShiny = discovered.includes(`${m.id}_shiny`);
+        const owned = currentPlayer.monsters.find(om => om.monsterId === m.id && !om.isShiny);
+        const ownedShiny = currentPlayer.monsters.find(om => om.monsterId === m.id && om.isShiny);
         return `
                         <div class="book-entry ${isDiscovered ? 'discovered' : 'undiscovered'}"
                              data-monster-id="${m.id}">
-                            ${isDiscovered ? renderMonsterCard(m, owned ? owned.level : 1, 'small') : `
+                            ${isDiscovered ? `
+                                ${renderMonsterCard(m, owned ? owned.level : 1, 'small')}
+                                ${hasShiny ? '<div class="shiny-badge">✨</div>' : ''}
+                            ` : `
                                 <div class="unknown-monster">
                                     <span class="unknown-icon">?</span>
                                     <span class="unknown-rarity">${'★'.repeat(m.rarity)}</span>
@@ -1197,20 +1221,32 @@ function showMonsterBook() {
     };
 }
 
-function showMonsterDetail(monsterId) {
+function showMonsterDetail(monsterId, showShiny = false) {
     const monster = getMonsterById(monsterId);
-    const owned = currentPlayer.monsters.find(m => m.monsterId === monsterId);
+    const ownedNormal = currentPlayer.monsters.find(m => m.monsterId === monsterId && !m.isShiny);
+    const ownedShiny = currentPlayer.monsters.find(m => m.monsterId === monsterId && m.isShiny);
+
+    const displayShiny = showShiny && ownedShiny;
+    const owned = displayShiny ? ownedShiny : ownedNormal;
     const level = owned ? owned.level : 1;
     const stats = calculateStats(monster, level);
     const canEvo = owned && canEvolve(currentPlayer, currentPlayer.monsters.indexOf(owned), MONSTERS);
 
+    const hasShiny = currentPlayer.discoveredMonsters.includes(`${monsterId}_shiny`);
+
     app.innerHTML = `
-        <div class="screen monster-detail-screen">
+        <div class="screen monster-detail-screen ${displayShiny ? 'showing-shiny' : ''}">
             <div class="detail-card-large">
-                ${renderMonsterCard(monster, level, 'large')}
+                ${renderMonsterCard(monster, level, 'large', displayShiny)}
             </div>
             <div class="detail-info">
-                <h2>${monster.name}</h2>
+                <h2>${displayShiny ? '✨ ' : ''}${monster.name}${displayShiny ? ' ✨' : ''}</h2>
+                ${hasShiny ? `
+                    <div class="shiny-toggle">
+                        <button class="btn ${!displayShiny ? 'btn-primary' : 'btn-ghost'}" id="showNormal">通常</button>
+                        <button class="btn ${displayShiny ? 'btn-primary' : 'btn-ghost'}" id="showShiny">✨色違い</button>
+                    </div>
+                ` : ''}
                 <p class="detail-desc">${monster.description}</p>
                 <div class="detail-stats">
                     <div class="stat-row">
@@ -1241,14 +1277,26 @@ function showMonsterDetail(monsterId) {
         </div>
     `;
 
+    // 色違い切り替えボタン
+    if (hasShiny) {
+        document.getElementById('showNormal')?.addEventListener('click', () => {
+            playSound('click');
+            showMonsterDetail(monsterId, false);
+        });
+        document.getElementById('showShiny')?.addEventListener('click', () => {
+            playSound('click');
+            showMonsterDetail(monsterId, true);
+        });
+    }
+
     if (canEvo) {
         document.getElementById('evolveBtn').onclick = () => {
             playSound('levelup');
-            const idx = currentPlayer.monsters.findIndex(m => m.monsterId === monsterId);
+            const idx = currentPlayer.monsters.findIndex(m => m.monsterId === monsterId && m.isShiny === displayShiny);
             evolveMonster(currentPlayer, idx, MONSTERS);
             currentPlayer = loadPlayerData(currentPlayer.id);
             const newMonster = currentPlayer.monsters[idx];
-            showMonsterDetail(newMonster.monsterId);
+            showMonsterDetail(newMonster.monsterId, displayShiny);
         };
     }
 
