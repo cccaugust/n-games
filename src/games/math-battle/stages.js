@@ -276,6 +276,12 @@ function calculateBaseReward(grade, level) {
     return grade * 3 * level;
 }
 
+// 学年コイン報酬計算
+// 学年が高いほど多くもらえる
+function calculateGradeCoinReward(grade, level) {
+    return grade * level * 2;
+}
+
 /**
  * 全ステージデータを生成
  */
@@ -295,6 +301,7 @@ export function generateAllStages() {
             for (let level = 1; level <= 3; level++) {
                 const enemyStats = calculateEnemyStats(grade, level);
                 const baseReward = calculateBaseReward(grade, level);
+                const gradeReward = calculateGradeCoinReward(grade, level);
 
                 stages[grade][category].push({
                     id: `${grade}-${category}-${level}`,
@@ -318,6 +325,15 @@ export function generateAllStages() {
                             [RANKS.B]: Math.floor(baseReward * 0.2),
                             [RANKS.A]: Math.floor(baseReward * 0.5),
                             [RANKS.S]: Math.floor(baseReward * 1.0)
+                        },
+                        // 学年コイン報酬
+                        gradeBase: gradeReward,
+                        gradeFirstClear: Math.floor(gradeReward * 2),
+                        gradeRankBonus: {
+                            [RANKS.C]: 0,
+                            [RANKS.B]: Math.floor(gradeReward * 0.2),
+                            [RANKS.A]: Math.floor(gradeReward * 0.5),
+                            [RANKS.S]: Math.floor(gradeReward * 1.0)
                         }
                     },
                     requirements: {
@@ -361,15 +377,20 @@ export function calculateRank(clearTime, correctRate, questionCount) {
  */
 export function calculateRewards(stage, rank, isFirstClear) {
     let coins = stage.rewards.base;
+    let gradeCoins = stage.rewards.gradeBase || 0;
 
     if (isFirstClear) {
         coins += stage.rewards.firstClear;
+        gradeCoins += stage.rewards.gradeFirstClear || 0;
     }
 
     coins += stage.rewards.rankBonus[rank] || 0;
+    gradeCoins += (stage.rewards.gradeRankBonus && stage.rewards.gradeRankBonus[rank]) || 0;
 
     return {
         coins,
+        gradeCoins,
+        grade: stage.grade,
         isFirstClear,
         rank
     };

@@ -17,7 +17,17 @@ export function createNewPlayer(name) {
         lastPlayedAt: Date.now(),
 
         // 所持金
-        coins: 100, // 初期コイン
+        coins: 100, // 通常コイン（初期コイン）
+
+        // 学年コイン（ステージクリアで獲得、学年ガチャに使用）
+        gradeCoins: {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0
+        },
 
         // パーティ（最大4体）
         party: [],
@@ -40,6 +50,7 @@ export function createNewPlayer(name) {
             totalCorrectAnswers: 0,
             totalStagesCleared: 0,
             totalCoinsEarned: 0,
+            totalGradeCoinsEarned: 0,
             totalGachaRolls: 0,
             playTime: 0
         }
@@ -128,7 +139,29 @@ export function savePlayerData(player) {
 export function loadPlayerData(playerId) {
     try {
         const data = localStorage.getItem(`${SAVE_KEY}_${playerId}`);
-        return data ? JSON.parse(data) : null;
+        if (!data) return null;
+
+        const player = JSON.parse(data);
+
+        // マイグレーション: 学年コインがない場合は初期化
+        if (!player.gradeCoins) {
+            player.gradeCoins = {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0
+            };
+            // 既存のcoinsは通常コインとしてそのまま維持
+        }
+
+        // マイグレーション: 統計に学年コイン用フィールドがない場合
+        if (player.stats && player.stats.totalGradeCoinsEarned === undefined) {
+            player.stats.totalGradeCoinsEarned = 0;
+        }
+
+        return player;
     } catch (e) {
         console.error('Failed to load player data:', e);
         return null;
@@ -214,8 +247,14 @@ export function removeFromParty(player, partyIndex) {
 
 /**
  * ステージクリアを記録
+ * @param {Object} player - プレイヤーデータ
+ * @param {string} stageId - ステージID
+ * @param {string} rank - 獲得ランク
+ * @param {number} coinsEarned - 獲得した通常コイン
+ * @param {number} gradeCoinsEarned - 獲得した学年コイン（オプション、省略時は0）
+ * @param {number} grade - 学年（学年コインを付与する学年）
  */
-export function recordStageClear(player, stageId, rank, coinsEarned) {
+export function recordStageClear(player, stageId, rank, coinsEarned, gradeCoinsEarned = 0, grade = null) {
     const isFirstClear = !player.clearedStages.includes(stageId);
 
     if (isFirstClear) {
@@ -230,20 +269,41 @@ export function recordStageClear(player, stageId, rank, coinsEarned) {
         player.stageRanks[stageId] = rank;
     }
 
-    // コイン追加
+    // 通常コイン追加
     player.coins += coinsEarned;
     player.stats.totalCoinsEarned += coinsEarned;
+
+    // 学年コイン追加
+    if (gradeCoinsEarned > 0 && grade !== null && player.gradeCoins) {
+        player.gradeCoins[grade] = (player.gradeCoins[grade] || 0) + gradeCoinsEarned;
+        player.stats.totalGradeCoinsEarned = (player.stats.totalGradeCoinsEarned || 0) + gradeCoinsEarned;
+    }
 
     savePlayerData(player);
     return { player, isFirstClear };
 }
 
 /**
- * コインを消費
+ * 通常コインを消費
  */
 export function spendCoins(player, amount) {
     if (player.coins < amount) return false;
     player.coins -= amount;
+    savePlayerData(player);
+    return true;
+}
+
+/**
+ * 学年コインを消費
+ * @param {Object} player - プレイヤーデータ
+ * @param {number} grade - 学年
+ * @param {number} amount - 消費量
+ * @returns {boolean} 消費成功/失敗
+ */
+export function spendGradeCoins(player, grade, amount) {
+    if (!player.gradeCoins) return false;
+    if ((player.gradeCoins[grade] || 0) < amount) return false;
+    player.gradeCoins[grade] -= amount;
     savePlayerData(player);
     return true;
 }

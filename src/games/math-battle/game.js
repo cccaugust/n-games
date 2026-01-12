@@ -5,6 +5,8 @@
 import {
     MONSTERS, TYPES, TYPE_NAMES, TYPE_COLORS,
     RARITY, RARITY_COLORS, RARITY_RATES,
+    GACHA_TYPES, GACHA_RARITY_RATES, GACHA_COSTS, GACHA_TYPE_NAMES,
+    getGachaTypeForGrade,
     getMonsterById, calculateStats, getTypeMultiplier
 } from './monsters.js';
 
@@ -22,7 +24,7 @@ import {
 import {
     getPlayerList, addPlayer, loadPlayerData, savePlayerData,
     addMonsterToPlayer, addExpToMonster, addToParty, removeFromParty,
-    recordStageClear, spendCoins, updateStats, recordGachaRoll,
+    recordStageClear, spendCoins, spendGradeCoins, updateStats, recordGachaRoll,
     canEvolve, evolveMonster, giveStarterMonster
 } from './save.js';
 
@@ -793,8 +795,8 @@ function battleVictory() {
     const isFirstClear = !currentPlayer.clearedStages.includes(bs.stage.id);
     const rewards = calculateRewards(bs.stage, rank, isFirstClear);
 
-    // 報酬付与
-    recordStageClear(currentPlayer, bs.stage.id, rank, rewards.coins);
+    // 報酬付与（通常コイン + 学年コイン）
+    recordStageClear(currentPlayer, bs.stage.id, rank, rewards.coins, rewards.gradeCoins, rewards.grade);
     updateStats(currentPlayer, bs.questions.length, bs.correctCount);
 
     // 経験値付与
@@ -821,6 +823,9 @@ function battleDefeat() {
 }
 
 function showBattleResult(isVictory, data) {
+    // 学年コイン表示用アイコン
+    const gradeIcon = data.rewards ? (GRADE_COIN_ICONS[data.rewards.grade] || '🪙') : '';
+
     app.innerHTML = `
         <div class="screen result-screen ${isVictory ? 'victory' : 'defeat'}">
             <h1 class="result-title">${isVictory ? '勝利！' : '敗北...'}</h1>
@@ -831,7 +836,14 @@ function showBattleResult(isVictory, data) {
                         <span class="rank rank-${data.rank.toLowerCase()}">${data.rank}</span>
                     </div>
                     <div class="reward-display">
-                        <span>💰 +${data.rewards.coins} コイン</span>
+                        <div class="reward-row">
+                            <span class="reward-label">💰 通常コイン</span>
+                            <span class="reward-value">+${data.rewards.coins}</span>
+                        </div>
+                        <div class="reward-row grade-coin">
+                            <span class="reward-label">${gradeIcon} ${data.rewards.grade}年コイン</span>
+                            <span class="reward-value">+${data.rewards.gradeCoins}</span>
+                        </div>
                         ${data.rewards.isFirstClear ? '<span class="first-clear">初クリアボーナス！</span>' : ''}
                     </div>
                     <div class="stats-display">
@@ -864,36 +876,176 @@ function showBattleResult(isVictory, data) {
 // ===========================================
 // ガチャシステム
 // ===========================================
-const GACHA_COST = 100;
 const GACHA_TIME = 10; // 秒
 const SHINY_RATE = 5; // 色違い出現率 5%
 
+// 現在選択中のガチャタイプ
+let selectedGachaType = GACHA_TYPES.NORMAL;
+
+// コイン表示用のアイコン
+const GRADE_COIN_ICONS = {
+    1: '🔵',
+    2: '🟢',
+    3: '🟡',
+    4: '🟠',
+    5: '🔴',
+    6: '🟣'
+};
+
+// ガチャ選択画面（メイン画面）
 function showGachaScreen() {
+    const gradeCoins = currentPlayer.gradeCoins || {};
+
+    // 学年ガチャタブのHTML
+    const gradeGachaTabs = [1, 2, 3, 4, 5, 6].map(grade => {
+        const gachaType = getGachaTypeForGrade(grade);
+        const cost = GACHA_COSTS[gachaType];
+        const coins = gradeCoins[grade] || 0;
+        const canAfford = coins >= cost.amount;
+        const rates = GACHA_RARITY_RATES[gachaType];
+
+        return `
+            <div class="gacha-type-card ${canAfford ? '' : 'disabled'}" data-gacha-type="${gachaType}">
+                <div class="gacha-type-name">${GACHA_TYPE_NAMES[gachaType]}</div>
+                <div class="gacha-type-cost">${GRADE_COIN_ICONS[grade]} ${cost.amount}</div>
+                <div class="gacha-type-owned">所持: ${coins}</div>
+                <div class="gacha-type-rates">
+                    <span class="rate legendary">★5: ${rates[RARITY.LEGENDARY]}%</span>
+                    <span class="rate epic">★4: ${rates[RARITY.EPIC]}%</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // 通常ガチャ
+    const normalCost = GACHA_COSTS[GACHA_TYPES.NORMAL];
+    const normalCanAfford = currentPlayer.coins >= normalCost.amount;
+    const normalRates = GACHA_RARITY_RATES[GACHA_TYPES.NORMAL];
+
     app.innerHTML = `
-        <div class="screen gacha-screen">
+        <div class="screen gacha-select-screen">
             <h2>ガチャ</h2>
             <p class="gacha-desc">10秒間で問題を解いて、モンスターをゲット！</p>
-            <p class="gacha-hint">正解するほど卵が増える！（最低1個はもらえるよ）</p>
-            <p class="gacha-cost">💰 ${GACHA_COST} コイン</p>
-            <p class="current-coins">所持: 💰 ${currentPlayer.coins}</p>
-            <button class="btn btn-primary btn-large" id="startGachaBtn" ${currentPlayer.coins < GACHA_COST ? 'disabled' : ''}>
-                ガチャをまわす！
-            </button>
+            <p class="gacha-hint">学年が上がるほど、レアが出やすい！</p>
+
+            <div class="coins-display">
+                <div class="coin-item normal-coin">
+                    <span class="coin-icon">💰</span>
+                    <span class="coin-amount">${currentPlayer.coins}</span>
+                </div>
+            </div>
+
+            <div class="gacha-section">
+                <h3>ノーマルガチャ</h3>
+                <div class="gacha-type-card normal ${normalCanAfford ? '' : 'disabled'}" data-gacha-type="${GACHA_TYPES.NORMAL}">
+                    <div class="gacha-type-name">${GACHA_TYPE_NAMES[GACHA_TYPES.NORMAL]}</div>
+                    <div class="gacha-type-cost">💰 ${normalCost.amount}</div>
+                    <div class="gacha-type-rates">
+                        <span class="rate legendary">★5: ${normalRates[RARITY.LEGENDARY]}%</span>
+                        <span class="rate epic">★4: ${normalRates[RARITY.EPIC]}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gacha-section">
+                <h3>学年ガチャ</h3>
+                <p class="section-hint">ステージをクリアして学年コインを集めよう！</p>
+                <div class="grade-coins-display">
+                    ${[1, 2, 3, 4, 5, 6].map(g => `
+                        <div class="grade-coin-item">
+                            <span class="grade-coin-icon">${GRADE_COIN_ICONS[g]}</span>
+                            <span class="grade-coin-amount">${gradeCoins[g] || 0}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="gacha-types-grid">
+                    ${gradeGachaTabs}
+                </div>
+            </div>
+
             <button class="btn btn-ghost back-btn" id="backToMenu">もどる</button>
         </div>
     `;
 
-    document.getElementById('startGachaBtn').onclick = () => {
-        if (currentPlayer.coins < GACHA_COST) return;
-        playSound('click');
-        spendCoins(currentPlayer, GACHA_COST);
-        currentPlayer = loadPlayerData(currentPlayer.id);
-        startGacha();
-    };
+    // ガチャカードクリックイベント
+    document.querySelectorAll('.gacha-type-card:not(.disabled)').forEach(card => {
+        card.onclick = () => {
+            const gachaType = card.dataset.gachaType;
+            playSound('click');
+            showGachaConfirm(gachaType);
+        };
+    });
 
     document.getElementById('backToMenu').onclick = () => {
         playSound('click');
         showMainMenu();
+    };
+}
+
+// ガチャ確認・実行画面
+function showGachaConfirm(gachaType) {
+    selectedGachaType = gachaType;
+    const cost = GACHA_COSTS[gachaType];
+    const rates = GACHA_RARITY_RATES[gachaType];
+    const name = GACHA_TYPE_NAMES[gachaType];
+
+    let canAfford = false;
+    let coinDisplay = '';
+
+    if (cost.type === 'coins') {
+        canAfford = currentPlayer.coins >= cost.amount;
+        coinDisplay = `💰 ${cost.amount} コイン`;
+    } else {
+        const grade = cost.grade;
+        const gradeCoins = (currentPlayer.gradeCoins && currentPlayer.gradeCoins[grade]) || 0;
+        canAfford = gradeCoins >= cost.amount;
+        coinDisplay = `${GRADE_COIN_ICONS[grade]} ${cost.amount} ${grade}年コイン`;
+    }
+
+    app.innerHTML = `
+        <div class="screen gacha-confirm-screen">
+            <h2>${name}</h2>
+            <p class="gacha-desc">10秒間で問題を解いて、モンスターをゲット！</p>
+            <p class="gacha-hint">正解するほど卵が増える！（最低1個はもらえるよ）</p>
+
+            <div class="gacha-rates-detail">
+                <h4>出現確率</h4>
+                <div class="rates-grid">
+                    <div class="rate-row"><span class="rarity rarity-5">★★★★★</span><span>${rates[RARITY.LEGENDARY]}%</span></div>
+                    <div class="rate-row"><span class="rarity rarity-4">★★★★</span><span>${rates[RARITY.EPIC]}%</span></div>
+                    <div class="rate-row"><span class="rarity rarity-3">★★★</span><span>${rates[RARITY.RARE]}%</span></div>
+                    <div class="rate-row"><span class="rarity rarity-2">★★</span><span>${rates[RARITY.UNCOMMON]}%</span></div>
+                    <div class="rate-row"><span class="rarity rarity-1">★</span><span>${rates[RARITY.COMMON]}%</span></div>
+                </div>
+            </div>
+
+            <p class="gacha-cost">${coinDisplay}</p>
+
+            <button class="btn btn-primary btn-large" id="startGachaBtn" ${!canAfford ? 'disabled' : ''}>
+                ガチャをまわす！
+            </button>
+            <button class="btn btn-ghost back-btn" id="backToGachaSelect">もどる</button>
+        </div>
+    `;
+
+    document.getElementById('startGachaBtn').onclick = () => {
+        if (!canAfford) return;
+        playSound('click');
+
+        // コイン消費
+        if (cost.type === 'coins') {
+            spendCoins(currentPlayer, cost.amount);
+        } else {
+            spendGradeCoins(currentPlayer, cost.grade, cost.amount);
+        }
+
+        currentPlayer = loadPlayerData(currentPlayer.id);
+        startGacha();
+    };
+
+    document.getElementById('backToGachaSelect').onclick = () => {
+        playSound('click');
+        showGachaScreen();
     };
 }
 
@@ -1052,7 +1204,7 @@ function finishGacha() {
     let hasShiny = false;
 
     for (let i = 0; i < monsterCount; i++) {
-        const monster = rollGacha();
+        const monster = rollGacha(selectedGachaType);
         const isShiny = Math.random() * 100 < SHINY_RATE;
         if (isShiny) hasShiny = true;
         monstersWon.push({ monster, isShiny });
@@ -1069,13 +1221,16 @@ const EVOLUTION_MONSTER_IDS = new Set(
     MONSTERS.filter(m => m.evolution).map(m => m.evolution)
 );
 
-function rollGacha() {
+function rollGacha(gachaType = GACHA_TYPES.NORMAL) {
+    // ガチャタイプに応じた確率テーブルを取得
+    const rates = GACHA_RARITY_RATES[gachaType] || GACHA_RARITY_RATES[GACHA_TYPES.NORMAL];
+
     // レアリティを決定
     const roll = Math.random() * 100;
     let cumulative = 0;
     let rarity = RARITY.COMMON;
 
-    for (const [r, rate] of Object.entries(RARITY_RATES)) {
+    for (const [r, rate] of Object.entries(rates)) {
         cumulative += rate;
         if (roll < cumulative) {
             rarity = parseInt(r);
@@ -1106,9 +1261,25 @@ function showGachaResult(monsters, correctCount = 0, hasShiny = false) {
 
     const shinyCount = monsters.filter(m => m.isShiny).length;
 
+    // 選択中のガチャタイプのコスト確認
+    const cost = GACHA_COSTS[selectedGachaType];
+    let canAfford = false;
+    let costDisplay = '';
+
+    if (cost.type === 'coins') {
+        canAfford = currentPlayer.coins >= cost.amount;
+        costDisplay = `💰${cost.amount}`;
+    } else {
+        const grade = cost.grade;
+        const gradeCoins = (currentPlayer.gradeCoins && currentPlayer.gradeCoins[grade]) || 0;
+        canAfford = gradeCoins >= cost.amount;
+        costDisplay = `${GRADE_COIN_ICONS[grade]}${cost.amount}`;
+    }
+
     app.innerHTML = `
         <div class="screen gacha-result-screen ${hasShiny ? 'has-shiny' : ''}">
             <h2>ガチャ結果</h2>
+            <p class="gacha-type-label">${GACHA_TYPE_NAMES[selectedGachaType]}</p>
             <p class="gacha-correct-count">正解数: ${correctCount}問</p>
             <p class="gacha-result-count">${monsters.length}体ゲット！🎉</p>
             ${hasShiny ? `<p class="shiny-alert">✨ 色違いが ${shinyCount}体 出た！ ✨</p>` : ''}
@@ -1116,20 +1287,33 @@ function showGachaResult(monsters, correctCount = 0, hasShiny = false) {
                 ${monsters.map(({ monster, isShiny }) => renderMonsterCard(monster, 1, 'normal', isShiny)).join('')}
             </div>
             <div class="result-buttons">
-                <button class="btn btn-primary" id="gachaAgainBtn" ${currentPlayer.coins < GACHA_COST ? 'disabled' : ''}>
-                    もう一回 (💰${GACHA_COST})
+                <button class="btn btn-primary" id="gachaAgainBtn" ${!canAfford ? 'disabled' : ''}>
+                    もう一回 (${costDisplay})
                 </button>
+                <button class="btn btn-secondary" id="backToGachaBtn">ガチャ選択</button>
                 <button class="btn btn-ghost" id="backToMenuBtn">メニューへ</button>
             </div>
         </div>
     `;
 
     document.getElementById('gachaAgainBtn').onclick = () => {
-        if (currentPlayer.coins < GACHA_COST) return;
+        if (!canAfford) return;
         playSound('click');
-        spendCoins(currentPlayer, GACHA_COST);
+
+        // コイン消費
+        if (cost.type === 'coins') {
+            spendCoins(currentPlayer, cost.amount);
+        } else {
+            spendGradeCoins(currentPlayer, cost.grade, cost.amount);
+        }
+
         currentPlayer = loadPlayerData(currentPlayer.id);
         startGacha();
+    };
+
+    document.getElementById('backToGachaBtn').onclick = () => {
+        playSound('click');
+        showGachaScreen();
     };
 
     document.getElementById('backToMenuBtn').onclick = () => {
