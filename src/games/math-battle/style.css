@@ -774,6 +774,56 @@ body {
     border-color: #ff4444;
 }
 
+/* 数字入力エリア（バトル用） */
+.answer-area {
+    width: 100%;
+}
+
+.numeric-input-area {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.battle-input {
+    width: 180px;
+    padding: 16px;
+    font-size: 1.8rem;
+    font-family: inherit;
+    font-weight: 700;
+    text-align: center;
+    background: var(--bg-card);
+    border: 3px solid var(--text-muted);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    -moz-appearance: textfield;
+}
+
+.battle-input::-webkit-outer-spin-button,
+.battle-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.battle-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+}
+
+.input-suffix {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-width: 40px;
+}
+
+.numeric-input-area .btn-primary {
+    padding: 16px 32px;
+    font-size: 1.3rem;
+}
+
 /* ダメージエフェクト */
 .damage-effect {
     position: absolute;

@@ -508,6 +508,19 @@ function showStageSelect(grade, category) {
 // ===========================================
 
 /**
+ * 数値回答の問題かどうかを判定
+ * 選択肢からの選択ではなく、数字入力で回答する問題
+ */
+function isNumericQuestion(q) {
+    // answerが数値型かつ、特殊な問題タイプでない場合は数字入力式
+    if (typeof q.answer !== 'number') return false;
+    // ひっ算、穴埋め、時計、比較問題は従来の形式を維持
+    if (q.type === 'hissan' || q.type === 'fill_blank' ||
+        q.type === 'clock' || q.type === 'compare') return false;
+    return true;
+}
+
+/**
  * ステージの敵タイプに合うモンスターを選択
  * 進化系モンスターを優先（ガチャで出ないレアな敵として）
  */
@@ -668,27 +681,70 @@ function renderBattle() {
                 <div class="question-box">
                     <p class="question-text">${q.question}</p>
                 </div>
-                <div class="answer-grid" id="answerGrid">
-                    ${q.choices.map((choice, i) => `
-                        <button class="answer-btn" data-answer="${choice}">
-                            ${q.prefix || ''}${choice}${q.suffix || ''}
-                        </button>
-                    `).join('')}
+                <div class="answer-area" id="answerArea">
+                    ${isNumericQuestion(q) ? `
+                        <div class="numeric-input-area">
+                            <input type="number" id="battleInput" class="battle-input" inputmode="numeric" step="any" autofocus>
+                            <span class="input-suffix">${q.suffix || ''}</span>
+                            <button class="btn btn-primary" id="battleSubmit">OK</button>
+                        </div>
+                    ` : `
+                        <div class="answer-grid">
+                            ${q.choices.map((choice, i) => `
+                                <button class="answer-btn" data-answer="${choice}">
+                                    ${q.prefix || ''}${choice}${q.suffix || ''}
+                                </button>
+                            `).join('')}
+                        </div>
+                    `}
                 </div>
             </div>
             <div id="particleContainer" class="particle-container"></div>
         </div>
     `;
 
+    // 数字入力式の場合
+    const battleInput = document.getElementById('battleInput');
+    const battleSubmit = document.getElementById('battleSubmit');
+
+    if (battleInput && battleSubmit) {
+        const submitAnswer = () => {
+            const userAnswer = parseFloat(battleInput.value);
+            if (isNaN(userAnswer)) return;
+            handleAnswer(userAnswer);
+        };
+
+        battleSubmit.onclick = submitAnswer;
+        battleInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        };
+        battleInput.focus();
+    }
+
+    // 選択式の場合
     document.querySelectorAll('.answer-btn').forEach(btn => {
-        btn.onclick = () => handleAnswer(parseFloat(btn.dataset.answer));
+        btn.onclick = () => {
+            const answer = btn.dataset.answer;
+            // 数値として解析できる場合は数値として、そうでなければ文字列として渡す
+            const numAnswer = parseFloat(answer);
+            handleAnswer(isNaN(numAnswer) ? answer : numAnswer);
+        };
     });
 }
 
 function handleAnswer(answer) {
     const bs = battleState;
     const q = bs.questions[bs.currentQuestion];
-    const isCorrect = Math.abs(answer - q.answer) < 0.001;
+
+    // 正答判定：数値の場合は誤差許容、文字列の場合は完全一致
+    let isCorrect = false;
+    if (typeof q.answer === 'number' && typeof answer === 'number') {
+        isCorrect = Math.abs(answer - q.answer) < 0.001;
+    } else {
+        isCorrect = String(answer) === String(q.answer);
+    }
 
     if (isCorrect) {
         playSound('correct');
