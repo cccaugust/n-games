@@ -28,6 +28,10 @@ const POKEDEX_IMAGE_MAP = {
     'ゴースター': 'ghoster.png',
     'キラリン': 'kirarin.png',
     'フェアリナ': 'fairina.png',
+    'コロモチ': 'koromochi.png',
+    'イワゴロ': 'iwagoro.png',
+    'イワディン': 'iwadin.png',
+    'コンゴウ': 'kongou.png',
     'ゴダンギル': 'godangiru.png',
     'カメラマン': 'cameraman.png',
     'カマサウルス': 'kamasaurus.png',
@@ -46,7 +50,10 @@ const POKEDEX_IMAGE_MAP = {
     'アビスウォーカー': 'abysswalker.png',
     'プラズマカイザー': 'plasmakaiser.png',
     'ウォンプ': 'womp.png',
-    'ダイコ': 'daiko.png',
+    'コンゴウ': 'kongou.png',
+    'サイコロン': 'psychoron.png',
+    'ヘキサマインド': 'hexamind.png',
+    'テサロード': 'tesserlord.png',
     'コインコイ': 'coinkoi.png'
 };
 
@@ -371,6 +378,7 @@ export const MONSTERS = [
         id: 'M005',
         name: 'コロモチ',
         description: 'ふわふわのお餅みたい。のんびり屋だけど計算は得意。',
+        image: resolveMonsterImageByName('コロモチ'),
         types: [TYPES.NORMAL],
         rarity: RARITY.COMMON,
         baseStats: { hp: 40, attack: 8, defense: 10 },
@@ -382,12 +390,13 @@ export const MONSTERS = [
         id: 'M006',
         name: 'イワゴロ',
         description: '岩のように頑丈。防御が自慢。',
+        image: resolveMonsterImageByName('イワゴロ'),
         types: [TYPES.STEEL],
         rarity: RARITY.COMMON,
         baseStats: { hp: 38, attack: 9, defense: 15 },
         skill: SKILLS.PLUS_10,
-        evolution: null,
-        evolutionLevel: null
+        evolution: 'M027',
+        evolutionLevel: 15
     },
     {
         id: 'M007',
@@ -493,12 +502,13 @@ export const MONSTERS = [
         id: 'M015',
         name: 'サイコロン',
         description: '念力で数字を操る。テレパシーで答えを見抜く。',
+        image: resolveMonsterImageByName('サイコロン'),
         types: [TYPES.PSYCHIC],
         rarity: RARITY.RARE,
         baseStats: { hp: 55, attack: 28, defense: 15 },
         skill: SKILLS.POWER_UP_1_5,
-        evolution: null,
-        evolutionLevel: null
+        evolution: 'M029',
+        evolutionLevel: 30
     },
     {
         id: 'M016',
@@ -630,6 +640,56 @@ export const MONSTERS = [
         rarity: RARITY.LEGENDARY,
         baseStats: { hp: 95, attack: 55, defense: 28 },
         skill: SKILLS.HEAL_HALF,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：イワゴロ進化系
+    {
+        id: 'M027',
+        name: 'イワディン',
+        description: 'イワゴロが成長した姿。強固な岩の鎧をまとっている。',
+        image: resolveMonsterImageByName('イワディン'),
+        types: [TYPES.STEEL],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 55, attack: 18, defense: 25 },
+        skill: SKILLS.PLUS_20,
+        evolution: 'M028',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M028',
+        name: 'コンゴウ',
+        description: 'イワディンの最終進化。ダイヤモンドのように硬い体を持つ。',
+        image: resolveMonsterImageByName('コンゴウ'),
+        types: [TYPES.STEEL, TYPES.FIGHTING],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 75, attack: 35, defense: 35 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：サイコロン進化系
+    {
+        id: 'M029',
+        name: 'ヘキサマインド',
+        description: 'サイコロンが成長した姿。複数のサイコロを宙に浮かせ、並列思考で計算する。',
+        image: resolveMonsterImageByName('ヘキサマインド'),
+        types: [TYPES.PSYCHIC],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 70, attack: 42, defense: 22 },
+        skill: SKILLS.LUCKY_70,
+        evolution: 'M030',
+        evolutionLevel: 50
+    },
+    {
+        id: 'M030',
+        name: 'テサロード',
+        description: 'ヘキサマインドの最終進化。4次元の演算能力を持つ思考の帝王。',
+        image: resolveMonsterImageByName('テサロード'),
+        types: [TYPES.PSYCHIC, TYPES.STEEL],
+        rarity: RARITY.EPIC, // 設定上はほぼレジェンダリー
+        baseStats: { hp: 85, attack: 52, defense: 38 },
+        skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
     }
