@@ -1,5 +1,5 @@
 // 日本探検クエスト
-// Google Mapsで日本を探検して、各地の特産物を集めるゲーム
+// Leaflet + OpenStreetMap版（完全無料・APIキー不要）
 
 // ========== 47都道府県データ ==========
 const PREFECTURES = [
@@ -15,7 +15,7 @@ const PREFECTURES = [
   // 関東
   { id: 8, name: '茨城県', lat: 36.3418, lng: 140.4468, item: '納豆', emoji: '🫘' },
   { id: 9, name: '栃木県', lat: 36.5657, lng: 139.8836, item: 'いちご', emoji: '🍓' },
-  { id: 10, name: '群馬県', lat: 36.3911, lng: 139.0608, item: 'こんにゃく', emoji: '🥢' },
+  { id: 10, name: '群馬県', lat: 36.3911, lng: 139.0608, item: 'こんにゃく', emoji: '🍡' },
   { id: 11, name: '埼玉県', lat: 35.8569, lng: 139.6489, item: '草加せんべい', emoji: '🍘' },
   { id: 12, name: '千葉県', lat: 35.6046, lng: 140.1233, item: '落花生', emoji: '🥜' },
   { id: 13, name: '東京都', lat: 35.6762, lng: 139.6503, item: '江戸前寿司', emoji: '🍣' },
@@ -67,29 +67,23 @@ const PREFECTURES = [
 
 // ========== ゲーム状態 ==========
 let gameState = {
-  mode: null, // 'google' | 'demo'
-  apiKey: null,
   collected: new Set(),
   currentMission: null,
-  currentLocation: null,
   map: null,
-  streetView: null,
-  markers: [],
-  isStreetViewMode: false,
+  markers: new Map(),
+  startTime: null,
 };
 
 // ========== DOM要素 ==========
 const elements = {
-  apiKeyScreen: document.getElementById('apiKeyScreen'),
+  titleScreen: document.getElementById('titleScreen'),
   gameScreen: document.getElementById('gameScreen'),
-  apiKeyInput: document.getElementById('apiKeyInput'),
   startBtn: document.getElementById('startBtn'),
-  demoBtn: document.getElementById('demoBtn'),
   mapView: document.getElementById('map'),
-  demoCanvas: document.getElementById('demoCanvas'),
   currentLocation: document.getElementById('currentLocation'),
   missionPref: document.getElementById('missionPref'),
   missionItem: document.getElementById('missionItem'),
+  flyToMissionBtn: document.getElementById('flyToMissionBtn'),
   skipMissionBtn: document.getElementById('skipMissionBtn'),
   collectedCount: document.getElementById('collectedCount'),
   totalCount: document.getElementById('totalCount'),
@@ -97,13 +91,17 @@ const elements = {
   toastIcon: document.getElementById('toastIcon'),
   toastText: document.getElementById('toastText'),
   collectionBtn: document.getElementById('collectionBtn'),
-  streetViewBtn: document.getElementById('streetViewBtn'),
-  mapViewBtn: document.getElementById('mapViewBtn'),
+  zoomJapanBtn: document.getElementById('zoomJapanBtn'),
+  resetBtn: document.getElementById('resetBtn'),
   collectionModal: document.getElementById('collectionModal'),
   closeCollectionBtn: document.getElementById('closeCollectionBtn'),
   collectionGrid: document.getElementById('collectionGrid'),
   clearModal: document.getElementById('clearModal'),
+  clearTime: document.getElementById('clearTime'),
   restartBtn: document.getElementById('restartBtn'),
+  resetModal: document.getElementById('resetModal'),
+  cancelResetBtn: document.getElementById('cancelResetBtn'),
+  confirmResetBtn: document.getElementById('confirmResetBtn'),
 };
 
 // ========== 初期化 ==========
@@ -111,172 +109,162 @@ function init() {
   elements.totalCount.textContent = PREFECTURES.length;
 
   // イベントリスナー
-  elements.startBtn.addEventListener('click', startWithGoogleMaps);
-  elements.demoBtn.addEventListener('click', startDemoMode);
+  elements.startBtn.addEventListener('click', startGame);
+  elements.flyToMissionBtn.addEventListener('click', flyToMission);
   elements.skipMissionBtn.addEventListener('click', pickRandomMission);
   elements.collectionBtn.addEventListener('click', showCollection);
   elements.closeCollectionBtn.addEventListener('click', hideCollection);
   elements.collectionModal.querySelector('.modal-backdrop').addEventListener('click', hideCollection);
-  elements.streetViewBtn.addEventListener('click', toggleStreetView);
-  elements.mapViewBtn.addEventListener('click', showMapView);
+  elements.zoomJapanBtn.addEventListener('click', zoomToJapan);
+  elements.resetBtn.addEventListener('click', showResetConfirm);
+  elements.cancelResetBtn.addEventListener('click', hideResetConfirm);
+  elements.confirmResetBtn.addEventListener('click', confirmReset);
+  elements.resetModal.querySelector('.modal-backdrop').addEventListener('click', hideResetConfirm);
   elements.restartBtn.addEventListener('click', restartGame);
-
-  // APIキーをlocalStorageから復元
-  const savedKey = localStorage.getItem('japan-quest-api-key');
-  if (savedKey) {
-    elements.apiKeyInput.value = savedKey;
-  }
+  elements.clearModal.querySelector('.modal-backdrop').addEventListener('click', hideClearModal);
 
   // 収集状況を復元
-  const savedCollected = localStorage.getItem('japan-quest-collected');
-  if (savedCollected) {
-    try {
-      gameState.collected = new Set(JSON.parse(savedCollected));
-    } catch (e) {
-      gameState.collected = new Set();
-    }
-  }
-
+  loadProgress();
   updateCollectedCount();
 }
 
-// ========== Google Maps モード ==========
-function startWithGoogleMaps() {
-  const apiKey = elements.apiKeyInput.value.trim();
-  if (!apiKey) {
-    alert('APIキーを入力してください');
-    return;
+// ========== ゲーム開始 ==========
+function startGame() {
+  elements.titleScreen.classList.add('hidden');
+  elements.gameScreen.classList.remove('hidden');
+
+  // 開始時間を記録（未設定の場合のみ）
+  if (!gameState.startTime) {
+    const saved = localStorage.getItem('japan-quest-start-time');
+    gameState.startTime = saved ? parseInt(saved) : Date.now();
+    localStorage.setItem('japan-quest-start-time', gameState.startTime);
   }
 
-  gameState.apiKey = apiKey;
-  gameState.mode = 'google';
-  localStorage.setItem('japan-quest-api-key', apiKey);
-
-  // Google Maps APIを動的に読み込み
-  loadGoogleMapsAPI(apiKey);
-}
-
-function loadGoogleMapsAPI(apiKey) {
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initGoogleMap&loading=async`;
-  script.async = true;
-  script.defer = true;
-  script.onerror = () => {
-    alert('Google Maps APIの読み込みに失敗しました。APIキーを確認してください。');
-  };
-  document.head.appendChild(script);
-}
-
-// グローバルコールバック
-window.initGoogleMap = function() {
-  showGameScreen();
   initMap();
-};
+}
 
+// ========== 地図初期化 ==========
 function initMap() {
-  // 東京を中心に日本全体が見える縮尺
-  const japan = { lat: 36.5, lng: 138.0 };
+  // 日本全体が見えるビュー
+  const japanCenter = [36.5, 138.0];
+  const defaultZoom = 5;
 
-  gameState.map = new google.maps.Map(elements.mapView, {
-    center: japan,
-    zoom: 5,
-    mapTypeId: 'roadmap',
-    streetViewControl: false,
-    fullscreenControl: false,
-    mapTypeControl: false,
-    styles: [
-      {
-        featureType: 'poi',
-        stylers: [{ visibility: 'off' }]
-      }
-    ]
+  gameState.map = L.map('map', {
+    center: japanCenter,
+    zoom: defaultZoom,
+    zoomControl: true,
+    attributionControl: true,
   });
 
-  // ストリートビュー
-  gameState.streetView = new google.maps.StreetViewPanorama(elements.mapView, {
-    position: japan,
-    pov: { heading: 0, pitch: 0 },
-    visible: false,
-    addressControl: false,
-    fullscreenControl: false,
-  });
-
-  gameState.map.setStreetView(gameState.streetView);
+  // OpenStreetMapタイル
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18,
+  }).addTo(gameState.map);
 
   // マーカーを配置
   createMarkers();
 
-  // 地図の移動を監視して現在地を更新
-  gameState.map.addListener('center_changed', () => {
-    updateCurrentLocation(gameState.map.getCenter());
+  // 地図移動時に現在地を更新
+  gameState.map.on('moveend', () => {
+    updateCurrentLocation();
   });
 
   // 初期ミッション
   pickRandomMission();
-  updateCurrentLocation(gameState.map.getCenter());
+  updateCurrentLocation();
 }
 
+// ========== マーカー作成 ==========
 function createMarkers() {
   PREFECTURES.forEach(pref => {
-    const isCollected = gameState.collected.has(pref.id);
-
-    const marker = new google.maps.Marker({
-      position: { lat: pref.lat, lng: pref.lng },
-      map: gameState.map,
-      title: `${pref.name} - ${pref.item}`,
-      icon: {
-        url: `data:image/svg+xml,${encodeURIComponent(createMarkerSVG(pref.emoji, isCollected))}`,
-        scaledSize: new google.maps.Size(40, 40),
-        anchor: new google.maps.Point(20, 40),
-      },
-      animation: isCollected ? null : google.maps.Animation.DROP,
-    });
-
-    marker.prefId = pref.id;
-
-    marker.addListener('click', () => {
-      handleMarkerClick(pref, marker);
-    });
-
-    gameState.markers.push(marker);
+    const marker = createMarker(pref);
+    gameState.markers.set(pref.id, marker);
   });
 }
 
-function createMarkerSVG(emoji, isCollected) {
-  const bgColor = isCollected ? '#95a5a6' : '#e74c3c';
+function createMarker(pref) {
+  const isCollected = gameState.collected.has(pref.id);
+  const isMission = gameState.currentMission && gameState.currentMission.id === pref.id;
+
+  // カスタムアイコン
+  const icon = L.divIcon({
+    className: 'custom-marker-wrapper',
+    html: `<div class="custom-marker ${isCollected ? 'collected' : ''} ${isMission ? 'mission' : ''}">${pref.emoji}</div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -22],
+  });
+
+  const marker = L.marker([pref.lat, pref.lng], { icon }).addTo(gameState.map);
+
+  // ポップアップ
+  const popupContent = createPopupContent(pref, isCollected);
+  marker.bindPopup(popupContent, { closeButton: true });
+
+  // クリックイベント
+  marker.on('click', () => {
+    // ポップアップが開いたらボタンにイベントを設定
+    setTimeout(() => {
+      const btn = document.querySelector(`.popup-btn-${pref.id}`);
+      if (btn && !isCollected) {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          collectItem(pref);
+          marker.closePopup();
+        });
+      }
+    }, 100);
+  });
+
+  return marker;
+}
+
+function createPopupContent(pref, isCollected) {
   return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-      <circle cx="20" cy="16" r="14" fill="${bgColor}" stroke="white" stroke-width="2"/>
-      <text x="20" y="21" font-size="14" text-anchor="middle" dominant-baseline="middle">${emoji}</text>
-      <polygon points="20,38 12,20 28,20" fill="${bgColor}"/>
-    </svg>
+    <div class="marker-popup">
+      <span class="marker-popup-emoji">${pref.emoji}</span>
+      <div class="marker-popup-pref">${pref.name}</div>
+      <div class="marker-popup-item">${pref.item}</div>
+      <button class="marker-popup-btn popup-btn-${pref.id}" ${isCollected ? 'disabled' : ''}>
+        ${isCollected ? 'ゲット済み' : 'ゲットする！'}
+      </button>
+    </div>
   `;
 }
 
-function handleMarkerClick(pref, marker) {
-  if (gameState.collected.has(pref.id)) {
-    // 既に収集済み
-    showToast(pref.emoji, `${pref.item}は既にゲット済み！`);
-    return;
-  }
+function updateMarker(pref) {
+  const marker = gameState.markers.get(pref.id);
+  if (!marker) return;
 
-  // アイテム収集
-  collectItem(pref, marker);
+  const isCollected = gameState.collected.has(pref.id);
+  const isMission = gameState.currentMission && gameState.currentMission.id === pref.id;
+
+  // アイコン更新
+  const icon = L.divIcon({
+    className: 'custom-marker-wrapper',
+    html: `<div class="custom-marker ${isCollected ? 'collected' : ''} ${isMission ? 'mission' : ''}">${pref.emoji}</div>`,
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+    popupAnchor: [0, -22],
+  });
+  marker.setIcon(icon);
+
+  // ポップアップ更新
+  const popupContent = createPopupContent(pref, isCollected);
+  marker.setPopupContent(popupContent);
 }
 
-function collectItem(pref, marker) {
+// ========== アイテム収集 ==========
+function collectItem(pref) {
+  if (gameState.collected.has(pref.id)) return;
+
   gameState.collected.add(pref.id);
   saveProgress();
   updateCollectedCount();
 
-  // マーカーを更新
-  if (marker && gameState.mode === 'google') {
-    marker.setIcon({
-      url: `data:image/svg+xml,${encodeURIComponent(createMarkerSVG(pref.emoji, true))}`,
-      scaledSize: new google.maps.Size(40, 40),
-      anchor: new google.maps.Point(20, 40),
-    });
-  }
+  // マーカー更新
+  updateMarker(pref);
 
   // トースト表示
   showToast(pref.emoji, `${pref.item}をゲット！`);
@@ -296,11 +284,13 @@ function collectItem(pref, marker) {
   }
 }
 
-function updateCurrentLocation(latLng) {
-  if (!latLng) return;
+// ========== 現在地更新 ==========
+function updateCurrentLocation() {
+  if (!gameState.map) return;
 
-  const lat = typeof latLng.lat === 'function' ? latLng.lat() : latLng.lat;
-  const lng = typeof latLng.lng === 'function' ? latLng.lng() : latLng.lng;
+  const center = gameState.map.getCenter();
+  const lat = center.lat;
+  const lng = center.lng;
 
   // 最も近い都道府県を探す
   let nearest = null;
@@ -317,189 +307,24 @@ function updateCurrentLocation(latLng) {
   });
 
   if (nearest) {
-    gameState.currentLocation = nearest;
     elements.currentLocation.textContent = nearest.name;
-  }
-}
-
-function toggleStreetView() {
-  if (!gameState.map || !gameState.streetView) return;
-
-  gameState.isStreetViewMode = !gameState.isStreetViewMode;
-
-  if (gameState.isStreetViewMode) {
-    // 現在の地図の中心でストリートビューを開く
-    const center = gameState.map.getCenter();
-    gameState.streetView.setPosition(center);
-    gameState.streetView.setVisible(true);
-    elements.streetViewBtn.classList.add('active');
-    elements.mapViewBtn.classList.remove('active');
-  } else {
-    gameState.streetView.setVisible(false);
-    elements.streetViewBtn.classList.remove('active');
-    elements.mapViewBtn.classList.add('active');
-  }
-}
-
-function showMapView() {
-  if (gameState.streetView) {
-    gameState.streetView.setVisible(false);
-  }
-  gameState.isStreetViewMode = false;
-  elements.streetViewBtn.classList.remove('active');
-  elements.mapViewBtn.classList.add('active');
-}
-
-// ========== デモモード ==========
-function startDemoMode() {
-  gameState.mode = 'demo';
-  showGameScreen();
-  initDemoMap();
-  pickRandomMission();
-}
-
-function initDemoMap() {
-  elements.mapView.classList.add('hidden');
-  elements.demoCanvas.classList.remove('hidden');
-
-  const canvas = elements.demoCanvas;
-  const ctx = canvas.getContext('2d');
-
-  // キャンバスサイズ設定
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
-    ctx.scale(dpr, dpr);
-    drawDemoMap();
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-
-  // クリックイベント
-  canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    handleDemoClick(x, y, rect.width, rect.height);
-  });
-}
-
-function drawDemoMap() {
-  const canvas = elements.demoCanvas;
-  const ctx = canvas.getContext('2d');
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const w = rect.width;
-  const h = rect.height;
-
-  // 背景（海）
-  ctx.fillStyle = '#0b4f6c';
-  ctx.fillRect(0, 0, w, h);
-
-  // 日本列島を簡略描画
-  drawJapanShape(ctx, w, h);
-
-  // マーカー描画
-  PREFECTURES.forEach(pref => {
-    const pos = latLngToScreen(pref.lat, pref.lng, w, h);
-    const isCollected = gameState.collected.has(pref.id);
-    const isMission = gameState.currentMission && gameState.currentMission.id === pref.id;
-
-    // マーカー
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, isMission ? 18 : 14, 0, Math.PI * 2);
-    ctx.fillStyle = isCollected ? '#95a5a6' : (isMission ? '#f39c12' : '#e74c3c');
-    ctx.fill();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // 絵文字
-    ctx.font = isMission ? '16px sans-serif' : '12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(pref.emoji, pos.x, pos.y);
-  });
-}
-
-function drawJapanShape(ctx, w, h) {
-  // 簡略化した日本列島（塗りつぶし）
-  const japanPolys = [
-    // 北海道
-    [[0.68, 0.06], [0.78, 0.04], [0.90, 0.10], [0.93, 0.18], [0.84, 0.26], [0.72, 0.23], [0.64, 0.14]],
-    // 本州
-    [[0.66, 0.22], [0.76, 0.22], [0.84, 0.30], [0.86, 0.40], [0.82, 0.55], [0.76, 0.70], [0.68, 0.78], [0.60, 0.76], [0.58, 0.68], [0.54, 0.62], [0.50, 0.64], [0.46, 0.68], [0.40, 0.70], [0.32, 0.74], [0.26, 0.72], [0.24, 0.64], [0.27, 0.58], [0.33, 0.60], [0.38, 0.56], [0.46, 0.54], [0.52, 0.50], [0.58, 0.46], [0.62, 0.38], [0.64, 0.30]],
-    // 四国
-    [[0.52, 0.72], [0.62, 0.72], [0.66, 0.76], [0.60, 0.82], [0.50, 0.79]],
-    // 九州
-    [[0.33, 0.72], [0.46, 0.70], [0.54, 0.78], [0.52, 0.92], [0.40, 0.96], [0.30, 0.89], [0.30, 0.78]],
-    // 沖縄
-    [[0.18, 0.92], [0.24, 0.91], [0.28, 0.94], [0.22, 0.97]],
-  ];
-
-  ctx.fillStyle = '#27ae60';
-  japanPolys.forEach(poly => {
-    ctx.beginPath();
-    poly.forEach((p, i) => {
-      const x = p[0] * w;
-      const y = p[1] * h;
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.closePath();
-    ctx.fill();
-  });
-}
-
-function latLngToScreen(lat, lng, w, h) {
-  // 日本の緯度経度範囲（おおよそ）
-  const minLat = 24, maxLat = 46;
-  const minLng = 122, maxLng = 146;
-
-  const x = ((lng - minLng) / (maxLng - minLng)) * w;
-  const y = ((maxLat - lat) / (maxLat - minLat)) * h;
-
-  return { x, y };
-}
-
-function handleDemoClick(x, y, w, h) {
-  // クリック位置に最も近いマーカーを探す
-  let nearest = null;
-  let minDist = Infinity;
-
-  PREFECTURES.forEach(pref => {
-    const pos = latLngToScreen(pref.lat, pref.lng, w, h);
-    const dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
-    if (dist < minDist && dist < 30) {
-      minDist = dist;
-      nearest = pref;
-    }
-  });
-
-  if (nearest) {
-    elements.currentLocation.textContent = nearest.name;
-
-    if (!gameState.collected.has(nearest.id)) {
-      collectItem(nearest, null);
-      requestAnimationFrame(() => drawDemoMap());
-    } else {
-      showToast(nearest.emoji, `${nearest.item}は既にゲット済み！`);
-    }
   }
 }
 
 // ========== ミッション ==========
 function pickRandomMission() {
+  // 前のミッションのマーカーを更新
+  if (gameState.currentMission) {
+    updateMarker(gameState.currentMission);
+  }
+
   // 未収集のものからランダムに選ぶ
   const uncollected = PREFECTURES.filter(p => !gameState.collected.has(p.id));
 
   if (uncollected.length === 0) {
     elements.missionPref.textContent = '-';
     elements.missionItem.textContent = 'コンプリート！';
+    gameState.currentMission = null;
     return;
   }
 
@@ -509,10 +334,25 @@ function pickRandomMission() {
   elements.missionPref.textContent = mission.name;
   elements.missionItem.textContent = mission.item;
 
-  // デモモードの場合は再描画
-  if (gameState.mode === 'demo') {
-    requestAnimationFrame(() => drawDemoMap());
-  }
+  // 新しいミッションのマーカーを更新
+  updateMarker(mission);
+}
+
+function flyToMission() {
+  if (!gameState.currentMission || !gameState.map) return;
+
+  const mission = gameState.currentMission;
+  gameState.map.flyTo([mission.lat, mission.lng], 8, {
+    duration: 1.5,
+  });
+}
+
+// ========== 日本全体表示 ==========
+function zoomToJapan() {
+  if (!gameState.map) return;
+  gameState.map.flyTo([36.5, 138.0], 5, {
+    duration: 1,
+  });
 }
 
 // ========== コレクション ==========
@@ -528,6 +368,15 @@ function showCollection() {
       <span class="collection-pref">${pref.name}</span>
       <span class="collection-name">${isCollected ? pref.item : '？？？'}</span>
     `;
+
+    // 収集済みの場合、クリックでその場所へ移動
+    if (isCollected) {
+      item.addEventListener('click', () => {
+        hideCollection();
+        gameState.map.flyTo([pref.lat, pref.lng], 8, { duration: 1 });
+      });
+    }
+
     elements.collectionGrid.appendChild(item);
   });
 
@@ -538,12 +387,63 @@ function hideCollection() {
   elements.collectionModal.classList.add('hidden');
 }
 
-// ========== UI ==========
-function showGameScreen() {
-  elements.apiKeyScreen.classList.add('hidden');
-  elements.gameScreen.classList.remove('hidden');
+// ========== リセット ==========
+function showResetConfirm() {
+  elements.resetModal.classList.remove('hidden');
 }
 
+function hideResetConfirm() {
+  elements.resetModal.classList.add('hidden');
+}
+
+function confirmReset() {
+  gameState.collected = new Set();
+  gameState.startTime = Date.now();
+  localStorage.setItem('japan-quest-start-time', gameState.startTime);
+  saveProgress();
+  updateCollectedCount();
+  hideResetConfirm();
+
+  // マーカーを更新
+  PREFECTURES.forEach(pref => updateMarker(pref));
+
+  pickRandomMission();
+  showToast('🔄', 'リセットしました！');
+}
+
+// ========== クリア ==========
+function showClearModal() {
+  // プレイ時間を計算
+  if (gameState.startTime) {
+    const elapsed = Date.now() - gameState.startTime;
+    const minutes = Math.floor(elapsed / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    elements.clearTime.textContent = `クリアタイム: ${minutes}分${seconds}秒`;
+  }
+
+  elements.clearModal.classList.remove('hidden');
+}
+
+function hideClearModal() {
+  elements.clearModal.classList.add('hidden');
+}
+
+function restartGame() {
+  gameState.collected = new Set();
+  gameState.startTime = Date.now();
+  localStorage.setItem('japan-quest-start-time', gameState.startTime);
+  saveProgress();
+  updateCollectedCount();
+  hideClearModal();
+
+  // マーカーを更新
+  PREFECTURES.forEach(pref => updateMarker(pref));
+
+  pickRandomMission();
+  zoomToJapan();
+}
+
+// ========== UI ==========
 function updateCollectedCount() {
   elements.collectedCount.textContent = gameState.collected.size;
 }
@@ -562,31 +462,25 @@ function showToast(emoji, text) {
   }, 1500);
 }
 
-function showClearModal() {
-  elements.clearModal.classList.remove('hidden');
-}
-
-function restartGame() {
-  gameState.collected = new Set();
-  saveProgress();
-  updateCollectedCount();
-  elements.clearModal.classList.add('hidden');
-
-  if (gameState.mode === 'google') {
-    // マーカーを再作成
-    gameState.markers.forEach(m => m.setMap(null));
-    gameState.markers = [];
-    createMarkers();
-  } else {
-    requestAnimationFrame(() => drawDemoMap());
-  }
-
-  pickRandomMission();
-}
-
-// ========== データ保存 ==========
+// ========== データ保存・読み込み ==========
 function saveProgress() {
   localStorage.setItem('japan-quest-collected', JSON.stringify([...gameState.collected]));
+}
+
+function loadProgress() {
+  const savedCollected = localStorage.getItem('japan-quest-collected');
+  if (savedCollected) {
+    try {
+      gameState.collected = new Set(JSON.parse(savedCollected));
+    } catch (e) {
+      gameState.collected = new Set();
+    }
+  }
+
+  const savedStartTime = localStorage.getItem('japan-quest-start-time');
+  if (savedStartTime) {
+    gameState.startTime = parseInt(savedStartTime);
+  }
 }
 
 // ========== 起動 ==========

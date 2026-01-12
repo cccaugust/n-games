@@ -3,34 +3,29 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <title>日本探検クエスト | N-Games</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="../../style.css">
   <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
   <div id="app">
-    <!-- API Key設定画面 -->
-    <div id="apiKeyScreen" class="screen">
-      <div class="setup-card">
+    <!-- タイトル画面 -->
+    <div id="titleScreen" class="screen">
+      <div class="title-card">
         <h1>日本探検クエスト</h1>
-        <p class="setup-desc">Google Mapsで日本を探検して、各地の特産物を集めよう！</p>
+        <p class="title-desc">日本中を旅して、47都道府県の特産物を集めよう！</p>
 
-        <div class="setup-form">
-          <label for="apiKeyInput">Google Maps API Key</label>
-          <input type="text" id="apiKeyInput" placeholder="AIza...">
-          <p class="setup-hint">
-            <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener">Google Cloud Console</a>
-            でMaps JavaScript APIを有効にしてキーを取得してください
-          </p>
-          <button id="startBtn" class="btn-primary">ゲームスタート</button>
+        <div class="title-preview">
+          <div class="preview-item">🍈 メロン</div>
+          <div class="preview-item">🍎 りんご</div>
+          <div class="preview-item">🍣 寿司</div>
+          <div class="preview-item">🐙 たこ焼き</div>
         </div>
 
-        <div class="setup-alt">
-          <p>APIキーがない場合：</p>
-          <button id="demoBtn" class="btn-secondary">デモモードで遊ぶ</button>
-        </div>
+        <button id="startBtn" class="btn-primary btn-large">スタート</button>
 
         <a class="back-link" href="../../pages/portal/portal.html">&larr; もどる</a>
       </div>
@@ -55,16 +50,13 @@
           <!-- 地図 -->
           <div id="map" class="map-view"></div>
 
-          <!-- デモモード用のキャンバス -->
-          <canvas id="demoCanvas" class="demo-canvas hidden"></canvas>
-
           <!-- 現在地表示 -->
           <div class="location-bar" id="locationBar">
             <span class="location-label">いまいる場所：</span>
             <span class="location-name" id="currentLocation">東京都</span>
           </div>
 
-          <!-- ミッション表示 -->
+          <!-- ミッションパネル -->
           <div class="mission-panel" id="missionPanel">
             <div class="mission-header">
               <span class="mission-icon">🎯</span>
@@ -74,7 +66,10 @@
               <span class="mission-pref" id="missionPref">北海道</span>の
               <span class="mission-item" id="missionItem">メロン</span>を手に入れろ！
             </div>
-            <button class="mission-skip" id="skipMissionBtn">スキップ</button>
+            <div class="mission-actions">
+              <button class="mission-btn" id="flyToMissionBtn">📍 場所を見る</button>
+              <button class="mission-btn" id="skipMissionBtn">スキップ</button>
+            </div>
           </div>
 
           <!-- 特産物ゲット通知 -->
@@ -90,13 +85,13 @@
             <span class="footer-icon">📦</span>
             <span class="footer-label">コレクション</span>
           </button>
-          <button class="footer-btn" id="streetViewBtn">
-            <span class="footer-icon">🚶</span>
-            <span class="footer-label">歩く</span>
+          <button class="footer-btn" id="zoomJapanBtn">
+            <span class="footer-icon">🗾</span>
+            <span class="footer-label">全体表示</span>
           </button>
-          <button class="footer-btn" id="mapViewBtn">
-            <span class="footer-icon">🗺️</span>
-            <span class="footer-label">地図</span>
+          <button class="footer-btn" id="resetBtn">
+            <span class="footer-icon">🔄</span>
+            <span class="footer-label">リセット</span>
           </button>
         </footer>
       </div>
@@ -121,12 +116,27 @@
         <div class="modal-content clear-content">
           <h2>🎉 コンプリート！ 🎉</h2>
           <p>47都道府県の特産物をすべて集めました！</p>
+          <p class="clear-time" id="clearTime"></p>
           <button class="btn-primary" id="restartBtn">もう一度遊ぶ</button>
+        </div>
+      </div>
+
+      <!-- リセット確認 -->
+      <div class="modal hidden" id="resetModal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content confirm-content">
+          <h2>リセットしますか？</h2>
+          <p>集めた特産物がすべてなくなります</p>
+          <div class="confirm-actions">
+            <button class="btn-secondary" id="cancelResetBtn">キャンセル</button>
+            <button class="btn-danger" id="confirmResetBtn">リセットする</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./game.js" type="module"></script>
 </body>
 
