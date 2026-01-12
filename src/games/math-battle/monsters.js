@@ -133,7 +133,13 @@ const POKEDEX_IMAGE_MAP = {
     'ヤキボン': 'yakibon.png',
     'ゴウカボン': 'goukabon.png',
     'アイスレオ': 'iceleo.png',
-    'グラシアレオ': 'glacialeo.png'
+    'グラシアレオ': 'glacialeo.png',
+    'シズクン': 'shizukun.png',
+    'プカリン': 'pukarin.png',
+    'メバエル': 'mebaeru.png',
+    'ボンサイン': 'bonsain.png',
+    'ホータン': 'houtan.png',
+    'ファラオン': 'faraon.png'
 };
 
 
@@ -2008,6 +2014,82 @@ export const MONSTERS = [
         types: [TYPES.ICE],
         rarity: RARITY.RARE,
         baseStats: { hp: 80, attack: 55, defense: 40 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // ===== 新規追加モンスター（M121〜M126）=====
+    // 水タイプ進化ライン
+    {
+        id: 'M121',
+        name: 'シズクン',
+        description: 'しずくの姿をした水の精霊。頭の水滴は気分によって大きさが変わる。',
+        image: resolveMonsterImageByName('シズクン'),
+        types: [TYPES.WATER],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 35, attack: 13, defense: 10 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M122',
+        evolutionLevel: 18
+    },
+    {
+        id: 'M122',
+        name: 'プカリン',
+        description: 'シズクンが進化した姿。体の浮き輪で水の上をプカプカと浮かぶ。',
+        image: resolveMonsterImageByName('プカリン'),
+        types: [TYPES.WATER],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 55, attack: 22, defense: 18 },
+        skill: SKILLS.HEAL_THIRD,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 草タイプ進化ライン
+    {
+        id: 'M123',
+        name: 'メバエル',
+        description: '双葉のような耳と枝の手足を持つ植物モンスター。陽の光を浴びると元気になる。',
+        image: resolveMonsterImageByName('メバエル'),
+        types: [TYPES.GRASS],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 32, attack: 14, defense: 11 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M124',
+        evolutionLevel: 20
+    },
+    {
+        id: 'M124',
+        name: 'ボンサイン',
+        description: 'メバエルが成長した姿。植木鉢から離れられないが、触手で自由に動ける。',
+        image: resolveMonsterImageByName('ボンサイン'),
+        types: [TYPES.GRASS],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 52, attack: 24, defense: 20 },
+        skill: SKILLS.POWER_UP_1_5,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // ゴーストタイプ進化ライン（ミイラ）
+    {
+        id: 'M125',
+        name: 'ホータン',
+        description: '古代遺跡で目覚めた包帯のモンスター。紫の霊気を出している。',
+        image: resolveMonsterImageByName('ホータン'),
+        types: [TYPES.GHOST],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 30, attack: 15, defense: 12 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: 'M126',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M126',
+        name: 'ファラオン',
+        description: 'ホータンが王の力を取り戻した姿。周囲に呪いの炎を漂わせる。',
+        image: resolveMonsterImageByName('ファラオン'),
+        types: [TYPES.GHOST],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 50, attack: 28, defense: 22 },
         skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
