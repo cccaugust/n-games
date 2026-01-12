@@ -128,7 +128,12 @@ const POKEDEX_IMAGE_MAP = {
     'スピリットゴン': 'spiritgon.png',
     'ファントムドラゴ': 'phantomdrago.png',
     'エレキャター': 'elecater.png',
-    'ボルトマンティス': 'voltmantis.png'
+    'ボルトマンティス': 'voltmantis.png',
+    'ウリボン': 'uribon.png',
+    'ヤキボン': 'yakibon.png',
+    'ゴウカボン': 'goukabon.png',
+    'アイスレオ': 'iceleo.png',
+    'グラシアレオ': 'glacialeo.png'
 };
 
 
@@ -1841,6 +1846,68 @@ export const MONSTERS = [
         types: [TYPES.BUG, TYPES.ELECTRIC],
         rarity: RARITY.RARE,
         baseStats: { hp: 70, attack: 55, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：イノシシ×炎系
+    {
+        id: 'M116',
+        name: 'ウリボン',
+        description: '尻尾に小さな火が灯ったウリ坊。興奮すると火が大きくなる。',
+        image: resolveMonsterImageByName('ウリボン'),
+        types: [TYPES.FIRE],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 45, attack: 18, defense: 12 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M117',
+        evolutionLevel: 18
+    },
+    {
+        id: 'M117',
+        name: 'ヤキボン',
+        description: '背中の岩が熱を持ち、触ると火傷する。突進力が増している。',
+        image: resolveMonsterImageByName('ヤキボン'),
+        types: [TYPES.FIRE, TYPES.ROCK],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 70, attack: 35, defense: 30 },
+        skill: SKILLS.POWER_UP_1_5,
+        evolution: 'M118',
+        evolutionLevel: 36
+    },
+    {
+        id: 'M118',
+        name: 'ゴウカボン',
+        description: '体中をマグマが流れる巨大イノシシ。通った後は焼け野原になる。',
+        image: resolveMonsterImageByName('ゴウカボン'),
+        types: [TYPES.FIRE, TYPES.ROCK],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 100, attack: 60, defense: 45 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：ライオン×氷系
+    {
+        id: 'M119',
+        name: 'アイスレオ',
+        description: '氷のたてがみを持つライオンの子供。眠そうな顔をしているが、油断すると凍らされる。',
+        image: resolveMonsterImageByName('アイスレオ'),
+        types: [TYPES.ICE],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 50, attack: 25, defense: 15 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M120',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M120',
+        name: 'グラシアレオ',
+        description: '氷河の王と呼ばれるライオン。咆哮と共に吹雪を巻き起こし、獲物を瞬時に凍結させる。',
+        image: resolveMonsterImageByName('グラシアレオ'),
+        types: [TYPES.ICE],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 80, attack: 55, defense: 40 },
         skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
