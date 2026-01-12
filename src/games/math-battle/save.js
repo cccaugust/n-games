@@ -161,6 +161,37 @@ export function loadPlayerData(playerId) {
             player.stats.totalGradeCoinsEarned = 0;
         }
 
+        // マイグレーション: 旧isShiny形式 → 新colorVariant形式
+        let needsSave = false;
+        player.monsters.forEach(monster => {
+            if (monster.isShiny !== undefined && monster.colorVariant === undefined) {
+                // 旧形式: isShiny: true → colorVariant: 4 (180度=従来の色違い)
+                monster.colorVariant = monster.isShiny ? 4 : 0;
+                delete monster.isShiny;
+                needsSave = true;
+            }
+            // colorVariantがない場合は0（通常色）に
+            if (monster.colorVariant === undefined) {
+                monster.colorVariant = 0;
+                needsSave = true;
+            }
+        });
+
+        // 図鑑のマイグレーション: _shiny → _v4
+        if (player.discoveredMonsters) {
+            player.discoveredMonsters = player.discoveredMonsters.map(key => {
+                if (key.endsWith('_shiny')) {
+                    needsSave = true;
+                    return key.replace('_shiny', '_v4');
+                }
+                return key;
+            });
+        }
+
+        if (needsSave) {
+            savePlayerData(player);
+        }
+
         return player;
     } catch (e) {
         console.error('Failed to load player data:', e);
@@ -169,15 +200,31 @@ export function loadPlayerData(playerId) {
 }
 
 /**
+ * 色違いバリアント数（通常色0 + 色違い1〜7 = 全8パターン）
+ */
+export const COLOR_VARIANT_COUNT = 8;
+
+/**
+ * 色違いバリアントの色相回転角度を取得
+ * @param {number} variant - バリアント番号(0〜7)
+ * @returns {number} 色相回転角度
+ */
+export function getColorVariantHue(variant) {
+    if (variant === 0) return 0; // 通常色
+    // バリアント1〜7: 45度ずつずらす（45, 90, 135, 180, 225, 270, 315）
+    return variant * 45;
+}
+
+/**
  * モンスターをプレイヤーに追加
  * @param {Object} player - プレイヤーデータ
  * @param {string} monsterId - モンスターID
- * @param {boolean} isShiny - 色違いかどうか
+ * @param {number} colorVariant - 色違いバリアント（0=通常色、1〜7=色違い）
  */
-export function addMonsterToPlayer(player, monsterId, isShiny = false) {
-    // 色違いかどうかで別モンスターとして扱う
+export function addMonsterToPlayer(player, monsterId, colorVariant = 0) {
+    // 色違いバリアントごとに別モンスターとして扱う
     const existingMonster = player.monsters.find(
-        m => m.monsterId === monsterId && m.isShiny === isShiny
+        m => m.monsterId === monsterId && m.colorVariant === colorVariant
     );
 
     if (existingMonster) {
@@ -189,12 +236,12 @@ export function addMonsterToPlayer(player, monsterId, isShiny = false) {
             monsterId: monsterId,
             level: 1,
             exp: 0,
-            isShiny: isShiny
+            colorVariant: colorVariant
         });
     }
 
-    // 図鑑に登録（色違いは別枠で記録）
-    const discoveryKey = isShiny ? `${monsterId}_shiny` : monsterId;
+    // 図鑑に登録（バリアントごとに別枠で記録）
+    const discoveryKey = colorVariant > 0 ? `${monsterId}_v${colorVariant}` : monsterId;
     if (!player.discoveredMonsters.includes(discoveryKey)) {
         player.discoveredMonsters.push(discoveryKey);
     }

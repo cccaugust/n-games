@@ -25,7 +25,8 @@ import {
     getPlayerList, addPlayer, loadPlayerData, savePlayerData,
     addMonsterToPlayer, addExpToMonster, addToParty, removeFromParty,
     recordStageClear, spendCoins, spendGradeCoins, updateStats, recordGachaRoll,
-    canEvolve, evolveMonster, giveStarterMonster
+    canEvolve, evolveMonster, giveStarterMonster,
+    COLOR_VARIANT_COUNT, getColorVariantHue
 } from './save.js';
 
 // ===========================================
@@ -124,7 +125,7 @@ function playSound(type) {
 // ===========================================
 // モンスターカード描画
 // ===========================================
-function renderMonsterCard(monster, level = 1, size = 'normal', isShiny = false) {
+function renderMonsterCard(monster, level = 1, size = 'normal', colorVariant = 0) {
     const monsterData = typeof monster === 'string' ? getMonsterById(monster) : monster;
     if (!monsterData) return '<div class="monster-card empty"></div>';
 
@@ -135,19 +136,21 @@ function renderMonsterCard(monster, level = 1, size = 'normal', isShiny = false)
     const stars = '★'.repeat(monsterData.rarity);
 
     const sizeClass = size === 'small' ? 'monster-card-small' : size === 'large' ? 'monster-card-large' : '';
-    const shinyClass = isShiny ? 'shiny' : '';
+    const isColorVariant = colorVariant > 0;
+    const shinyClass = isColorVariant ? 'shiny' : '';
+    const hueRotate = getColorVariantHue(colorVariant);
 
     return `
-        <div class="monster-card ${sizeClass} ${shinyClass}" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --rarity-color: ${rarityColor}">
+        <div class="monster-card ${sizeClass} ${shinyClass}" style="--primary-color: ${primaryColor}; --secondary-color: ${secondaryColor}; --rarity-color: ${rarityColor}; --hue-rotate: ${hueRotate}deg">
             <div class="card-frame">
-                ${isShiny ? '<div class="shiny-sparkle"></div>' : ''}
+                ${isColorVariant ? '<div class="shiny-sparkle"></div>' : ''}
                 <div class="card-bg" style="background: linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}40)">
-                    <div class="card-icon ${isShiny ? 'shiny-icon' : ''}">
+                    <div class="card-icon ${isColorVariant ? 'shiny-icon' : ''}">
                         ${renderMonsterIcon(monsterData)}
                     </div>
                 </div>
                 <div class="card-info-bar">
-                    <span class="card-name">${isShiny ? '✨ ' : ''}${monsterData.name}${isShiny ? ' ✨' : ''}</span>
+                    <span class="card-name">${isColorVariant ? '✨ ' : ''}${monsterData.name}${isColorVariant ? ' ✨' : ''}</span>
                     <span class="card-level">Lv.${level}</span>
                 </div>
                 <div class="card-rarity" style="color: ${rarityColor}">${stars}</div>
@@ -638,7 +641,7 @@ function renderBattle() {
         const hpPercent = Math.max(0, bs.partyHp[i] / bs.partyMaxHp[i] * 100);
         return `
             <div class="party-member ${bs.partyHp[i] <= 0 ? 'fainted' : ''}">
-                ${renderMonsterCard(data, m.level, 'small', m.isShiny)}
+                ${renderMonsterCard(data, m.level, 'small', m.colorVariant || 0)}
                 <div class="hp-bar-mini">
                     <div class="hp-fill" style="width: ${hpPercent}%"></div>
                 </div>
@@ -933,7 +936,7 @@ function showBattleResult(isVictory, data) {
 // ガチャシステム
 // ===========================================
 const GACHA_TIME = 10; // 秒
-const SHINY_RATE = 5; // 色違い出現率 5%
+const COLOR_VARIANT_RATE = 5; // 色違い出現率 5%（1〜7のいずれかのバリアント）
 
 // 現在選択中のガチャタイプ
 let selectedGachaType = GACHA_TYPES.NORMAL;
@@ -1257,19 +1260,24 @@ function finishGacha() {
     // 獲得モンスターを決定（最低1体は保証）
     const monstersWon = [];
     const monsterCount = Math.max(1, gachaState.correctCount + 1); // 正解数+1、最低1体
-    let hasShiny = false;
+    let hasColorVariant = false;
 
     for (let i = 0; i < monsterCount; i++) {
         const monster = rollGacha(selectedGachaType);
-        const isShiny = Math.random() * 100 < SHINY_RATE;
-        if (isShiny) hasShiny = true;
-        monstersWon.push({ monster, isShiny });
-        addMonsterToPlayer(currentPlayer, monster.id, isShiny);
+        // 色違いが出るかどうか（5%の確率）
+        let colorVariant = 0;
+        if (Math.random() * 100 < COLOR_VARIANT_RATE) {
+            // 1〜7のランダムなバリアントを選択
+            colorVariant = Math.floor(Math.random() * 7) + 1;
+            hasColorVariant = true;
+        }
+        monstersWon.push({ monster, colorVariant });
+        addMonsterToPlayer(currentPlayer, monster.id, colorVariant);
     }
 
     currentPlayer = loadPlayerData(currentPlayer.id);
 
-    showGachaResult(monstersWon, gachaState.correctCount, hasShiny);
+    showGachaResult(monstersWon, gachaState.correctCount, hasColorVariant);
 }
 
 // 進化系モンスターのIDセットを作成（他のモンスターのevolutionとして参照されているもの）
@@ -1309,13 +1317,13 @@ function rollGacha(gachaType = GACHA_TYPES.NORMAL) {
     return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function showGachaResult(monsters, correctCount = 0, hasShiny = false) {
+function showGachaResult(monsters, correctCount = 0, hasColorVariant = false) {
     // 色違いがいたら特別なSE
-    if (hasShiny) {
+    if (hasColorVariant) {
         playSound('levelup');
     }
 
-    const shinyCount = monsters.filter(m => m.isShiny).length;
+    const colorVariantCount = monsters.filter(m => m.colorVariant > 0).length;
 
     // 選択中のガチャタイプのコスト確認
     const cost = GACHA_COSTS[selectedGachaType];
@@ -1333,14 +1341,14 @@ function showGachaResult(monsters, correctCount = 0, hasShiny = false) {
     }
 
     app.innerHTML = `
-        <div class="screen gacha-result-screen ${hasShiny ? 'has-shiny' : ''}">
+        <div class="screen gacha-result-screen ${hasColorVariant ? 'has-shiny' : ''}">
             <h2>ガチャ結果</h2>
             <p class="gacha-type-label">${GACHA_TYPE_NAMES[selectedGachaType]}</p>
             <p class="gacha-correct-count">正解数: ${correctCount}問</p>
             <p class="gacha-result-count">${monsters.length}体ゲット！🎉</p>
-            ${hasShiny ? `<p class="shiny-alert">✨ 色違いが ${shinyCount}体 出た！ ✨</p>` : ''}
+            ${hasColorVariant ? `<p class="shiny-alert">✨ 色違いが ${colorVariantCount}体 出た！ ✨</p>` : ''}
             <div class="gacha-monsters">
-                ${monsters.map(({ monster, isShiny }) => renderMonsterCard(monster, 1, 'normal', isShiny)).join('')}
+                ${monsters.map(({ monster, colorVariant }) => renderMonsterCard(monster, 1, 'normal', colorVariant)).join('')}
             </div>
             <div class="result-buttons">
                 <button class="btn btn-primary" id="gachaAgainBtn" ${!canAfford ? 'disabled' : ''}>
@@ -1460,7 +1468,7 @@ function showPartyScreen() {
         const pm = partyMonsters[i];
         return pm ? `
                             <div class="party-slot filled" data-party-idx="${i}" data-monster-idx="${pm.idx}">
-                                ${renderMonsterCard(pm.data, pm.level, 'small', pm.isShiny)}
+                                ${renderMonsterCard(pm.data, pm.level, 'small', pm.colorVariant || 0)}
                                 <button class="remove-btn" data-party-idx="${i}">×</button>
                             </div>
                         ` : `
@@ -1477,7 +1485,7 @@ function showPartyScreen() {
                     ${allMonsters.map(m => `
                         <div class="box-monster ${currentPlayer.party.includes(m.idx) ? 'in-party' : ''}"
                              data-monster-idx="${m.idx}">
-                            ${renderMonsterCard(m.data, m.level, 'small', m.isShiny)}
+                            ${renderMonsterCard(m.data, m.level, 'small', m.colorVariant || 0)}
                         </div>
                     `).join('')}
                 </div>
@@ -1545,10 +1553,10 @@ function showPartyMonsterDetail(monsterIdx, isInParty) {
     content.innerHTML = `
         <button class="modal-close-btn" id="closeModal">×</button>
         <div class="modal-monster-card">
-            ${renderMonsterCard(monster, m.level, 'large', m.isShiny)}
+            ${renderMonsterCard(monster, m.level, 'large', m.colorVariant || 0)}
         </div>
         <div class="modal-info">
-            <h3>${m.isShiny ? '✨ ' : ''}${monster.name}${m.isShiny ? ' ✨' : ''}</h3>
+            <h3>${(m.colorVariant > 0) ? '✨ ' : ''}${monster.name}${(m.colorVariant > 0) ? ' ✨' : ''}</h3>
             <p class="modal-desc">${monster.description}</p>
             <div class="modal-stats">
                 <div class="modal-stat-row">
@@ -1641,30 +1649,52 @@ function showPartyMonsterDetail(monsterIdx, isInParty) {
 // ===========================================
 // モンスター図鑑
 // ===========================================
+
+/**
+ * モンスターの発見済みバリアントを取得
+ * @param {string} monsterId - モンスターID
+ * @param {Array} discovered - 発見済みリスト
+ * @returns {Array} 発見済みバリアント番号の配列
+ */
+function getDiscoveredVariants(monsterId, discovered) {
+    const variants = [];
+    // 通常色チェック
+    if (discovered.includes(monsterId)) {
+        variants.push(0);
+    }
+    // 色違いバリアントチェック（v1〜v7）
+    for (let v = 1; v < COLOR_VARIANT_COUNT; v++) {
+        if (discovered.includes(`${monsterId}_v${v}`)) {
+            variants.push(v);
+        }
+    }
+    return variants;
+}
+
 function showMonsterBook() {
     const discovered = currentPlayer.discoveredMonsters;
 
     // 通常と色違いそれぞれの発見数をカウント
-    const normalDiscovered = discovered.filter(d => !d.endsWith('_shiny')).length;
-    const shinyDiscovered = discovered.filter(d => d.endsWith('_shiny')).length;
-    const totalPossible = MONSTERS.length * 2; // 通常 + 色違い
+    const normalDiscovered = discovered.filter(d => !d.includes('_v')).length;
+    const variantDiscovered = discovered.filter(d => d.includes('_v')).length;
 
     app.innerHTML = `
         <div class="screen monster-book-screen">
             <h2>モンスターずかん</h2>
-            <p class="book-progress">発見: ${normalDiscovered}体 + ✨${shinyDiscovered}体 / ${MONSTERS.length}種類</p>
+            <p class="book-progress">発見: ${normalDiscovered}種 + ✨${variantDiscovered}色違い / ${MONSTERS.length}種類×8色</p>
             <div class="book-grid">
                 ${MONSTERS.map(m => {
-        const isDiscovered = discovered.includes(m.id);
-        const hasShiny = discovered.includes(`${m.id}_shiny`);
-        const owned = currentPlayer.monsters.find(om => om.monsterId === m.id && !om.isShiny);
-        const ownedShiny = currentPlayer.monsters.find(om => om.monsterId === m.id && om.isShiny);
+        const discoveredVariants = getDiscoveredVariants(m.id, discovered);
+        const isDiscovered = discoveredVariants.length > 0;
+        const variantCount = discoveredVariants.length;
+        const owned = currentPlayer.monsters.find(om => om.monsterId === m.id);
         return `
                         <div class="book-entry ${isDiscovered ? 'discovered' : 'undiscovered'}"
                              data-monster-id="${m.id}">
                             ${isDiscovered ? `
-                                ${renderMonsterCard(m, owned ? owned.level : 1, 'small')}
-                                ${hasShiny ? '<div class="shiny-badge">✨</div>' : ''}
+                                ${renderMonsterCard(m, owned ? owned.level : 1, 'small', owned ? owned.colorVariant || 0 : 0)}
+                                ${variantCount > 1 ? `<div class="variant-badge">${variantCount}/8</div>` : ''}
+                                ${variantCount === COLOR_VARIANT_COUNT ? `<div class="complete-badge">★</div>` : ''}
                             ` : `
                                 <div class="unknown-monster">
                                     <span class="unknown-icon">?</span>
@@ -1693,31 +1723,40 @@ function showMonsterBook() {
     };
 }
 
-function showMonsterDetail(monsterId, showShiny = false) {
+function showMonsterDetail(monsterId, displayVariant = 0) {
     const monster = getMonsterById(monsterId);
-    const ownedNormal = currentPlayer.monsters.find(m => m.monsterId === monsterId && !m.isShiny);
-    const ownedShiny = currentPlayer.monsters.find(m => m.monsterId === monsterId && m.isShiny);
+    const discoveredVariants = getDiscoveredVariants(monsterId, currentPlayer.discoveredMonsters);
 
-    const displayShiny = showShiny && ownedShiny;
-    const owned = displayShiny ? ownedShiny : ownedNormal;
+    // 表示するバリアントが発見済みでなければ最初の発見済みバリアントを表示
+    if (!discoveredVariants.includes(displayVariant)) {
+        displayVariant = discoveredVariants[0] || 0;
+    }
+
+    // 該当バリアントの所持モンスターを探す
+    const owned = currentPlayer.monsters.find(m => m.monsterId === monsterId && (m.colorVariant || 0) === displayVariant);
     const level = owned ? owned.level : 1;
     const stats = calculateStats(monster, level);
     const canEvo = owned && canEvolve(currentPlayer, currentPlayer.monsters.indexOf(owned), MONSTERS);
 
-    const hasShiny = currentPlayer.discoveredMonsters.includes(`${monsterId}_shiny`);
+    const isColorVariant = displayVariant > 0;
 
     app.innerHTML = `
-        <div class="screen monster-detail-screen ${displayShiny ? 'showing-shiny' : ''}">
+        <div class="screen monster-detail-screen ${isColorVariant ? 'showing-shiny' : ''}">
             <div class="detail-card-large">
-                ${renderMonsterCard(monster, level, 'large', displayShiny)}
+                ${renderMonsterCard(monster, level, 'large', displayVariant)}
             </div>
             <div class="detail-info">
-                <h2>${displayShiny ? '✨ ' : ''}${monster.name}${displayShiny ? ' ✨' : ''}</h2>
-                ${hasShiny ? `
-                    <div class="shiny-toggle">
-                        <button class="btn ${!displayShiny ? 'btn-primary' : 'btn-ghost'}" id="showNormal">通常</button>
-                        <button class="btn ${displayShiny ? 'btn-primary' : 'btn-ghost'}" id="showShiny">✨色違い</button>
+                <h2>${isColorVariant ? '✨ ' : ''}${monster.name}${isColorVariant ? ' ✨' : ''}</h2>
+                ${discoveredVariants.length > 1 ? `
+                    <div class="variant-toggle">
+                        ${discoveredVariants.map(v => `
+                            <button class="variant-btn ${v === displayVariant ? 'active' : ''}" data-variant="${v}"
+                                    style="--hue: ${getColorVariantHue(v)}deg">
+                                ${v === 0 ? '通常' : `色${v}`}
+                            </button>
+                        `).join('')}
                     </div>
+                    <p class="variant-progress">発見: ${discoveredVariants.length}/${COLOR_VARIANT_COUNT}色</p>
                 ` : ''}
                 <p class="detail-desc">${monster.description}</p>
                 <div class="detail-stats">
@@ -1749,26 +1788,22 @@ function showMonsterDetail(monsterId, showShiny = false) {
         </div>
     `;
 
-    // 色違い切り替えボタン
-    if (hasShiny) {
-        document.getElementById('showNormal')?.addEventListener('click', () => {
+    // バリアント切り替えボタン
+    document.querySelectorAll('.variant-btn').forEach(btn => {
+        btn.onclick = () => {
             playSound('click');
-            showMonsterDetail(monsterId, false);
-        });
-        document.getElementById('showShiny')?.addEventListener('click', () => {
-            playSound('click');
-            showMonsterDetail(monsterId, true);
-        });
-    }
+            showMonsterDetail(monsterId, parseInt(btn.dataset.variant));
+        };
+    });
 
     if (canEvo) {
         document.getElementById('evolveBtn').onclick = () => {
             playSound('levelup');
-            const idx = currentPlayer.monsters.findIndex(m => m.monsterId === monsterId && m.isShiny === displayShiny);
+            const idx = currentPlayer.monsters.findIndex(m => m.monsterId === monsterId && (m.colorVariant || 0) === displayVariant);
             evolveMonster(currentPlayer, idx, MONSTERS);
             currentPlayer = loadPlayerData(currentPlayer.id);
             const newMonster = currentPlayer.monsters[idx];
-            showMonsterDetail(newMonster.monsterId, displayShiny);
+            showMonsterDetail(newMonster.monsterId, newMonster.colorVariant || 0);
         };
     }
 
