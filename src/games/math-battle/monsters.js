@@ -111,8 +111,26 @@ const POKEDEX_IMAGE_MAP = {
     'コインコイ': 'coinkoi.png',
     'M080': 'm080.png',
     'M081': 'm081.png',
-    'ダイコ': 'daiko.png'
+    'コイシゾウ': 'koishizou.png',
+    'イワゾウ': 'iwazou.png',
+    'グランファント': 'granphant.png',
+    'ダイコ': 'daiko.png',
+    'フモフワワ': 'fumofuwawa.png',
+    'コットンミスト': 'cottonmist.png',
+    'クロックン': 'clockun.png',
+    'ジュエルバグ': 'jewelbug.png',
+    'ユキボン': 'yukibon.png',
+    'ユキダルモン': 'yukidarumon.png',
+    'フロストキング': 'frostking.png',
+    'ミカニー': 'mikanny.png',
+    'オランジョン': 'orangeon.png',
+    'グランミカン': 'grandmikan.png',
+    'スピリットゴン': 'spiritgon.png',
+    'ファントムドラゴ': 'phantomdrago.png',
+    'エレキャター': 'elecater.png',
+    'ボルトマンティス': 'voltmantis.png'
 };
+
 
 function resolveMonsterImageByName(name) {
     const file = POKEDEX_IMAGE_MAP[name];
@@ -1613,6 +1631,217 @@ export const MONSTERS = [
         rarity: RARITY.RARE,
         baseStats: { hp: 65, attack: 30, defense: 40 },
         skill: SKILLS.LUCKY_50,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：象×岩系
+    {
+        id: 'M099',
+        name: 'コイシゾウ',
+        description: '小石のような肌を持つ子象。鼻で水を浴びるのが好き。',
+        image: resolveMonsterImageByName('コイシゾウ'),
+        types: [TYPES.ROCK],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 45, attack: 15, defense: 15 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M100',
+        evolutionLevel: 20
+    },
+    {
+        id: 'M100',
+        name: 'イワゾウ',
+        description: '体が硬い岩で覆われた象。突進で城門も破壊する。',
+        image: resolveMonsterImageByName('イワゾウ'),
+        types: [TYPES.ROCK],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 70, attack: 30, defense: 30 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M101',
+        evolutionLevel: 40
+    },
+    {
+        id: 'M101',
+        name: 'グランファント',
+        description: '背中に火山を背負った巨大象。歩くだけで大地が揺れる。',
+        image: resolveMonsterImageByName('グランファント'),
+        types: [TYPES.ROCK, TYPES.FIRE],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 110, attack: 55, defense: 50 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：フェアリー系（かわいい枠）
+    {
+        id: 'M102',
+        name: 'フモフワワ',
+        description: '綿あめのような体を持つ妖精。甘い匂いがする。',
+        image: resolveMonsterImageByName('フモフワワ'),
+        types: [TYPES.FAIRY],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 12, defense: 12 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M103',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M103',
+        name: 'コットンミスト',
+        description: '虹色のオーラを纏った妖精。羽ばたくとキラキラした粉が舞う。',
+        image: resolveMonsterImageByName('コットンミスト'),
+        types: [TYPES.FAIRY, TYPES.FLYING],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 70, attack: 35, defense: 25 },
+        skill: SKILLS.HEAL_HALF,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：単発モンスター
+    {
+        id: 'M104',
+        name: 'クロックン',
+        description: 'お腹に時計を持つ不思議な妖精。時間を操り、計算ミスをなかったことにする…かも？',
+        image: resolveMonsterImageByName('クロックン'),
+        types: [TYPES.FAIRY, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 60, attack: 30, defense: 30 },
+        skill: SKILLS.LUCKY_50,
+        evolution: null,
+        evolutionLevel: null
+    },
+    {
+        id: 'M105',
+        name: 'ジュエルバグ',
+        description: '宝石のような体を持つ美しい虫。硬い殻で身を守り、光を反射して目をくらませる。',
+        image: resolveMonsterImageByName('ジュエルバグ'),
+        types: [TYPES.BUG, TYPES.ROCK],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 50, attack: 25, defense: 60 },
+        skill: SKILLS.PLUS_20,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：雪だるま系
+    {
+        id: 'M106',
+        name: 'ユキボン',
+        description: '子連れの雪だるま…ではなく、手足が生えた雪玉。まだうまく歩けない。',
+        image: resolveMonsterImageByName('ユキボン'),
+        types: [TYPES.ICE],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 12, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M107',
+        evolutionLevel: 15
+    },
+    {
+        id: 'M107',
+        name: 'ユキダルモン',
+        description: '帽子とマフラーでおしゃれした雪だるま。暑いところは苦手。',
+        image: resolveMonsterImageByName('ユキダルモン'),
+        types: [TYPES.ICE],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 65, attack: 22, defense: 18 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M108',
+        evolutionLevel: 35
+    },
+    {
+        id: 'M108',
+        name: 'フロストキング',
+        description: '絶対零度の鎧を纏った氷の王。杖の一振りで吹雪を呼ぶ。',
+        image: resolveMonsterImageByName('フロストキング'),
+        types: [TYPES.ICE, TYPES.STEEL],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 95, attack: 45, defense: 50 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：みかん×ドラゴン系
+    {
+        id: 'M109',
+        name: 'ミカニー',
+        description: 'みかんの皮を被った小さなドラゴン。甘酸っぱい香りがする。',
+        image: resolveMonsterImageByName('ミカニー'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 45, attack: 15, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M110',
+        evolutionLevel: 20
+    },
+    {
+        id: 'M110',
+        name: 'オランジョン',
+        description: '葉っぱのマントを羽織ったみかんドラゴン。太陽の光を浴びて元気になる。',
+        image: resolveMonsterImageByName('オランジョン'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.UNCOMMON,
+        baseStats: { hp: 65, attack: 30, defense: 25 },
+        skill: SKILLS.HEAL_QUARTER,
+        evolution: 'M111',
+        evolutionLevel: 45
+    },
+    {
+        id: 'M111',
+        name: 'グランミカン',
+        description: '完熟した果実の力を持つ老練なドラゴン。尻尾の果実は万病に効く。',
+        image: resolveMonsterImageByName('グランミカン'),
+        types: [TYPES.GRASS, TYPES.DRAGON],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 100, attack: 55, defense: 45 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：ゴースト×ドラゴン系
+    {
+        id: 'M112',
+        name: 'スピリットゴン',
+        description: '霊界の扉を守る子供ドラゴン。紫色の体は幽体でできている。',
+        image: resolveMonsterImageByName('スピリットゴン'),
+        types: [TYPES.GHOST, TYPES.DRAGON],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 50, attack: 20, defense: 15 },
+        skill: SKILLS.ENEMY_DEFENSE_DOWN,
+        evolution: 'M113',
+        evolutionLevel: 30
+    },
+    {
+        id: 'M113',
+        name: 'ファントムドラゴ',
+        description: '冥界の炎を操るドラゴン。その炎は熱くなく、魂だけを燃やす。',
+        image: resolveMonsterImageByName('ファントムドラゴ'),
+        types: [TYPES.GHOST, TYPES.DRAGON],
+        rarity: RARITY.EPIC,
+        baseStats: { hp: 85, attack: 50, defense: 40 },
+        skill: SKILLS.POWER_UP_2,
+        evolution: null,
+        evolutionLevel: null
+    },
+    // 追加分：虫×電気系
+    {
+        id: 'M114',
+        name: 'エレキャター',
+        description: '静電気を帯びた毛虫。触角から微弱な電気を放ち、敵を威嚇する。',
+        image: resolveMonsterImageByName('エレキャター'),
+        types: [TYPES.BUG, TYPES.ELECTRIC],
+        rarity: RARITY.COMMON,
+        baseStats: { hp: 40, attack: 20, defense: 10 },
+        skill: SKILLS.PLUS_10,
+        evolution: 'M115',
+        evolutionLevel: 25
+    },
+    {
+        id: 'M115',
+        name: 'ボルトマンティス',
+        description: '雷のエネルギーを鎌に纏ったカマキリ。高速で動き、一瞬で敵を切り裂く。',
+        image: resolveMonsterImageByName('ボルトマンティス'),
+        types: [TYPES.BUG, TYPES.ELECTRIC],
+        rarity: RARITY.RARE,
+        baseStats: { hp: 70, attack: 55, defense: 30 },
+        skill: SKILLS.POWER_UP_2,
         evolution: null,
         evolutionLevel: null
     }
