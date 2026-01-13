@@ -2315,3 +2315,433 @@ body {
         font-size: 0.9rem;
     }
 }
+
+/* ===========================================
+   挑戦ステージ - バトルモード選択
+=========================================== */
+.battle-mode-screen {
+    justify-content: center;
+}
+
+.battle-mode-screen h2 {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.battle-mode-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.battle-mode-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.battle-mode-btn.grade-mode {
+    background: linear-gradient(135deg, #4a90d9, #6ab7ff);
+    box-shadow: var(--shadow-md), 0 4px 0 #3a70a9;
+}
+
+.battle-mode-btn.challenge-mode {
+    background: linear-gradient(135deg, #9c5dc9, #c77dff);
+    box-shadow: var(--shadow-md), 0 4px 0 #7c3da9;
+}
+
+.battle-mode-btn:active {
+    transform: translateY(2px);
+    box-shadow: var(--shadow-sm), 0 2px 0 rgba(0,0,0,0.3);
+}
+
+.mode-icon {
+    font-size: 3rem;
+}
+
+.mode-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: white;
+}
+
+.mode-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ===========================================
+   挑戦ステージ - ダンジョン選択
+=========================================== */
+.dungeon-select-screen h2 {
+    margin-bottom: 20px;
+}
+
+.dungeon-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.dungeon-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 16px;
+    background: var(--bg-card);
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.dungeon-btn:not(.locked):hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.dungeon-btn:not(.locked):active {
+    transform: translateY(0);
+}
+
+.dungeon-btn.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dungeon-icon {
+    font-size: 2.5rem;
+}
+
+.dungeon-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.dungeon-progress {
+    font-size: 0.85rem;
+    color: var(--accent-green);
+}
+
+.dungeon-locked {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ===========================================
+   挑戦ステージ - 階層選択
+=========================================== */
+.floor-select-screen h2 {
+    margin-bottom: 20px;
+}
+
+.floor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 500px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.floor-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+    text-align: left;
+}
+
+.floor-btn:not(.locked):hover {
+    border-color: var(--accent-primary);
+}
+
+.floor-btn:not(.locked):active {
+    transform: scale(0.98);
+}
+
+.floor-btn.locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.floor-btn.cleared {
+    border-color: var(--accent-green);
+    background: linear-gradient(135deg, var(--bg-card), rgba(0, 210, 106, 0.1));
+}
+
+.floor-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.floor-num {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.floor-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.floor-status {
+    font-size: 1.5rem;
+}
+
+.best-points {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    background: rgba(0, 210, 106, 0.15);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+}
+
+/* ===========================================
+   挑戦ステージ - バトル画面
+=========================================== */
+.challenge-screen {
+    padding: 16px;
+    gap: 16px;
+}
+
+.challenge-header {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.challenge-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.challenge-location {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.challenge-progress {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.points-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+}
+
+.points-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.points-bar-container {
+    flex: 1;
+    height: 16px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.points-fill {
+    height: 100%;
+    transition: width 0.3s ease, background 0.3s ease;
+    border-radius: 8px;
+}
+
+.points-fill.high {
+    background: linear-gradient(90deg, #00d26a, #00e676);
+}
+
+.points-fill.medium {
+    background: linear-gradient(90deg, #ffc107, #ffca28);
+}
+
+.points-fill.low {
+    background: linear-gradient(90deg, #e94560, #ff6b6b);
+}
+
+.points-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    min-width: 60px;
+    text-align: right;
+}
+
+.challenge-question-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 500px;
+    gap: 24px;
+}
+
+.challenge-question {
+    background: var(--bg-card);
+    padding: 24px 32px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    width: 100%;
+}
+
+.challenge-question .question-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.challenge-choices {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+}
+
+.challenge-choice-btn {
+    padding: 20px 16px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: inherit;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-height: 60px;
+}
+
+.challenge-choice-btn:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.challenge-choice-btn:active {
+    transform: translateY(0) scale(0.98);
+    background: var(--accent-primary);
+}
+
+/* ===========================================
+   挑戦ステージ - 結果画面
+=========================================== */
+.challenge-result-screen {
+    justify-content: center;
+}
+
+.challenge-result-screen.victory {
+    background: radial-gradient(ellipse at center, rgba(0, 210, 106, 0.15), var(--bg-primary));
+}
+
+.challenge-result-screen.defeat {
+    background: radial-gradient(ellipse at center, rgba(233, 69, 96, 0.1), var(--bg-primary));
+}
+
+.result-points {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.result-points .result-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.result-points .result-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.new-best {
+    background: linear-gradient(135deg, var(--accent-gold), #ffeb3b);
+    color: var(--bg-primary);
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 700;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.result-stats {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 480px) {
+    .battle-mode-grid {
+        gap: 16px;
+    }
+
+    .battle-mode-btn {
+        padding: 20px;
+    }
+
+    .mode-icon {
+        font-size: 2.5rem;
+    }
+
+    .dungeon-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .challenge-question .question-text {
+        font-size: 1.3rem;
+    }
+
+    .challenge-choice-btn {
+        font-size: 1.1rem;
+        padding: 16px 12px;
+    }
+
+    .points-display {
+        padding: 10px 12px;
+    }
+}
