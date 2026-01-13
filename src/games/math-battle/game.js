@@ -716,7 +716,7 @@ function renderChallenge() {
             <div class="challenge-header">
                 <div class="challenge-info">
                     <span class="challenge-location">${DUNGEON_ICONS[cs.dungeon]} ${cs.floor}F</span>
-                    <span class="challenge-progress">問題 ${cs.currentQuestion + 1} / ${QUESTIONS_PER_FLOOR}</span>
+                    <span class="challenge-progress">問題 ${cs.currentQuestion + 1} / ${cs.questions.length}</span>
                 </div>
                 <div class="points-display">
                     <span class="points-label">ポイント</span>

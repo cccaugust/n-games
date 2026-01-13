@@ -41,6 +41,7 @@ export const DUNGEON_ICONS = {
 
 export const MAX_FLOOR = 9;
 export const QUESTIONS_PER_FLOOR = 10;
+export const QUESTIONS_FOR_MIXED_FLOOR = 16; // 9F（混合）は16問
 
 // 階層ごとの問題タイプ（足し算の場合）
 export const FLOOR_TYPES = {
@@ -355,8 +356,10 @@ function generateNumericChoices(answer, min, max, count = 4) {
 export function generateChallengeQuestions(dungeon, floor) {
     const questions = [];
     const floorType = FLOOR_TYPES[floor] || 'mixed';
+    // 9F（混合）は16問、それ以外は10問
+    const questionCount = floor === 9 ? QUESTIONS_FOR_MIXED_FLOOR : QUESTIONS_PER_FLOOR;
 
-    for (let i = 0; i < QUESTIONS_PER_FLOOR; i++) {
+    for (let i = 0; i < questionCount; i++) {
         let question;
 
         switch (dungeon) {
@@ -386,35 +389,494 @@ export function generateChallengeQuestions(dungeon, floor) {
 }
 
 /**
- * 引き算の問題を生成（準備中 - 基本のみ）
+ * 引き算の問題を生成
  */
 function generateSubtractionQuestion(floorType) {
-    const a = randInt(5, 18);
-    const b = randInt(1, a - 1);
-    const answer = a - b;
-    const choices = generateNumericChoices(answer, 1, 17);
-    return {
-        question: `${a} - ${b} = ?`,
-        answer,
-        choices,
-        type: 'numeric'
-    };
+    switch (floorType) {
+        case 'basic': {
+            // ①8-1など（答えは四択から選ぶ）
+            const a = randInt(2, 10);
+            const b = randInt(1, a - 1);
+            const answer = a - b;
+            const choices = generateNumericChoices(answer, 1, 9);
+            return {
+                question: `${a} - ${b} = ?`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'find_missing': {
+            // ②4-？=1 など（答えは四択から選ぶ）
+            const answer = randInt(1, 8);
+            const result = randInt(1, 9 - answer);
+            const total = answer + result;
+            const choices = generateNumericChoices(answer, 1, 9);
+            return {
+                question: `${total} - ? = ${result}`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'reverse': {
+            // ③1（答えとして「7-6」など四択ででる）
+            const target = randInt(1, 5);
+            const a = randInt(target + 1, target + 8);
+            const b = a - target;
+            const correctExpr = `${a} - ${b}`;
+
+            // 不正解の式を生成
+            const wrongExprs = [];
+            while (wrongExprs.length < 3) {
+                const wa = randInt(2, 15);
+                const wb = randInt(1, wa - 1);
+                const wrongResult = wa - wb;
+                const expr = `${wa} - ${wb}`;
+                if (wrongResult !== target && !wrongExprs.includes(expr)) {
+                    wrongExprs.push(expr);
+                }
+            }
+
+            return {
+                question: `${target} になる しきは？`,
+                answer: correctExpr,
+                choices: shuffleArray([correctExpr, ...wrongExprs]),
+                type: 'expression'
+            };
+        }
+
+        case 'find_min': {
+            // ④最小は？（答えとして「8-1」など四択ででる）
+            const expressions = [];
+            const results = new Set();
+
+            while (expressions.length < 4) {
+                const a = randInt(3, 15);
+                const b = randInt(1, a - 1);
+                const result = a - b;
+                const expr = `${a} - ${b}`;
+                if (!results.has(result)) {
+                    results.add(result);
+                    expressions.push({ expr, result });
+                }
+            }
+
+            expressions.sort((x, y) => x.result - y.result);
+            const minExpr = expressions[0].expr;
+
+            return {
+                question: 'いちばん ちいさいのは？',
+                answer: minExpr,
+                choices: shuffleArray(expressions.map(e => e.expr)),
+                type: 'expression'
+            };
+        }
+
+        case 'triple': {
+            // ⑤-1+9-6（符号混合の計算、答えは四択から選ぶ）
+            // 結果が正の整数になるように調整
+            let a, b, c, answer;
+            do {
+                a = randInt(-5, 5);
+                b = randInt(1, 9);
+                c = randInt(1, 8);
+                answer = a + b - c;
+            } while (answer < 0 || answer > 10);
+
+            // 式の表示を調整（最初が負の場合も自然に表示）
+            let questionText;
+            if (a >= 0) {
+                questionText = `${a} + ${b} - ${c} = ?`;
+            } else {
+                questionText = `${a} + ${b} - ${c} = ?`;
+            }
+
+            const choices = generateNumericChoices(answer, 0, 10);
+            return {
+                question: questionText,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'large': {
+            // ⑥93-28（大きな数の引き算、答えは四択から選ぶ）
+            const a = randInt(50, 99);
+            const b = randInt(10, a - 10);
+            const answer = a - b;
+
+            // 1の位が同じになる不正解を含める
+            const wrongAnswers = [];
+
+            // 10の位が違うが1の位が同じものを追加
+            const wrongWithSameOnes = answer + 10;
+            if (wrongWithSameOnes !== answer && wrongWithSameOnes < 100) {
+                wrongAnswers.push(wrongWithSameOnes);
+            }
+            const wrongWithSameOnes2 = answer - 10;
+            if (wrongWithSameOnes2 !== answer && wrongWithSameOnes2 > 0) {
+                wrongAnswers.push(wrongWithSameOnes2);
+            }
+
+            // 追加の不正解
+            while (wrongAnswers.length < 3) {
+                const wrong = answer + randInt(-15, 15);
+                if (wrong !== answer && wrong > 0 && wrong < 100 && !wrongAnswers.includes(wrong)) {
+                    wrongAnswers.push(wrong);
+                }
+            }
+
+            return {
+                question: `${a} - ${b} = ?`,
+                answer,
+                choices: shuffleArray([answer, ...wrongAnswers.slice(0, 3)]),
+                type: 'numeric'
+            };
+        }
+
+        case 'find_max': {
+            // ⑦最大は？（答えとして「19-6」など四択ででる）
+            const expressions = [];
+            const results = new Set();
+
+            while (expressions.length < 4) {
+                const a = randInt(10, 20);
+                const b = randInt(1, a - 1);
+                const result = a - b;
+                const expr = `${a} - ${b}`;
+                if (!results.has(result)) {
+                    results.add(result);
+                    expressions.push({ expr, result });
+                }
+            }
+
+            expressions.sort((x, y) => y.result - x.result);
+            const maxExpr = expressions[0].expr;
+
+            return {
+                question: 'いちばん おおきいのは？',
+                answer: maxExpr,
+                choices: shuffleArray(expressions.map(e => e.expr)),
+                type: 'expression'
+            };
+        }
+
+        case 'equivalent': {
+            // ⑧7-5（答えとして「11-9」などが四択で出る）
+            const target = randInt(1, 8);
+            const a = randInt(target + 1, target + 5);
+            const b = a - target;
+            const questionExpr = `${a} - ${b}`;
+
+            // 同じ答えになる別の式
+            let ca, cb;
+            do {
+                ca = randInt(target + 1, target + 10);
+                cb = ca - target;
+            } while (ca === a && cb === b);
+            const correctExpr = `${ca} - ${cb}`;
+
+            // 違う答えになる式
+            const wrongExprs = [];
+            while (wrongExprs.length < 3) {
+                const wa = randInt(3, 15);
+                const wb = randInt(1, wa - 1);
+                const wrongResult = wa - wb;
+                const expr = `${wa} - ${wb}`;
+                if (wrongResult !== target && !wrongExprs.includes(expr)) {
+                    wrongExprs.push(expr);
+                }
+            }
+
+            return {
+                question: `${questionExpr} と おなじ こたえは？`,
+                answer: correctExpr,
+                choices: shuffleArray([correctExpr, ...wrongExprs]),
+                type: 'expression'
+            };
+        }
+
+        case 'mixed':
+        default: {
+            // ⑨①～⑧の混合
+            const types = ['basic', 'find_missing', 'reverse', 'find_min', 'triple', 'large', 'find_max', 'equivalent'];
+            const randomType = types[randInt(0, types.length - 1)];
+            return generateSubtractionQuestion(randomType);
+        }
+    }
 }
 
 /**
- * 掛け算の問題を生成（準備中 - 基本のみ）
+ * 掛け算の問題を生成
  */
 function generateMultiplicationQuestion(floorType) {
-    const a = randInt(1, 9);
-    const b = randInt(1, 9);
-    const answer = a * b;
-    const choices = generateNumericChoices(answer, 1, 81);
-    return {
-        question: `${a} × ${b} = ?`,
-        answer,
-        choices,
-        type: 'numeric'
-    };
+    switch (floorType) {
+        case 'basic': {
+            // ①3×7、0×10など（1〜10までの数字の掛け算、4択）
+            const a = randInt(0, 10);
+            const b = randInt(0, 10);
+            const answer = a * b;
+            const choices = generateNumericChoices(answer, 0, 100);
+            return {
+                question: `${a} × ${b} = ?`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'find_missing': {
+            // ②?×8=64（穴埋め、4択）
+            const answer = randInt(1, 10);
+            const b = randInt(1, 10);
+            const product = answer * b;
+            const choices = generateNumericChoices(answer, 0, 10);
+            return {
+                question: `? × ${b} = ${product}`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'reverse': {
+            // ③24（答えとして「3×8」など四択ででる）
+            // 計算しやすい積を選ぶ
+            const products = [6, 8, 10, 12, 15, 16, 18, 20, 24, 30, 36, 40, 42, 48, 56, 63, 72];
+            const target = products[randInt(0, products.length - 1)];
+
+            // 積がtargetになる組み合わせを探す
+            let a, b;
+            const pairs = [];
+            for (let i = 1; i <= 10; i++) {
+                for (let j = 1; j <= 10; j++) {
+                    if (i * j === target) {
+                        pairs.push([i, j]);
+                    }
+                }
+            }
+            if (pairs.length > 0) {
+                [a, b] = pairs[randInt(0, pairs.length - 1)];
+            } else {
+                a = 3;
+                b = 8;
+            }
+            const correctExpr = `${a} × ${b}`;
+
+            // 不正解の式を生成
+            const wrongExprs = [];
+            while (wrongExprs.length < 3) {
+                const wa = randInt(1, 10);
+                const wb = randInt(1, 10);
+                const wrongProduct = wa * wb;
+                const expr = `${wa} × ${wb}`;
+                if (wrongProduct !== target && !wrongExprs.includes(expr)) {
+                    wrongExprs.push(expr);
+                }
+            }
+
+            return {
+                question: `${target} になる しきは？`,
+                answer: correctExpr,
+                choices: shuffleArray([correctExpr, ...wrongExprs]),
+                type: 'expression'
+            };
+        }
+
+        case 'find_min': {
+            // ④最小は？（「4×5」など4択）
+            const expressions = [];
+            const products = new Set();
+
+            while (expressions.length < 4) {
+                const a = randInt(1, 10);
+                const b = randInt(1, 10);
+                const product = a * b;
+                const expr = `${a} × ${b}`;
+                if (!products.has(product)) {
+                    products.add(product);
+                    expressions.push({ expr, product });
+                }
+            }
+
+            expressions.sort((x, y) => x.product - y.product);
+            const minExpr = expressions[0].expr;
+
+            return {
+                question: 'いちばん ちいさいのは？',
+                answer: minExpr,
+                choices: shuffleArray(expressions.map(e => e.expr)),
+                type: 'expression'
+            };
+        }
+
+        case 'triple': {
+            // ⑤9×(5-3)（かっこ内の足し算引き算の結果は0〜10になるように、4択）
+            const multiplier = randInt(1, 9);
+            // かっこ内の結果（0〜10）
+            const bracketResult = randInt(0, 10);
+            // かっこ内の式を生成
+            let bracketExpr;
+            if (Math.random() < 0.5) {
+                // 足し算: a + b = bracketResult
+                const a = randInt(0, bracketResult);
+                const b = bracketResult - a;
+                bracketExpr = `${a} + ${b}`;
+            } else {
+                // 引き算: a - b = bracketResult
+                const b = randInt(0, 9);
+                const a = bracketResult + b;
+                bracketExpr = `${a} - ${b}`;
+            }
+
+            const answer = multiplier * bracketResult;
+            const choices = generateNumericChoices(answer, 0, 90);
+
+            return {
+                question: `${multiplier} × (${bracketExpr}) = ?`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'large': {
+            // ⑥4×6×2（1〜10の三つの掛け算。数字のどれか2個をかけたら1〜10になるように）
+            // まず2つかけて1〜10になる組み合わせを作る
+            const smallPairs = [
+                [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10],
+                [2, 1], [2, 2], [2, 3], [2, 4], [2, 5],
+                [3, 1], [3, 2], [3, 3],
+                [4, 1], [4, 2],
+                [5, 1], [5, 2],
+                [6, 1],
+                [7, 1],
+                [8, 1],
+                [9, 1],
+                [10, 1]
+            ];
+            const [a, b] = smallPairs[randInt(0, smallPairs.length - 1)];
+            const c = randInt(2, 10);
+
+            const answer = a * b * c;
+            const choices = generateNumericChoices(answer, 1, 100);
+
+            return {
+                question: `${a} × ${b} × ${c} = ?`,
+                answer,
+                choices,
+                type: 'numeric'
+            };
+        }
+
+        case 'find_max': {
+            // ⑦最大は？（10×8などが4択に）
+            const expressions = [];
+            const products = new Set();
+
+            while (expressions.length < 4) {
+                const a = randInt(5, 10);
+                const b = randInt(5, 10);
+                const product = a * b;
+                const expr = `${a} × ${b}`;
+                if (!products.has(product)) {
+                    products.add(product);
+                    expressions.push({ expr, product });
+                }
+            }
+
+            expressions.sort((x, y) => y.product - x.product);
+            const maxExpr = expressions[0].expr;
+
+            return {
+                question: 'いちばん おおきいのは？',
+                answer: maxExpr,
+                choices: shuffleArray(expressions.map(e => e.expr)),
+                type: 'expression'
+            };
+        }
+
+        case 'equivalent': {
+            // ⑧6×2（「3×4」などが4択で出る）
+            // 同じ答えになる掛け算を選ぶ
+            const products = [12, 18, 20, 24, 30, 36];
+            const target = products[randInt(0, products.length - 1)];
+
+            // 積がtargetになる組み合わせを集める
+            const pairs = [];
+            for (let i = 1; i <= 10; i++) {
+                for (let j = i; j <= 10; j++) {
+                    if (i * j === target) {
+                        pairs.push([i, j]);
+                    }
+                }
+            }
+
+            if (pairs.length < 2) {
+                // フォールバック: 12を使う (2×6, 3×4)
+                const [a, b] = [2, 6];
+                const [ca, cb] = [3, 4];
+                const questionExpr = `${a} × ${b}`;
+                const correctExpr = `${ca} × ${cb}`;
+
+                const wrongExprs = [];
+                while (wrongExprs.length < 3) {
+                    const wa = randInt(1, 10);
+                    const wb = randInt(1, 10);
+                    const wrongProduct = wa * wb;
+                    const expr = `${wa} × ${wb}`;
+                    if (wrongProduct !== 12 && !wrongExprs.includes(expr)) {
+                        wrongExprs.push(expr);
+                    }
+                }
+
+                return {
+                    question: `${questionExpr} と おなじ こたえは？`,
+                    answer: correctExpr,
+                    choices: shuffleArray([correctExpr, ...wrongExprs]),
+                    type: 'expression'
+                };
+            }
+
+            // ランダムに2つのペアを選ぶ
+            const shuffledPairs = shuffleArray(pairs);
+            const [a, b] = shuffledPairs[0];
+            const [ca, cb] = shuffledPairs[1];
+            const questionExpr = `${a} × ${b}`;
+            const correctExpr = `${ca} × ${cb}`;
+
+            // 違う答えになる式
+            const wrongExprs = [];
+            while (wrongExprs.length < 3) {
+                const wa = randInt(1, 10);
+                const wb = randInt(1, 10);
+                const wrongProduct = wa * wb;
+                const expr = `${wa} × ${wb}`;
+                if (wrongProduct !== target && !wrongExprs.includes(expr)) {
+                    wrongExprs.push(expr);
+                }
+            }
+
+            return {
+                question: `${questionExpr} と おなじ こたえは？`,
+                answer: correctExpr,
+                choices: shuffleArray([correctExpr, ...wrongExprs]),
+                type: 'expression'
+            };
+        }
+
+        case 'mixed':
+        default: {
+            // ⑨①～⑧の混合
+            const types = ['basic', 'find_missing', 'reverse', 'find_min', 'triple', 'large', 'find_max', 'equivalent'];
+            const randomType = types[randInt(0, types.length - 1)];
+            return generateMultiplicationQuestion(randomType);
+        }
+    }
 }
 
 /**
@@ -437,7 +899,9 @@ function generateDivisionQuestion(floorType) {
  * ダンジョンが利用可能かどうか
  */
 export function isDungeonAvailable(dungeon) {
-    return dungeon === DUNGEONS.ADDITION;
+    return dungeon === DUNGEONS.ADDITION ||
+           dungeon === DUNGEONS.SUBTRACTION ||
+           dungeon === DUNGEONS.MULTIPLICATION;
 }
 
 /**
