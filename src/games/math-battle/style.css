@@ -2441,6 +2441,15 @@ body {
     color: var(--text-muted);
 }
 
+.dungeon-bonus {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
 /* ===========================================
    挑戦ステージ - 階層選択
 =========================================== */

@@ -569,12 +569,15 @@ function showDungeonSelect() {
         const dungeonData = currentPlayer.challengeData?.[dungeon] || {};
         const clearedFloors = dungeonData.clearedFloors || [];
         const progress = clearedFloors.length;
+        const multiplier = REWARD_CONFIG.getDungeonMultiplier(dungeon);
+        const bonusText = multiplier > 1 ? `報酬 ×${multiplier}` : '';
 
         return `
                         <button class="dungeon-btn ${available ? '' : 'locked'}"
                                 data-dungeon="${dungeon}" ${available ? '' : 'disabled'}>
                             <span class="dungeon-icon">${DUNGEON_ICONS[dungeon]}</span>
                             <span class="dungeon-name">${DUNGEON_NAMES[dungeon]}</span>
+                            ${bonusText ? `<span class="dungeon-bonus">${bonusText}</span>` : ''}
                             ${available
                 ? `<span class="dungeon-progress">${progress}/${MAX_FLOOR} クリア</span>`
                 : `<span class="dungeon-locked">準備中...</span>`
@@ -628,8 +631,8 @@ function showFloorSelect(dungeon) {
         const bestPoints = getChallengeFloorBestPoints(currentPlayer, dungeon, floor);
         const isCleared = bestPoints > 0;
 
-        // 報酬プレビュー
-        const preview = REWARD_CONFIG.getRewardPreview(floor);
+        // 報酬プレビュー（ダンジョン難易度で倍率がかかる）
+        const preview = REWARD_CONFIG.getRewardPreview(floor, dungeon);
         const maxReward = preview[0]; // 100%
         const gradeIcon = gradeIcons[maxReward.gradeLevel];
 
@@ -831,9 +834,9 @@ function finishChallenge() {
     if (isCleared) {
         playSound('levelup');
 
-        // 報酬計算
-        const coins = REWARD_CONFIG.getCoins(cs.floor, cs.points, cs.maxPoints);
-        const gradeReward = REWARD_CONFIG.getGradeCoins(cs.floor, cs.points, cs.maxPoints);
+        // 報酬計算（ダンジョン難易度で倍率がかかる）
+        const coins = REWARD_CONFIG.getCoins(cs.floor, cs.points, cs.maxPoints, cs.dungeon);
+        const gradeReward = REWARD_CONFIG.getGradeCoins(cs.floor, cs.points, cs.maxPoints, cs.dungeon);
 
         // 記録
         const result = recordChallengeFloorClear(
