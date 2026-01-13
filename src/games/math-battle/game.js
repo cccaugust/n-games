@@ -26,8 +26,16 @@ import {
     addMonsterToPlayer, addExpToMonster, addToParty, removeFromParty,
     recordStageClear, spendCoins, spendGradeCoins, updateStats, recordGachaRoll,
     canEvolve, evolveMonster, giveStarterMonster,
-    COLOR_VARIANT_COUNT, getColorVariantHue
+    COLOR_VARIANT_COUNT, getColorVariantHue,
+    isChallengeFloorUnlocked, getChallengeFloorBestPoints, recordChallengeFloorClear
 } from './save.js';
+
+import {
+    DUNGEONS, DUNGEON_NAMES, DUNGEON_ICONS,
+    MAX_FLOOR, QUESTIONS_PER_FLOOR,
+    FLOOR_DESCRIPTIONS, POINT_CONFIG, REWARD_CONFIG,
+    generateChallengeQuestions, isDungeonAvailable
+} from './challenge.js';
 
 // ===========================================
 // グローバル状態
@@ -36,6 +44,7 @@ let currentPlayer = null;
 let currentScreen = 'title';
 let battleState = null;
 let gachaState = null;
+let challengeState = null; // 挑戦ステージ用
 let audioContext = null;
 
 // DOM要素
@@ -373,7 +382,7 @@ function showMainMenu() {
 
     document.getElementById('menuBattle').onclick = () => {
         playSound('click');
-        showGradeSelect();
+        showBattleModeSelect();
     };
     document.getElementById('menuGacha').onclick = () => {
         playSound('click');
@@ -394,6 +403,43 @@ function showMainMenu() {
     };
 }
 
+// バトルモード選択（学年ステージ or 挑戦ステージ）
+function showBattleModeSelect() {
+    app.innerHTML = `
+        <div class="screen battle-mode-screen">
+            <h2>バトルモードをえらぼう</h2>
+            <div class="battle-mode-grid">
+                <button class="battle-mode-btn grade-mode" id="gradeModeBtn">
+                    <span class="mode-icon">📚</span>
+                    <span class="mode-title">学年ステージ</span>
+                    <span class="mode-desc">学年ごとに問題にチャレンジ！</span>
+                </button>
+                <button class="battle-mode-btn challenge-mode" id="challengeModeBtn">
+                    <span class="mode-icon">🏰</span>
+                    <span class="mode-title">挑戦ステージ</span>
+                    <span class="mode-desc">ダンジョンを攻略しよう！</span>
+                </button>
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToMenu">もどる</button>
+        </div>
+    `;
+
+    document.getElementById('gradeModeBtn').onclick = () => {
+        playSound('click');
+        showGradeSelect();
+    };
+
+    document.getElementById('challengeModeBtn').onclick = () => {
+        playSound('click');
+        showDungeonSelect();
+    };
+
+    document.getElementById('backToMenu').onclick = () => {
+        playSound('click');
+        showMainMenu();
+    };
+}
+
 // 学年選択
 function showGradeSelect() {
     app.innerHTML = `
@@ -407,7 +453,7 @@ function showGradeSelect() {
                     </button>
                 `).join('')}
             </div>
-            <button class="btn btn-ghost back-btn" id="backToMenu">もどる</button>
+            <button class="btn btn-ghost back-btn" id="backToMode">もどる</button>
         </div>
     `;
 
@@ -418,9 +464,9 @@ function showGradeSelect() {
         };
     });
 
-    document.getElementById('backToMenu').onclick = () => {
+    document.getElementById('backToMode').onclick = () => {
         playSound('click');
-        showMainMenu();
+        showBattleModeSelect();
     };
 }
 
@@ -503,6 +549,354 @@ function showStageSelect(grade, category) {
     document.getElementById('backToCategory').onclick = () => {
         playSound('click');
         showCategorySelect(grade);
+    };
+}
+
+// ===========================================
+// 挑戦ステージシステム
+// ===========================================
+
+// ダンジョン選択
+function showDungeonSelect() {
+    const dungeons = Object.values(DUNGEONS);
+
+    app.innerHTML = `
+        <div class="screen dungeon-select-screen">
+            <h2>🏰 ダンジョンをえらぼう</h2>
+            <div class="dungeon-grid">
+                ${dungeons.map(dungeon => {
+        const available = isDungeonAvailable(dungeon);
+        const dungeonData = currentPlayer.challengeData?.[dungeon] || {};
+        const clearedFloors = dungeonData.clearedFloors || [];
+        const progress = clearedFloors.length;
+
+        return `
+                        <button class="dungeon-btn ${available ? '' : 'locked'}"
+                                data-dungeon="${dungeon}" ${available ? '' : 'disabled'}>
+                            <span class="dungeon-icon">${DUNGEON_ICONS[dungeon]}</span>
+                            <span class="dungeon-name">${DUNGEON_NAMES[dungeon]}</span>
+                            ${available
+                ? `<span class="dungeon-progress">${progress}/${MAX_FLOOR} クリア</span>`
+                : `<span class="dungeon-locked">準備中...</span>`
+            }
+                        </button>
+                    `;
+    }).join('')}
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToMode">もどる</button>
+        </div>
+    `;
+
+    document.querySelectorAll('.dungeon-btn:not([disabled])').forEach(btn => {
+        btn.onclick = () => {
+            playSound('click');
+            showFloorSelect(btn.dataset.dungeon);
+        };
+    });
+
+    document.getElementById('backToMode').onclick = () => {
+        playSound('click');
+        showBattleModeSelect();
+    };
+}
+
+// 階層選択
+function showFloorSelect(dungeon) {
+    const floors = [];
+    for (let i = 1; i <= MAX_FLOOR; i++) {
+        floors.push(i);
+    }
+
+    app.innerHTML = `
+        <div class="screen floor-select-screen">
+            <h2>${DUNGEON_ICONS[dungeon]} ${DUNGEON_NAMES[dungeon]}</h2>
+            <div class="floor-list">
+                ${floors.map(floor => {
+        const isUnlocked = isChallengeFloorUnlocked(currentPlayer, dungeon, floor);
+        const bestPoints = getChallengeFloorBestPoints(currentPlayer, dungeon, floor);
+        const isCleared = bestPoints > 0;
+
+        return `
+                        <button class="floor-btn ${isUnlocked ? '' : 'locked'} ${isCleared ? 'cleared' : ''}"
+                                data-floor="${floor}" ${isUnlocked ? '' : 'disabled'}>
+                            <div class="floor-info">
+                                <span class="floor-num">${floor}F</span>
+                                <span class="floor-desc">${FLOOR_DESCRIPTIONS[floor]}</span>
+                            </div>
+                            <div class="floor-status">
+                                ${!isUnlocked ? '🔒' : isCleared ? `<span class="best-points">${bestPoints}pt</span>` : ''}
+                            </div>
+                        </button>
+                    `;
+    }).join('')}
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToDungeon">もどる</button>
+        </div>
+    `;
+
+    document.querySelectorAll('.floor-btn:not([disabled])').forEach(btn => {
+        btn.onclick = () => {
+            playSound('click');
+            startChallenge(dungeon, parseInt(btn.dataset.floor));
+        };
+    });
+
+    document.getElementById('backToDungeon').onclick = () => {
+        playSound('click');
+        showDungeonSelect();
+    };
+}
+
+// 挑戦ステージ開始
+function startChallenge(dungeon, floor) {
+    const questions = generateChallengeQuestions(dungeon, floor);
+    const maxPoints = POINT_CONFIG.getInitialPoints(floor, dungeon);
+
+    challengeState = {
+        dungeon: dungeon,
+        floor: floor,
+        questions: questions,
+        currentQuestion: 0,
+        correctCount: 0,
+        points: maxPoints,
+        maxPoints: maxPoints,
+        startTime: Date.now(),
+        timer: null,
+        timeDecay: POINT_CONFIG.getTimeDecay(floor),
+        missPenalty: POINT_CONFIG.getMissPenalty(floor)
+    };
+
+    renderChallenge();
+    startChallengeTimer();
+}
+
+// 挑戦ステージタイマー開始
+function startChallengeTimer() {
+    if (challengeState.timer) {
+        clearInterval(challengeState.timer);
+    }
+
+    challengeState.timer = setInterval(() => {
+        challengeState.points = Math.max(0, challengeState.points - challengeState.timeDecay);
+        updateChallengePointsDisplay();
+    }, 1000);
+}
+
+// ポイント表示更新
+function updateChallengePointsDisplay() {
+    const pointsEl = document.getElementById('challengePoints');
+    const pointsBarEl = document.getElementById('challengePointsBar');
+
+    if (pointsEl) {
+        pointsEl.textContent = challengeState.points;
+    }
+    if (pointsBarEl) {
+        const percent = (challengeState.points / challengeState.maxPoints) * 100;
+        pointsBarEl.style.width = `${percent}%`;
+
+        // 色を変える
+        if (percent > 60) {
+            pointsBarEl.className = 'points-fill high';
+        } else if (percent > 30) {
+            pointsBarEl.className = 'points-fill medium';
+        } else {
+            pointsBarEl.className = 'points-fill low';
+        }
+    }
+}
+
+// 挑戦ステージ描画
+function renderChallenge() {
+    const cs = challengeState;
+    const q = cs.questions[cs.currentQuestion];
+    const percent = (cs.points / cs.maxPoints) * 100;
+
+    app.innerHTML = `
+        <div class="screen challenge-screen">
+            <div class="challenge-header">
+                <div class="challenge-info">
+                    <span class="challenge-location">${DUNGEON_ICONS[cs.dungeon]} ${cs.floor}F</span>
+                    <span class="challenge-progress">問題 ${cs.currentQuestion + 1} / ${QUESTIONS_PER_FLOOR}</span>
+                </div>
+                <div class="points-display">
+                    <span class="points-label">ポイント</span>
+                    <div class="points-bar-container">
+                        <div class="points-fill ${percent > 60 ? 'high' : percent > 30 ? 'medium' : 'low'}"
+                             id="challengePointsBar" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="points-value" id="challengePoints">${cs.points}</span>
+                </div>
+            </div>
+
+            <div class="challenge-question-area">
+                <div class="challenge-question">
+                    <p class="question-text">${q.question}</p>
+                </div>
+                <div class="challenge-choices">
+                    ${q.choices.map((choice, i) => `
+                        <button class="challenge-choice-btn" data-choice="${choice}">
+                            ${choice}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div id="particleContainer" class="particle-container"></div>
+        </div>
+    `;
+
+    document.querySelectorAll('.challenge-choice-btn').forEach(btn => {
+        btn.onclick = () => {
+            handleChallengeAnswer(btn.dataset.choice);
+        };
+    });
+}
+
+// 挑戦ステージの回答処理
+function handleChallengeAnswer(choiceValue) {
+    const cs = challengeState;
+    const q = cs.questions[cs.currentQuestion];
+
+    // 正答判定
+    let isCorrect = false;
+    if (typeof q.answer === 'number') {
+        const numChoice = parseFloat(choiceValue);
+        isCorrect = !isNaN(numChoice) && Math.abs(numChoice - q.answer) < 0.001;
+    } else {
+        isCorrect = String(choiceValue) === String(q.answer);
+    }
+
+    if (isCorrect) {
+        playSound('correct');
+        cs.correctCount++;
+        spawnParticles(document.getElementById('particleContainer'), 'correct');
+    } else {
+        playSound('wrong');
+        cs.points = Math.max(0, cs.points - cs.missPenalty);
+        updateChallengePointsDisplay();
+
+        // 画面を揺らす
+        const questionArea = document.querySelector('.challenge-question-area');
+        if (questionArea) {
+            questionArea.classList.add('shake');
+            setTimeout(() => questionArea.classList.remove('shake'), 300);
+        }
+    }
+
+    cs.currentQuestion++;
+
+    setTimeout(() => {
+        if (cs.currentQuestion >= cs.questions.length) {
+            finishChallenge();
+        } else {
+            renderChallenge();
+        }
+    }, 300);
+}
+
+// 挑戦ステージ終了
+function finishChallenge() {
+    if (challengeState.timer) {
+        clearInterval(challengeState.timer);
+        challengeState.timer = null;
+    }
+
+    const cs = challengeState;
+    const clearTime = (Date.now() - cs.startTime) / 1000;
+    const correctRate = cs.correctCount / cs.questions.length;
+
+    // クリア判定（60%以上正解でクリア）
+    const isCleared = correctRate >= 0.6;
+
+    if (isCleared) {
+        playSound('levelup');
+
+        // 報酬計算
+        const coins = REWARD_CONFIG.getCoins(cs.floor, cs.points, cs.maxPoints);
+        const gradeReward = REWARD_CONFIG.getGradeCoins(cs.floor, cs.points, cs.maxPoints);
+
+        // 記録
+        const result = recordChallengeFloorClear(
+            currentPlayer, cs.dungeon, cs.floor, cs.points,
+            coins, gradeReward.amount, gradeReward.grade
+        );
+        currentPlayer = loadPlayerData(currentPlayer.id);
+
+        showChallengeResult(true, {
+            points: cs.points,
+            maxPoints: cs.maxPoints,
+            correctCount: cs.correctCount,
+            totalQuestions: cs.questions.length,
+            clearTime,
+            coins,
+            gradeCoins: gradeReward.amount,
+            gradeCoinsGrade: gradeReward.grade,
+            isNewBest: result.isNewBest
+        });
+    } else {
+        showChallengeResult(false, {
+            points: cs.points,
+            maxPoints: cs.maxPoints,
+            correctCount: cs.correctCount,
+            totalQuestions: cs.questions.length,
+            clearTime
+        });
+    }
+}
+
+// 挑戦ステージ結果画面
+function showChallengeResult(isVictory, data) {
+    const gradeIcon = data.gradeCoinsGrade ? (GRADE_COIN_ICONS[data.gradeCoinsGrade] || '🪙') : '';
+
+    app.innerHTML = `
+        <div class="screen challenge-result-screen ${isVictory ? 'victory' : 'defeat'}">
+            <h1 class="result-title">${isVictory ? 'クリア！' : '失敗...'}</h1>
+
+            <div class="result-details">
+                <div class="result-points">
+                    <span class="result-label">獲得ポイント</span>
+                    <span class="result-value">${data.points} / ${data.maxPoints}</span>
+                    ${data.isNewBest ? '<span class="new-best">NEW BEST!</span>' : ''}
+                </div>
+
+                <div class="result-stats">
+                    <span>正解: ${data.correctCount} / ${data.totalQuestions}</span>
+                    <span>時間: ${Math.round(data.clearTime)}秒</span>
+                </div>
+
+                ${isVictory ? `
+                    <div class="reward-display">
+                        <div class="reward-row">
+                            <span class="reward-label">💰 コイン</span>
+                            <span class="reward-value">+${data.coins}</span>
+                        </div>
+                        ${data.gradeCoins > 0 ? `
+                            <div class="reward-row grade-coin">
+                                <span class="reward-label">${gradeIcon} ${data.gradeCoinsGrade}年コイン</span>
+                                <span class="reward-value">+${data.gradeCoins}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : `
+                    <p class="defeat-message">60%以上正解でクリア！もう一度チャレンジしよう</p>
+                `}
+            </div>
+
+            <div class="result-buttons">
+                <button class="btn btn-primary" id="retryBtn">もう一度</button>
+                <button class="btn btn-ghost" id="backToFloorBtn">階層選択へ</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('retryBtn').onclick = () => {
+        playSound('click');
+        startChallenge(challengeState.dungeon, challengeState.floor);
+    };
+
+    document.getElementById('backToFloorBtn').onclick = () => {
+        playSound('click');
+        showFloorSelect(challengeState.dungeon);
     };
 }
 

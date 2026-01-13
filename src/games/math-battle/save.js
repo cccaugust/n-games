@@ -53,6 +53,11 @@ export function createNewPlayer(name) {
             totalGradeCoinsEarned: 0,
             totalGachaRolls: 0,
             playTime: 0
+        },
+
+        // 挑戦ステージデータ
+        challengeData: {
+            // dungeon: { clearedFloors: [], bestPoints: {} }
         }
     };
 }
@@ -186,6 +191,12 @@ export function loadPlayerData(playerId) {
                 }
                 return key;
             });
+        }
+
+        // マイグレーション: 挑戦ステージデータがない場合
+        if (!player.challengeData) {
+            player.challengeData = {};
+            needsSave = true;
         }
 
         if (needsSave) {
@@ -417,4 +428,83 @@ export function evolveMonster(player, monsterIndex, monsterData) {
  */
 export function giveStarterMonster(player, monsterId) {
     return addMonsterToPlayer(player, monsterId);
+}
+
+// ===========================================
+// 挑戦ステージ関連
+// ===========================================
+
+/**
+ * 挑戦ステージの階層がアンロックされているか
+ * @param {Object} player - プレイヤーデータ
+ * @param {string} dungeon - ダンジョンID
+ * @param {number} floor - 階層（1-9）
+ */
+export function isChallengeFloorUnlocked(player, dungeon, floor) {
+    if (floor === 1) return true;
+
+    const challengeData = player.challengeData || {};
+    const dungeonData = challengeData[dungeon] || {};
+    const clearedFloors = dungeonData.clearedFloors || [];
+
+    return clearedFloors.includes(floor - 1);
+}
+
+/**
+ * 挑戦ステージのベストポイントを取得
+ */
+export function getChallengeFloorBestPoints(player, dungeon, floor) {
+    const challengeData = player.challengeData || {};
+    const dungeonData = challengeData[dungeon] || {};
+    const bestPoints = dungeonData.bestPoints || {};
+    return bestPoints[`floor_${floor}`] || 0;
+}
+
+/**
+ * 挑戦ステージの階層クリアを記録
+ * @param {Object} player - プレイヤーデータ
+ * @param {string} dungeon - ダンジョンID
+ * @param {number} floor - 階層
+ * @param {number} points - 獲得ポイント
+ * @param {number} coinsEarned - 獲得した通常コイン
+ * @param {number} gradeCoinsEarned - 獲得した学年コイン
+ * @param {number} grade - 学年コインの学年
+ */
+export function recordChallengeFloorClear(player, dungeon, floor, points, coinsEarned, gradeCoinsEarned = 0, grade = null) {
+    if (!player.challengeData) {
+        player.challengeData = {};
+    }
+    if (!player.challengeData[dungeon]) {
+        player.challengeData[dungeon] = {
+            clearedFloors: [],
+            bestPoints: {}
+        };
+    }
+
+    const dungeonData = player.challengeData[dungeon];
+
+    // クリア記録
+    if (!dungeonData.clearedFloors.includes(floor)) {
+        dungeonData.clearedFloors.push(floor);
+    }
+
+    // ベストポイント更新
+    const bestKey = `floor_${floor}`;
+    const isNewBest = !dungeonData.bestPoints[bestKey] || points > dungeonData.bestPoints[bestKey];
+    if (isNewBest) {
+        dungeonData.bestPoints[bestKey] = points;
+    }
+
+    // 通常コイン追加
+    player.coins += coinsEarned;
+    player.stats.totalCoinsEarned += coinsEarned;
+
+    // 学年コイン追加
+    if (gradeCoinsEarned > 0 && grade !== null && player.gradeCoins) {
+        player.gradeCoins[grade] = (player.gradeCoins[grade] || 0) + gradeCoinsEarned;
+        player.stats.totalGradeCoinsEarned = (player.stats.totalGradeCoinsEarned || 0) + gradeCoinsEarned;
+    }
+
+    savePlayerData(player);
+    return { isNewBest };
 }
