@@ -94,22 +94,40 @@ export const POINT_CONFIG = {
 
 // 報酬計算
 export const REWARD_CONFIG = {
-    // 通常コイン報酬
+    // 通常コイン報酬（増量版）
     getCoins: (floor, points, maxPoints) => {
         const ratio = points / maxPoints;
-        const baseReward = floor * 5;
+        // 基本報酬: 10 + floor * 10 → 1Fで20、9Fで100が満点時
+        const baseReward = 10 + floor * 10;
         return Math.floor(baseReward * ratio);
     },
-    // 学年コイン報酬（高い階層でより多く）
+    // 学年コイン報酬（全フロアで獲得可能）
     getGradeCoins: (floor, points, maxPoints) => {
-        if (floor < 3) return { grade: 1, amount: 0 };
         const ratio = points / maxPoints;
+        // 階層に応じた学年: 1-2F→1年, 3-4F→2年, 5-6F→3年, 7-8F→4年, 9F→5年
         const grade = Math.min(6, Math.ceil(floor / 2));
-        const baseReward = Math.floor(floor / 2);
+        // 基本報酬: 1 + floor → 1Fで2、9Fで10が満点時
+        const baseReward = 1 + Math.floor(floor / 2);
         return {
             grade,
-            amount: Math.floor(baseReward * ratio)
+            amount: Math.max(1, Math.floor(baseReward * ratio)) // 最低1枚保証
         };
+    },
+    // 報酬プレビュー（ポイント率ごとの報酬を計算）
+    getRewardPreview: (floor) => {
+        const maxPoints = 1000; // 仮の値（実際は階層とダンジョンで変わる）
+        const grades = [100, 80, 60]; // パーセント
+        return grades.map(percent => {
+            const points = maxPoints * (percent / 100);
+            const coins = REWARD_CONFIG.getCoins(floor, points, maxPoints);
+            const gradeReward = REWARD_CONFIG.getGradeCoins(floor, points, maxPoints);
+            return {
+                percent,
+                coins,
+                gradeCoins: gradeReward.amount,
+                gradeLevel: gradeReward.grade
+            };
+        });
     }
 };
 

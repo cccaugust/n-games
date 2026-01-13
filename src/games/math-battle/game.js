@@ -607,14 +607,31 @@ function showFloorSelect(dungeon) {
         floors.push(i);
     }
 
+    // 報酬プレビュー用のアイコンマップ（GRADE_COIN_ICONSより前に定義されているため直接定義）
+    const gradeIcons = { 1: '🔵', 2: '🟢', 3: '🟡', 4: '🟠', 5: '🔴', 6: '🟣' };
+
     app.innerHTML = `
         <div class="screen floor-select-screen">
             <h2>${DUNGEON_ICONS[dungeon]} ${DUNGEON_NAMES[dungeon]}</h2>
+
+            <div class="reward-legend">
+                <div class="legend-title">報酬の目安（クリア時）</div>
+                <div class="legend-items">
+                    <span class="legend-item">💯 100% → 最大報酬</span>
+                    <span class="legend-item">✨ 60% → クリア報酬</span>
+                </div>
+            </div>
+
             <div class="floor-list">
                 ${floors.map(floor => {
         const isUnlocked = isChallengeFloorUnlocked(currentPlayer, dungeon, floor);
         const bestPoints = getChallengeFloorBestPoints(currentPlayer, dungeon, floor);
         const isCleared = bestPoints > 0;
+
+        // 報酬プレビュー
+        const preview = REWARD_CONFIG.getRewardPreview(floor);
+        const maxReward = preview[0]; // 100%
+        const gradeIcon = gradeIcons[maxReward.gradeLevel];
 
         return `
                         <button class="floor-btn ${isUnlocked ? '' : 'locked'} ${isCleared ? 'cleared' : ''}"
@@ -622,6 +639,9 @@ function showFloorSelect(dungeon) {
                             <div class="floor-info">
                                 <span class="floor-num">${floor}F</span>
                                 <span class="floor-desc">${FLOOR_DESCRIPTIONS[floor]}</span>
+                            </div>
+                            <div class="floor-rewards">
+                                <span class="reward-preview">💰${maxReward.coins} ${gradeIcon}${maxReward.gradeCoins}</span>
                             </div>
                             <div class="floor-status">
                                 ${!isUnlocked ? '🔒' : isCleared ? `<span class="best-points">${bestPoints}pt</span>` : ''}
