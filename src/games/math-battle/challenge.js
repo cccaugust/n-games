@@ -100,6 +100,9 @@ const DUNGEON_REWARD_MULTIPLIER = {
     [DUNGEONS.DIVISION]: 1.8        // 割り算: 1.8倍
 };
 
+// 最大ミス回数（これに達するとゲームオーバー）
+export const MAX_MISS_COUNT = 4;
+
 // 報酬計算
 export const REWARD_CONFIG = {
     // ダンジョン倍率を取得
@@ -107,24 +110,27 @@ export const REWARD_CONFIG = {
         return DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
     },
     // 通常コイン報酬（増量版 + ダンジョン難易度ボーナス）
+    // 足し算の場合: 1F=10、2F=20、...、9F=90 が最高パフォーマンス時
     getCoins: (floor, points, maxPoints, dungeon = DUNGEONS.ADDITION) => {
         const ratio = points / maxPoints;
         const dungeonMultiplier = DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
-        // 基本報酬: 10 + floor * 10 → 1Fで20、9Fで100が満点時（足し算）
-        const baseReward = 10 + floor * 10;
+        // 基本報酬: floor * 10 → 1Fで10、9Fで90が満点時（足し算）
+        const baseReward = floor * 10;
         return Math.floor(baseReward * ratio * dungeonMultiplier);
     },
     // 学年コイン報酬（全フロアで獲得可能 + ダンジョン難易度ボーナス）
+    // 足し算の場合: 1F=5、2F=10、...、9F=45 が最高パフォーマンス時
     getGradeCoins: (floor, points, maxPoints, dungeon = DUNGEONS.ADDITION) => {
         const ratio = points / maxPoints;
         const dungeonMultiplier = DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
         // 階層に応じた学年: 1-2F→1年, 3-4F→2年, 5-6F→3年, 7-8F→4年, 9F→5年
         const grade = Math.min(6, Math.ceil(floor / 2));
-        // 基本報酬: 1 + floor/2 → 1Fで1、9Fで5が満点時（足し算）
-        const baseReward = 1 + Math.floor(floor / 2);
+        // 基本報酬: floor * 5 → 1Fで5、9Fで45が満点時（足し算）
+        const baseReward = floor * 5;
+        const amount = Math.floor(baseReward * ratio * dungeonMultiplier);
         return {
             grade,
-            amount: Math.max(1, Math.floor(baseReward * ratio * dungeonMultiplier)) // 最低1枚保証
+            amount: Math.max(1, amount) // 最低1枚保証
         };
     },
     // 報酬プレビュー（ポイント率ごとの報酬を計算）

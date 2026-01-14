@@ -32,7 +32,7 @@ import {
 
 import {
     DUNGEONS, DUNGEON_NAMES, DUNGEON_ICONS,
-    MAX_FLOOR, QUESTIONS_PER_FLOOR,
+    MAX_FLOOR, QUESTIONS_PER_FLOOR, MAX_MISS_COUNT,
     FLOOR_DESCRIPTIONS, POINT_CONFIG, REWARD_CONFIG,
     generateChallengeQuestions, isDungeonAvailable
 } from './challenge.js';
@@ -681,6 +681,7 @@ function startChallenge(dungeon, floor) {
         questions: questions,
         currentQuestion: 0,
         correctCount: 0,
+        missCount: 0, // 間違い回数
         points: maxPoints,
         maxPoints: maxPoints,
         startTime: Date.now(),
@@ -740,6 +741,7 @@ function renderChallenge() {
                 <div class="challenge-info">
                     <span class="challenge-location">${DUNGEON_ICONS[cs.dungeon]} ${cs.floor}F</span>
                     <span class="challenge-progress">問題 ${cs.currentQuestion + 1} / ${cs.questions.length}</span>
+                    <span class="challenge-miss ${cs.missCount >= MAX_MISS_COUNT - 1 ? 'danger' : ''}">ミス ${cs.missCount}/${MAX_MISS_COUNT}</span>
                 </div>
                 <div class="points-display">
                     <span class="points-label">ポイント</span>
@@ -795,6 +797,7 @@ function handleChallengeAnswer(choiceValue) {
         spawnParticles(document.getElementById('particleContainer'), 'correct');
     } else {
         playSound('wrong');
+        cs.missCount++;
         cs.points = Math.max(0, cs.points - cs.missPenalty);
         updateChallengePointsDisplay();
 
@@ -809,8 +812,11 @@ function handleChallengeAnswer(choiceValue) {
     cs.currentQuestion++;
 
     setTimeout(() => {
-        if (cs.currentQuestion >= cs.questions.length) {
-            finishChallenge();
+        // 4回間違えたらゲームオーバー
+        if (cs.missCount >= MAX_MISS_COUNT) {
+            finishChallenge(true); // ゲームオーバーフラグ
+        } else if (cs.currentQuestion >= cs.questions.length) {
+            finishChallenge(false);
         } else {
             renderChallenge();
         }
@@ -818,7 +824,7 @@ function handleChallengeAnswer(choiceValue) {
 }
 
 // 挑戦ステージ終了
-function finishChallenge() {
+function finishChallenge(isGameOver = false) {
     if (challengeState.timer) {
         clearInterval(challengeState.timer);
         challengeState.timer = null;
@@ -826,7 +832,21 @@ function finishChallenge() {
 
     const cs = challengeState;
     const clearTime = (Date.now() - cs.startTime) / 1000;
-    const correctRate = cs.correctCount / cs.questions.length;
+    const correctRate = cs.correctCount / cs.currentQuestion; // 回答済み問題数で計算
+
+    // 4回間違えたらゲームオーバー（クリア扱いにしない）
+    if (isGameOver) {
+        showChallengeResult(false, {
+            points: cs.points,
+            maxPoints: cs.maxPoints,
+            correctCount: cs.correctCount,
+            totalQuestions: cs.currentQuestion,
+            missCount: cs.missCount,
+            clearTime,
+            isGameOver: true
+        });
+        return;
+    }
 
     // クリア判定（60%以上正解でクリア）
     const isCleared = correctRate >= 0.6;
@@ -850,6 +870,7 @@ function finishChallenge() {
             maxPoints: cs.maxPoints,
             correctCount: cs.correctCount,
             totalQuestions: cs.questions.length,
+            missCount: cs.missCount,
             clearTime,
             coins,
             gradeCoins: gradeReward.amount,
@@ -862,6 +883,7 @@ function finishChallenge() {
             maxPoints: cs.maxPoints,
             correctCount: cs.correctCount,
             totalQuestions: cs.questions.length,
+            missCount: cs.missCount,
             clearTime
         });
     }
@@ -870,10 +892,23 @@ function finishChallenge() {
 // 挑戦ステージ結果画面
 function showChallengeResult(isVictory, data) {
     const gradeIcon = data.gradeCoinsGrade ? (GRADE_COIN_ICONS[data.gradeCoinsGrade] || '🪙') : '';
+    const isGameOver = data.isGameOver || false;
+
+    // タイトル決定
+    let resultTitle = isVictory ? 'クリア！' : '失敗...';
+    if (isGameOver) {
+        resultTitle = 'ゲームオーバー';
+    }
+
+    // 敗北メッセージ決定
+    let defeatMessage = '60%以上正解でクリア！もう一度チャレンジしよう';
+    if (isGameOver) {
+        defeatMessage = `${MAX_MISS_COUNT}回間違えると終了！次は気をつけよう`;
+    }
 
     app.innerHTML = `
         <div class="screen challenge-result-screen ${isVictory ? 'victory' : 'defeat'}">
-            <h1 class="result-title">${isVictory ? 'クリア！' : '失敗...'}</h1>
+            <h1 class="result-title">${resultTitle}</h1>
 
             <div class="result-details">
                 <div class="result-points">
@@ -884,6 +919,7 @@ function showChallengeResult(isVictory, data) {
 
                 <div class="result-stats">
                     <span>正解: ${data.correctCount} / ${data.totalQuestions}</span>
+                    <span>ミス: ${data.missCount || 0} / ${MAX_MISS_COUNT}</span>
                     <span>時間: ${Math.round(data.clearTime)}秒</span>
                 </div>
 
@@ -901,7 +937,7 @@ function showChallengeResult(isVictory, data) {
                         ` : ''}
                     </div>
                 ` : `
-                    <p class="defeat-message">60%以上正解でクリア！もう一度チャレンジしよう</p>
+                    <p class="defeat-message">${defeatMessage}</p>
                 `}
             </div>
 

@@ -2607,6 +2607,25 @@ body {
     color: var(--text-secondary);
 }
 
+.challenge-miss {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.challenge-miss.danger {
+    color: var(--danger);
+    background: rgba(220, 53, 69, 0.2);
+    animation: pulse-miss 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-miss {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}
+
 .points-display {
     display: flex;
     align-items: center;
