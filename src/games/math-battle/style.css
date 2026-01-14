@@ -2806,3 +2806,840 @@ body {
         padding: 10px 12px;
     }
 }
+
+/* ===========================================
+   マルチプレイヤー - 共通
+=========================================== */
+.multiplayer-menu-screen,
+.pvp-menu-screen,
+.trade-menu-screen {
+    justify-content: center;
+}
+
+.multiplayer-mode-grid,
+.pvp-options,
+.trade-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+    margin: 24px auto;
+}
+
+.multiplayer-mode-btn,
+.pvp-option-btn,
+.trade-option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 16px;
+    background: var(--bg-card);
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.multiplayer-mode-btn:hover,
+.pvp-option-btn:hover,
+.trade-option-btn:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.multiplayer-mode-btn .mode-icon,
+.pvp-option-btn .option-icon,
+.trade-option-btn .option-icon {
+    font-size: 3rem;
+}
+
+.multiplayer-mode-btn .mode-title,
+.pvp-option-btn .option-title,
+.trade-option-btn .option-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.multiplayer-mode-btn .mode-desc,
+.pvp-option-btn .option-desc {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.multiplayer-mode-btn.battle-mode {
+    background: linear-gradient(135deg, rgba(233, 69, 96, 0.1), rgba(255, 107, 107, 0.1));
+}
+
+.multiplayer-mode-btn.trade-mode {
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.1), rgba(0, 210, 106, 0.1));
+}
+
+/* メニューのマルチプレイヤーボタン */
+.menu-item-multiplayer {
+    background: linear-gradient(135deg, rgba(155, 89, 182, 0.15), rgba(52, 152, 219, 0.15));
+    border: 2px solid rgba(155, 89, 182, 0.3);
+}
+
+.menu-item-multiplayer:hover {
+    border-color: rgba(155, 89, 182, 0.6);
+}
+
+/* ===========================================
+   ルームコード入力
+=========================================== */
+.join-room-screen {
+    justify-content: center;
+}
+
+.room-code-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 16px 24px;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.5em;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    margin: 24px auto;
+}
+
+.room-code-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.room-code-input::placeholder {
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+}
+
+.error-message {
+    color: var(--accent-danger);
+    min-height: 24px;
+    margin: 8px 0;
+}
+
+/* ===========================================
+   ローディング画面
+=========================================== */
+.loading-screen {
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===========================================
+   対戦ロビー
+=========================================== */
+.pvp-lobby-screen {
+    justify-content: flex-start;
+    padding-top: 20px;
+}
+
+.room-code-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+}
+
+.room-code-display .label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.room-code-display .code {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--accent-primary);
+}
+
+.lobby-players {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 24px;
+}
+
+.lobby-player {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    min-height: 150px;
+}
+
+.lobby-player.ready {
+    border-color: var(--accent-success);
+    background: linear-gradient(135deg, rgba(0, 210, 106, 0.1), transparent);
+}
+
+.player-badge {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+}
+
+.lobby-player.host .player-badge {
+    background: var(--accent-gold);
+    color: var(--bg-primary);
+}
+
+.lobby-player .player-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.player-party-preview {
+    display: flex;
+    gap: 4px;
+}
+
+.mini-monster {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mini-monster.empty {
+    color: var(--text-muted);
+}
+
+.ready-status {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.lobby-player.ready .ready-status {
+    color: var(--accent-success);
+    font-weight: 600;
+}
+
+.vs-divider {
+    display: flex;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.waiting-guest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    padding: 20px 0;
+}
+
+.loading-dots {
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { content: '.'; opacity: 0; }
+    40% { opacity: 1; }
+    60% { opacity: 1; }
+    80%, 100% { opacity: 0; }
+}
+
+/* 対戦設定 */
+.battle-settings,
+.battle-settings-view {
+    width: 100%;
+    max-width: 500px;
+    background: var(--bg-card);
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+}
+
+.battle-settings h3,
+.battle-settings-view h3 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: var(--text-secondary);
+}
+
+.settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dungeon-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dungeon-setting label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.dungeon-setting input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent-primary);
+}
+
+.floor-select {
+    padding: 6px 10px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+.waiting-settings {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ロビーアクション */
+.lobby-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.pulse-animation {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* ===========================================
+   対戦画面
+=========================================== */
+.pvp-battle-screen {
+    padding: 16px;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative;
+}
+
+.pvp-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.battle-timer {
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 8px 24px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    font-variant-numeric: tabular-nums;
+}
+
+.battle-timer.time-critical {
+    color: var(--accent-danger);
+    animation: pulse 0.5s ease-in-out infinite;
+}
+
+/* スコアエリア */
+.pvp-score-area {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 16px;
+}
+
+.score-bar-container {
+    display: flex;
+    height: 24px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: var(--bg-secondary);
+}
+
+.score-bar {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.score-bar.my-score {
+    background: linear-gradient(90deg, var(--accent-primary), #6c5ce7);
+}
+
+.score-bar.opponent-score {
+    background: linear-gradient(90deg, #e94560, #ff6b6b);
+}
+
+.score-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+}
+
+.score-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.score-label .name {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.score-label .score {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.score-label.my-label .score {
+    color: var(--accent-primary);
+}
+
+.score-label.opponent-label .score {
+    color: #e94560;
+}
+
+/* パーティ表示 */
+.pvp-parties {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 16px;
+}
+
+.pvp-party {
+    display: flex;
+    gap: 4px;
+}
+
+/* 問題エリア */
+.pvp-question-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.pvp-question-area .question-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.answer-feedback {
+    min-height: 40px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.correct-feedback {
+    color: var(--accent-success);
+}
+
+.wrong-feedback {
+    color: var(--accent-danger);
+}
+
+/* 選択肢 */
+.pvp-choices {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.pvp-choice-btn {
+    padding: 16px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.pvp-choice-btn:hover:not(:disabled) {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.pvp-choice-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.pvp-choice-btn:disabled {
+    cursor: default;
+}
+
+.pvp-choice-btn.correct {
+    background: var(--accent-success);
+    border-color: var(--accent-success);
+    color: white;
+}
+
+.pvp-choice-btn.wrong {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: white;
+}
+
+/* パーティクルエフェクト */
+@keyframes particle-fly {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance));
+        opacity: 0;
+    }
+}
+
+/* ===========================================
+   対戦結果画面
+=========================================== */
+.pvp-result-screen {
+    justify-content: center;
+}
+
+.pvp-result-screen.win {
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15), var(--bg-primary));
+}
+
+.pvp-result-screen.lose {
+    background: radial-gradient(ellipse at center, rgba(233, 69, 96, 0.1), var(--bg-primary));
+}
+
+.pvp-result-screen.draw {
+    background: radial-gradient(ellipse at center, rgba(108, 92, 231, 0.1), var(--bg-primary));
+}
+
+.result-banner {
+    margin-bottom: 32px;
+}
+
+.result-banner h1 {
+    font-size: 3rem;
+    text-align: center;
+}
+
+.result-banner.win h1 {
+    color: var(--accent-gold);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.result-banner.lose h1 {
+    color: var(--accent-danger);
+}
+
+.result-banner.draw h1 {
+    color: var(--accent-primary);
+}
+
+.result-scores {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.result-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px 32px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 2px solid transparent;
+}
+
+.result-player.winner {
+    border-color: var(--accent-gold);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), transparent);
+}
+
+.result-player .name {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.result-player .score {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.result-player.winner .score {
+    color: var(--accent-gold);
+}
+
+.result-vs {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.result-actions {
+    margin-top: 24px;
+}
+
+/* ===========================================
+   交換機能
+=========================================== */
+.trade-lobby-screen {
+    justify-content: flex-start;
+    padding-top: 20px;
+}
+
+.waiting-trade-partner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+.trade-area {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 24px;
+}
+
+.trade-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+}
+
+.trade-side h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.trade-monster-slot {
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.empty-slot {
+    padding: 32px;
+    color: var(--text-muted);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+}
+
+.trade-monster {
+    position: relative;
+}
+
+.trade-monster.confirmed {
+    box-shadow: 0 0 20px rgba(0, 210, 106, 0.4);
+}
+
+.confirmed-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--accent-success);
+    color: white;
+    padding: 4px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.trade-arrow {
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--text-muted);
+}
+
+.trade-complete-message {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-success);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* 交換モンスター選択 */
+.trade-select-screen {
+    justify-content: flex-start;
+    padding-top: 20px;
+}
+
+.monster-select-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+    padding: 16px;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.trade-monster-option {
+    position: relative;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+}
+
+.trade-monster-option:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-4px);
+}
+
+.trade-monster-option.in-party {
+    opacity: 0.7;
+}
+
+.party-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.65rem;
+    font-weight: 600;
+}
+
+/* 交換完了画面 */
+.trade-complete-screen {
+    justify-content: center;
+    background: radial-gradient(ellipse at center, rgba(78, 205, 196, 0.15), var(--bg-primary));
+}
+
+.received-monster {
+    margin: 24px 0;
+}
+
+.received-message {
+    font-size: 1.3rem;
+    color: var(--accent-success);
+    margin-bottom: 24px;
+}
+
+/* ===========================================
+   マルチプレイヤー - レスポンシブ
+=========================================== */
+@media (max-width: 480px) {
+    .room-code-display .code {
+        font-size: 2rem;
+    }
+
+    .lobby-players {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .vs-divider {
+        font-size: 1.2rem;
+    }
+
+    .battle-timer {
+        font-size: 1.5rem;
+    }
+
+    .pvp-question-area .question-text {
+        font-size: 1.4rem;
+    }
+
+    .pvp-choice-btn {
+        padding: 14px;
+        font-size: 1.1rem;
+    }
+
+    .result-scores {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .result-banner h1 {
+        font-size: 2rem;
+    }
+
+    .trade-area {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .trade-arrow {
+        transform: rotate(90deg);
+    }
+
+    .monster-select-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+}
