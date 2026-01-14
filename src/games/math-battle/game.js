@@ -37,6 +37,15 @@ import {
     generateChallengeQuestions, isDungeonAvailable
 } from './challenge.js';
 
+import {
+    ROOM_TYPES, ROOM_STATUS, BATTLE_DURATION,
+    createRoom, joinRoom, getRoom, updateRoom, deleteRoom, leaveRoom,
+    setReady, setBattleSettings, startBattle as startPvpBattleRoom, updateScore, endBattle, recordEvent,
+    getOrCreateTrade, selectTradeMonster, confirmTrade, cancelTrade,
+    subscribeToRoom, subscribeToTrade, subscribeToEvents, unsubscribe,
+    calculateAnswerScore
+} from './multiplayer.js';
+
 // ===========================================
 // グローバル状態
 // ===========================================
@@ -46,6 +55,12 @@ let battleState = null;
 let gachaState = null;
 let challengeState = null; // 挑戦ステージ用
 let audioContext = null;
+
+// マルチプレイヤー状態
+let multiplayerState = null;
+let roomSubscription = null;
+let tradeSubscription = null;
+let eventsSubscription = null;
 
 // DOM要素
 const app = document.getElementById('app');
@@ -363,6 +378,10 @@ function showMainMenu() {
                     <span class="menu-icon">⚔️</span>
                     <span class="menu-label">バトル</span>
                 </button>
+                <button class="menu-item menu-item-multiplayer" id="menuMultiplayer">
+                    <span class="menu-icon">📡</span>
+                    <span class="menu-label">みんなで</span>
+                </button>
                 <button class="menu-item" id="menuGacha">
                     <span class="menu-icon">🎰</span>
                     <span class="menu-label">ガチャ</span>
@@ -383,6 +402,10 @@ function showMainMenu() {
     document.getElementById('menuBattle').onclick = () => {
         playSound('click');
         showBattleModeSelect();
+    };
+    document.getElementById('menuMultiplayer').onclick = () => {
+        playSound('click');
+        showMultiplayerMenu();
     };
     document.getElementById('menuGacha').onclick = () => {
         playSound('click');
@@ -2263,6 +2286,1126 @@ function showMonsterDetail(monsterId, displayVariant = 0) {
         playSound('click');
         showMonsterBook();
     };
+}
+
+// ===========================================
+// マルチプレイヤー機能
+// ===========================================
+
+// 購読をクリーンアップ
+function cleanupMultiplayerSubscriptions() {
+    if (roomSubscription) {
+        unsubscribe(roomSubscription);
+        roomSubscription = null;
+    }
+    if (tradeSubscription) {
+        unsubscribe(tradeSubscription);
+        tradeSubscription = null;
+    }
+    if (eventsSubscription) {
+        unsubscribe(eventsSubscription);
+        eventsSubscription = null;
+    }
+}
+
+// マルチプレイヤーメニュー
+function showMultiplayerMenu() {
+    cleanupMultiplayerSubscriptions();
+    multiplayerState = null;
+
+    app.innerHTML = `
+        <div class="screen multiplayer-menu-screen">
+            <h2>みんなであそぼう！</h2>
+            <div class="multiplayer-mode-grid">
+                <button class="multiplayer-mode-btn battle-mode" id="pvpBattleBtn">
+                    <span class="mode-icon">⚔️</span>
+                    <span class="mode-title">対戦</span>
+                    <span class="mode-desc">友達と算数バトル！</span>
+                </button>
+                <button class="multiplayer-mode-btn trade-mode" id="tradeBtn">
+                    <span class="mode-icon">🔄</span>
+                    <span class="mode-title">交換</span>
+                    <span class="mode-desc">モンスターを交換しよう</span>
+                </button>
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToMenu">もどる</button>
+        </div>
+    `;
+
+    document.getElementById('pvpBattleBtn').onclick = () => {
+        playSound('click');
+        showPvpMenu();
+    };
+    document.getElementById('tradeBtn').onclick = () => {
+        playSound('click');
+        showTradeMenu();
+    };
+    document.getElementById('backToMenu').onclick = () => {
+        playSound('click');
+        showMainMenu();
+    };
+}
+
+// 対戦メニュー（ルーム作成 or 参加）
+function showPvpMenu() {
+    app.innerHTML = `
+        <div class="screen pvp-menu-screen">
+            <h2>対戦モード</h2>
+            <div class="pvp-options">
+                <button class="pvp-option-btn create-room" id="createRoomBtn">
+                    <span class="option-icon">🏠</span>
+                    <span class="option-title">ルームをつくる</span>
+                    <span class="option-desc">友達をまってバトル！</span>
+                </button>
+                <button class="pvp-option-btn join-room" id="joinRoomBtn">
+                    <span class="option-icon">🚪</span>
+                    <span class="option-title">ルームにはいる</span>
+                    <span class="option-desc">コードを入力してバトル！</span>
+                </button>
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToMultiplayer">もどる</button>
+        </div>
+    `;
+
+    document.getElementById('createRoomBtn').onclick = async () => {
+        playSound('click');
+        await createPvpRoom();
+    };
+    document.getElementById('joinRoomBtn').onclick = () => {
+        playSound('click');
+        showJoinRoomScreen();
+    };
+    document.getElementById('backToMultiplayer').onclick = () => {
+        playSound('click');
+        showMultiplayerMenu();
+    };
+}
+
+// ルーム作成
+async function createPvpRoom() {
+    app.innerHTML = `
+        <div class="screen loading-screen">
+            <div class="loading-spinner"></div>
+            <p>ルームを作成中...</p>
+        </div>
+    `;
+
+    try {
+        const room = await createRoom(ROOM_TYPES.BATTLE, {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            party: currentPlayer.party
+        });
+
+        multiplayerState = {
+            room,
+            isHost: true,
+            battleQuestions: [],
+            currentQuestionIndex: 0,
+            timerInterval: null
+        };
+
+        // リアルタイム購読開始
+        roomSubscription = subscribeToRoom(room.id, (updatedRoom) => {
+            if (multiplayerState) {
+                multiplayerState.room = updatedRoom;
+                handleRoomUpdate(updatedRoom);
+            }
+        });
+
+        showPvpLobby();
+    } catch (error) {
+        console.error('ルーム作成エラー:', error);
+        app.innerHTML = `
+            <div class="screen error-screen">
+                <h2>エラー</h2>
+                <p>ルームの作成に失敗しました</p>
+                <button class="btn btn-primary" id="retryBtn">もう一度</button>
+            </div>
+        `;
+        document.getElementById('retryBtn').onclick = () => showPvpMenu();
+    }
+}
+
+// ルーム参加画面
+function showJoinRoomScreen() {
+    app.innerHTML = `
+        <div class="screen join-room-screen">
+            <h2>ルームコードを入力</h2>
+            <input type="text" id="roomCodeInput" class="room-code-input"
+                   placeholder="XXXXXX" maxlength="6"
+                   style="text-transform: uppercase">
+            <button class="btn btn-primary btn-large" id="joinBtn" disabled>はいる</button>
+            <p class="error-message" id="errorMessage"></p>
+            <button class="btn btn-ghost back-btn" id="backToPvpMenu">もどる</button>
+        </div>
+    `;
+
+    const input = document.getElementById('roomCodeInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const errorMsg = document.getElementById('errorMessage');
+
+    input.oninput = () => {
+        input.value = input.value.toUpperCase();
+        joinBtn.disabled = input.value.length !== 6;
+        errorMsg.textContent = '';
+    };
+
+    joinBtn.onclick = async () => {
+        playSound('click');
+        joinBtn.disabled = true;
+        joinBtn.textContent = '接続中...';
+
+        const result = await joinRoom(input.value, {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            party: currentPlayer.party
+        });
+
+        if (result.error) {
+            errorMsg.textContent = result.error;
+            joinBtn.disabled = false;
+            joinBtn.textContent = 'はいる';
+            playSound('wrong');
+            return;
+        }
+
+        multiplayerState = {
+            room: result.data,
+            isHost: false,
+            battleQuestions: [],
+            currentQuestionIndex: 0,
+            timerInterval: null
+        };
+
+        // リアルタイム購読開始
+        roomSubscription = subscribeToRoom(result.data.id, (updatedRoom) => {
+            if (multiplayerState) {
+                multiplayerState.room = updatedRoom;
+                handleRoomUpdate(updatedRoom);
+            }
+        });
+
+        showPvpLobby();
+    };
+
+    document.getElementById('backToPvpMenu').onclick = () => {
+        playSound('click');
+        showPvpMenu();
+    };
+}
+
+// 対戦ロビー
+function showPvpLobby() {
+    const room = multiplayerState.room;
+    const isHost = multiplayerState.isHost;
+
+    // パーティ情報を取得
+    const hostParty = getPartyInfo(room.host_party);
+    const guestParty = room.guest_player_id ? getPartyInfo(room.guest_party) : null;
+
+    app.innerHTML = `
+        <div class="screen pvp-lobby-screen">
+            <div class="room-code-display">
+                <span class="label">ルームコード</span>
+                <span class="code">${room.room_code}</span>
+            </div>
+
+            <div class="lobby-players">
+                <div class="lobby-player host ${room.host_ready ? 'ready' : ''}">
+                    <div class="player-badge">ホスト</div>
+                    <div class="player-name">${room.host_player_name}</div>
+                    <div class="player-party-preview">
+                        ${hostParty.map(m => m ? `<span class="mini-monster">${m.name.charAt(0)}</span>` : '').join('')}
+                    </div>
+                    <div class="ready-status">${room.host_ready ? '準備OK!' : '準備中...'}</div>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="lobby-player guest ${room.guest_ready ? 'ready' : ''}">
+                    ${room.guest_player_id ? `
+                        <div class="player-badge">ゲスト</div>
+                        <div class="player-name">${room.guest_player_name}</div>
+                        <div class="player-party-preview">
+                            ${guestParty.map(m => m ? `<span class="mini-monster">${m.name.charAt(0)}</span>` : '').join('')}
+                        </div>
+                        <div class="ready-status">${room.guest_ready ? '準備OK!' : '準備中...'}</div>
+                    ` : `
+                        <div class="waiting-guest">
+                            <span class="loading-dots">...</span>
+                            <span>対戦相手をまっています</span>
+                        </div>
+                    `}
+                </div>
+            </div>
+
+            ${isHost ? `
+                <div class="battle-settings">
+                    <h3>出題設定</h3>
+                    <div class="settings-grid">
+                        ${Object.values(DUNGEONS).filter(d => isDungeonAvailable(d)).map(dungeon => `
+                            <div class="dungeon-setting">
+                                <label>
+                                    <input type="checkbox" class="dungeon-check" data-dungeon="${dungeon}" checked>
+                                    ${DUNGEON_ICONS[dungeon]} ${DUNGEON_NAMES[dungeon]}
+                                </label>
+                                <select class="floor-select" data-dungeon="${dungeon}">
+                                    ${Array.from({length: MAX_FLOOR}, (_, i) => i + 1).map(f =>
+                                        `<option value="${f}">${f}F - ${FLOOR_DESCRIPTIONS[f]}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : `
+                <div class="battle-settings-view">
+                    <h3>出題設定（ホストが決定します）</h3>
+                    <p class="waiting-settings">設定を待っています...</p>
+                </div>
+            `}
+
+            <div class="lobby-actions">
+                ${(isHost ? !room.host_ready : !room.guest_ready) ? `
+                    <button class="btn btn-primary btn-large" id="readyBtn" ${!room.guest_player_id ? 'disabled' : ''}>
+                        準備OK！
+                    </button>
+                ` : `
+                    <button class="btn btn-secondary btn-large" id="cancelReadyBtn">
+                        キャンセル
+                    </button>
+                `}
+                ${isHost && room.host_ready && room.guest_ready ? `
+                    <button class="btn btn-primary btn-large pulse-animation" id="startBattleBtn">
+                        バトル開始！
+                    </button>
+                ` : ''}
+            </div>
+
+            <button class="btn btn-ghost back-btn" id="leaveLobbyBtn">退出する</button>
+        </div>
+    `;
+
+    // イベントリスナー
+    const readyBtn = document.getElementById('readyBtn');
+    const cancelReadyBtn = document.getElementById('cancelReadyBtn');
+    const startBattleBtn = document.getElementById('startBattleBtn');
+    const leaveLobbyBtn = document.getElementById('leaveLobbyBtn');
+
+    if (readyBtn) {
+        readyBtn.onclick = async () => {
+            playSound('click');
+
+            // ホストの場合は設定を保存
+            if (isHost) {
+                const settings = getBattleSettingsFromUI();
+                await setBattleSettings(room.id, settings);
+            }
+
+            await setReady(room.id, isHost, true);
+        };
+    }
+
+    if (cancelReadyBtn) {
+        cancelReadyBtn.onclick = async () => {
+            playSound('click');
+            await setReady(room.id, isHost, false);
+        };
+    }
+
+    if (startBattleBtn) {
+        startBattleBtn.onclick = async () => {
+            playSound('gacha');
+            await startPvpBattleRoom(room.id);
+        };
+    }
+
+    if (leaveLobbyBtn) {
+        leaveLobbyBtn.onclick = async () => {
+            playSound('click');
+            cleanupMultiplayerSubscriptions();
+            if (isHost) {
+                await deleteRoom(room.id);
+            } else {
+                await leaveRoom(room.id);
+            }
+            multiplayerState = null;
+            showMultiplayerMenu();
+        };
+    }
+}
+
+// UIから対戦設定を取得
+function getBattleSettingsFromUI() {
+    const settings = { dungeons: [] };
+
+    document.querySelectorAll('.dungeon-check:checked').forEach(checkbox => {
+        const dungeon = checkbox.dataset.dungeon;
+        const floorSelect = document.querySelector(`.floor-select[data-dungeon="${dungeon}"]`);
+        settings.dungeons.push({
+            dungeon,
+            floor: parseInt(floorSelect.value)
+        });
+    });
+
+    return settings;
+}
+
+// パーティ情報を取得
+function getPartyInfo(partyIndexes) {
+    if (!partyIndexes || !currentPlayer.monsters) return [];
+    return partyIndexes.map(idx => {
+        const owned = currentPlayer.monsters[idx];
+        if (!owned) return null;
+        return getMonsterById(owned.monsterId);
+    });
+}
+
+// ルーム更新ハンドラ
+function handleRoomUpdate(room) {
+    if (!multiplayerState) return;
+
+    // ステータスに応じた処理
+    switch (room.status) {
+        case ROOM_STATUS.WAITING:
+        case ROOM_STATUS.READY:
+            // ロビー画面を更新
+            if (currentScreen !== 'pvp-battle') {
+                showPvpLobby();
+            }
+            break;
+        case ROOM_STATUS.PLAYING:
+            // 対戦画面へ
+            if (currentScreen !== 'pvp-battle') {
+                currentScreen = 'pvp-battle';
+                startPvpBattle();
+            } else {
+                // スコア更新
+                updatePvpScoreDisplay();
+            }
+            break;
+        case ROOM_STATUS.FINISHED:
+            // 結果画面へ
+            showPvpResult();
+            break;
+    }
+}
+
+// 対戦開始
+function startPvpBattle() {
+    const room = multiplayerState.room;
+    const settings = room.battle_settings || { dungeons: [{ dungeon: DUNGEONS.ADDITION, floor: 1 }] };
+
+    // 問題を生成（各ダンジョン・階層からランダム）
+    const questions = [];
+    for (let i = 0; i < 50; i++) { // 十分な数の問題を用意
+        const setting = settings.dungeons[Math.floor(Math.random() * settings.dungeons.length)];
+        const generatedQuestions = generateChallengeQuestions(setting.dungeon, setting.floor);
+        questions.push(generatedQuestions[Math.floor(Math.random() * generatedQuestions.length)]);
+    }
+    multiplayerState.battleQuestions = questions;
+    multiplayerState.currentQuestionIndex = 0;
+
+    // イベント購読
+    eventsSubscription = subscribeToEvents(room.id, (event) => {
+        handleBattleEvent(event);
+    });
+
+    playSound('levelup');
+    renderPvpBattle();
+    startBattleTimer();
+}
+
+// 対戦タイマー開始
+function startBattleTimer() {
+    const room = multiplayerState.room;
+    const endTime = new Date(room.battle_end_time).getTime();
+
+    multiplayerState.timerInterval = setInterval(() => {
+        const now = Date.now();
+        const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+        const timerEl = document.getElementById('battleTimer');
+        if (timerEl) {
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            // 残り10秒は赤く
+            if (remaining <= 10) {
+                timerEl.classList.add('time-critical');
+                if (remaining === 10 || remaining === 5 || remaining === 3 || remaining === 2 || remaining === 1) {
+                    playSound('click');
+                }
+            }
+        }
+
+        if (remaining <= 0) {
+            clearInterval(multiplayerState.timerInterval);
+            // ホストが終了処理
+            if (multiplayerState.isHost) {
+                endBattle(room.id);
+            }
+        }
+    }, 100);
+}
+
+// 対戦画面描画
+function renderPvpBattle() {
+    const room = multiplayerState.room;
+    const question = multiplayerState.battleQuestions[multiplayerState.currentQuestionIndex];
+    const isHost = multiplayerState.isHost;
+
+    const myScore = isHost ? room.host_score : room.guest_score;
+    const opponentScore = isHost ? room.guest_score : room.host_score;
+    const myName = isHost ? room.host_player_name : room.guest_player_name;
+    const opponentName = isHost ? room.guest_player_name : room.host_player_name;
+
+    // スコアバーの幅を計算（最低5%、最大95%）
+    const totalScore = myScore + opponentScore || 1;
+    const myScorePercent = Math.max(5, Math.min(95, (myScore / totalScore) * 100));
+
+    app.innerHTML = `
+        <div class="screen pvp-battle-screen">
+            <div class="pvp-header">
+                <div class="battle-timer" id="battleTimer">3:00</div>
+            </div>
+
+            <div class="pvp-score-area">
+                <div class="score-bar-container">
+                    <div class="score-bar my-score" style="width: ${myScorePercent}%"></div>
+                    <div class="score-bar opponent-score" style="width: ${100 - myScorePercent}%"></div>
+                </div>
+                <div class="score-labels">
+                    <div class="score-label my-label">
+                        <span class="name">${myName}</span>
+                        <span class="score" id="myScore">${myScore}</span>
+                    </div>
+                    <div class="score-label opponent-label">
+                        <span class="name">${opponentName}</span>
+                        <span class="score" id="opponentScore">${opponentScore}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pvp-parties">
+                <div class="pvp-party my-party">
+                    ${renderMiniParty(isHost ? room.host_party : room.guest_party)}
+                </div>
+                <div class="pvp-party opponent-party">
+                    ${renderMiniParty(isHost ? room.guest_party : room.host_party)}
+                </div>
+            </div>
+
+            <div class="pvp-question-area">
+                <div class="question-text" id="questionText">${question.question}</div>
+                <div class="answer-feedback" id="answerFeedback"></div>
+            </div>
+
+            <div class="pvp-choices" id="choicesArea">
+                ${question.choices.map((choice, i) => `
+                    <button class="pvp-choice-btn" data-choice="${choice}" data-index="${i}">
+                        ${choice}
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    // 選択肢のイベント
+    document.querySelectorAll('.pvp-choice-btn').forEach(btn => {
+        btn.onclick = () => handlePvpAnswer(btn.dataset.choice);
+    });
+}
+
+// ミニパーティ表示
+function renderMiniParty(partyIndexes) {
+    if (!partyIndexes) return '';
+    return partyIndexes.map(idx => {
+        const owned = currentPlayer.monsters[idx];
+        if (!owned) return '<span class="mini-monster empty">?</span>';
+        const monster = getMonsterById(owned.monsterId);
+        if (!monster) return '<span class="mini-monster empty">?</span>';
+        return `<span class="mini-monster" title="${monster.name}">${monster.name.charAt(0)}</span>`;
+    }).join('');
+}
+
+// 対戦中の回答処理
+async function handlePvpAnswer(selectedAnswer) {
+    const question = multiplayerState.battleQuestions[multiplayerState.currentQuestionIndex];
+    const isCorrect = selectedAnswer == question.answer;
+
+    const feedback = document.getElementById('answerFeedback');
+    const choicesArea = document.getElementById('choicesArea');
+
+    // ボタンを無効化
+    document.querySelectorAll('.pvp-choice-btn').forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.choice == question.answer) {
+            btn.classList.add('correct');
+        } else if (btn.dataset.choice == selectedAnswer) {
+            btn.classList.add('wrong');
+        }
+    });
+
+    if (isCorrect) {
+        playSound('correct');
+        feedback.innerHTML = '<span class="correct-feedback">正解！ +ポイント</span>';
+        createParticles('correct');
+
+        // スコア計算と更新
+        const score = calculateAnswerScore(
+            currentPlayer.party,
+            currentPlayer.monsters,
+            MONSTERS,
+            calculateStats
+        );
+        await updateScore(multiplayerState.room.id, multiplayerState.isHost, score);
+        await recordEvent(multiplayerState.room.id, multiplayerState.isHost ? 'host' : 'guest', 'answer_correct', { question: question.question }, score);
+    } else {
+        playSound('wrong');
+        feedback.innerHTML = '<span class="wrong-feedback">残念...</span>';
+
+        await recordEvent(multiplayerState.room.id, multiplayerState.isHost ? 'host' : 'guest', 'answer_wrong', { question: question.question }, 0);
+    }
+
+    // 次の問題へ
+    setTimeout(() => {
+        multiplayerState.currentQuestionIndex++;
+        if (multiplayerState.currentQuestionIndex >= multiplayerState.battleQuestions.length) {
+            multiplayerState.currentQuestionIndex = 0; // ループ
+        }
+        renderPvpBattle();
+    }, 800);
+}
+
+// スコア表示更新
+function updatePvpScoreDisplay() {
+    const room = multiplayerState.room;
+    const isHost = multiplayerState.isHost;
+
+    const myScore = isHost ? room.host_score : room.guest_score;
+    const opponentScore = isHost ? room.guest_score : room.host_score;
+
+    const myScoreEl = document.getElementById('myScore');
+    const opponentScoreEl = document.getElementById('opponentScore');
+
+    if (myScoreEl) myScoreEl.textContent = myScore;
+    if (opponentScoreEl) opponentScoreEl.textContent = opponentScore;
+
+    // スコアバー更新
+    const totalScore = myScore + opponentScore || 1;
+    const myScorePercent = Math.max(5, Math.min(95, (myScore / totalScore) * 100));
+    const myBar = document.querySelector('.score-bar.my-score');
+    const opponentBar = document.querySelector('.score-bar.opponent-score');
+    if (myBar) myBar.style.width = `${myScorePercent}%`;
+    if (opponentBar) opponentBar.style.width = `${100 - myScorePercent}%`;
+}
+
+// バトルイベント処理
+function handleBattleEvent(event) {
+    // 相手のイベントを受信したときの演出
+    const isOpponentEvent = (multiplayerState.isHost && event.player_role === 'guest') ||
+                           (!multiplayerState.isHost && event.player_role === 'host');
+
+    if (isOpponentEvent) {
+        if (event.event_type === 'answer_correct') {
+            // 相手が正解したときのエフェクト
+            createParticles('opponent');
+        }
+    }
+}
+
+// パーティクルエフェクト
+function createParticles(type) {
+    const colors = type === 'correct' ? ['#ffd700', '#ff6b6b', '#4ecdc4'] : ['#ff4444', '#888'];
+    const container = document.querySelector('.pvp-battle-screen') || document.body;
+
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.cssText = `
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: ${colors[Math.floor(Math.random() * colors.length)]};
+            border-radius: 50%;
+            pointer-events: none;
+            left: 50%;
+            top: 50%;
+            animation: particle-fly 0.8s ease-out forwards;
+            --angle: ${Math.random() * 360}deg;
+            --distance: ${50 + Math.random() * 100}px;
+        `;
+        container.appendChild(particle);
+        setTimeout(() => particle.remove(), 800);
+    }
+}
+
+// 対戦結果画面
+function showPvpResult() {
+    clearInterval(multiplayerState.timerInterval);
+    cleanupMultiplayerSubscriptions();
+
+    const room = multiplayerState.room;
+    const isHost = multiplayerState.isHost;
+    const myScore = isHost ? room.host_score : room.guest_score;
+    const opponentScore = isHost ? room.guest_score : room.host_score;
+    const myName = isHost ? room.host_player_name : room.guest_player_name;
+    const opponentName = isHost ? room.guest_player_name : room.host_player_name;
+
+    const isWinner = (isHost && room.winner === 'host') || (!isHost && room.winner === 'guest');
+    const isDraw = room.winner === 'draw';
+
+    let resultText, resultClass;
+    if (isDraw) {
+        resultText = '引き分け！';
+        resultClass = 'draw';
+    } else if (isWinner) {
+        resultText = '勝利！';
+        resultClass = 'win';
+        playSound('levelup');
+    } else {
+        resultText = '敗北...';
+        resultClass = 'lose';
+    }
+
+    app.innerHTML = `
+        <div class="screen pvp-result-screen ${resultClass}">
+            <div class="result-banner ${resultClass}">
+                <h1>${resultText}</h1>
+            </div>
+
+            <div class="result-scores">
+                <div class="result-player my-result ${isWinner ? 'winner' : ''}">
+                    <span class="name">${myName}</span>
+                    <span class="score">${myScore}点</span>
+                </div>
+                <div class="result-vs">VS</div>
+                <div class="result-player opponent-result ${!isWinner && !isDraw ? 'winner' : ''}">
+                    <span class="name">${opponentName}</span>
+                    <span class="score">${opponentScore}点</span>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button class="btn btn-primary btn-large" id="backToMultiplayerBtn">もどる</button>
+            </div>
+        </div>
+    `;
+
+    // 勝利時のパーティクル
+    if (isWinner) {
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => createParticles('correct'), i * 200);
+        }
+    }
+
+    document.getElementById('backToMultiplayerBtn').onclick = () => {
+        playSound('click');
+        currentScreen = 'multiplayer';
+        multiplayerState = null;
+        showMultiplayerMenu();
+    };
+}
+
+// ===========================================
+// 交換機能
+// ===========================================
+
+// 交換メニュー
+function showTradeMenu() {
+    app.innerHTML = `
+        <div class="screen trade-menu-screen">
+            <h2>交換モード</h2>
+            <div class="trade-options">
+                <button class="trade-option-btn create-trade" id="createTradeBtn">
+                    <span class="option-icon">🏠</span>
+                    <span class="option-title">交換ルームをつくる</span>
+                </button>
+                <button class="trade-option-btn join-trade" id="joinTradeBtn">
+                    <span class="option-icon">🚪</span>
+                    <span class="option-title">交換ルームにはいる</span>
+                </button>
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToMultiplayer">もどる</button>
+        </div>
+    `;
+
+    document.getElementById('createTradeBtn').onclick = async () => {
+        playSound('click');
+        await createTradeRoom();
+    };
+    document.getElementById('joinTradeBtn').onclick = () => {
+        playSound('click');
+        showJoinTradeScreen();
+    };
+    document.getElementById('backToMultiplayer').onclick = () => {
+        playSound('click');
+        showMultiplayerMenu();
+    };
+}
+
+// 交換ルーム作成
+async function createTradeRoom() {
+    app.innerHTML = `
+        <div class="screen loading-screen">
+            <div class="loading-spinner"></div>
+            <p>ルームを作成中...</p>
+        </div>
+    `;
+
+    try {
+        const room = await createRoom(ROOM_TYPES.TRADE, {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            party: currentPlayer.party
+        });
+
+        multiplayerState = {
+            room,
+            isHost: true,
+            trade: null,
+            selectedMonsterIndex: null
+        };
+
+        // リアルタイム購読
+        roomSubscription = subscribeToRoom(room.id, (updatedRoom) => {
+            if (multiplayerState) {
+                multiplayerState.room = updatedRoom;
+                handleTradeRoomUpdate(updatedRoom);
+            }
+        });
+
+        showTradeLobby();
+    } catch (error) {
+        console.error('交換ルーム作成エラー:', error);
+        showTradeMenu();
+    }
+}
+
+// 交換ルーム参加画面
+function showJoinTradeScreen() {
+    app.innerHTML = `
+        <div class="screen join-room-screen">
+            <h2>ルームコードを入力</h2>
+            <input type="text" id="roomCodeInput" class="room-code-input"
+                   placeholder="XXXXXX" maxlength="6"
+                   style="text-transform: uppercase">
+            <button class="btn btn-primary btn-large" id="joinBtn" disabled>はいる</button>
+            <p class="error-message" id="errorMessage"></p>
+            <button class="btn btn-ghost back-btn" id="backToTradeMenu">もどる</button>
+        </div>
+    `;
+
+    const input = document.getElementById('roomCodeInput');
+    const joinBtn = document.getElementById('joinBtn');
+    const errorMsg = document.getElementById('errorMessage');
+
+    input.oninput = () => {
+        input.value = input.value.toUpperCase();
+        joinBtn.disabled = input.value.length !== 6;
+        errorMsg.textContent = '';
+    };
+
+    joinBtn.onclick = async () => {
+        playSound('click');
+        joinBtn.disabled = true;
+        joinBtn.textContent = '接続中...';
+
+        const result = await joinRoom(input.value, {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            party: currentPlayer.party
+        });
+
+        if (result.error) {
+            errorMsg.textContent = result.error;
+            joinBtn.disabled = false;
+            joinBtn.textContent = 'はいる';
+            playSound('wrong');
+            return;
+        }
+
+        if (result.data.room_type !== ROOM_TYPES.TRADE) {
+            errorMsg.textContent = '対戦ルームです。交換ルームではありません。';
+            joinBtn.disabled = false;
+            joinBtn.textContent = 'はいる';
+            playSound('wrong');
+            return;
+        }
+
+        multiplayerState = {
+            room: result.data,
+            isHost: false,
+            trade: null,
+            selectedMonsterIndex: null
+        };
+
+        roomSubscription = subscribeToRoom(result.data.id, (updatedRoom) => {
+            if (multiplayerState) {
+                multiplayerState.room = updatedRoom;
+                handleTradeRoomUpdate(updatedRoom);
+            }
+        });
+
+        showTradeLobby();
+    };
+
+    document.getElementById('backToTradeMenu').onclick = () => {
+        playSound('click');
+        showTradeMenu();
+    };
+}
+
+// 交換ロビー
+async function showTradeLobby() {
+    const room = multiplayerState.room;
+    const isHost = multiplayerState.isHost;
+
+    // 交換データを取得/作成
+    if (room.guest_player_id && !multiplayerState.trade) {
+        multiplayerState.trade = await getOrCreateTrade(room.id);
+        // 交換の購読開始
+        tradeSubscription = subscribeToTrade(room.id, (updatedTrade) => {
+            if (multiplayerState) {
+                multiplayerState.trade = updatedTrade;
+                showTradeLobby();
+            }
+        });
+    }
+
+    const trade = multiplayerState.trade;
+
+    app.innerHTML = `
+        <div class="screen trade-lobby-screen">
+            <div class="room-code-display">
+                <span class="label">ルームコード</span>
+                <span class="code">${room.room_code}</span>
+            </div>
+
+            ${!room.guest_player_id ? `
+                <div class="waiting-trade-partner">
+                    <div class="loading-spinner"></div>
+                    <p>交換相手を待っています...</p>
+                </div>
+            ` : `
+                <div class="trade-area">
+                    <div class="trade-side my-trade">
+                        <h3>${isHost ? room.host_player_name : room.guest_player_name}</h3>
+                        <div class="trade-monster-slot" id="myTradeSlot">
+                            ${renderTradeSlot(trade, isHost, true)}
+                        </div>
+                        <button class="btn btn-secondary" id="selectMonsterBtn">
+                            モンスターを選ぶ
+                        </button>
+                        ${canConfirmTrade(trade, isHost) ? `
+                            <button class="btn btn-primary" id="confirmTradeBtn">
+                                交換する！
+                            </button>
+                        ` : ''}
+                    </div>
+
+                    <div class="trade-arrow">⇄</div>
+
+                    <div class="trade-side partner-trade">
+                        <h3>${isHost ? room.guest_player_name : room.host_player_name}</h3>
+                        <div class="trade-monster-slot" id="partnerTradeSlot">
+                            ${renderTradeSlot(trade, isHost, false)}
+                        </div>
+                    </div>
+                </div>
+
+                ${trade && trade.host_confirmed && trade.guest_confirmed ? `
+                    <div class="trade-complete-message">
+                        <p>交換成立！</p>
+                    </div>
+                ` : ''}
+            `}
+
+            <button class="btn btn-ghost back-btn" id="leaveTradeBtn">退出する</button>
+        </div>
+    `;
+
+    // イベント
+    const selectBtn = document.getElementById('selectMonsterBtn');
+    const confirmBtn = document.getElementById('confirmTradeBtn');
+    const leaveBtn = document.getElementById('leaveTradeBtn');
+
+    if (selectBtn) {
+        selectBtn.onclick = () => {
+            playSound('click');
+            showTradeMonsterSelect();
+        };
+    }
+
+    if (confirmBtn) {
+        confirmBtn.onclick = async () => {
+            playSound('gacha');
+            await confirmTrade(trade.id, isHost);
+        };
+    }
+
+    if (leaveBtn) {
+        leaveBtn.onclick = async () => {
+            playSound('click');
+            cleanupMultiplayerSubscriptions();
+            if (isHost) {
+                await deleteRoom(room.id);
+            } else {
+                await leaveRoom(room.id);
+            }
+            multiplayerState = null;
+            showMultiplayerMenu();
+        };
+    }
+
+    // 交換完了チェック
+    if (trade && trade.status === 'completed') {
+        handleTradeComplete();
+    }
+}
+
+// 交換スロット表示
+function renderTradeSlot(trade, isHost, isMySide) {
+    if (!trade) return '<div class="empty-slot">選択してください</div>';
+
+    const monsterData = isMySide
+        ? (isHost ? trade.host_monster_data : trade.guest_monster_data)
+        : (isHost ? trade.guest_monster_data : trade.host_monster_data);
+    const confirmed = isMySide
+        ? (isHost ? trade.host_confirmed : trade.guest_confirmed)
+        : (isHost ? trade.guest_confirmed : trade.host_confirmed);
+
+    if (!monsterData) {
+        return '<div class="empty-slot">選択してください</div>';
+    }
+
+    const monster = getMonsterById(monsterData.monsterId);
+    if (!monster) return '<div class="empty-slot">???</div>';
+
+    return `
+        <div class="trade-monster ${confirmed ? 'confirmed' : ''}">
+            ${renderMonsterCard(monster, monsterData.level, 'small', monsterData.colorVariant || 0)}
+            ${confirmed ? '<div class="confirmed-badge">OK!</div>' : ''}
+        </div>
+    `;
+}
+
+// 交換確認可能かチェック
+function canConfirmTrade(trade, isHost) {
+    if (!trade) return false;
+    const myData = isHost ? trade.host_monster_data : trade.guest_monster_data;
+    const partnerData = isHost ? trade.guest_monster_data : trade.host_monster_data;
+    const myConfirmed = isHost ? trade.host_confirmed : trade.guest_confirmed;
+    return myData && partnerData && !myConfirmed;
+}
+
+// 交換用モンスター選択画面
+function showTradeMonsterSelect() {
+    const trade = multiplayerState.trade;
+    const isHost = multiplayerState.isHost;
+
+    app.innerHTML = `
+        <div class="screen trade-select-screen">
+            <h2>交換するモンスターを選ぼう</h2>
+            <div class="monster-select-grid">
+                ${currentPlayer.monsters.map((owned, idx) => {
+                    const monster = getMonsterById(owned.monsterId);
+                    if (!monster) return '';
+                    const inParty = currentPlayer.party.includes(idx);
+                    return `
+                        <div class="trade-monster-option ${inParty ? 'in-party' : ''}" data-index="${idx}">
+                            ${renderMonsterCard(monster, owned.level, 'small', owned.colorVariant || 0)}
+                            ${inParty ? '<div class="party-badge">パーティ</div>' : ''}
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <button class="btn btn-ghost back-btn" id="backToTradeLobby">もどる</button>
+        </div>
+    `;
+
+    document.querySelectorAll('.trade-monster-option').forEach(el => {
+        el.onclick = async () => {
+            playSound('click');
+            const idx = parseInt(el.dataset.index);
+            const owned = currentPlayer.monsters[idx];
+
+            // 交換データを更新
+            await selectTradeMonster(trade.id, isHost, idx, {
+                monsterId: owned.monsterId,
+                level: owned.level,
+                exp: owned.exp,
+                colorVariant: owned.colorVariant || 0
+            });
+
+            multiplayerState.selectedMonsterIndex = idx;
+            showTradeLobby();
+        };
+    });
+
+    document.getElementById('backToTradeLobby').onclick = () => {
+        playSound('click');
+        showTradeLobby();
+    };
+}
+
+// 交換ルーム更新ハンドラ
+function handleTradeRoomUpdate(room) {
+    if (!multiplayerState) return;
+    showTradeLobby();
+}
+
+// 交換完了処理
+function handleTradeComplete() {
+    const trade = multiplayerState.trade;
+    const isHost = multiplayerState.isHost;
+
+    // 相手のモンスターデータを取得
+    const receivedData = isHost ? trade.guest_monster_data : trade.host_monster_data;
+    const givenIndex = isHost ? trade.host_monster_index : trade.guest_monster_index;
+
+    if (receivedData && givenIndex !== null) {
+        // 自分のモンスターを削除して、相手のモンスターを追加
+        currentPlayer.monsters.splice(givenIndex, 1);
+        currentPlayer.monsters.push({
+            monsterId: receivedData.monsterId,
+            level: receivedData.level,
+            exp: receivedData.exp,
+            colorVariant: receivedData.colorVariant || 0
+        });
+
+        // パーティから削除されたモンスターを除去
+        currentPlayer.party = currentPlayer.party.filter(idx => idx !== givenIndex).map(idx => idx > givenIndex ? idx - 1 : idx);
+
+        savePlayerData(currentPlayer);
+        playSound('levelup');
+    }
+
+    // 完了画面表示
+    setTimeout(() => {
+        cleanupMultiplayerSubscriptions();
+
+        const monster = getMonsterById(receivedData.monsterId);
+        app.innerHTML = `
+            <div class="screen trade-complete-screen">
+                <h2>交換完了！</h2>
+                <div class="received-monster">
+                    ${renderMonsterCard(monster, receivedData.level, 'large', receivedData.colorVariant || 0)}
+                </div>
+                <p class="received-message">${monster?.name}を手に入れた！</p>
+                <button class="btn btn-primary btn-large" id="backToMenuBtn">もどる</button>
+            </div>
+        `;
+
+        document.getElementById('backToMenuBtn').onclick = () => {
+            playSound('click');
+            multiplayerState = null;
+            showMultiplayerMenu();
+        };
+    }, 1500);
 }
 
 // ===========================================
