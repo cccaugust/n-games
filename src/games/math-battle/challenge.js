@@ -92,24 +92,56 @@ export const POINT_CONFIG = {
     }
 };
 
+// ダンジョン難易度による報酬倍率
+const DUNGEON_REWARD_MULTIPLIER = {
+    [DUNGEONS.ADDITION]: 1.0,       // 足し算: 基本
+    [DUNGEONS.SUBTRACTION]: 1.2,    // 引き算: 1.2倍
+    [DUNGEONS.MULTIPLICATION]: 1.5, // 掛け算: 1.5倍
+    [DUNGEONS.DIVISION]: 1.8        // 割り算: 1.8倍
+};
+
 // 報酬計算
 export const REWARD_CONFIG = {
-    // 通常コイン報酬
-    getCoins: (floor, points, maxPoints) => {
-        const ratio = points / maxPoints;
-        const baseReward = floor * 5;
-        return Math.floor(baseReward * ratio);
+    // ダンジョン倍率を取得
+    getDungeonMultiplier: (dungeon) => {
+        return DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
     },
-    // 学年コイン報酬（高い階層でより多く）
-    getGradeCoins: (floor, points, maxPoints) => {
-        if (floor < 3) return { grade: 1, amount: 0 };
+    // 通常コイン報酬（増量版 + ダンジョン難易度ボーナス）
+    getCoins: (floor, points, maxPoints, dungeon = DUNGEONS.ADDITION) => {
         const ratio = points / maxPoints;
+        const dungeonMultiplier = DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
+        // 基本報酬: 10 + floor * 10 → 1Fで20、9Fで100が満点時（足し算）
+        const baseReward = 10 + floor * 10;
+        return Math.floor(baseReward * ratio * dungeonMultiplier);
+    },
+    // 学年コイン報酬（全フロアで獲得可能 + ダンジョン難易度ボーナス）
+    getGradeCoins: (floor, points, maxPoints, dungeon = DUNGEONS.ADDITION) => {
+        const ratio = points / maxPoints;
+        const dungeonMultiplier = DUNGEON_REWARD_MULTIPLIER[dungeon] || 1.0;
+        // 階層に応じた学年: 1-2F→1年, 3-4F→2年, 5-6F→3年, 7-8F→4年, 9F→5年
         const grade = Math.min(6, Math.ceil(floor / 2));
-        const baseReward = Math.floor(floor / 2);
+        // 基本報酬: 1 + floor/2 → 1Fで1、9Fで5が満点時（足し算）
+        const baseReward = 1 + Math.floor(floor / 2);
         return {
             grade,
-            amount: Math.floor(baseReward * ratio)
+            amount: Math.max(1, Math.floor(baseReward * ratio * dungeonMultiplier)) // 最低1枚保証
         };
+    },
+    // 報酬プレビュー（ポイント率ごとの報酬を計算）
+    getRewardPreview: (floor, dungeon = DUNGEONS.ADDITION) => {
+        const maxPoints = 1000; // 仮の値
+        const grades = [100, 80, 60]; // パーセント
+        return grades.map(percent => {
+            const points = maxPoints * (percent / 100);
+            const coins = REWARD_CONFIG.getCoins(floor, points, maxPoints, dungeon);
+            const gradeReward = REWARD_CONFIG.getGradeCoins(floor, points, maxPoints, dungeon);
+            return {
+                percent,
+                coins,
+                gradeCoins: gradeReward.amount,
+                gradeLevel: gradeReward.grade
+            };
+        });
     }
 };
 

@@ -2441,6 +2441,15 @@ body {
     color: var(--text-muted);
 }
 
+.dungeon-bonus {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+
 /* ===========================================
    挑戦ステージ - 階層選択
 =========================================== */
@@ -2518,6 +2527,51 @@ body {
     background: rgba(0, 210, 106, 0.15);
     padding: 4px 10px;
     border-radius: var(--radius-sm);
+}
+
+/* 報酬の目安表示 */
+.reward-legend {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.legend-title {
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.legend-item {
+    white-space: nowrap;
+}
+
+/* 階層ごとの報酬表示 */
+.floor-rewards {
+    flex-shrink: 0;
+    margin: 0 12px;
+}
+
+.reward-preview {
+    font-size: 0.85rem;
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.15);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
 }
 
 /* ===========================================

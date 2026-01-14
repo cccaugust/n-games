@@ -569,12 +569,15 @@ function showDungeonSelect() {
         const dungeonData = currentPlayer.challengeData?.[dungeon] || {};
         const clearedFloors = dungeonData.clearedFloors || [];
         const progress = clearedFloors.length;
+        const multiplier = REWARD_CONFIG.getDungeonMultiplier(dungeon);
+        const bonusText = multiplier > 1 ? `報酬 ×${multiplier}` : '';
 
         return `
                         <button class="dungeon-btn ${available ? '' : 'locked'}"
                                 data-dungeon="${dungeon}" ${available ? '' : 'disabled'}>
                             <span class="dungeon-icon">${DUNGEON_ICONS[dungeon]}</span>
                             <span class="dungeon-name">${DUNGEON_NAMES[dungeon]}</span>
+                            ${bonusText ? `<span class="dungeon-bonus">${bonusText}</span>` : ''}
                             ${available
                 ? `<span class="dungeon-progress">${progress}/${MAX_FLOOR} クリア</span>`
                 : `<span class="dungeon-locked">準備中...</span>`
@@ -607,14 +610,31 @@ function showFloorSelect(dungeon) {
         floors.push(i);
     }
 
+    // 報酬プレビュー用のアイコンマップ（GRADE_COIN_ICONSより前に定義されているため直接定義）
+    const gradeIcons = { 1: '🔵', 2: '🟢', 3: '🟡', 4: '🟠', 5: '🔴', 6: '🟣' };
+
     app.innerHTML = `
         <div class="screen floor-select-screen">
             <h2>${DUNGEON_ICONS[dungeon]} ${DUNGEON_NAMES[dungeon]}</h2>
+
+            <div class="reward-legend">
+                <div class="legend-title">報酬の目安（クリア時）</div>
+                <div class="legend-items">
+                    <span class="legend-item">💯 100% → 最大報酬</span>
+                    <span class="legend-item">✨ 60% → クリア報酬</span>
+                </div>
+            </div>
+
             <div class="floor-list">
                 ${floors.map(floor => {
         const isUnlocked = isChallengeFloorUnlocked(currentPlayer, dungeon, floor);
         const bestPoints = getChallengeFloorBestPoints(currentPlayer, dungeon, floor);
         const isCleared = bestPoints > 0;
+
+        // 報酬プレビュー（ダンジョン難易度で倍率がかかる）
+        const preview = REWARD_CONFIG.getRewardPreview(floor, dungeon);
+        const maxReward = preview[0]; // 100%
+        const gradeIcon = gradeIcons[maxReward.gradeLevel];
 
         return `
                         <button class="floor-btn ${isUnlocked ? '' : 'locked'} ${isCleared ? 'cleared' : ''}"
@@ -622,6 +642,9 @@ function showFloorSelect(dungeon) {
                             <div class="floor-info">
                                 <span class="floor-num">${floor}F</span>
                                 <span class="floor-desc">${FLOOR_DESCRIPTIONS[floor]}</span>
+                            </div>
+                            <div class="floor-rewards">
+                                <span class="reward-preview">💰${maxReward.coins} ${gradeIcon}${maxReward.gradeCoins}</span>
                             </div>
                             <div class="floor-status">
                                 ${!isUnlocked ? '🔒' : isCleared ? `<span class="best-points">${bestPoints}pt</span>` : ''}
@@ -811,9 +834,9 @@ function finishChallenge() {
     if (isCleared) {
         playSound('levelup');
 
-        // 報酬計算
-        const coins = REWARD_CONFIG.getCoins(cs.floor, cs.points, cs.maxPoints);
-        const gradeReward = REWARD_CONFIG.getGradeCoins(cs.floor, cs.points, cs.maxPoints);
+        // 報酬計算（ダンジョン難易度で倍率がかかる）
+        const coins = REWARD_CONFIG.getCoins(cs.floor, cs.points, cs.maxPoints, cs.dungeon);
+        const gradeReward = REWARD_CONFIG.getGradeCoins(cs.floor, cs.points, cs.maxPoints, cs.dungeon);
 
         // 記録
         const result = recordChallengeFloorClear(
