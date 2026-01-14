@@ -2607,6 +2607,13 @@ body {
     color: var(--text-secondary);
 }
 
+.challenge-life {
+    font-size: 1.4rem;
+    text-align: center;
+    letter-spacing: 4px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
 .points-display {
     display: flex;
     align-items: center;
