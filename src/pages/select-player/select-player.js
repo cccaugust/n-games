@@ -1,4 +1,4 @@
-import { selectPlayer, requireAuth } from '../../js/auth.js';
+import { consumeNextPath, requireAuth, selectPlayer } from '../../js/auth.js';
 import { supabase } from '../../js/supabaseClient.js';
 import { isImageAvatar, makeImageAvatar, renderAvatarInto } from '../../js/avatar.js';
 import { pokemonData } from '../../data/pokemonData.js';
@@ -311,7 +311,8 @@ async function renderPlayers() {
 
 function choosePlayer(player) {
     selectPlayer(player);
-    navigateTo('/pages/portal/portal.html');
+    const next = consumeNextPath();
+    navigateTo(next || '/pages/portal/portal.html');
 }
 
 // Initial render
