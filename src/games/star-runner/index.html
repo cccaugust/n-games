@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スターランナー・アドベンチャー</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="game-shell">
+    <header class="hud">
+      <h1>⭐ スターランナー・アドベンチャー</h1>
+      <div class="hud-stats">
+        <span id="coinLabel">コイン: 0 / 0</span>
+        <span id="lifeLabel">ライフ: 3</span>
+        <span id="messageLabel">→ と ← で移動 / スペースでジャンプ</span>
+      </div>
+    </header>
+    <canvas id="gameCanvas" width="960" height="540" aria-label="横スクロールアクションゲーム"></canvas>
+    <footer class="tips">
+      <p>操作: ← → で移動 / スペース or ↑ でジャンプ / R でリスタート</p>
+    </footer>
+  </main>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
