@@ -62,15 +62,69 @@ body {
   background: #1e293b;
 }
 
+
+.touch-controls {
+  display: none;
+  margin-top: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.touch-controls__move {
+  display: flex;
+  gap: 10px;
+}
+
+.touch-btn {
+  min-width: 64px;
+  min-height: 56px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f8fafc;
+  font-size: 1.25rem;
+  font-weight: 700;
+  touch-action: manipulation;
+}
+
+.touch-btn:active {
+  transform: scale(0.96);
+  background: rgba(30, 41, 59, 0.95);
+}
+
+.touch-btn--jump {
+  min-width: 110px;
+  font-size: 1rem;
+}
+
 .tips {
   text-align: center;
   color: #cbd5e1;
   font-size: 0.9rem;
 }
 
+@media (max-width: 1024px) {
+  .touch-controls {
+    display: flex;
+  }
+}
+
 @media (max-width: 720px) {
   .hud {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .touch-controls {
+    width: 100%;
+  }
+
+  .touch-btn {
+    min-height: 52px;
+  }
+
+  .touch-btn--jump {
+    margin-left: auto;
   }
 }

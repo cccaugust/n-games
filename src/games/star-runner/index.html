@@ -13,12 +13,19 @@
       <div class="hud-stats">
         <span id="coinLabel">コイン: 0 / 0</span>
         <span id="lifeLabel">ライフ: 3</span>
-        <span id="messageLabel">→ と ← で移動 / スペースでジャンプ</span>
+        <span id="messageLabel">→ と ← で移動 / スペース or タッチでジャンプ</span>
       </div>
     </header>
     <canvas id="gameCanvas" width="960" height="540" aria-label="横スクロールアクションゲーム"></canvas>
+    <section class="touch-controls" aria-label="タッチ操作">
+      <div class="touch-controls__move">
+        <button type="button" class="touch-btn" data-control="left" aria-label="左に移動">←</button>
+        <button type="button" class="touch-btn" data-control="right" aria-label="右に移動">→</button>
+      </div>
+      <button type="button" class="touch-btn touch-btn--jump" data-control="jump" aria-label="ジャンプ">ジャンプ</button>
+    </section>
     <footer class="tips">
-      <p>操作: ← → で移動 / スペース or ↑ でジャンプ / R でリスタート</p>
+      <p>操作: ← → で移動 / スペース or ↑ でジャンプ / タッチボタン対応 / R でリスタート</p>
     </footer>
   </main>
 

@@ -80,6 +80,38 @@ document.addEventListener('keyup', (e) => {
   if (keyMap[e.code]) input[keyMap[e.code]] = false;
 });
 
+function bindHoldControl(button, key) {
+  if (!button) return;
+  const start = (e) => {
+    e.preventDefault();
+    input[key] = true;
+  };
+  const end = (e) => {
+    e.preventDefault();
+    input[key] = false;
+  };
+  button.addEventListener('pointerdown', start);
+  button.addEventListener('pointerup', end);
+  button.addEventListener('pointercancel', end);
+  button.addEventListener('pointerleave', end);
+}
+
+function setupTouchControls() {
+  const leftButton = document.querySelector('[data-control="left"]');
+  const rightButton = document.querySelector('[data-control="right"]');
+  const jumpButton = document.querySelector('[data-control="jump"]');
+
+  bindHoldControl(leftButton, 'left');
+  bindHoldControl(rightButton, 'right');
+
+  if (jumpButton) {
+    jumpButton.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      input.jumpPressed = true;
+    });
+  }
+}
+
 function resetGame() {
   player.x = 80;
   player.y = 350;
@@ -90,7 +122,7 @@ function resetGame() {
   player.invincibleFrames = 0;
   collectedCoins = new Set();
   gameState = 'playing';
-  messageLabel.textContent = '→ と ← で移動 / スペースでジャンプ';
+  messageLabel.textContent = '→ と ← で移動 / スペース or タッチでジャンプ';
   updateHud();
 }
 
@@ -301,6 +333,8 @@ function loop() {
   drawOverlay();
   requestAnimationFrame(loop);
 }
+
+setupTouchControls();
 
 updateHud();
 loop();
