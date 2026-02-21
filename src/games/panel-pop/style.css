@@ -1,0 +1,100 @@
+:root {
+  color-scheme: light;
+  --text: #2b1a55;
+  --panel: #ffffffcc;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 20% 15%, #fff3a9, transparent 40%),
+    radial-gradient(circle at 85% 10%, #ffc8ee, transparent 36%),
+    radial-gradient(circle at 70% 90%, #b2ffe8, transparent 32%),
+    linear-gradient(180deg, #8ec5ff, #99a7ff 50%, #f8b4ff);
+  color: var(--text);
+  font-family: 'Nunito', 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', sans-serif;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.app { width: min(100%, 540px); display: grid; gap: 12px; }
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hud > div {
+  border: 3px solid #ffffff;
+  border-radius: 16px;
+  padding: 8px 10px;
+  background: linear-gradient(180deg, #ffffffeb, #ffe6ffea);
+  box-shadow: 0 6px 0 #8a67d9aa;
+}
+
+.label { margin: 0; font-size: 11px; letter-spacing: 0.1em; font-weight: 800; color: #5d4f8c; }
+.value { margin: 4px 0 0; font-size: clamp(20px, 4vw, 30px); font-weight: 900; color: #302263; }
+
+.game-wrap {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 0 #6f62c9a8, 0 18px 36px #2f1f5a4d;
+  background: #ffffff70;
+}
+
+#game { width: 100%; height: auto; display: block; }
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: #2f1e57d8;
+  color: #fff;
+}
+
+.overlay.hidden { display: none; }
+.overlay h1, .overlay p { margin: 0; }
+
+button {
+  border: 2px solid #fff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(180deg, #8f7cff, #6c58f7);
+  box-shadow: 0 4px 0 #4935cc;
+}
+
+.touch-controls {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.touch-controls button { min-height: 44px; touch-action: manipulation; }
+.touch-controls .primary { background: linear-gradient(180deg, #3be0cf, #08a894); box-shadow: 0 4px 0 #067a6b; }
+.touch-controls .danger { background: linear-gradient(180deg, #ff7ea8, #f14b7d); box-shadow: 0 4px 0 #be2f5d; }
+
+.howto {
+  border: 3px solid #fff;
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #89a0f0;
+}
+
+.howto p { margin: 0; }
