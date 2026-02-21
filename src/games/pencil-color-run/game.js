@@ -9,7 +9,8 @@ const COLORS = {
 const COLOR_KEYS = Object.keys(COLORS);
 
 let scene, camera, renderer, playerRoot, pencilBody, pencilTip, ground;
-let length = 10;
+const INITIAL_LENGTH = 7.2;
+let length = INITIAL_LENGTH;
 let laneX = 0;
 let speed = 10;
 let distance = 0;
@@ -28,16 +29,17 @@ const card = document.getElementById('card');
 const lengthChip = document.getElementById('length-chip');
 const distanceChip = document.getElementById('distance-chip');
 const colorChip = document.getElementById('color-chip');
+const lengthMeterFill = document.getElementById('length-meter-fill');
 
 setup();
 showStart();
 
 function setup() {
   scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x90a1ff, 35, 120);
+  scene.fog = new THREE.Fog(0xa6b8ff, 45, 160);
 
-  camera = new THREE.PerspectiveCamera(63, window.innerWidth / window.innerHeight, 0.1, 250);
-  camera.position.set(0, 8, 14);
+  camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 300);
+  camera.position.set(0, 11.5, 20);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -45,18 +47,39 @@ function setup() {
   renderer.shadowMap.enabled = true;
   app.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  scene.add(new THREE.HemisphereLight(0xffefff, 0x7bb8ff, 0.55));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.2);
   sun.position.set(15, 30, 18);
   sun.castShadow = true;
   scene.add(sun);
 
-  const groundMat = new THREE.MeshStandardMaterial({ color: 0xeaf3ff, roughness: 0.95, metalness: 0 });
+  const groundMat = new THREE.MeshStandardMaterial({ color: 0xf7fbff, roughness: 0.85, metalness: 0 });
   ground = new THREE.Mesh(new THREE.PlaneGeometry(24, 600), groundMat);
   ground.rotation.x = -Math.PI / 2;
   ground.position.z = -220;
   ground.receiveShadow = true;
   scene.add(ground);
+
+  const laneColors = [0xff7db8, 0x73c5ff, 0x80ed99];
+  [-4, 0, 4].forEach((x, i) => {
+    const lane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.5, 600),
+      new THREE.MeshStandardMaterial({ color: laneColors[i], transparent: true, opacity: 0.2, emissive: laneColors[i], emissiveIntensity: 0.22 })
+    );
+    lane.rotation.x = -Math.PI / 2;
+    lane.position.set(x, 0.03, -220);
+    scene.add(lane);
+  });
+
+  for (let i = 0; i < 40; i++) {
+    const star = new THREE.Mesh(
+      new THREE.SphereGeometry(0.12 + Math.random() * 0.12, 10, 10),
+      new THREE.MeshBasicMaterial({ color: laneColors[Math.floor(Math.random() * laneColors.length)] })
+    );
+    star.position.set((Math.random() - 0.5) * 25, 3 + Math.random() * 10, -30 - Math.random() * 560);
+    scene.add(star);
+  }
 
   for (let i = 0; i < 50; i++) {
     spawnGroup(-20 - i * 11);
@@ -189,9 +212,10 @@ function animate(now = performance.now()) {
     laneX = THREE.MathUtils.clamp(laneX + dir * dt * 10, -4, 4);
     playerRoot.position.x = THREE.MathUtils.damp(playerRoot.position.x, laneX, 9, dt);
 
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, playerRoot.position.x * 0.38, 6, dt);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, playerRoot.position.z + 14, 6, dt);
-    camera.lookAt(playerRoot.position.x, Math.max(1.4, length * 0.5), playerRoot.position.z - 8);
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, playerRoot.position.x * 0.45, 6, dt);
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, 10.5 + length * 0.18, 4.5, dt);
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, playerRoot.position.z + 20, 6, dt);
+    camera.lookAt(playerRoot.position.x, Math.max(2.8, length * 0.52), playerRoot.position.z - 20);
 
     paintTrail();
     recycleAndCollide();
@@ -278,7 +302,10 @@ function recycleAndCollide() {
 }
 
 function updateHud() {
-  lengthChip.textContent = `ながさ: ${length.toFixed(1)}`;
+  const lengthCm = Math.round(length * 10);
+  lengthChip.textContent = `ながさ: ${lengthCm}cm`;
+  const meterRatio = THREE.MathUtils.clamp(length / 18, 0, 1);
+  lengthMeterFill.style.transform = `scaleX(${meterRatio})`;
   distanceChip.textContent = `きょり: ${Math.floor(distance)}m`;
 }
 
@@ -287,6 +314,7 @@ function showStart() {
   card.innerHTML = `
     <h1>✏️ えんぴつカラーダッシュ</h1>
     <p>えんぴつは前へオートで進みます！左右だけ動かしてね。</p>
+    <p>🧮 ながさは <strong>cm表示</strong> とメーターでいつでもチェック！</p>
     <p>同じ色の色鉛筆を取ると長くなる！ちがう色を取るとゲームオーバー！</p>
     <p>半透明の色ゲートで色チェンジ。壁は高さぶんだけ削れるよ！</p>
     <button class="play-btn" id="start-btn">スタート！</button>

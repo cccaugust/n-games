@@ -7,11 +7,14 @@
   <link rel="stylesheet" href="../../style.css" />
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; overflow: hidden; background: radial-gradient(circle at top, #b9f2ff, #8ea5ff 56%, #4a5fd9); min-height: 100dvh; touch-action: none; }
+    body { margin: 0; overflow: hidden; background: radial-gradient(circle at 20% 10%, #ffd7f2, #9ed2ff 45%, #6671ff 75%, #4f3dc2); min-height: 100dvh; touch-action: none; }
     #app { position: fixed; inset: 0; }
     canvas { width: 100%; height: 100%; display: block; }
     .hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; gap: 10px; padding: max(12px, env(safe-area-inset-top)) 14px 12px; z-index: 10; pointer-events: none; }
-    .chip { background: rgba(255,255,255,0.74); border: 2px solid rgba(255,255,255,.5); border-radius: 999px; padding: 8px 14px; font-weight: 800; color: #203064; box-shadow: 0 6px 20px rgba(32,48,100,.2); }
+    .chip { background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(255,255,255,0.72)); border: 2px solid rgba(255,255,255,.7); border-radius: 999px; padding: 8px 14px; font-weight: 800; color: #203064; box-shadow: 0 8px 24px rgba(82,52,180,.25); }
+    .length-wrap { display: grid; gap: 6px; }
+    .meter { width: 170px; height: 10px; border-radius: 999px; background: rgba(255,255,255,0.45); overflow: hidden; border: 1px solid rgba(255,255,255,0.8); }
+    .meter-fill { width: 100%; height: 100%; transform-origin: left center; background: linear-gradient(90deg,#ff8fab,#ffd166,#80ed99,#73c5ff); box-shadow: 0 0 10px rgba(255,255,255,.85); }
     .overlay { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(10,15,45,.4); z-index: 20; padding: 18px; }
     .card { width: min(560px, 100%); background: rgba(255,255,255,.9); border-radius: 24px; padding: 22px; text-align: center; color: #1f2559; box-shadow: 0 16px 50px rgba(21,26,66,.25); }
     .card h1 { margin: 0 0 10px; font-size: clamp(1.3rem, 5vw, 2rem); }
@@ -25,7 +28,10 @@
 <body>
   <div id="app"></div>
   <div class="hud">
-    <div class="chip" id="length-chip">ながさ: 10</div>
+    <div class="length-wrap">
+      <div class="chip" id="length-chip">ながさ: 72cm</div>
+      <div class="meter" aria-hidden="true"><div class="meter-fill" id="length-meter-fill" style="transform:scaleX(0.4)"></div></div>
+    </div>
     <div class="chip" id="distance-chip">きょり: 0m</div>
     <div class="chip" id="color-chip">いろ: あか</div>
   </div>
