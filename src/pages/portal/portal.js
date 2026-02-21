@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'pencil-color-run',
+    title: 'えんぴつカラーダッシュ',
+    desc: '3Dで色を集めて伸びろ！色ちがいはアウト✏️',
+    color: '#ff8fab',
+    icon: '✏️',
+    link: '/games/pencil-color-run/'
+  },
+  {
     id: 'paint-wars',
     title: 'PAINT WARS',
     desc: '塗りつくせ！インクシューティング🎨',
