@@ -312,6 +312,14 @@ const games = [
     link: '/games/battle-arena/'
   },
   {
+    id: 'star-runner',
+    title: 'スターランナー・アドベンチャー',
+    desc: '本格横スクロール！走って跳んでコインを集めよう⭐',
+    color: '#2563eb',
+    icon: '⭐',
+    link: '/games/star-runner/'
+  },
+  {
     id: 'kakuriyo',
     title: '幽世の試練',
     desc: '和風ローグライク！100階を踏破せよ',
