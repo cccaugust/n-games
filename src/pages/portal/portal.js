@@ -13,6 +13,9 @@ document.getElementById('playerName').innerHTML = `${avatarToHtml(player?.avatar
 })} ${escapeHtml(player?.name || 'Player')}`;
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('switchBtn').addEventListener('click', switchPlayer);
+document.getElementById('toUtilitiesBtn')?.addEventListener('click', () => {
+  window.location.href = resolvePath('/pages/utility-portal/portal.html');
+});
 
 const games = [
   {
