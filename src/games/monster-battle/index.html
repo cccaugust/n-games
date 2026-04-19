@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>モンスタークラッシュ | N-Games</title>
+    <link rel="stylesheet" href="../../style.css" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body class="mb-body">
+    <div class="mb-bg-aurora" aria-hidden="true">
+      <div class="mb-blob mb-blob-1"></div>
+      <div class="mb-blob mb-blob-2"></div>
+      <div class="mb-blob mb-blob-3"></div>
+    </div>
+
+    <div id="mb-fx-layer" class="mb-fx-layer" aria-hidden="true"></div>
+
+    <header class="mb-topbar">
+      <a class="mb-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+      <div class="mb-title-bar">
+        <span class="mb-logo">モンスタークラッシュ</span>
+      </div>
+      <div class="mb-coins" id="mbCoinsBox">
+        <span class="mb-coin-icon">◎</span>
+        <span id="mbCoinsValue">0</span>
+      </div>
+    </header>
+
+    <main id="mbApp" class="mb-app">
+      <!-- ===== TITLE ===== -->
+      <section id="sceneTitle" class="mb-scene mb-scene-title is-active">
+        <div class="mb-hero">
+          <canvas id="heroMonster" width="280" height="280" aria-label="モンスター"></canvas>
+        </div>
+        <h1 class="mb-hero-title">モンスタークラッシュ</h1>
+        <p class="mb-hero-sub">じぶんだけのモンスターを作って、バトルしよう！</p>
+        <div class="mb-menu">
+          <button class="mb-menu-btn mb-menu-battle" data-go="party">
+            <span class="mb-menu-icn">⚔️</span>
+            <span class="mb-menu-name">バトル</span>
+          </button>
+          <button class="mb-menu-btn mb-menu-editor" data-go="editor">
+            <span class="mb-menu-icn">🎨</span>
+            <span class="mb-menu-name">エディター</span>
+          </button>
+          <button class="mb-menu-btn mb-menu-gacha" data-go="gacha">
+            <span class="mb-menu-icn">✨</span>
+            <span class="mb-menu-name">ガチャ</span>
+          </button>
+          <button class="mb-menu-btn mb-menu-dex" data-go="dex">
+            <span class="mb-menu-icn">📖</span>
+            <span class="mb-menu-name">ずかん</span>
+          </button>
+        </div>
+        <div class="mb-hero-tip">どこからでもタイトルにもどれるよ</div>
+      </section>
+
+      <!-- ===== EDITOR ===== -->
+      <section id="sceneEditor" class="mb-scene mb-scene-editor">
+        <div class="mb-scene-head">
+          <button class="mb-icon-btn" data-go="title" aria-label="もどる">←</button>
+          <h2>モンスターをつくる</h2>
+          <span class="mb-scene-spacer"></span>
+        </div>
+
+        <div class="mb-editor">
+          <div class="mb-editor-preview">
+            <canvas id="editorPreview" width="320" height="320"></canvas>
+            <div class="mb-name-row">
+              <input id="editorName" class="mb-input" type="text" maxlength="10" placeholder="なまえ（10もじまで）" />
+              <button id="editorRandom" class="mb-mini-btn" type="button">🎲 ランダム</button>
+            </div>
+            <div class="mb-stat-grid" id="editorStats"></div>
+          </div>
+
+          <div class="mb-editor-parts">
+            <div class="mb-part-block" data-part="body">
+              <div class="mb-part-label">からだ</div>
+              <div class="mb-chip-row" data-chips="body"></div>
+            </div>
+            <div class="mb-part-block" data-part="color">
+              <div class="mb-part-label">いろ</div>
+              <div class="mb-chip-row" data-chips="color"></div>
+            </div>
+            <div class="mb-part-block" data-part="pattern">
+              <div class="mb-part-label">もよう</div>
+              <div class="mb-chip-row" data-chips="pattern"></div>
+            </div>
+            <div class="mb-part-block" data-part="eyes">
+              <div class="mb-part-label">め</div>
+              <div class="mb-chip-row" data-chips="eyes"></div>
+            </div>
+            <div class="mb-part-block" data-part="mouth">
+              <div class="mb-part-label">くち</div>
+              <div class="mb-chip-row" data-chips="mouth"></div>
+            </div>
+            <div class="mb-part-block" data-part="accessory">
+              <div class="mb-part-label">かざり</div>
+              <div class="mb-chip-row" data-chips="accessory"></div>
+            </div>
+            <div class="mb-part-block" data-part="element">
+              <div class="mb-part-label">タイプ</div>
+              <div class="mb-chip-row" data-chips="element"></div>
+            </div>
+
+            <div class="mb-editor-actions">
+              <button id="editorSave" class="mb-btn mb-btn-primary" type="button">✔ ほぞんする</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== GACHA ===== -->
+      <section id="sceneGacha" class="mb-scene mb-scene-gacha">
+        <div class="mb-scene-head">
+          <button class="mb-icon-btn" data-go="title" aria-label="もどる">←</button>
+          <h2>ガチャ</h2>
+          <span class="mb-scene-spacer"></span>
+        </div>
+
+        <div class="mb-gacha-stage" id="gachaStage">
+          <div class="mb-gacha-orb" id="gachaOrb">
+            <div class="mb-gacha-orb-glow"></div>
+            <div class="mb-gacha-orb-core">？</div>
+          </div>
+          <div class="mb-gacha-text">どんなモンスターが でてくるかな？</div>
+        </div>
+
+        <div class="mb-gacha-actions">
+          <button id="gachaPull1" class="mb-btn mb-btn-gacha" type="button">
+            <span class="mb-btn-big">1かい ひく</span>
+            <span class="mb-btn-cost">100 ◎</span>
+          </button>
+          <button id="gachaPull10" class="mb-btn mb-btn-gacha-10" type="button">
+            <span class="mb-btn-big">10れん！</span>
+            <span class="mb-btn-cost">900 ◎</span>
+          </button>
+        </div>
+        <div class="mb-gacha-rates">
+          かくりつ: SSR 2% / SR 8% / R 30% / N 60%（10れんは SR 1まいかくてい）
+        </div>
+      </section>
+
+      <!-- ===== PARTY (battle prep) ===== -->
+      <section id="sceneParty" class="mb-scene mb-scene-party">
+        <div class="mb-scene-head">
+          <button class="mb-icon-btn" data-go="title" aria-label="もどる">←</button>
+          <h2>バトルじゅんび</h2>
+          <span class="mb-scene-spacer"></span>
+        </div>
+
+        <div class="mb-party-intro">
+          バトルにつれていく モンスターを えらんでね
+        </div>
+        <div id="partyList" class="mb-party-list"></div>
+
+        <div class="mb-party-vs">
+          <div class="mb-party-side">
+            <div class="mb-party-label">あなた</div>
+            <div id="partyChosen" class="mb-party-card mb-party-card-empty">えらんでね</div>
+          </div>
+          <div class="mb-party-vs-mark">VS</div>
+          <div class="mb-party-side">
+            <div class="mb-party-label">あいて (CPU)</div>
+            <div id="partyEnemy" class="mb-party-card mb-party-card-empty">？？？</div>
+          </div>
+        </div>
+
+        <div class="mb-party-actions">
+          <button id="rerollEnemy" class="mb-mini-btn" type="button">あいてチェンジ 🔄</button>
+          <button id="startBattleBtn" class="mb-btn mb-btn-primary" type="button" disabled>バトルスタート！</button>
+        </div>
+      </section>
+
+      <!-- ===== BATTLE ===== -->
+      <section id="sceneBattle" class="mb-scene mb-scene-battle">
+        <div class="mb-battle-arena">
+          <div class="mb-battle-side mb-battle-enemy">
+            <div class="mb-battle-bar">
+              <div class="mb-battle-name" id="enemyName">？</div>
+              <div class="mb-battle-hp">
+                <div class="mb-hp-bar"><div class="mb-hp-fill" id="enemyHp"></div></div>
+                <div class="mb-hp-text"><span id="enemyHpVal">0</span>/<span id="enemyHpMax">0</span></div>
+              </div>
+              <div class="mb-battle-tags" id="enemyTags"></div>
+            </div>
+            <div class="mb-battle-mon" id="enemyMonHolder">
+              <canvas id="enemyMonCanvas" width="240" height="240"></canvas>
+            </div>
+          </div>
+
+          <div class="mb-battle-side mb-battle-player">
+            <div class="mb-battle-mon" id="playerMonHolder">
+              <canvas id="playerMonCanvas" width="240" height="240"></canvas>
+            </div>
+            <div class="mb-battle-bar">
+              <div class="mb-battle-name" id="playerName">？</div>
+              <div class="mb-battle-hp">
+                <div class="mb-hp-bar"><div class="mb-hp-fill" id="playerHp"></div></div>
+                <div class="mb-hp-text"><span id="playerHpVal">0</span>/<span id="playerHpMax">0</span></div>
+              </div>
+              <div class="mb-battle-tags" id="playerTags"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-battle-bottom">
+          <div id="battleLog" class="mb-battle-log">よーい、バトル！</div>
+          <div id="battleMoves" class="mb-battle-moves"></div>
+          <div class="mb-battle-bottom-actions">
+            <button id="battleQuit" class="mb-mini-btn" type="button">あきらめる</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== DEX ===== -->
+      <section id="sceneDex" class="mb-scene mb-scene-dex">
+        <div class="mb-scene-head">
+          <button class="mb-icon-btn" data-go="title" aria-label="もどる">←</button>
+          <h2>ずかん</h2>
+          <span class="mb-dex-count" id="dexCount">0びき</span>
+        </div>
+        <div id="dexList" class="mb-dex-list"></div>
+      </section>
+    </main>
+
+    <!-- ===== Modals ===== -->
+    <div id="resultModal" class="mb-modal hidden" aria-hidden="true">
+      <div class="mb-modal-card mb-result-card">
+        <div class="mb-result-title" id="resultTitle">かった！</div>
+        <div class="mb-result-coin">+<span id="resultCoin">0</span> ◎</div>
+        <div class="mb-result-actions">
+          <button id="resultBack" class="mb-btn mb-btn-secondary" type="button">タイトルへ</button>
+          <button id="resultAgain" class="mb-btn mb-btn-primary" type="button">もう一回！</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="reveal" class="mb-reveal hidden" aria-hidden="true">
+      <div class="mb-reveal-bg"></div>
+      <div class="mb-reveal-rays"></div>
+      <div class="mb-reveal-card">
+        <div class="mb-reveal-rarity" id="revealRarity">SSR</div>
+        <canvas id="revealCanvas" width="280" height="280"></canvas>
+        <div class="mb-reveal-name" id="revealName">？</div>
+        <div class="mb-reveal-element" id="revealElement"></div>
+        <button id="revealNext" class="mb-btn mb-btn-primary" type="button">つぎへ →</button>
+      </div>
+    </div>
+
+    <div id="dexDetail" class="mb-modal hidden" aria-hidden="true">
+      <div class="mb-modal-card mb-dex-detail-card">
+        <button id="dexClose" class="mb-icon-btn mb-dex-close" type="button">×</button>
+        <canvas id="dexDetailCanvas" width="240" height="240"></canvas>
+        <div class="mb-dex-detail-name" id="dexDetailName"></div>
+        <div class="mb-dex-detail-meta" id="dexDetailMeta"></div>
+        <div class="mb-stat-grid" id="dexDetailStats"></div>
+        <div class="mb-dex-detail-moves" id="dexDetailMoves"></div>
+        <div class="mb-dex-detail-actions">
+          <button id="dexRelease" class="mb-mini-btn mb-mini-btn-danger" type="button">にがす</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="mb-toast hidden" aria-live="polite"></div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
