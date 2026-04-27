@@ -320,6 +320,14 @@ const games = [
     link: '/games/star-runner/'
   },
   {
+    id: 'kanahebi-no-komichi',
+    title: 'カナヘビのこみち',
+    desc: '庭のこみちを進む、絵本風の横スクロールアクション。',
+    color: '#8dcf7e',
+    icon: '🦎',
+    link: '/games/kanahebi-no-komichi/'
+  },
+  {
     id: 'kakuriyo',
     title: '幽世の試練',
     desc: '和風ローグライク！100階を踏破せよ',

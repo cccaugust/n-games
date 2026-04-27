@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>カナヘビのこみち</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="game-page">
+    <section class="frame">
+      <div class="hud">
+        <div class="hud__brand">
+          <p class="hud__eyebrow">Garden Side-Scrolling Action</p>
+          <h1>カナヘビのこみち</h1>
+        </div>
+        <div class="hud__stats">
+          <div class="pill"><span>HP</span><strong id="hpValue">3</strong></div>
+          <div class="pill"><span>虫ポイント</span><strong id="bugValue">0</strong></div>
+          <div class="pill"><span>葉っぱ</span><strong id="medalValue">0 / 3</strong></div>
+          <div class="pill pill--gauge">
+            <span>ダッシュ</span>
+            <div class="gauge"><div id="dashGaugeFill" class="gauge__fill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="canvas-shell">
+        <canvas id="gameCanvas" width="1280" height="720" aria-label="カナヘビのこみち"></canvas>
+
+        <section class="touch-ui" aria-label="タブレット操作">
+          <div class="touch-ui__left">
+            <button type="button" class="touch-btn" data-control="left" aria-label="左に移動">◀</button>
+            <button type="button" class="touch-btn" data-control="right" aria-label="右に移動">▶</button>
+          </div>
+          <div class="touch-ui__right">
+            <button type="button" class="touch-btn touch-btn--action" data-control="hide" aria-label="かくれる">かくれる</button>
+            <button type="button" class="touch-btn touch-btn--action" data-control="dash" aria-label="ダッシュ">ダッシュ</button>
+            <button type="button" class="touch-btn touch-btn--action touch-btn--primary" data-control="jump" aria-label="ジャンプ">ジャンプ</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="helpbar">
+        <p>A / D または ← / → で移動、Space でジャンプ、Shift でダッシュ、S または ↓ でかくれる</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
