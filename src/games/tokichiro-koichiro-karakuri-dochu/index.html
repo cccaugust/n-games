@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>藤吉郎と小一郎 からくり道中 | N-Games</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="game-page">
+    <section class="game-shell">
+      <canvas id="gameCanvas" width="1280" height="720" aria-label="藤吉郎と小一郎 からくり道中"></canvas>
+
+      <div class="hud" aria-hidden="true">
+        <div class="hud-left">
+          <div class="face" id="faceIcon"></div>
+          <div class="pill"><span>HP</span><strong id="hpText">5</strong></div>
+          <div class="pill"><span>小判</span><strong id="coinText">0</strong></div>
+          <div class="pill"><span>金しゃち</span><strong id="shachiText">0/3</strong></div>
+          <div class="pill"><span>書状</span><strong id="letterText">0/3</strong></div>
+        </div>
+        <div class="hud-right">
+          <div class="mission" id="missionText">書状の切れはしを集めよう</div>
+          <div class="gauge"><span>兄弟わざ</span><i id="skillFill"></i></div>
+        </div>
+      </div>
+
+      <section class="touch-ui" aria-label="タブレット操作">
+        <div class="touch-left">
+          <button class="touch-btn" data-control="left" aria-label="左へ">◀</button>
+          <button class="touch-btn" data-control="right" aria-label="右へ">▶</button>
+        </div>
+        <button class="touch-btn change-btn" data-control="change" aria-label="兄弟チェンジ">交代</button>
+        <div class="touch-right">
+          <button class="touch-btn action-btn" data-control="action" aria-label="アクション">動作</button>
+          <button class="touch-btn jump-btn" data-control="jump" aria-label="ジャンプ">跳</button>
+        </div>
+        <button class="touch-btn skill-btn" data-control="skill" aria-label="兄弟わざ">兄弟<br>わざ</button>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="./game.js?v=20260427-2"></script>
+</body>
+</html>

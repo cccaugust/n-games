@@ -1,0 +1,258 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #1e1b16;
+  color: #fff8df;
+  font-family: "Hiragino Maru Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+  overflow: hidden;
+  touch-action: none;
+}
+
+button {
+  font: inherit;
+  border: 0;
+  color: inherit;
+}
+
+.game-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 8%, rgba(255, 221, 138, 0.28), transparent 30%),
+    linear-gradient(135deg, #30251b 0%, #13100e 100%);
+}
+
+.game-shell {
+  position: relative;
+  width: min(100vw, calc(100dvh * 16 / 9));
+  height: min(100dvh, calc(100vw * 9 / 16));
+  overflow: hidden;
+  background: #5fb9f2;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+.hud {
+  position: absolute;
+  inset: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) auto max(12px, env(safe-area-inset-left));
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.hud-right {
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.face,
+.pill,
+.mission,
+.gauge {
+  background: rgba(41, 27, 16, 0.72);
+  border: 2px solid rgba(255, 236, 178, 0.68);
+  box-shadow: 0 4px 0 rgba(70, 36, 13, 0.48);
+  backdrop-filter: blur(5px);
+}
+
+.face {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+}
+
+.pill {
+  min-width: 78px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  padding: 4px 10px;
+}
+
+.pill span,
+.gauge span {
+  font-size: 11px;
+  line-height: 1;
+  color: #ffe6a4;
+  font-weight: 800;
+}
+
+.pill strong {
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.mission {
+  max-width: min(420px, 44vw);
+  min-height: 38px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 900;
+  font-size: 15px;
+  text-align: right;
+}
+
+.gauge {
+  width: 260px;
+  max-width: 36vw;
+  height: 30px;
+  border-radius: 999px;
+  padding: 5px 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.gauge i {
+  position: absolute;
+  left: 72px;
+  right: 7px;
+  top: 7px;
+  bottom: 7px;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffcc33, #ff5d73, #b35cff);
+  box-shadow: 0 0 16px rgba(255, 219, 73, 0.9);
+}
+
+.touch-ui {
+  position: absolute;
+  inset: auto max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.touch-left,
+.touch-right {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.touch-left {
+  left: 0;
+}
+
+.touch-right {
+  right: 0;
+}
+
+.touch-btn {
+  width: 74px;
+  height: 74px;
+  border-radius: 22px;
+  background: rgba(54, 38, 24, 0.54);
+  border: 2px solid rgba(255, 244, 205, 0.64);
+  box-shadow: 0 6px 0 rgba(47, 24, 11, 0.42);
+  color: #fff5ca;
+  font-weight: 900;
+  font-size: 22px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.touch-btn.is-down {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(47, 24, 11, 0.42);
+  background: rgba(205, 82, 39, 0.72);
+}
+
+.jump-btn {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: rgba(226, 88, 44, 0.64);
+}
+
+.action-btn {
+  background: rgba(35, 110, 93, 0.62);
+}
+
+.change-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 58px;
+  border-radius: 18px;
+  font-size: 18px;
+}
+
+.change-btn.is-down {
+  transform: translateX(-50%) translateY(4px);
+}
+
+.skill-btn {
+  position: absolute;
+  right: 0;
+  top: auto;
+  bottom: calc(100% - 64px);
+  width: 74px;
+  height: 64px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.1;
+  background: rgba(115, 58, 160, 0.66);
+}
+
+@media (max-width: 860px) {
+  .pill {
+    min-width: 58px;
+    height: 38px;
+    padding: 3px 7px;
+  }
+
+  .pill span {
+    font-size: 9px;
+  }
+
+  .pill strong {
+    font-size: 15px;
+  }
+
+  .face {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mission {
+    display: none;
+  }
+
+  .touch-btn {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+  }
+
+  .jump-btn {
+    width: 74px;
+    height: 74px;
+  }
+}

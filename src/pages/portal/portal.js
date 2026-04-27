@@ -320,6 +320,14 @@ const games = [
     link: '/games/star-runner/'
   },
   {
+    id: 'tokichiro-koichiro-karakuri-dochu',
+    title: '藤吉郎と小一郎 からくり道中',
+    desc: '兄弟チェンジで進む、明るい戦国からくりアクション！',
+    color: '#d9572c',
+    icon: '🏯',
+    link: '/games/tokichiro-koichiro-karakuri-dochu/'
+  },
+  {
     id: 'kanahebi-no-komichi',
     title: 'カナヘビのこみち',
     desc: '庭のこみちを進む、絵本風の横スクロールアクション。',
