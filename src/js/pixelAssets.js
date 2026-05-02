@@ -7,6 +7,7 @@
  * This is designed so future games can load by assetId.
  */
 import { supabase } from './supabaseClient.js';
+import { noticeSupabaseFailure } from './offline.js';
 
 const DB_NAME = 'n-games-assets';
 const DB_VERSION = 1;
@@ -258,20 +259,34 @@ export async function getPixelAsset(id) {
   if (localAsset) return localAsset;
 
   // Fallback: fetch from Supabase and cache locally.
-  const { data: meta, error: metaErr } = await supabase
-    .from('pixel_assets')
-    .select('id, owner_id, name, kind, width, height, created_at, updated_at, frame_count')
-    .eq('id', id)
-    .maybeSingle();
-  if (metaErr) throw metaErr;
+  let meta;
+  let frames;
+  try {
+    const { data, error } = await supabase
+      .from('pixel_assets')
+      .select('id, owner_id, name, kind, width, height, created_at, updated_at, frame_count')
+      .eq('id', id)
+      .maybeSingle();
+    if (error) throw error;
+    meta = data;
+  } catch (e) {
+    noticeSupabaseFailure(e, 'getPixelAsset/meta');
+    return null;
+  }
   if (!meta) return null;
 
-  const { data: frames, error: framesErr } = await supabase
-    .from('pixel_asset_frames')
-    .select('asset_id, frame_index, width, height, pixels_b64, duration_ms')
-    .eq('asset_id', id)
-    .order('frame_index', { ascending: true });
-  if (framesErr) throw framesErr;
+  try {
+    const { data, error } = await supabase
+      .from('pixel_asset_frames')
+      .select('asset_id, frame_index, width, height, pixels_b64, duration_ms')
+      .eq('asset_id', id)
+      .order('frame_index', { ascending: true });
+    if (error) throw error;
+    frames = data;
+  } catch (e) {
+    noticeSupabaseFailure(e, 'getPixelAsset/frames');
+    return null;
+  }
 
   const frame0 = (frames || []).find((f) => f.frame_index === 0) || frames?.[0];
   const pixels = frame0 ? base64ToPixels(frame0.pixels_b64) : createEmptyPixels(meta.width, meta.height);
@@ -305,17 +320,8 @@ export async function getPixelAsset(id) {
  * @param {{ownerId:string, kind?:PixelAssetKind}} params
  */
 export async function listPixelAssets({ ownerId, kind } = {}) {
-  // Prefer Supabase as source of truth, and cache locally.
-  let metaQuery = supabase
-    .from('pixel_assets')
-    .select('id, owner_id, name, kind, width, height, created_at, updated_at, frame_count')
-    .order('updated_at', { ascending: false });
-  if (ownerId) metaQuery = metaQuery.eq('owner_id', ownerId);
-  if (kind) metaQuery = metaQuery.eq('kind', kind);
-
-  const { data: metas, error: metaErr } = await metaQuery;
-  if (metaErr) {
-    // Fallback to local-only
+  // Local-first: load from IndexedDB so the app works offline.
+  async function readLocal() {
     const raws = await withStore('readonly', (store) => {
       if (ownerId && kind) {
         const index = store.index('ownerId_kind');
@@ -333,15 +339,40 @@ export async function listPixelAssets({ ownerId, kind } = {}) {
     return list;
   }
 
+  // Try Supabase as source of truth; on any failure, return the local list.
+  let metas;
+  try {
+    let metaQuery = supabase
+      .from('pixel_assets')
+      .select('id, owner_id, name, kind, width, height, created_at, updated_at, frame_count')
+      .order('updated_at', { ascending: false });
+    if (ownerId) metaQuery = metaQuery.eq('owner_id', ownerId);
+    if (kind) metaQuery = metaQuery.eq('kind', kind);
+
+    const { data, error } = await metaQuery;
+    if (error) throw error;
+    metas = data;
+  } catch (e) {
+    noticeSupabaseFailure(e, 'listPixelAssets/meta');
+    return readLocal();
+  }
+
   const ids = (metas || []).map((m) => m.id);
-  const { data: frames0, error: framesErr } = ids.length
-    ? await supabase
+  let frames0 = [];
+  try {
+    if (ids.length) {
+      const { data, error } = await supabase
         .from('pixel_asset_frames')
         .select('asset_id, frame_index, width, height, pixels_b64, duration_ms')
         .in('asset_id', ids)
-        .eq('frame_index', 0)
-    : { data: [], error: null };
-  if (framesErr) throw framesErr;
+        .eq('frame_index', 0);
+      if (error) throw error;
+      frames0 = data || [];
+    }
+  } catch (e) {
+    noticeSupabaseFailure(e, 'listPixelAssets/frames');
+    return readLocal();
+  }
 
   const frameMap = new Map((frames0 || []).map((f) => [f.asset_id, f]));
 
