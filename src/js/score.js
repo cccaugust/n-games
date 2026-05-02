@@ -1,44 +1,48 @@
 import { supabase } from './supabaseClient.js';
+import { appendLocalScore, localRankings, noticeSupabaseFailure } from './offline.js';
 
 export async function saveScore(gameId, playerId, score) {
-    const { data, error } = await supabase
-        .from('scores')
-        .insert([{ game_id: gameId, player_id: playerId, score }]);
+    // ローカルにも必ず残す。Supabase が落ちていてもランキングが見られるように。
+    appendLocalScore(gameId, playerId, score);
 
-    if (error) {
-        console.error('Error saving score:', error);
+    try {
+        const { error } = await supabase
+            .from('scores')
+            .insert([{ game_id: gameId, player_id: playerId, score }]);
+        if (error) throw error;
+        return true;
+    } catch (e) {
+        noticeSupabaseFailure(e, 'saveScore');
         return false;
     }
-    return true;
 }
 
 export async function getRankings(gameId, limit = 5) {
-    // Supabase can join tables!
-    // We select scores and join with players to get name and avatar.
-    const { data, error } = await supabase
-        .from('scores')
-        .select(`
-            score,
-            created_at,
-            players (
-                name,
-                avatar
-            )
-        `)
-        .eq('game_id', gameId)
-        .order('score', { ascending: false })
-        .limit(limit);
+    try {
+        const { data, error } = await supabase
+            .from('scores')
+            .select(`
+                score,
+                created_at,
+                players (
+                    name,
+                    avatar
+                )
+            `)
+            .eq('game_id', gameId)
+            .order('score', { ascending: false })
+            .limit(limit);
 
-    if (error) {
-        console.error('Error fetching rankings:', error);
-        return [];
+        if (error) throw error;
+
+        return data.map((item) => ({
+            score: item.score,
+            name: item.players?.name || 'プレイヤー',
+            avatar: item.players?.avatar || '❓',
+            date: new Date(item.created_at).toLocaleDateString()
+        }));
+    } catch (e) {
+        noticeSupabaseFailure(e, 'getRankings');
+        return localRankings(gameId, limit);
     }
-
-    // Flatten structure for easier usage
-    return data.map(item => ({
-        score: item.score,
-        name: item.players.name,
-        avatar: item.players.avatar || '❓', // Fallback
-        date: new Date(item.created_at).toLocaleDateString()
-    }));
 }

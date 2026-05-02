@@ -4,6 +4,12 @@ import { isImageAvatar, makeImageAvatar, renderAvatarInto } from '../../js/avata
 import { pokemonData } from '../../data/pokemonData.js';
 import { assetPreviewDataUrl, listPixelAssets } from '../../js/pixelAssets.js';
 import { navigateTo } from '../../js/config.js';
+import {
+  loadLocalPlayers,
+  saveLocalPlayers,
+  genLocalId,
+  noticeSupabaseFailure
+} from '../../js/offline.js';
 
 requireAuth();
 
@@ -227,46 +233,91 @@ saveBtn.onclick = async () => {
 
 
 /* ================= API Logic ================= */
+// Supabase が使えない時のためにローカルにもプレイヤーを保存する。
+// オンラインなら Supabase をマスター、ローカルはミラー。
+// オフライン時はローカルだけで完結する。
+
+function mergePlayers(remote, local) {
+    const map = new Map();
+    (local || []).forEach((p) => p && p.id && map.set(p.id, p));
+    (remote || []).forEach((p) => p && p.id && map.set(p.id, p));
+    const list = Array.from(map.values());
+    list.sort((a, b) => {
+        const ta = a.created_at ? Date.parse(a.created_at) : 0;
+        const tb = b.created_at ? Date.parse(b.created_at) : 0;
+        return ta - tb;
+    });
+    return list;
+}
 
 async function fetchPlayers() {
-    const { data, error } = await supabase
-        .from('players')
-        .select('*')
-        .order('created_at', { ascending: true });
+    try {
+        const { data, error } = await supabase
+            .from('players')
+            .select('*')
+            .order('created_at', { ascending: true });
 
-    if (error) {
-        console.error('Error fetching players:', error);
-        return [];
+        if (error) throw error;
+        const merged = mergePlayers(data, loadLocalPlayers());
+        saveLocalPlayers(merged);
+        return merged;
+    } catch (e) {
+        noticeSupabaseFailure(e, 'fetchPlayers');
+        return loadLocalPlayers();
     }
-    return data;
 }
 
 async function addPlayer(name, avatar) {
-    const { error } = await supabase
-        .from('players')
-        .insert([{ name, avatar }]);
+    let saved = null;
+    try {
+        const { data, error } = await supabase
+            .from('players')
+            .insert([{ name, avatar }])
+            .select()
+            .single();
+        if (error) throw error;
+        saved = data;
+    } catch (e) {
+        noticeSupabaseFailure(e, 'addPlayer');
+    }
 
-    if (error) alert('追加できませんでした');
-    else renderPlayers();
+    const list = loadLocalPlayers();
+    const row = saved || { id: genLocalId(), name, avatar, created_at: new Date().toISOString() };
+    if (!list.some((p) => p.id === row.id)) list.push(row);
+    saveLocalPlayers(list);
+    renderPlayers();
 }
 
 async function updatePlayer(id, name, avatar) {
-    const { error } = await supabase
-        .from('players')
-        .update({ name, avatar })
-        .eq('id', id);
+    try {
+        const { error } = await supabase
+            .from('players')
+            .update({ name, avatar })
+            .eq('id', id);
+        if (error) throw error;
+    } catch (e) {
+        noticeSupabaseFailure(e, 'updatePlayer');
+    }
 
-    if (error) alert('更新できませんでした');
-    else renderPlayers();
+    const list = loadLocalPlayers().map((p) => (p.id === id ? { ...p, name, avatar } : p));
+    saveLocalPlayers(list);
+    renderPlayers();
 }
 
 async function deletePlayer(id, event) {
     event.stopPropagation();
     if (!confirm('本当に消しちゃう？')) return;
 
-    const { error } = await supabase.from('players').delete().eq('id', id);
-    if (error) alert('削除できませんでした');
-    else renderPlayers();
+    try {
+        const { error } = await supabase.from('players').delete().eq('id', id);
+        if (error) throw error;
+    } catch (e) {
+        noticeSupabaseFailure(e, 'deletePlayer');
+    }
+
+    const list = loadLocalPlayers().filter((p) => p.id !== id);
+    saveLocalPlayers(list);
+    renderPlayers();
 }
 
 async function renderPlayers() {
