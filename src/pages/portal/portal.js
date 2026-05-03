@@ -24,6 +24,14 @@ const games = [
     link: '/games/quarto/'
   },
   {
+    id: 'pengin-fish',
+    title: 'それはオレの魚だ！',
+    desc: 'ペンギンで魚を取り合え！氷が沈む陣取り🐧',
+    color: '#0e7490',
+    icon: '🐧',
+    link: '/games/pengin-fish/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',
