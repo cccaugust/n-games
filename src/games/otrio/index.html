@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>OTRIO | N-Games</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      min-height: 100svh;
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      display: grid;
+      place-items: center;
+    }
+    .app { width: min(980px, 100%); display: grid; gap: 16px; }
+    .top { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; align-items:center; }
+    .status { font-size: clamp(1rem, 2.4vw, 1.35rem); font-weight: 700; }
+    .btn { border:0; border-radius:12px; padding:10px 14px; min-height:44px; font-weight:700; }
+    .btn:active { transform: scale(.98); }
+    .board {
+      width: min(82vmin, 680px);
+      aspect-ratio: 1;
+      margin-inline: auto;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      touch-action: manipulation;
+    }
+    .cell {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.16);
+      border-radius: 16px;
+      display:grid; place-items:center;
+      position: relative;
+      min-height: 0;
+    }
+    .ring { position:absolute; border-radius:999px; border-style:solid; }
+    .size-s { width: 24%; height:24%; border-width:4px; }
+    .size-m { width: 46%; height:46%; border-width:5px; }
+    .size-l { width: 70%; height:70%; border-width:6px; }
+    .p1 { border-color:#38bdf8; }
+    .p2 { border-color:#f472b6; }
+    .panel { display:grid; gap:10px; grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .pile { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; }
+    .pile h3 { margin:0 0 8px; font-size:.95rem; }
+    .pickers { display:flex; gap:8px; flex-wrap:wrap; }
+    .pick {
+      min-width: 64px; min-height: 44px; border:2px solid transparent; border-radius:10px;
+      background: rgba(255,255,255,.12); color:#fff; font-weight:800;
+    }
+    .pick.active { border-color:#facc15; }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <div id="status" class="status">プレイヤー1の番</div>
+      <button class="btn" id="resetBtn">リセット</button>
+    </div>
+    <section id="board" class="board" aria-label="otrio board"></section>
+    <section class="panel">
+      <div class="pile"><h3>プレイヤー1 (青)</h3><div id="p1Pickers" class="pickers"></div></div>
+      <div class="pile"><h3>プレイヤー2 (ピンク)</h3><div id="p2Pickers" class="pickers"></div></div>
+    </section>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
