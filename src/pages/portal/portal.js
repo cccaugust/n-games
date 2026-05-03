@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'quarto',
+    title: 'クアルト！',
+    desc: '4つの違いをそろえろ！相手にコマを渡す名作対戦◎',
+    color: '#1f2937',
+    icon: '◐',
+    link: '/games/quarto/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',

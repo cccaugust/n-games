@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>クアルト！ | N-Games</title>
+  <style>
+    :root {
+      --bg-1: #131c2c;
+      --bg-2: #25305a;
+      --bg-3: #3a2742;
+      --surface: rgba(255,255,255,0.06);
+      --surface-strong: rgba(255,255,255,0.12);
+      --line: rgba(255,255,255,0.16);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --p1: #38bdf8;
+      --p2: #f472b6;
+      --gold: #fde047;
+      --wood-light: #f1d8a6;
+      --wood-light-hi: #ffe9bd;
+      --wood-light-shadow: #c9a96a;
+      --wood-dark: #4d2e18;
+      --wood-dark-hi: #75452a;
+      --wood-dark-shadow: #28150a;
+      --shadow-sm: 0 4px 14px rgba(0,0,0,0.25);
+      --shadow-lg: 0 18px 50px rgba(0,0,0,0.4);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --tap: 220ms cubic-bezier(.2,1.4,.4,1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100svh;
+      background:
+        radial-gradient(1200px 700px at 0% 0%, rgba(56,189,248,0.18), transparent 55%),
+        radial-gradient(1100px 700px at 100% 100%, rgba(244,114,182,0.18), transparent 55%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2) 60%, var(--bg-3));
+      padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .app {
+      width: min(820px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 10px;
+      grid-template-rows: auto auto auto auto auto auto;
+      min-height: 100svh;
+      padding-bottom: 8px;
+    }
+
+    /* ==== ヘッダー ==== */
+    .head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 4px 2px;
+    }
+    .title-wrap { display: flex; align-items: center; gap: 8px; }
+    .logo {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--wood-light), var(--wood-dark));
+      box-shadow: var(--shadow-sm);
+      display: grid; place-items: center;
+      font-size: 1.1rem;
+    }
+    .title {
+      font-size: clamp(1.05rem, 3.4vw, 1.4rem);
+      font-weight: 900; letter-spacing: 0.16em;
+      background: linear-gradient(90deg, #93c5fd, #f0abfc, #fde68a);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .head-actions { display: flex; gap: 6px; }
+    .btn {
+      border: 0; border-radius: 12px; padding: 8px 12px;
+      min-height: 42px; min-width: 42px; font-weight: 800; font-size: 0.9rem;
+      color: #0b1024; background: #e2e8f0;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform .12s ease, background .2s ease, opacity .2s ease;
+      font-family: inherit;
+    }
+    .btn:hover { background: #fff; }
+    .btn:active { transform: scale(0.96); }
+    .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .btn.ghost {
+      background: transparent; color: var(--text);
+      border: 2px solid var(--line);
+      box-shadow: none;
+    }
+    .btn.ghost:hover { background: var(--surface); }
+    .btn.primary {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      color: white;
+    }
+    .btn.icon { padding: 8px 10px; font-size: 1.05rem; }
+
+    /* ==== プレイヤーパネル ==== */
+    .panel {
+      position: relative;
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 2px solid transparent;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      transition: border-color .25s ease, background .25s ease, transform .25s ease, box-shadow .25s ease;
+    }
+    .panel.active {
+      border-color: var(--c);
+      background: color-mix(in srgb, var(--c) 12%, var(--surface));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), var(--shadow-lg);
+      transform: translateY(-1px);
+    }
+    .panel.winner {
+      border-color: var(--gold);
+      background: color-mix(in srgb, var(--gold) 18%, var(--surface));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 30%, transparent), var(--shadow-lg);
+    }
+    .panel.p2 {
+      transform: rotate(180deg);
+    }
+    .panel.p2.active { transform: rotate(180deg) translateY(-1px); }
+    .panel-name {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 900; font-size: 1.05rem;
+    }
+    .panel-dot {
+      width: 14px; height: 14px; border-radius: 999px; background: var(--c);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent);
+    }
+    .panel-role {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .panel.active .panel-role { color: #fff; }
+    .panel-score {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 40px;
+    }
+    .panel-score-num {
+      font-size: 1.4rem; font-weight: 900; line-height: 1;
+    }
+    .panel-score-label { font-size: 0.7rem; color: var(--muted); }
+
+    /* ==== 受け渡しスロット ==== */
+    .handoff-slot {
+      min-height: 56px;
+      display: grid; place-items: center;
+      transition: opacity .25s ease;
+      opacity: 0;
+    }
+    .handoff-slot.show { opacity: 1; }
+    .handoff-slot.flash .handoff-card { animation: handoffFlash .55s cubic-bezier(.2,1.4,.4,1); }
+    @keyframes handoffFlash {
+      0% { transform: scale(0.4); opacity: 0; }
+      60% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .handoff-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface-strong);
+      border: 2px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 8px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .handoff-card.empty {
+      border-color: var(--line);
+    }
+    .handoff-label {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .handoff-vis {
+      width: 56px; height: 56px;
+    }
+
+    /* ==== 盤面 ==== */
+    .stage {
+      position: relative;
+      width: min(80vmin, 520px);
+      margin-inline: auto;
+    }
+    .board {
+      width: 100%;
+      aspect-ratio: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 6px;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15));
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.4), var(--shadow-lg);
+    }
+    .cell {
+      position: relative;
+      background: rgba(255,255,255,0.04);
+      border: 2px solid var(--line);
+      border-radius: 12px;
+      padding: 0;
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: background .2s ease, border-color .2s ease, transform .12s ease;
+    }
+    .cell:disabled { cursor: default; }
+    .cell.placeable:hover {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.32);
+    }
+    .cell.placeable:active { transform: scale(0.97); }
+    .cell.placeable .preview { opacity: 0; transition: opacity .15s ease; }
+    .cell.placeable:hover .preview { opacity: 0.55; }
+    .cell.filled .piece-vis { animation: placePop .35s cubic-bezier(.2,1.4,.4,1); }
+    @keyframes placePop {
+      0% { transform: translateY(-12px) scale(0.6); opacity: 0; }
+      60% { transform: translateY(2px) scale(1.08); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .cell.winning {
+      background: color-mix(in srgb, var(--gold) 18%, transparent);
+      border-color: var(--gold);
+      animation: winPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes winPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253,224,71,0.6); }
+      50% { box-shadow: 0 0 24px 6px rgba(253,224,71,0.7); }
+    }
+
+    /* ==== コマのビジュアル ==== */
+    .piece-vis {
+      width: var(--vis-size, 86%);
+      height: var(--vis-size, 86%);
+      aspect-ratio: 1;
+      display: grid; place-items: center;
+      pointer-events: none;
+    }
+    .piece {
+      position: relative;
+      transition: transform .2s ease, filter .2s ease;
+    }
+
+    /* サイズ */
+    .piece.tall {
+      width: 86%; height: 86%;
+      filter: drop-shadow(0 5px 5px rgba(0,0,0,0.45));
+    }
+    .piece.short {
+      width: 56%; height: 56%;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+    }
+
+    /* 形 */
+    .piece.round { border-radius: 50%; }
+    .piece.square { border-radius: 16%; }
+
+    /* 色 (ライト) */
+    .piece.light {
+      background:
+        radial-gradient(circle at 32% 28%, var(--wood-light-hi) 0%, var(--wood-light) 50%, var(--wood-light-shadow) 100%);
+      box-shadow:
+        inset 0 -2px 4px rgba(120, 80, 30, 0.45),
+        inset 0 2px 2px rgba(255, 240, 210, 0.7);
+    }
+
+    /* 色 (ダーク) */
+    .piece.dark {
+      background:
+        radial-gradient(circle at 32% 28%, var(--wood-dark-hi) 0%, var(--wood-dark) 55%, var(--wood-dark-shadow) 100%);
+      box-shadow:
+        inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+        inset 0 2px 2px rgba(180, 130, 80, 0.55);
+    }
+
+    /* 中心 (穴あり / 詰まり) */
+    .piece::before {
+      content: ''; position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36%; height: 36%;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .piece.square::before {
+      width: 40%; height: 40%;
+      border-radius: 30%;
+    }
+    .piece.hollow::before {
+      background:
+        radial-gradient(circle at 50% 30%, rgba(0,0,0,0.7), rgba(0,0,0,0.35));
+      box-shadow:
+        inset 0 2px 3px rgba(0,0,0,0.7),
+        inset 0 -1px 1px rgba(255,255,255,0.15);
+    }
+    .piece.solid::before {
+      background: transparent;
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.25),
+        inset 0 -1px 2px rgba(0,0,0,0.15);
+    }
+    .piece.solid.light::before {
+      background: radial-gradient(circle at 40% 38%, rgba(255,235,200,0.55), transparent 70%);
+    }
+    .piece.solid.dark::before {
+      background: radial-gradient(circle at 40% 38%, rgba(180,140,90,0.5), transparent 70%);
+    }
+
+    /* ==== ストック（共通の駒置き場） ==== */
+    .stock-wrap {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    .stock-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+    }
+    .stock {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    .stock-item {
+      position: relative;
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      padding: 4px;
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: transform .15s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
+    }
+    .stock-item.selectable:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.35);
+      transform: translateY(-3px);
+    }
+    .stock-item.selectable:active { transform: scale(0.95); }
+    .stock-item.used {
+      opacity: 0.18;
+      cursor: default;
+      filter: grayscale(0.6);
+    }
+    .stock-item.selected {
+      border-color: var(--gold);
+      background: color-mix(in srgb, var(--gold) 18%, transparent);
+      animation: selectedGlow 1.2s ease-in-out infinite;
+    }
+    @keyframes selectedGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253,224,71,0.5); }
+      50% { box-shadow: 0 0 16px 4px rgba(253,224,71,0.6); }
+    }
+    .stock-item:disabled { cursor: default; }
+
+    /* タブレット縦置き優先 */
+    @media (min-width: 720px) {
+      .app { gap: 14px; padding-bottom: 14px; }
+      .stage { width: min(70vmin, 540px); }
+      .panel { padding: 14px 20px; }
+      .panel-name { font-size: 1.15rem; }
+      .panel-role { font-size: 0.9rem; }
+      .stock { gap: 8px; }
+    }
+
+    /* 横向きタブレット: 横に並べる */
+    @media (orientation: landscape) and (min-width: 900px) {
+      .app {
+        grid-template-rows: auto 1fr auto;
+        grid-template-columns: 1fr auto 1fr;
+        grid-template-areas:
+          "head head head"
+          "left center right"
+          "stock stock stock";
+        max-width: 1100px;
+      }
+      .head { grid-area: head; }
+      #panel-1 { grid-area: right; transform: none !important; }
+      #panel-2 { grid-area: left; transform: none !important; }
+      #panel-2.active { transform: translateY(-1px) !important; }
+      .center-col {
+        grid-area: center;
+        display: grid; gap: 12px;
+        grid-template-rows: auto auto;
+      }
+      .stock-wrap { grid-area: stock; }
+    }
+
+    /* ==== オーバーレイ（共通） ==== */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(8, 10, 28, 0.78);
+      backdrop-filter: blur(8px);
+      display: grid; place-items: center;
+      padding: 16px;
+      animation: fade .25s ease;
+    }
+    .overlay.hidden { display: none; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+    .modal {
+      width: min(520px, 100%);
+      max-height: 92svh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+      display: grid; gap: 14px;
+    }
+    .modal h2 {
+      margin: 0; font-size: 1.4rem; font-weight: 900;
+      background: linear-gradient(90deg, #93c5fd, #f0abfc);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .modal p { margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.6; }
+
+    /* ==== ルール説明 ==== */
+    .rules-step {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .rules-step h3 {
+      margin: 0; font-size: 1rem; color: var(--gold);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rules-step h3 .num {
+      width: 26px; height: 26px; border-radius: 999px;
+      background: var(--gold); color: #0f172a;
+      display: grid; place-items: center;
+      font-size: 0.85rem; font-weight: 900;
+    }
+    .rules-step p { font-size: 0.88rem; color: #e2e8f0; }
+    .attr-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      margin-top: 4px;
+    }
+    .attr-cell {
+      background: rgba(0,0,0,0.25);
+      border-radius: 10px;
+      padding: 6px;
+      display: grid; gap: 4px;
+      place-items: center;
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .attr-cell .mini {
+      width: 100%; height: 56px;
+      display: flex; gap: 6px;
+      align-items: center; justify-content: center;
+    }
+    .rules-line {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      background: rgba(0,0,0,0.3);
+      padding: 8px;
+      border-radius: 10px;
+      margin-top: 6px;
+    }
+    .rules-line .mini-cell {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid; place-items: center;
+    }
+    .rules-line.win { border: 2px solid var(--gold); padding: 6px; }
+    .modal-actions {
+      display: flex; justify-content: flex-end; gap: 10px;
+      margin-top: 4px;
+    }
+
+    /* ==== リザルト ==== */
+    .result-dialog {
+      width: min(380px, 100%);
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      border: 3px solid var(--c, var(--gold));
+      border-radius: 22px;
+      padding: 24px;
+      display: grid; gap: 14px;
+      place-items: center;
+      box-shadow: var(--shadow-lg);
+      animation: resultPop .45s cubic-bezier(.2,1.4,.4,1);
+    }
+    @keyframes resultPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .result-emoji {
+      font-size: 3rem;
+      animation: bounce 1.4s infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .result-title {
+      font-size: 1.5rem; font-weight: 900;
+      text-align: center;
+      color: var(--c, #fff);
+    }
+    .result-sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+    /* ==== 紙吹雪キャンバス ==== */
+    #confetti {
+      position: fixed; inset: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    /* ==== スマホ対応 ==== */
+    @media (max-width: 480px) {
+      .title { letter-spacing: 0.1em; }
+      .stock { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+      .stock-wrap { padding: 8px; }
+      .panel { padding: 8px 12px; }
+      .panel-name { font-size: 0.95rem; }
+      .panel-role { font-size: 0.78rem; }
+      .panel-score-num { font-size: 1.2rem; }
+      .stage { width: min(94vmin, 520px); }
+      .head-actions .btn span.lbl { display: none; }
+    }
+
+    /* hover無効環境（タッチ） */
+    @media (hover: none) {
+      .stock-item.selectable:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: transparent;
+        transform: none;
+      }
+      .cell.placeable:hover {
+        background: rgba(255,255,255,0.04);
+        border-color: var(--line);
+      }
+      .cell.placeable:hover .preview { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <div class="title-wrap">
+        <div class="logo">●</div>
+        <div class="title">クアルト！</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost icon" id="rulesBtn" aria-label="あそびかた">？<span class="lbl"> ルール</span></button>
+        <button class="btn ghost icon" id="muteBtn" aria-label="サウンド" aria-pressed="false">🔊</button>
+        <button class="btn ghost" id="newBtn">もう一回</button>
+        <button class="btn" id="resetBtn">リセット</button>
+      </div>
+    </header>
+
+    <!-- P2 (上、テーブル対面の相手側 → 180度回転) -->
+    <section id="panel-2" class="panel p2" style="--c: var(--p2)" aria-label="プレイヤー2">
+      <div class="panel-name">
+        <span class="panel-dot"></span>
+        <span>プレイヤー2</span>
+      </div>
+      <div class="panel-role" id="role-2">相手の番…</div>
+      <div class="panel-score">
+        <div class="panel-score-num" id="score-2">0</div>
+        <div class="panel-score-label">WIN</div>
+      </div>
+    </section>
+
+    <div class="center-col">
+      <div class="stage">
+        <section id="board" class="board" aria-label="ボード"></section>
+      </div>
+
+      <div id="handoff" class="handoff-slot" aria-live="polite"></div>
+    </div>
+
+    <!-- 16コマのストック -->
+    <section class="stock-wrap" aria-label="残りのコマ">
+      <div class="stock-label">のこっているコマ</div>
+      <div id="stock" class="stock"></div>
+    </section>
+
+    <!-- P1 (下) -->
+    <section id="panel-1" class="panel" style="--c: var(--p1)" aria-label="プレイヤー1">
+      <div class="panel-name">
+        <span class="panel-dot"></span>
+        <span>プレイヤー1</span>
+      </div>
+      <div class="panel-role" id="role-1">相手にコマをわたそう</div>
+      <div class="panel-score">
+        <div class="panel-score-num" id="score-1">0</div>
+        <div class="panel-score-label">WIN</div>
+      </div>
+    </section>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- ルール説明モーダル -->
+  <div id="rules" class="overlay hidden" role="dialog" aria-labelledby="rulesTitle">
+    <div class="modal">
+      <h2 id="rulesTitle">クアルト！ のあそびかた</h2>
+
+      <div class="rules-step">
+        <h3><span class="num">1</span>16コマには 4つの ちがい</h3>
+        <p>コマぜんぶで16こ。<b>色 / 高さ / 形 / 中心の穴</b> の4つの組合せで全部ちがうよ。</p>
+        <div class="attr-grid">
+          <div class="attr-cell">
+            <div class="mini" id="rule-attr-1"></div>
+            <div>色（明・暗）</div>
+          </div>
+          <div class="attr-cell">
+            <div class="mini" id="rule-attr-2"></div>
+            <div>高さ（高・低）</div>
+          </div>
+          <div class="attr-cell">
+            <div class="mini" id="rule-attr-3"></div>
+            <div>形（丸・四角）</div>
+          </div>
+          <div class="attr-cell">
+            <div class="mini" id="rule-attr-4"></div>
+            <div>穴（あり・なし）</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">2</span>相手にわたす コマを えらぶ</h3>
+        <p>あなたは <b>自分でコマを置けない</b>。下の「のこっているコマ」から1つえらんで <b>相手に わたす</b>。相手はそれを盤に置くんだ。</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">3</span>もらったコマを 盤に置く</h3>
+        <p>相手からもらったコマは、好きな空きマスに置こう。置いたあと、つぎの相手にわたすコマをえらぶ番になるよ。</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">4</span>たて・よこ・ななめで「ちがいが そろう」と かち</h3>
+        <p>4つならんだ列に、<b>共通する特徴が1つでもあれば</b>、置いた人のかち！例：「全部 高い」「全部 暗い」「全部 穴あり」など。</p>
+        <div class="rules-line win" id="rule-win-line"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" id="rulesClose">わかった！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- リザルト -->
+  <div id="result" class="overlay hidden" role="dialog" aria-labelledby="resultTitle">
+    <div class="result-dialog">
+      <div id="resultEmoji" class="result-emoji">🎉</div>
+      <div id="resultTitle" class="result-title">プレイヤー1の勝ち！</div>
+      <div id="resultSub" class="result-sub">クアルト！</div>
+      <div class="result-actions">
+        <button class="btn ghost" id="resultRulesBtn">ルール</button>
+        <button class="btn primary" id="resultAgainBtn">もう一回</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+  <script type="module">
+    // ルールモーダル内のミニビジュアル生成（インライン: コマSVG的に表現）
+    function piece(cls) {
+      const w = document.createElement('div');
+      w.className = 'piece-vis';
+      w.style.setProperty('--vis-size', '40px');
+      const p = document.createElement('div');
+      p.className = 'piece ' + cls;
+      w.appendChild(p);
+      return w;
+    }
+    function set(id, ...nodes) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      nodes.forEach(n => el.appendChild(n));
+    }
+    set('rule-attr-1', piece('tall light round solid'), piece('tall dark round solid'));
+    set('rule-attr-2', piece('tall dark round solid'), piece('short dark round solid'));
+    set('rule-attr-3', piece('tall dark round solid'), piece('tall dark square solid'));
+    set('rule-attr-4', piece('tall dark round hollow'), piece('tall dark round solid'));
+
+    // 勝ち例: 全部 dark の4コマ
+    const winLine = document.getElementById('rule-win-line');
+    const examples = [
+      'tall dark round solid',
+      'short dark square hollow',
+      'tall dark square solid',
+      'short dark round hollow'
+    ];
+    examples.forEach(c => {
+      const cell = document.createElement('div');
+      cell.className = 'mini-cell';
+      cell.appendChild(piece(c));
+      winLine.appendChild(cell);
+    });
+  </script>
+</body>
+</html>
