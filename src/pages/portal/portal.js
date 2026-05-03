@@ -32,6 +32,14 @@ const games = [
     link: '/games/pengin-fish/'
   },
   {
+    id: 'corridor',
+    title: 'コリドール',
+    desc: '壁で道をふさいで先にゴールせよ！戦略派の名作🚧',
+    color: '#1f1d4a',
+    icon: '🚧',
+    link: '/games/corridor/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',
