@@ -5,68 +5,400 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>OTRIO | N-Games</title>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(145deg, #0f172a, #1e293b);
-      color: #e2e8f0;
-      min-height: 100svh;
-      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-      display: grid;
-      place-items: center;
+    :root {
+      --bg-1: #0b1024;
+      --bg-2: #1e2a5e;
+      --surface: rgba(255,255,255,0.08);
+      --surface-strong: rgba(255,255,255,0.14);
+      --line: rgba(255,255,255,0.18);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --p1: #38bdf8;
+      --p2: #f472b6;
+      --p3: #34d399;
+      --p4: #facc15;
+      --shadow-sm: 0 4px 14px rgba(0,0,0,0.25);
+      --shadow-lg: 0 18px 50px rgba(0,0,0,0.35);
+      --radius: 16px;
+      --radius-sm: 10px;
     }
-    .app { width: min(980px, 100%); display: grid; gap: 16px; }
-    .top { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; align-items:center; }
-    .status { font-size: clamp(1rem, 2.4vw, 1.35rem); font-weight: 700; }
-    .btn { border:0; border-radius:12px; padding:10px 14px; min-height:44px; font-weight:700; }
-    .btn:active { transform: scale(.98); }
-    .board {
-      width: min(82vmin, 680px);
-      aspect-ratio: 1;
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100svh;
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(56,189,248,0.18), transparent 60%),
+        radial-gradient(900px 600px at 110% 110%, rgba(244,114,182,0.18), transparent 60%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      display: grid;
+      place-items: start center;
+      overflow-x: hidden;
+    }
+    .app { width: min(980px, 100%); display: grid; gap: 14px; }
+    .head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 6px 4px;
+    }
+    .title {
+      font-size: clamp(1.1rem, 3.6vw, 1.6rem);
+      font-weight: 900; letter-spacing: 0.18em;
+      background: linear-gradient(90deg, #93c5fd, #f0abfc, #fde68a);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .head-actions { display: flex; gap: 8px; }
+    .btn {
+      border: 0; border-radius: 12px; padding: 10px 14px;
+      min-height: 44px; min-width: 44px; font-weight: 800; font-size: 0.95rem;
+      color: #0b1024; background: #e2e8f0;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer; transition: transform .12s ease, background .2s ease, opacity .2s ease;
+    }
+    .btn:hover { background: #fff; }
+    .btn:active { transform: scale(0.97); }
+    .btn:focus-visible { outline: 3px solid #fde047; outline-offset: 2px; }
+    .btn.ghost {
+      background: transparent; color: var(--text);
+      border: 2px solid var(--line);
+    }
+    .btn.ghost:hover { background: var(--surface); }
+    .btn.primary {
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      color: white;
+    }
+
+    /* プレイヤーチップ */
+    .players {
+      display: grid; gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+    .pchip {
+      position: relative;
+      background: var(--surface);
+      border: 2px solid transparent;
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      display: grid; gap: 4px;
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
+      overflow: hidden;
+    }
+    .pchip::before {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--c, #fff) 0%, transparent 60%);
+      opacity: 0.12; pointer-events: none;
+    }
+    .pchip.active {
+      border-color: var(--c);
+      background: var(--surface-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 28%, transparent), var(--shadow-lg);
+    }
+    .pchip.skipped { opacity: 0.45; }
+    .pchip-name {
+      display: flex; align-items: center; gap: 8px;
+      font-weight: 800; font-size: 0.95rem;
+    }
+    .pchip-dot {
+      width: 14px; height: 14px; border-radius: 999px; background: var(--c);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent);
+    }
+    .pchip-stock { display: flex; gap: 6px; align-items: center; }
+    .stock-item {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.82rem; color: var(--muted); font-weight: 700;
+    }
+    .stock-ring {
+      display: inline-block; border: 2px solid var(--c); border-radius: 999px;
+    }
+    .stock-ring.s { width: 8px; height: 8px; }
+    .stock-ring.m { width: 12px; height: 12px; }
+    .stock-ring.l { width: 16px; height: 16px; }
+
+    /* ステータスバー */
+    .status-bar {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      min-height: 48px;
+    }
+    .status-text {
+      font-weight: 800; font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+    }
+    .turn-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 999px;
+      background: color-mix(in srgb, var(--c, #fff) 25%, transparent);
+      border: 2px solid var(--c, #fff);
+      font-weight: 800; font-size: 0.85rem;
+    }
+
+    /* 盤面 */
+    .stage {
+      position: relative;
+      width: min(82vmin, 560px);
       margin-inline: auto;
-      display:grid;
+    }
+    .board {
+      width: 100%;
+      aspect-ratio: 1;
+      display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       touch-action: manipulation;
+      position: relative;
+      z-index: 1;
     }
     .cell {
-      background: rgba(255,255,255,0.08);
-      border: 2px solid rgba(255,255,255,0.16);
-      border-radius: 16px;
-      display:grid; place-items:center;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      display: grid; place-items: center;
       position: relative;
-      min-height: 0;
+      min-height: 0; padding: 0;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .12s ease;
     }
-    .ring { position:absolute; border-radius:999px; border-style:solid; }
-    .size-s { width: 24%; height:24%; border-width:4px; }
-    .size-m { width: 46%; height:46%; border-width:5px; }
-    .size-l { width: 70%; height:70%; border-width:6px; }
-    .p1 { border-color:#38bdf8; }
-    .p2 { border-color:#f472b6; }
-    .panel { display:grid; gap:10px; grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .pile { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 10px; }
-    .pile h3 { margin:0 0 8px; font-size:.95rem; }
-    .pickers { display:flex; gap:8px; flex-wrap:wrap; }
+    .cell:hover:not(.locked) {
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.32);
+    }
+    .cell.preview .ghost-ring {
+      opacity: 0.45;
+    }
+    .cell.win {
+      border-color: #fde047;
+      animation: winPulse 1.2s ease-in-out infinite;
+    }
+    @keyframes winPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(253,224,71,0.5); }
+      50% { box-shadow: 0 0 24px 6px rgba(253,224,71,0.55); }
+    }
+    .ring {
+      position: absolute; border-radius: 999px; border-style: solid;
+      transform: scale(0);
+      animation: pop .35s cubic-bezier(.2,1.4,.4,1) forwards;
+    }
+    .ring.win {
+      animation: winRing 1.1s ease-in-out infinite;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.18); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes winRing {
+      0%, 100% { filter: drop-shadow(0 0 4px currentColor); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 18px currentColor); transform: scale(1.06); }
+    }
+    .ghost-ring {
+      position: absolute; border-radius: 999px; border-style: dashed;
+      opacity: 0; pointer-events: none;
+      transition: opacity .15s ease;
+    }
+    .size-s { width: 28%; height: 28%; border-width: 4px; }
+    .size-m { width: 52%; height: 52%; border-width: 5px; }
+    .size-l { width: 80%; height: 80%; border-width: 6px; }
+
+    .ring.p1, .ghost-ring.p1 { border-color: var(--p1); color: var(--p1); }
+    .ring.p2, .ghost-ring.p2 { border-color: var(--p2); color: var(--p2); }
+    .ring.p3, .ghost-ring.p3 { border-color: var(--p3); color: var(--p3); }
+    .ring.p4, .ghost-ring.p4 { border-color: var(--p4); color: var(--p4); }
+
+    /* パーティクルキャンバス */
+    #fx {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none; z-index: 2;
+    }
+    /* 勝利画面紙吹雪 */
+    #confetti {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 60;
+    }
+
+    /* サイズピッカー */
+    .picker {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: grid; gap: 10px;
+    }
+    .picker-label {
+      font-size: 0.85rem; color: var(--muted); font-weight: 700;
+    }
+    .picks { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
     .pick {
-      min-width: 64px; min-height: 44px; border:2px solid transparent; border-radius:10px;
-      background: rgba(255,255,255,.12); color:#fff; font-weight:800;
+      position: relative;
+      min-width: 88px; min-height: 64px;
+      border: 3px solid transparent; border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text); font-weight: 800;
+      display: grid; place-items: center; gap: 4px;
+      cursor: pointer;
+      transition: transform .12s ease, border-color .2s ease, background .2s ease, opacity .2s ease;
     }
-    .pick.active { border-color:#facc15; }
+    .pick:hover:not(:disabled) { background: rgba(255,255,255,0.14); transform: translateY(-2px); }
+    .pick:active:not(:disabled) { transform: scale(0.97); }
+    .pick:disabled { opacity: 0.35; cursor: not-allowed; }
+    .pick.active { border-color: var(--c); background: color-mix(in srgb, var(--c) 18%, transparent); }
+    .pick-vis {
+      width: 36px; height: 36px; display: grid; place-items: center;
+    }
+    .pick-vis .ring-vis {
+      border-radius: 999px; border: 3px solid var(--c);
+    }
+    .pick-vis .ring-vis.s { width: 16px; height: 16px; }
+    .pick-vis .ring-vis.m { width: 26px; height: 26px; }
+    .pick-vis .ring-vis.l { width: 34px; height: 34px; }
+    .pick-count { font-size: 0.78rem; color: var(--muted); }
+
+    /* セットアップ画面 */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(8, 10, 28, 0.85);
+      backdrop-filter: blur(8px);
+      display: grid; place-items: center;
+      padding: 16px;
+      animation: fade .25s ease;
+    }
+    .overlay.hidden { display: none; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      width: min(440px, 100%);
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+      display: grid; gap: 16px;
+    }
+    .modal h2 {
+      margin: 0; font-size: 1.4rem; font-weight: 900;
+      background: linear-gradient(90deg, #93c5fd, #f0abfc);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .modal p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .count-grid {
+      display: grid; gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .count-btn {
+      border: 3px solid var(--line); background: rgba(255,255,255,0.04);
+      color: var(--text); border-radius: 16px; padding: 16px 10px;
+      font-size: 1.6rem; font-weight: 900;
+      display: grid; gap: 4px; place-items: center;
+      cursor: pointer; min-height: 88px;
+      transition: transform .12s ease, border-color .2s ease, background .2s ease;
+    }
+    .count-btn small { font-size: 0.72rem; color: var(--muted); font-weight: 700; }
+    .count-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+    .count-btn.active {
+      border-color: #fde047;
+      background: color-mix(in srgb, #fde047 14%, transparent);
+    }
+    .colors-preview { display: flex; gap: 10px; justify-content: center; }
+    .cdot {
+      width: 28px; height: 28px; border-radius: 999px;
+      background: var(--c); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 60%, transparent);
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .cdot.muted { opacity: 0.25; transform: scale(0.85); }
+
+    /* リザルトダイアログ */
+    .result-dialog {
+      width: min(380px, 100%);
+      background: linear-gradient(180deg, #1e293b, #0f172a);
+      border: 3px solid var(--c, var(--line));
+      border-radius: 22px; padding: 24px;
+      display: grid; gap: 14px; place-items: center;
+      box-shadow: var(--shadow-lg);
+      animation: pop .4s cubic-bezier(.2,1.4,.4,1);
+    }
+    .result-emoji { font-size: 3rem; animation: bounce 1s infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .result-title {
+      font-size: 1.5rem; font-weight: 900; text-align: center;
+      color: var(--c, #fff);
+    }
+    .result-sub { color: var(--muted); font-size: 0.9rem; }
+    .result-actions { display: flex; gap: 10px; }
+
+    /* 小さい画面 */
+    @media (max-width: 480px) {
+      .picks { gap: 8px; }
+      .pick { min-width: 76px; }
+    }
   </style>
 </head>
 <body>
   <main class="app">
-    <div class="top">
-      <div id="status" class="status">プレイヤー1の番</div>
-      <button class="btn" id="resetBtn">リセット</button>
+    <header class="head">
+      <div class="title">⊙ OTRIO</div>
+      <div class="head-actions">
+        <button class="btn ghost" id="muteBtn" aria-label="サウンド切り替え" title="サウンド">🔊</button>
+        <button class="btn ghost" id="newBtn">新しい対戦</button>
+        <button class="btn" id="resetBtn">リセット</button>
+      </div>
+    </header>
+
+    <section id="players" class="players" aria-label="プレイヤー"></section>
+
+    <div class="status-bar">
+      <div id="status" class="status-text">プレイヤー1の番</div>
+      <div id="turnBadge" class="turn-badge" style="--c: var(--p1)">
+        <span>🎯</span><span id="turnLabel">P1</span>
+      </div>
     </div>
-    <section id="board" class="board" aria-label="otrio board"></section>
-    <section class="panel">
-      <div class="pile"><h3>プレイヤー1 (青)</h3><div id="p1Pickers" class="pickers"></div></div>
-      <div class="pile"><h3>プレイヤー2 (ピンク)</h3><div id="p2Pickers" class="pickers"></div></div>
+
+    <div class="stage">
+      <section id="board" class="board" aria-label="otrio board"></section>
+      <canvas id="fx" aria-hidden="true"></canvas>
+    </div>
+
+    <section class="picker" aria-label="サイズ選択">
+      <div class="picker-label">置くサイズを選んでね</div>
+      <div id="picks" class="picks"></div>
     </section>
   </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- セットアップオーバーレイ -->
+  <div id="setup" class="overlay" role="dialog" aria-labelledby="setupTitle">
+    <div class="modal">
+      <h2 id="setupTitle">プレイヤーは何人？</h2>
+      <p>2〜4人で対戦できます。それぞれの色で輪を置いていこう！</p>
+      <div id="countGrid" class="count-grid">
+        <button class="count-btn active" data-count="2">2<small>人</small></button>
+        <button class="count-btn" data-count="3">3<small>人</small></button>
+        <button class="count-btn" data-count="4">4<small>人</small></button>
+      </div>
+      <div id="colorsPreview" class="colors-preview" aria-hidden="true"></div>
+      <button class="btn primary" id="startBtn">はじめる</button>
+    </div>
+  </div>
+
+  <!-- 結果オーバーレイ -->
+  <div id="result" class="overlay hidden" role="dialog">
+    <div id="resultDialog" class="result-dialog">
+      <div id="resultEmoji" class="result-emoji">🎉</div>
+      <div id="resultTitle" class="result-title">プレイヤー1の勝ち！</div>
+      <div id="resultSub" class="result-sub">おめでとう！</div>
+      <div class="result-actions">
+        <button class="btn ghost" id="resultMenuBtn">メニュー</button>
+        <button class="btn primary" id="resultAgainBtn">もう一度</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="./game.js"></script>
 </body>
 </html>
