@@ -1,0 +1,17 @@
+:root { font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", sans-serif; color-scheme: light; }
+body { margin:0; background: radial-gradient(circle at top, #e8f8ff, #b6dfff 50%, #87c7f5); min-height:100vh; }
+.app{ max-width:1100px; margin:0 auto; padding:12px; }
+.topbar{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; align-items:center; }
+h1{ margin:0; color:#155b9a; }
+.controls{ display:flex; gap:8px; align-items:center; }
+select,button{ border:none; border-radius:999px; padding:10px 14px; font-size:16px; }
+button{ background:#ff7bb1; color:white; font-weight:700; }
+.status{ margin:12px 0; background:#ffffffd8; padding:10px 14px; border-radius:14px; font-size:18px; color:#0f3e69; }
+.player-panel{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.player-card{ background:#ffffffd6; border-radius:12px; padding:8px; text-align:center; border:3px solid transparent; font-size:14px; }
+.player-card.active{ border-color:#ffcf5f; transform:translateY(-2px); }
+.player-card.out{ opacity:.45; filter:grayscale(.8); }
+.board-wrap{ margin-top:10px; }
+#board{ width:min(94vw,760px); height:min(94vw,760px); max-height:75vh; display:block; margin:0 auto; border-radius:22px; box-shadow:0 10px 25px #0b4c7d44; touch-action:manipulation; background:#e0f5ff; }
+.hint{ text-align:center; margin-top:8px; color:#0c4472; font-weight:700; }
+@media (max-width:900px){ .player-panel{ grid-template-columns:repeat(2,minmax(0,1fr)); } .status{font-size:16px;} }
