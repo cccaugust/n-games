@@ -48,6 +48,14 @@ const games = [
     link: '/games/patchwork/'
   },
   {
+    id: 'rose-king',
+    title: 'ローゼンケーニッヒ',
+    desc: '王を動かしてバラを並べろ！薔薇戦争モチーフの陣取り👑',
+    color: '#4a1d3d',
+    icon: '👑',
+    link: '/games/rose-king/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',
