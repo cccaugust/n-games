@@ -24,6 +24,38 @@ const games = [
     link: '/games/quarto/'
   },
   {
+    id: 'pengin-fish',
+    title: 'それはオレの魚だ！',
+    desc: 'ペンギンで魚を取り合え！氷が沈む陣取り🐧',
+    color: '#0e7490',
+    icon: '🐧',
+    link: '/games/pengin-fish/'
+  },
+  {
+    id: 'corridor',
+    title: 'コリドール',
+    desc: '壁で道をふさいで先にゴールせよ！戦略派の名作🚧',
+    color: '#1f1d4a',
+    icon: '🚧',
+    link: '/games/corridor/'
+  },
+  {
+    id: 'patchwork',
+    title: 'パッチワーク',
+    desc: 'パッチで9×9のキルトを埋めよう！時間とボタンの戦略🪡',
+    color: '#3d1f4d',
+    icon: '🪡',
+    link: '/games/patchwork/'
+  },
+  {
+    id: 'rose-king',
+    title: 'ローゼンケーニッヒ',
+    desc: '王を動かしてバラを並べろ！薔薇戦争モチーフの陣取り👑',
+    color: '#4a1d3d',
+    icon: '👑',
+    link: '/games/rose-king/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',
