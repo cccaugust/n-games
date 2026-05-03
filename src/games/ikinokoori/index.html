@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>イキノコオリ</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>❄️ イキノコオリ</h1>
+      <div class="controls">
+        <label>人数
+          <select id="playerCount">
+            <option value="2">2人</option>
+            <option value="3">3人</option>
+            <option value="4" selected>4人</option>
+          </select>
+        </label>
+        <button id="resetBtn">あたらしく遊ぶ</button>
+      </div>
+    </header>
+    <section class="status" id="status"></section>
+    <section id="playerPanel" class="player-panel"></section>
+    <section class="board-wrap">
+      <canvas id="board" width="900" height="900"></canvas>
+      <div class="hint">タップで移動 → 足場が割れて消える！最後まで生き残れ！</div>
+    </section>
+  </main>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
