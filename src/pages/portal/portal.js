@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'blokus-duel-lite',
+    title: 'ブロックス バトル',
+    desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',
+    color: '#5f3dc4',
+    icon: '🧩',
+    link: '/games/blokus-duel-lite/'
+  },
+  {
     id: 'otrio',
     title: 'OTRIO',
     desc: '輪をならべて3つそろえよう！2人対戦ボードゲーム⭕',
