@@ -40,6 +40,14 @@ const games = [
     link: '/games/corridor/'
   },
   {
+    id: 'patchwork',
+    title: 'パッチワーク',
+    desc: 'パッチで9×9のキルトを埋めよう！時間とボタンの戦略🪡',
+    color: '#3d1f4d',
+    icon: '🪡',
+    link: '/games/patchwork/'
+  },
+  {
     id: 'blokus-duel-lite',
     title: 'ブロックス バトル',
     desc: '2〜4人で遊べる陣取りパズル！角つなぎで勝負🧩',

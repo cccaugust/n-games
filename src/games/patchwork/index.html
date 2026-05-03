@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>パッチワーク | N-Games</title>
+  <style>
+    :root {
+      --bg-1: #1d1430;
+      --bg-2: #2a1d4a;
+      --bg-3: #3d1f4d;
+      --board-bg: #fef3c7;
+      --board-line: #d4a373;
+      --cell-empty: #fffbeb;
+      --cell-line: #e7d6b5;
+      --p1: #ec4899;
+      --p2: #0ea5e9;
+      --gold: #fde047;
+      --surface: rgba(255,255,255,0.06);
+      --surface-strong: rgba(255,255,255,0.12);
+      --line: rgba(255,255,255,0.16);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --shadow-sm: 0 4px 14px rgba(0,0,0,0.25);
+      --shadow-lg: 0 18px 50px rgba(0,0,0,0.4);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --quilt-cell: 30px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Outfit', 'Hiragino Maru Gothic ProN', 'Hiragino Sans', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100svh;
+      background:
+        radial-gradient(900px 500px at 0% 0%, rgba(236,72,153,0.18), transparent 55%),
+        radial-gradient(900px 500px at 100% 100%, rgba(14,165,233,0.18), transparent 55%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2) 60%, var(--bg-3));
+      padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .app {
+      width: min(880px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 8px;
+      min-height: 100svh;
+      padding-bottom: 8px;
+    }
+
+    .head {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 4px 2px;
+    }
+    .title-wrap { display: flex; align-items: center; gap: 8px; }
+    .logo {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--p1), var(--p2));
+      box-shadow: var(--shadow-sm);
+      display: grid; place-items: center;
+      font-size: 1.1rem;
+    }
+    .title {
+      font-size: clamp(1.05rem, 3.4vw, 1.4rem);
+      font-weight: 900; letter-spacing: 0.16em;
+      background: linear-gradient(90deg, #fbcfe8, #bae6fd, #fde68a);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .head-actions { display: flex; gap: 6px; }
+    .btn {
+      border: 0; border-radius: 12px; padding: 8px 12px;
+      min-height: 42px; min-width: 42px; font-weight: 800; font-size: 0.9rem;
+      color: #1d1430; background: #e2e8f0;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform .12s, background .2s, opacity .2s;
+      font-family: inherit;
+    }
+    .btn:hover { background: #fff; }
+    .btn:active { transform: scale(0.96); }
+    .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+    .btn.ghost {
+      background: transparent; color: var(--text);
+      border: 2px solid var(--line); box-shadow: none;
+    }
+    .btn.ghost:hover { background: var(--surface); }
+    .btn.primary {
+      background: linear-gradient(135deg, #ec4899, #a78bfa);
+      color: white;
+    }
+    .btn.icon { padding: 8px 10px; font-size: 1.05rem; }
+
+    /* パネル */
+    .panel {
+      position: relative;
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 2px solid transparent;
+      display: flex; align-items: center; gap: 12px;
+      flex-wrap: wrap;
+      transition: border-color .25s, background .25s, transform .25s, box-shadow .25s;
+    }
+    .panel.active {
+      border-color: var(--c);
+      background: color-mix(in srgb, var(--c) 16%, var(--surface));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 22%, transparent), var(--shadow-lg);
+    }
+    .panel.winner {
+      border-color: var(--gold);
+      background: color-mix(in srgb, var(--gold) 18%, var(--surface));
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 30%, transparent), var(--shadow-lg);
+    }
+    #panel-2.flip { transform: rotate(180deg); }
+    #panel-2.flip.active { transform: rotate(180deg) translateY(-1px); }
+    .panel-name {
+      display: flex; align-items: center; gap: 6px;
+      font-weight: 900; font-size: 0.95rem;
+      min-width: 130px;
+    }
+    .panel-dot {
+      width: 12px; height: 12px; border-radius: 999px; background: var(--c);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent);
+    }
+    .panel-status {
+      font-size: 0.8rem; color: var(--muted); font-weight: 700;
+      flex: 1;
+    }
+    .panel.active .panel-status { color: #fff; }
+    .panel-info {
+      display: flex; gap: 8px;
+    }
+    .info-chip {
+      display: inline-flex; align-items: center; gap: 3px;
+      background: rgba(0,0,0,0.25);
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+    .info-chip b { color: var(--c); }
+
+    /* キルト */
+    .quilt-wrap {
+      display: grid; place-items: center;
+      padding: 6px;
+    }
+    .quilt {
+      display: grid;
+      grid-template-columns: repeat(9, var(--quilt-cell));
+      grid-template-rows: repeat(9, var(--quilt-cell));
+      gap: 2px;
+      background: var(--board-bg);
+      padding: 8px;
+      border-radius: 12px;
+      border: 3px solid var(--board-line);
+      box-shadow: var(--shadow-lg);
+    }
+    .quilt.flip {
+      transform: rotate(180deg);
+    }
+    .qcell {
+      background: var(--cell-empty);
+      border: 1px dashed var(--cell-line);
+      border-radius: 4px;
+      position: relative;
+      display: grid; place-items: center;
+      transition: background .15s, transform .12s;
+    }
+    .qcell.filled {
+      border: 1px solid rgba(0,0,0,0.18);
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    }
+    .qcell.targetable {
+      cursor: pointer;
+    }
+    .qcell.preview {
+      background: color-mix(in srgb, var(--gold) 35%, var(--cell-empty));
+      border-color: var(--gold);
+    }
+    .qcell.preview-bad {
+      background: color-mix(in srgb, #f87171 50%, var(--cell-empty));
+      border-color: #ef4444;
+    }
+    .qbutton {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
+      line-height: 1;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.5);
+    }
+
+    /* マーケット */
+    .market {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      display: grid; gap: 8px;
+    }
+    .market-title {
+      font-size: 0.78rem; color: var(--muted); font-weight: 800;
+      letter-spacing: 0.06em; text-align: center;
+    }
+    .market-row {
+      display: flex; gap: 8px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .market-tile {
+      flex: 0 0 auto;
+      background: rgba(255,255,255,0.04);
+      border: 2px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      display: grid; gap: 6px; place-items: center;
+      cursor: default;
+      min-width: 88px;
+      transition: transform .15s, border-color .2s, background .2s;
+    }
+    .market-tile.buyable { cursor: pointer; }
+    .market-tile.buyable:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+    .market-tile.locked { opacity: 0.45; }
+    .market-tile.selected {
+      border-color: var(--gold);
+      background: color-mix(in srgb, var(--gold) 18%, transparent);
+      box-shadow: 0 0 0 3px rgba(253,224,71,0.4);
+    }
+    .market-more { font-size: 0.78rem; color: var(--muted); text-align: center; }
+
+    .patch-grid {
+      display: grid;
+      gap: 1px;
+    }
+    .patch-cell {
+      width: 16px; height: 16px;
+      background: #d4a373;
+      border-radius: 3px;
+      display: grid; place-items: center;
+      font-size: 9px;
+      color: white;
+    }
+    .patch-cell.empty {
+      background: transparent;
+    }
+    .patch-cell.with-button {
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+    }
+    .patch-grid.big .patch-cell {
+      width: 28px; height: 28px;
+      font-size: 16px;
+    }
+    .patch-info {
+      display: flex; gap: 8px; font-size: 0.75rem; font-weight: 800;
+    }
+    .patch-info .cost { color: #fbbf24; }
+    .patch-info .time { color: #a5b4fc; }
+
+    .active-patch {
+      background: var(--surface-strong);
+      border: 2px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 14px;
+      justify-content: space-between;
+      min-height: 90px;
+    }
+    .active-patch.empty {
+      border-style: dashed;
+      border-color: var(--line);
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .active-empty { font-weight: 700; }
+    .active-shape { display: grid; place-items: center; }
+    .active-controls {
+      display: grid; gap: 6px;
+      flex: 1;
+      max-width: 200px;
+    }
+    .active-info {
+      display: flex; gap: 10px;
+      font-size: 0.95rem; font-weight: 800;
+      justify-content: center;
+    }
+    .active-actions {
+      display: flex; gap: 4px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      flex: 1;
+      min-height: 36px;
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+      border: 2px solid var(--line);
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+    }
+    .ctrl-btn:hover { background: rgba(255,255,255,0.18); }
+    .ctrl-btn:active { transform: scale(0.96); }
+    .ctrl-btn.cancel { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); }
+    .active-hint { font-size: 0.78rem; color: var(--muted); text-align: center; }
+
+    /* 時間トラック */
+    .time-track {
+      display: grid;
+      grid-template-columns: repeat(26, minmax(20px, 1fr));
+      gap: 2px;
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 6px;
+    }
+    .tcell {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.04);
+      border-radius: 4px;
+      display: grid; place-items: center;
+      font-size: 0.62rem;
+      color: var(--muted);
+      font-weight: 700;
+      position: relative;
+      min-height: 20px;
+    }
+    .tcell.start, .tcell.end { font-size: 0.7rem; }
+    .tcell.button-space {
+      background: color-mix(in srgb, var(--gold) 20%, transparent);
+      color: var(--gold);
+    }
+    .token {
+      position: absolute;
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      display: grid; place-items: center;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 900;
+      box-shadow: 0 0 8px currentColor, 0 0 0 2px rgba(0,0,0,0.4);
+      bottom: -8px;
+      z-index: 2;
+    }
+    .token + .token {
+      top: -8px;
+      bottom: auto;
+    }
+
+    /* HUD */
+    .hud {
+      background: var(--surface);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      padding: 8px 12px;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      min-height: 46px;
+    }
+    .hud-phase {
+      font-size: 0.92rem; font-weight: 800;
+      transition: color .2s, transform .2s;
+    }
+    .hud-phase.flash { color: var(--gold); animation: shake .3s ease-in-out; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .pass-btn {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      border: 0;
+      padding: 8px 14px;
+      font-weight: 900;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+      min-height: 38px;
+    }
+    .pass-btn:hover { filter: brightness(1.1); }
+    .pass-btn:active { transform: scale(0.96); }
+    .pass-btn:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
+
+    /* オーバーレイ */
+    .overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: rgba(8, 10, 28, 0.78);
+      backdrop-filter: blur(8px);
+      display: grid; place-items: center;
+      padding: 16px;
+      animation: fade .25s ease;
+    }
+    .overlay.hidden { display: none; }
+    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      width: min(560px, 100%);
+      max-height: 92svh;
+      overflow-y: auto;
+      background: linear-gradient(180deg, #2a1d4a, #1d1430);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+      display: grid; gap: 12px;
+    }
+    .modal h2 {
+      margin: 0; font-size: 1.4rem; font-weight: 900;
+      background: linear-gradient(90deg, #fbcfe8, #bae6fd);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .modal p { margin: 0; color: #cbd5e1; font-size: 0.92rem; line-height: 1.55; }
+    .modal-actions {
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+
+    .menu-illust {
+      display: flex; gap: 10px; justify-content: center;
+      font-size: 1.6rem;
+    }
+
+    .rules-step {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: grid; gap: 6px;
+    }
+    .rules-step h3 {
+      margin: 0; font-size: 0.95rem; color: var(--gold);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .rules-step h3 .num {
+      width: 24px; height: 24px; border-radius: 999px;
+      background: var(--gold); color: #1d1430;
+      display: grid; place-items: center;
+      font-size: 0.78rem; font-weight: 900;
+    }
+    .rules-step p { font-size: 0.84rem; }
+
+    /* リザルト */
+    .result-dialog {
+      width: min(420px, 100%);
+      background: linear-gradient(180deg, #2a1d4a, #1d1430);
+      border: 3px solid var(--c, var(--gold));
+      border-radius: 22px; padding: 24px;
+      display: grid; gap: 14px;
+      box-shadow: var(--shadow-lg);
+      animation: resultPop .45s cubic-bezier(.2,1.4,.4,1);
+    }
+    @keyframes resultPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      60% { transform: scale(1.08); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .result-emoji { font-size: 3rem; text-align: center; animation: bounce 1.4s infinite; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .result-title { font-size: 1.4rem; font-weight: 900; text-align: center; }
+    .result-sub { color: var(--muted); font-size: 0.9rem; text-align: center; }
+    .result-list { display: grid; gap: 6px; }
+    .result-row {
+      display: grid;
+      grid-template-columns: 16px 1fr auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+      font-weight: 700;
+    }
+    .result-row.winner {
+      background: color-mix(in srgb, var(--gold) 14%, rgba(255,255,255,0.04));
+      box-shadow: inset 0 0 0 1px rgba(253,224,71,0.5);
+    }
+    .result-dot { width: 14px; height: 14px; border-radius: 999px; }
+    .result-name { font-size: 0.95rem; }
+    .result-detail { font-size: 0.78rem; color: var(--muted); }
+    .result-score { font-size: 1.2rem; font-weight: 900; color: var(--c, var(--gold)); }
+    .result-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+
+    #confetti {
+      position: fixed; inset: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 60;
+    }
+
+    /* タブレット最適化 */
+    @media (max-width: 720px) {
+      :root { --quilt-cell: 26px; }
+      .panel-name { min-width: 100px; font-size: 0.85rem; }
+      .panel-status { font-size: 0.72rem; }
+      .info-chip { font-size: 0.78rem; padding: 3px 6px; }
+      .head .lbl { display: none; }
+      .market-tile { min-width: 76px; padding: 6px; }
+      .patch-cell { width: 14px; height: 14px; }
+      .patch-grid.big .patch-cell { width: 22px; height: 22px; }
+      .tcell { font-size: 0.55rem; min-height: 18px; }
+      .token { width: 14px; height: 14px; font-size: 0.6rem; }
+    }
+    @media (max-width: 480px) {
+      :root { --quilt-cell: 22px; }
+      .market-tile { min-width: 68px; }
+      .ctrl-btn { font-size: 0.78rem; min-height: 32px; padding: 4px 6px; }
+      .active-patch { padding: 8px; gap: 8px; }
+    }
+    @media (hover: none) {
+      .market-tile.buyable:hover { transform: none; background: rgba(255,255,255,0.04); }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="head">
+      <div class="title-wrap">
+        <div class="logo">🪡</div>
+        <div class="title">パッチワーク</div>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost icon" id="rulesBtn" aria-label="ルール">？<span class="lbl"> ルール</span></button>
+        <button class="btn ghost icon" id="muteBtn" aria-label="サウンド">🔊</button>
+        <button class="btn ghost" id="newBtn">メニュー</button>
+        <button class="btn" id="resetBtn">リセット</button>
+      </div>
+    </header>
+
+    <!-- P2 (上、対面プレイ用反転) -->
+    <section id="panel-2" class="panel flip" style="--c: var(--p2)" aria-label="プレイヤー2"></section>
+    <div class="quilt-wrap">
+      <div id="quilt-2" class="quilt" aria-label="P2のキルト"></div>
+    </div>
+
+    <!-- マーケット + アクティブパッチ -->
+    <section class="market" aria-label="マーケット">
+      <div class="market-title">⏰ 次に買える3枚</div>
+      <div id="market-row" class="market-row"></div>
+      <div id="market-more" class="market-more"></div>
+    </section>
+
+    <div id="active-patch" class="active-patch empty"></div>
+
+    <!-- 時間トラック -->
+    <section id="time-track" class="time-track" aria-label="時間トラック"></section>
+
+    <!-- HUD -->
+    <div class="hud">
+      <div class="hud-phase" id="phase">スタート</div>
+      <button class="pass-btn" id="passBtn">▶ 進む</button>
+    </div>
+
+    <!-- P1 (下) -->
+    <div class="quilt-wrap">
+      <div id="quilt-1" class="quilt" aria-label="P1のキルト"></div>
+    </div>
+    <section id="panel-1" class="panel" style="--c: var(--p1)" aria-label="プレイヤー1"></section>
+  </main>
+
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- メニュー -->
+  <div id="menu" class="overlay" role="dialog" aria-labelledby="menuTitle">
+    <div class="modal">
+      <h2 id="menuTitle">パッチワーク</h2>
+      <div class="menu-illust">🪡 → 🧵 → 🟧🟦🟪</div>
+      <p>布のパッチを買って、9×9のキルトを綺麗に埋めよう！時間とボタン（お金）の使いどころが勝敗を分ける、戦略タイル配置ゲーム。</p>
+      <p style="font-size: 0.82rem; color: var(--muted);">2人専用 / ボタン5個スタート / 時間トラック25</p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="rulesFromMenuBtn">ルールを見る</button>
+        <button class="btn primary" id="startBtn">はじめる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ルール -->
+  <div id="rules" class="overlay hidden" role="dialog" aria-labelledby="rulesTitle">
+    <div class="modal">
+      <h2 id="rulesTitle">あそびかた</h2>
+
+      <div class="rules-step">
+        <h3><span class="num">1</span>後ろにいる人の番</h3>
+        <p>時間トラックで <b>後ろにいる人</b> が常に手番。同じマスにいるときは、後から来た人が先に動く。</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">2</span>パッチを買う or 進む</h3>
+        <p>毎ターン、次の2つから1つ選ぶ:<br>
+        <b>A.</b> 次に並んでる<b>3枚から1枚を買う</b> → 🪙コスト払って → ⏰時間進めて → 9×9キルトに置く<br>
+        <b>B.</b> <b>「進む」</b> 相手の1マス先まで進んで、進んだマス数だけ🪙ボタンをもらう</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">3</span>パッチを置く</h3>
+        <p>選んだパッチは <b>↻回転 / ⇋反転</b> できる。キルトの空きマスをタップして配置！キーボード R / F / Esc も使える。</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">4</span>ボタン収入</h3>
+        <p>パッチには <b>●ボタン印</b> がついてるものがあり、その合計が「収入」。時間トラックの 🪙マスを通過するたびに、収入分のボタンをもらえる！</p>
+      </div>
+
+      <div class="rules-step">
+        <h3><span class="num">5</span>勝敗</h3>
+        <p>両者がゴール🏁に着いたら終了。<br>
+        <b>スコア = 持ってる🪙 − 空きマス×2</b><br>
+        スコアが多い人の勝ち！</p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn primary" id="rulesClose">わかった！</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- リザルト -->
+  <div id="result" class="overlay hidden" role="dialog" aria-labelledby="resultTitle">
+    <div id="resultDialog" class="result-dialog">
+      <div id="resultEmoji" class="result-emoji">🏆</div>
+      <div id="resultTitle" class="result-title">プレイヤー1 の勝ち！</div>
+      <div id="resultSub" class="result-sub"></div>
+      <div id="resultList" class="result-list"></div>
+      <div class="result-actions">
+        <button class="btn ghost" id="resultMenuBtn">メニュー</button>
+        <button class="btn primary" id="resultAgainBtn">もう一回</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
