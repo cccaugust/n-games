@@ -6,6 +6,12 @@ export const FAMILY_PIN = '0818';
 
 export const PLAYER_KEY = 'n-games-player';
 
+const DEFAULT_PLAYER = Object.freeze({
+    id: 'guest',
+    name: 'プレイヤー',
+    avatar: '🎮'
+});
+
 export function isFamilyLoggedIn() {
     return localStorage.getItem(FAMILY_AUTH_KEY) === 'true';
 }
@@ -20,7 +26,14 @@ export function loginFamily(id, pin) {
 
 export function getCurrentPlayer() {
     const json = localStorage.getItem(PLAYER_KEY);
-    return json ? JSON.parse(json) : null;
+    if (json) {
+        try {
+            return JSON.parse(json);
+        } catch {
+            // fall through to default
+        }
+    }
+    return { ...DEFAULT_PLAYER };
 }
 
 export function selectPlayer(player) {
@@ -34,22 +47,9 @@ export function logout() {
     navigateTo('/pages/login/login.html');
 }
 
-export function switchPlayer() {
-    localStorage.removeItem(PLAYER_KEY);
-    navigateTo('/pages/select-player/select-player.html');
-}
-
 export function requireAuth() {
     const isLoginPage = window.location.pathname.includes('/login.html');
-    const isSelectPage = window.location.pathname.includes('/select-player.html');
-
-    if (!isFamilyLoggedIn()) {
-        if (!isLoginPage) {
-            navigateTo('/pages/login/login.html');
-        }
-    } else if (!getCurrentPlayer()) {
-        if (!isLoginPage && !isSelectPage) {
-            navigateTo('/pages/select-player/select-player.html');
-        }
+    if (!isFamilyLoggedIn() && !isLoginPage) {
+        navigateTo('/pages/login/login.html');
     }
 }
