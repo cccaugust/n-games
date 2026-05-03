@@ -16,6 +16,14 @@ document.getElementById('switchBtn').addEventListener('click', switchPlayer);
 
 const games = [
   {
+    id: 'otrio',
+    title: 'OTRIO',
+    desc: '輪をならべて3つそろえよう！2人対戦ボードゲーム⭕',
+    color: '#0f172a',
+    icon: '⭕',
+    link: '/games/otrio/'
+  },
+  {
     id: 'pencil-color-run',
     title: 'えんぴつカラーダッシュ',
     desc: '3Dで色を集めて伸びろ！色ちがいはアウト✏️',
