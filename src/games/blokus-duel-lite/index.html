@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ブロックス バトル</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hud">
+      <h1>ブロックス バトル</h1>
+      <div class="controls">
+        <label>人数
+          <select id="playerCount">
+            <option value="2">2人</option>
+            <option value="3">3人</option>
+            <option value="4" selected>4人</option>
+          </select>
+        </label>
+        <button id="newGameBtn">新しく始める</button>
+      </div>
+      <p id="status"></p>
+    </header>
+
+    <section class="game-layout">
+      <div id="board" class="board" aria-label="ゲーム盤"></div>
+      <aside class="side">
+        <p>タップでピース選択 → 盤面タップで配置</p>
+        <div class="piece-actions">
+          <button id="rotateBtn">回転</button>
+          <button id="flipBtn">左右反転</button>
+          <button id="skipBtn">パス</button>
+        </div>
+        <div id="pieces" class="pieces"></div>
+      </aside>
+    </section>
+  </main>
+  <canvas id="fxCanvas"></canvas>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
