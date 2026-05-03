@@ -3074,7 +3074,7 @@ if (avatarPickBtn) {
     }
 
     const ctx = readJson(AVATAR_CTX_KEY);
-    const returnTo = typeof ctx?.returnTo === 'string' ? ctx.returnTo : '/pages/select-player/select-player.html';
+    const returnTo = typeof ctx?.returnTo === 'string' ? ctx.returnTo : '/pages/portal/portal.html';
     window.location.href = resolvePath(returnTo);
   });
 }

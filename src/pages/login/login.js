@@ -3,7 +3,7 @@ import { navigateTo } from '../../js/config.js';
 
 // Redirect if already logged in
 if (isFamilyLoggedIn()) {
-    navigateTo('/pages/select-player/select-player.html');
+    navigateTo('/pages/portal/portal.html');
 }
 
 const pinDisplay = document.getElementById('pinDisplay');
@@ -41,7 +41,7 @@ function attemptLogin() {
     // The user said "0818 de haireru youni" (enter with 0818)
     if (loginFamily('nakao', currentPin)) {
         pinDisplay.style.color = '#00b894';
-        navigateTo('/pages/select-player/select-player.html');
+        navigateTo('/pages/portal/portal.html');
     } else {
         // Error
         errorMsg.style.opacity = '1';
