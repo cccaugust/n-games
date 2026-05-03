@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>イキノコオリ</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>❄️ イキノコオリ</h1>
+      <div class="controls">
+        <label>人数
+          <select id="playerCount">
+            <option value="2">2人</option>
+            <option value="3">3人</option>
+            <option value="4" selected>4人</option>
+          </select>
+        </label>
+        <button id="resetBtn">あたらしく遊ぶ</button>
+        <button id="ruleBtn" class="sub-btn" type="button">📘 ルール</button>
+      </div>
+    </header>
+    <section class="status" id="status"></section>
+    <section id="playerPanel" class="player-panel"></section>
+    <section class="board-wrap">
+      <canvas id="board" width="900" height="900"></canvas>
+      <div class="hint">タップで移動 → 足場が割れて消える！最後まで生き残れ！</div>
+    </section>
+  </main>
+
+  <dialog id="ruleDialog" class="rule-dialog">
+    <h2>📘 イキノコオリのルール</h2>
+    <ol>
+      <li>自分の番で、上下左右のどれか1マスに移動します。</li>
+      <li>移動したら、さっきいたマスの氷が割れて消えます。</li>
+      <li>移動先がないプレイヤーは脱落です。</li>
+      <li>最後まで残った1人の勝ち！</li>
+    </ol>
+    <p>2〜4人で、順番にタップして遊べます。</p>
+    <button id="closeRuleBtn" class="sub-btn" type="button">とじる</button>
+  </dialog>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

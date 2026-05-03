@@ -358,6 +358,14 @@ const games = [
     color: '#1a1a2e',
     icon: '⛩️',
     link: '/games/kakuriyo/'
+  },
+  {
+    id: 'ikinokoori',
+    title: 'イキノコオリ',
+    desc: '2〜4人でバトル！氷の床を渡って最後の1人になろう❄️',
+    color: '#7dd3fc',
+    icon: '❄️',
+    link: '/games/ikinokoori/'
   }
 ];
 
