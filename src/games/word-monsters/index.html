@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ワードモンスターズ | N-Games</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <div class="wm-app">
+      <a class="wm-back" href="../../pages/portal/portal.html">&larr; もどる</a>
+
+      <!-- ===== ホーム ===== -->
+      <section id="screenHome" class="wm-screen is-active">
+        <div class="wm-home-card">
+          <div class="wm-logo">
+            <span class="wm-logo-emoji">👾</span>
+            <h1>ワードモンスターズ</h1>
+            <p class="wm-tagline">英語でこたえて、モンスターをあつめよう！</p>
+          </div>
+
+          <div class="wm-stats" id="homeStats"></div>
+
+          <div class="wm-home-actions">
+            <button class="wm-btn wm-btn-primary wm-btn-xl" id="btnStart">▶ クイズスタート</button>
+            <button class="wm-btn wm-btn-secondary" id="btnDex">📖 ずかんをみる</button>
+          </div>
+
+          <div class="wm-settings" id="homeSettings">
+            <label class="wm-toggle"><input type="checkbox" id="setSound" checked /><span>🔊 こうかおん</span></label>
+            <label class="wm-toggle"><input type="checkbox" id="setVoice" checked /><span>🗣️ よみあげ</span></label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== カテゴリ選択 ===== -->
+      <section id="screenCategory" class="wm-screen">
+        <header class="wm-subhead">
+          <button class="wm-btn wm-btn-ghost wm-icon-btn" data-go="home">←</button>
+          <h2>どれであそぶ？</h2>
+        </header>
+        <div class="wm-cat-grid" id="catGrid"></div>
+      </section>
+
+      <!-- ===== クイズ ===== -->
+      <section id="screenQuiz" class="wm-screen">
+        <header class="wm-hud">
+          <button class="wm-btn wm-btn-ghost wm-icon-btn" data-go="home" title="やめる">✕</button>
+          <div class="wm-hud-chips">
+            <div class="wm-chip"><span class="wm-chip-label">スコア</span><span id="hudScore">0</span></div>
+            <div class="wm-chip wm-chip-streak"><span class="wm-chip-label">れんぞく</span><span id="hudStreak">0</span>🔥</div>
+          </div>
+          <div class="wm-chip wm-chip-q"><span id="hudProg">1</span>/<span id="hudTotal">10</span></div>
+        </header>
+        <div class="wm-progress"><div class="wm-progress-bar" id="progBar"></div></div>
+
+        <div class="wm-quiz-body">
+          <div class="wm-qcard" id="qcard">
+            <div class="wm-qmode" id="qMode">いみは？</div>
+            <div class="wm-qmonster" id="qMonster">
+              <canvas id="qCanvas" width="160" height="160"></canvas>
+            </div>
+            <div class="wm-qprompt" id="qPrompt">apple</div>
+            <button class="wm-btn wm-btn-listen" id="btnListen" hidden>🔊 もういちど</button>
+          </div>
+
+          <div class="wm-options" id="options"></div>
+        </div>
+
+        <div class="wm-feedback" id="feedback"></div>
+      </section>
+
+      <!-- ===== リザルト ===== -->
+      <section id="screenResult" class="wm-screen">
+        <div class="wm-result-card">
+          <h2 id="resultTitle">クリア！</h2>
+          <div class="wm-result-score" id="resultScore"></div>
+          <div class="wm-result-stats" id="resultStats"></div>
+          <div class="wm-result-new" id="resultNew"></div>
+          <div class="wm-home-actions">
+            <button class="wm-btn wm-btn-primary" id="btnRetry">🔁 もういちど</button>
+            <button class="wm-btn wm-btn-secondary" data-go="category">🎯 カテゴリをかえる</button>
+            <button class="wm-btn wm-btn-ghost" data-go="dex">📖 ずかん</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ずかん ===== -->
+      <section id="screenDex" class="wm-screen">
+        <header class="wm-subhead">
+          <button class="wm-btn wm-btn-ghost wm-icon-btn" data-go="home">←</button>
+          <h2>ずかん</h2>
+          <div class="wm-dex-prog" id="dexProg">0 / 0</div>
+        </header>
+        <div class="wm-dex-filter" id="dexFilter"></div>
+        <div class="wm-dex-grid" id="dexGrid"></div>
+      </section>
+
+      <!-- ===== オーバーレイ：キャプチャ演出 ===== -->
+      <div class="wm-overlay" id="captureOverlay" aria-hidden="true">
+        <div class="wm-capture">
+          <div class="wm-capture-burst"></div>
+          <div class="wm-capture-label">NEW! ゲット！</div>
+          <div class="wm-card" id="captureCard"></div>
+          <button class="wm-btn wm-btn-primary" id="btnCaptureNext">つぎへ ▶</button>
+        </div>
+      </div>
+
+      <!-- ===== オーバーレイ：カード詳細 ===== -->
+      <div class="wm-overlay" id="detailOverlay" aria-hidden="true">
+        <div class="wm-detail">
+          <button class="wm-btn wm-btn-ghost wm-icon-btn wm-detail-close" id="btnDetailClose">✕</button>
+          <div class="wm-card" id="detailCard"></div>
+          <div class="wm-detail-info" id="detailInfo"></div>
+        </div>
+      </div>
+
+      <div class="wm-confetti" id="confetti" aria-hidden="true"></div>
+    </div>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>

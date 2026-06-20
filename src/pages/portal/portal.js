@@ -7,6 +7,14 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 
 const games = [
   {
+    id: 'word-monsters',
+    title: 'ワードモンスターズ',
+    desc: '英語でこたえてモンスターを集めよう！図鑑つき英単語クイズ👾',
+    color: '#5b6cff',
+    icon: '👾',
+    link: '/games/word-monsters/'
+  },
+  {
     id: 'quarto',
     title: 'クアルト！',
     desc: '4つの違いをそろえろ！相手にコマを渡す名作対戦◎',
