@@ -309,27 +309,105 @@
     }
     .cdot.muted { opacity: 0.25; transform: scale(0.85); }
 
-    /* リザルトダイアログ */
+    /* リザルト画面 */
+    #result { place-items: start center; overflow-y: auto; overscroll-behavior: contain; }
     .result-dialog {
-      width: min(380px, 100%);
+      width: min(460px, 100%);
+      margin-block: auto;
       background: linear-gradient(180deg, #1e293b, #0f172a);
       border: 3px solid var(--c, var(--line));
-      border-radius: 22px; padding: 24px;
-      display: grid; gap: 14px; place-items: center;
+      border-radius: 22px; padding: 20px;
+      display: grid; gap: 16px;
       box-shadow: var(--shadow-lg);
-      animation: pop .4s cubic-bezier(.2,1.4,.4,1);
+      animation: rise .22s ease;
     }
-    .result-emoji { font-size: 3rem; animation: bounce 1s infinite; }
+    @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .result-head { display: grid; gap: 4px; place-items: center; text-align: center; }
+    .result-emoji { font-size: 2.6rem; animation: bounce 1s infinite; }
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
     }
     .result-title {
-      font-size: 1.5rem; font-weight: 900; text-align: center;
+      font-size: clamp(1.25rem, 5vw, 1.5rem); font-weight: 900;
       color: var(--c, #fff);
     }
-    .result-sub { color: var(--muted); font-size: 0.9rem; }
-    .result-actions { display: flex; gap: 10px; }
+    .result-sub { color: var(--muted); font-size: 0.9rem; font-weight: 700; }
+    .result-section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: grid; gap: 10px;
+    }
+    .section-label {
+      font-size: 0.8rem; color: var(--muted); font-weight: 800; letter-spacing: 0.06em;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .mini-board {
+      width: min(240px, 100%); aspect-ratio: 1; margin-inline: auto;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    }
+    .mini-cell {
+      position: relative; display: grid; place-items: center;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid var(--line); border-radius: 12px;
+    }
+    .mini-cell.win { border-color: #fde047; box-shadow: 0 0 14px rgba(253,224,71,0.45); }
+    .mring {
+      position: absolute; border-radius: 999px; border-style: solid;
+      transition: opacity .15s ease;
+    }
+    .mring.size-s { border-width: 3px; }
+    .mring.size-m { border-width: 4px; }
+    .mring.size-l { border-width: 4px; }
+    .mring.p1 { border-color: var(--p1); color: var(--p1); }
+    .mring.p2 { border-color: var(--p2); color: var(--p2); }
+    .mring.p3 { border-color: var(--p3); color: var(--p3); }
+    .mring.p4 { border-color: var(--p4); color: var(--p4); }
+    .mini-board.dim-others .mring:not(.win) { opacity: 0.35; }
+    .mring.win { filter: drop-shadow(0 0 6px currentColor); }
+    .mring.last { animation: lastPulse 1s ease-in-out infinite; }
+    @keyframes lastPulse {
+      0%, 100% { filter: drop-shadow(0 0 2px currentColor); }
+      50% { filter: drop-shadow(0 0 10px currentColor); }
+    }
+    .replay {
+      display: grid; grid-template-columns: 44px 1fr 44px; gap: 8px; align-items: center;
+    }
+    .replay .btn { padding: 0; font-size: 1.1rem; }
+    .replay input[type="range"] { width: 100%; min-height: 44px; accent-color: var(--c, #60a5fa); }
+    .replay-info {
+      text-align: center; font-size: 0.85rem; font-weight: 800; min-height: 1.3em;
+    }
+    .stats { display: grid; gap: 6px; }
+    .stat-row {
+      display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center;
+      padding: 8px 10px; border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.04);
+      border-left: 4px solid var(--c);
+      font-size: 0.9rem; font-weight: 800;
+    }
+    .stat-row.winner { background: color-mix(in srgb, var(--c) 18%, transparent); }
+    .stat-num { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .stat-num b { color: var(--text); font-size: 1rem; }
+    .tally { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .tally-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px;
+      border: 2px solid var(--c); font-weight: 800; font-size: 0.9rem;
+      background: color-mix(in srgb, var(--c) 14%, transparent);
+    }
+    .tally-chip b { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+    .result-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .result-actions .btn { padding: 10px 6px; }
+    .result-open {
+      display: none; flex-shrink: 0; white-space: nowrap; font-size: 0.85rem;
+      background: color-mix(in srgb, var(--c, #fff) 25%, transparent);
+      color: var(--text); border: 2px solid var(--c, #fff);
+    }
+    .result-open:hover { background: color-mix(in srgb, var(--c, #fff) 40%, transparent); }
+    .status-bar.ended .turn-badge { display: none; }
+    .status-bar.ended .result-open { display: inline-block; }
 
     /* 小さい画面 */
     @media (max-width: 480px) {
@@ -351,11 +429,12 @@
 
     <section id="players" class="players" aria-label="プレイヤー"></section>
 
-    <div class="status-bar">
+    <div id="statusBar" class="status-bar">
       <div id="status" class="status-text">プレイヤー1の番</div>
       <div id="turnBadge" class="turn-badge" style="--c: var(--p1)">
         <span>🎯</span><span id="turnLabel">P1</span>
       </div>
+      <button class="btn result-open" id="resultOpenBtn" type="button">📋 結果を見る</button>
     </div>
 
     <div class="stage">
@@ -387,14 +466,39 @@
   </div>
 
   <!-- 結果オーバーレイ -->
-  <div id="result" class="overlay hidden" role="dialog">
+  <div id="result" class="overlay hidden" role="dialog" aria-labelledby="resultTitle">
     <div id="resultDialog" class="result-dialog">
-      <div id="resultEmoji" class="result-emoji">🎉</div>
-      <div id="resultTitle" class="result-title">プレイヤー1の勝ち！</div>
-      <div id="resultSub" class="result-sub">おめでとう！</div>
+      <div class="result-head">
+        <div id="resultEmoji" class="result-emoji">🎉</div>
+        <div id="resultTitle" class="result-title">プレイヤー1の勝ち！</div>
+        <div id="resultSub" class="result-sub">おめでとう！</div>
+      </div>
+
+      <section class="result-section" aria-label="ふりかえり">
+        <div class="section-label"><span>ふりかえり</span><span id="replayCount">0 / 0 手</span></div>
+        <div id="miniBoard" class="mini-board"></div>
+        <div id="replayInfo" class="replay-info"></div>
+        <div class="replay">
+          <button class="btn ghost" id="replayPrev" type="button" aria-label="1手もどる">◀</button>
+          <input id="replaySlider" type="range" min="0" max="0" value="0" aria-label="何手目を見るか" />
+          <button class="btn ghost" id="replayNext" type="button" aria-label="1手すすむ">▶</button>
+        </div>
+      </section>
+
+      <section class="result-section" aria-label="今回の記録">
+        <div class="section-label"><span>今回の記録</span></div>
+        <div id="stats" class="stats"></div>
+      </section>
+
+      <section class="result-section" aria-label="通算成績">
+        <div class="section-label"><span>通算成績</span><span id="tallyGames">0 試合</span></div>
+        <div id="tally" class="tally"></div>
+      </section>
+
       <div class="result-actions">
-        <button class="btn ghost" id="resultMenuBtn">メニュー</button>
-        <button class="btn primary" id="resultAgainBtn">もう一度</button>
+        <button class="btn ghost" id="resultBoardBtn" type="button">盤面を見る</button>
+        <button class="btn ghost" id="resultMenuBtn" type="button">メニュー</button>
+        <button class="btn primary" id="resultAgainBtn" type="button">もう一度</button>
       </div>
     </div>
   </div>

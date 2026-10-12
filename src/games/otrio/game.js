@@ -30,8 +30,11 @@ const state = {
   stock: {},
   board: Array.from({ length: 9 }, () => ({ s: null, m: null, l: null })),
   ended: false,
-  winInfo: null, // { winner, cells, sizes? }
+  winInfo: null, // { winner, cells, type, rings: [{ idx, size }] }
   hoverCell: -1,
+  moves: [], // [{ player, idx, size }] ふりかえり用の手順
+  tally: { games: 0, draws: 0, wins: {} }, // 通算成績（同じ人数で遊んでいる間だけ）
+  replayStep: 0,
 };
 
 // ----- DOM参照 -----
@@ -48,6 +51,15 @@ const resultEmoji = document.getElementById('resultEmoji');
 const resultTitle = document.getElementById('resultTitle');
 const resultSub = document.getElementById('resultSub');
 const muteBtn = document.getElementById('muteBtn');
+const statusBar = document.getElementById('statusBar');
+const resultOpenBtn = document.getElementById('resultOpenBtn');
+const miniBoardEl = document.getElementById('miniBoard');
+const replaySlider = document.getElementById('replaySlider');
+const replayCount = document.getElementById('replayCount');
+const replayInfo = document.getElementById('replayInfo');
+const statsEl = document.getElementById('stats');
+const tallyEl = document.getElementById('tally');
+const tallyGames = document.getElementById('tallyGames');
 
 const fxCanvas = document.getElementById('fx');
 const confettiCanvas = document.getElementById('confetti');
@@ -260,6 +272,9 @@ function reset(keepCount = true) {
   state.ended = false;
   state.winInfo = null;
   state.hoverCell = -1;
+  state.moves = [];
+  statusBar.classList.remove('ended');
+  resultEl.classList.add('hidden');
   buildPlayers();
   buildBoard();
   buildPicker();
@@ -311,6 +326,7 @@ function place(idx) {
 
   cell[actualSize] = player;
   state.stock[player][actualSize] -= 1;
+  state.moves.push({ player, idx, size: actualSize });
 
   // エフェクト＆音
   SFX.place(player);
@@ -357,7 +373,7 @@ function checkWin(player) {
   for (const line of LINES) {
     for (const s of SIZES) {
       if (line.every((idx) => state.board[idx][s] === player)) {
-        return { winner: player, cells: line, type: 'same-size' };
+        return { winner: player, cells: line, type: 'same-size', rings: line.map((idx) => ({ idx, size: s })) };
       }
     }
   }
@@ -365,7 +381,7 @@ function checkWin(player) {
   for (let i = 0; i < 9; i++) {
     const c = state.board[i];
     if (c.s === player && c.m === player && c.l === player) {
-      return { winner: player, cells: [i], type: 'nest' };
+      return { winner: player, cells: [i], type: 'nest', rings: SIZES.map((size) => ({ idx: i, size })) };
     }
   }
   // 直線上で 小→中→大 または 大→中→小
@@ -373,7 +389,7 @@ function checkWin(player) {
   for (const line of LINES) {
     for (const order of orders) {
       if (line.every((idx, j) => state.board[idx][order[j]] === player)) {
-        return { winner: player, cells: line, type: 'sequence' };
+        return { winner: player, cells: line, type: 'sequence', rings: line.map((idx, j) => ({ idx, size: order[j] })) };
       }
     }
   }
@@ -383,19 +399,42 @@ function checkWin(player) {
 function endWithWinner(player) {
   SFX.win();
   launchConfetti();
-  resultDialog.style.setProperty('--c', PLAYER_COLORS[player]);
-  resultEmoji.textContent = '🎉';
-  resultTitle.textContent = `${PLAYER_ICONS[player]} ${PLAYER_NAMES[player]}の勝ち！`;
-  resultSub.textContent = winTypeMessage(state.winInfo?.type);
-  resultEl.classList.remove('hidden');
+  state.tally.games += 1;
+  state.tally.wins[player] = (state.tally.wins[player] || 0) + 1;
+  showEnded({
+    color: PLAYER_COLORS[player],
+    emoji: '🎉',
+    title: `${PLAYER_ICONS[player]} ${PLAYER_NAMES[player]}の勝ち！`,
+    sub: winTypeMessage(state.winInfo?.type),
+    status: `${PLAYER_ICONS[player]} ${PLAYER_NAMES[player]}の勝ち！`,
+  });
 }
 function endWithDraw() {
   SFX.draw();
-  resultDialog.style.setProperty('--c', '#94a3b8');
-  resultEmoji.textContent = '🤝';
-  resultTitle.textContent = '引き分け';
-  resultSub.textContent = 'もう一度遊ぼう！';
+  state.tally.games += 1;
+  state.tally.draws += 1;
+  showEnded({
+    color: '#94a3b8',
+    emoji: '🤝',
+    title: '引き分け',
+    sub: 'だれも置けなくなったよ',
+    status: '🤝 引き分け',
+  });
+}
+function showEnded({ color, emoji, title, sub, status }) {
+  resultDialog.style.setProperty('--c', color);
+  resultOpenBtn.style.setProperty('--c', color);
+  resultEmoji.textContent = emoji;
+  resultTitle.textContent = title;
+  resultSub.textContent = sub;
+  statusEl.textContent = status;
+  statusBar.classList.add('ended');
+  buildResult();
+  openResult();
+}
+function openResult() {
   resultEl.classList.remove('hidden');
+  resultEl.scrollTop = 0;
 }
 function winTypeMessage(type) {
   if (type === 'same-size') return '同じサイズで3つそろえた！';
@@ -521,29 +560,7 @@ function render() {
       if (!owner) return;
       const ring = document.createElement('div');
       ring.className = `ring size-${s} p${owner}`;
-      if (state.winInfo && state.winInfo.cells.includes(idx)) {
-        // 勝ち判定で使われたサイズのみ強調（type別）
-        if (state.winInfo.type === 'same-size') {
-          // 同サイズなら 全セルでそのサイズを強調
-          // 判定対象サイズを推定: そのライン上のすべてのセルでowner=winnerとなるサイズ
-          const winSize = SIZES.find((sz) =>
-            state.winInfo.cells.every((ci) => state.board[ci][sz] === state.winInfo.winner)
-          );
-          if (winSize === s) ring.classList.add('win');
-        } else if (state.winInfo.type === 'nest') {
-          ring.classList.add('win');
-        } else if (state.winInfo.type === 'sequence') {
-          // 各セルで階段のサイズを強調
-          const orders = [['s', 'm', 'l'], ['l', 'm', 's']];
-          for (const order of orders) {
-            if (state.winInfo.cells.every((ci, j) => state.board[ci][order[j]] === state.winInfo.winner)) {
-              const j = state.winInfo.cells.indexOf(idx);
-              if (order[j] === s) ring.classList.add('win');
-              break;
-            }
-          }
-        }
-      }
+      if (isWinRing(idx, s)) ring.classList.add('win');
       cellEl.appendChild(ring);
     });
     if (state.winInfo && state.winInfo.cells.includes(idx)) {
@@ -588,6 +605,103 @@ function render() {
   updatePreview();
 }
 
+function isWinRing(idx, size) {
+  return !!state.winInfo?.rings.some((r) => r.idx === idx && r.size === size);
+}
+
+// ----- リザルト画面 -----
+function buildResult() {
+  // ふりかえり（ミニ盤面）
+  miniBoardEl.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'mini-cell';
+    miniBoardEl.appendChild(c);
+  }
+  replaySlider.max = String(state.moves.length);
+  setReplayStep(state.moves.length);
+
+  // 今回の記録
+  statsEl.innerHTML = '';
+  for (let p = 1; p <= state.numPlayers; p++) {
+    const placed = state.moves.filter((m) => m.player === p).length;
+    const left = SIZES.reduce((sum, s) => sum + state.stock[p][s], 0);
+    const isWinner = state.winInfo?.winner === p;
+    const row = document.createElement('div');
+    row.className = 'stat-row' + (isWinner ? ' winner' : '');
+    row.style.setProperty('--c', PLAYER_COLORS[p]);
+    row.innerHTML = `
+      <span>${isWinner ? '👑' : PLAYER_ICONS[p]} ${PLAYER_NAMES[p]}</span>
+      <span class="stat-num">置いた <b>${placed}</b></span>
+      <span class="stat-num">のこり <b>${left}</b></span>
+    `;
+    statsEl.appendChild(row);
+  }
+
+  // 通算成績
+  tallyGames.textContent = `${state.tally.games} 試合`;
+  tallyEl.innerHTML = '';
+  for (let p = 1; p <= state.numPlayers; p++) {
+    const chip = document.createElement('span');
+    chip.className = 'tally-chip';
+    chip.style.setProperty('--c', PLAYER_COLORS[p]);
+    chip.innerHTML = `${PLAYER_ICONS[p]} P${p} <b>${state.tally.wins[p] || 0}</b>勝`;
+    tallyEl.appendChild(chip);
+  }
+  if (state.tally.draws > 0) {
+    const chip = document.createElement('span');
+    chip.className = 'tally-chip';
+    chip.style.setProperty('--c', '#94a3b8');
+    chip.innerHTML = `🤝 引き分け <b>${state.tally.draws}</b>`;
+    tallyEl.appendChild(chip);
+  }
+}
+
+function setReplayStep(step) {
+  const total = state.moves.length;
+  step = Math.max(0, Math.min(total, step));
+  state.replayStep = step;
+  replaySlider.value = String(step);
+  replayCount.textContent = `${step} / ${total} 手`;
+
+  // step手目までの盤面を組み立て
+  const board = Array.from({ length: 9 }, () => ({ s: null, m: null, l: null }));
+  for (let i = 0; i < step; i++) {
+    const m = state.moves[i];
+    board[m.idx][m.size] = m.player;
+  }
+  const last = step > 0 ? state.moves[step - 1] : null;
+  const isFinal = step === total && !!state.winInfo;
+  miniBoardEl.classList.toggle('dim-others', isFinal);
+
+  [...miniBoardEl.children].forEach((cellEl, idx) => {
+    cellEl.innerHTML = '';
+    cellEl.classList.toggle('win', isFinal && state.winInfo.cells.includes(idx));
+    SIZES.forEach((s) => {
+      const owner = board[idx][s];
+      if (!owner) return;
+      const ring = document.createElement('div');
+      ring.className = `mring size-${s} p${owner}`;
+      if (isFinal && isWinRing(idx, s)) ring.classList.add('win');
+      else if (!isFinal && last && last.idx === idx && last.size === s) ring.classList.add('last');
+      cellEl.appendChild(ring);
+    });
+  });
+
+  if (step === 0) {
+    replayInfo.textContent = 'スタート';
+    replayInfo.style.color = '';
+  } else if (isFinal) {
+    replayInfo.textContent = `✨ ${winTypeMessage(state.winInfo.type)}`;
+    replayInfo.style.color = PLAYER_COLORS[state.winInfo.winner];
+  } else {
+    replayInfo.textContent = `${PLAYER_ICONS[last.player]} ${PLAYER_NAMES[last.player]}が「${SIZE_LABEL[last.size]}」を置いた`;
+    replayInfo.style.color = PLAYER_COLORS[last.player];
+  }
+  document.getElementById('replayPrev').disabled = step === 0;
+  document.getElementById('replayNext').disabled = step === total;
+}
+
 // ----- セットアップUI -----
 function setupCountUI() {
   const countGrid = document.getElementById('countGrid');
@@ -615,6 +729,7 @@ function setupCountUI() {
   document.getElementById('startBtn').addEventListener('click', () => {
     ensureAudio();
     setupEl.classList.add('hidden');
+    state.tally = { games: 0, draws: 0, wins: {} };
     SFX.turn();
     reset(true);
   });
@@ -638,6 +753,16 @@ document.getElementById('resultAgainBtn').addEventListener('click', () => {
   resultEl.classList.add('hidden');
   reset(true);
 });
+document.getElementById('resultBoardBtn').addEventListener('click', () => {
+  resultEl.classList.add('hidden');
+});
+resultOpenBtn.addEventListener('click', () => {
+  SFX.select();
+  openResult();
+});
+replaySlider.addEventListener('input', () => setReplayStep(Number(replaySlider.value)));
+document.getElementById('replayPrev').addEventListener('click', () => setReplayStep(state.replayStep - 1));
+document.getElementById('replayNext').addEventListener('click', () => setReplayStep(state.replayStep + 1));
 muteBtn.addEventListener('click', () => {
   muted = !muted;
   muteBtn.textContent = muted ? '🔇' : '🔊';
@@ -653,6 +778,7 @@ ro.observe(boardEl);
 
 // ----- 起動 -----
 setupCountUI();
+state.stock = makeStock();
 buildPlayers();
 buildBoard();
 buildPicker();
