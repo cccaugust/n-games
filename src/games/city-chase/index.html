@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#070b1a">
+  <title>シティチェイス | N-Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;800;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="scene" aria-label="3Dの街"></div>
+    <div id="loading" class="loading"><div class="loading-spinner"></div><p>街を建設中…</p></div>
+
+    <!-- HUD -->
+    <header id="hud" class="hud is-hidden">
+      <div class="hud-top">
+        <div class="hud-left">
+          <div class="chip chip-round"><span class="chip-label">ROUND</span><strong id="roundNum">1</strong><span class="chip-sub">/11</span></div>
+          <div id="phaseChip" class="chip chip-phase police">警察フェーズ</div>
+        </div>
+        <div id="aiChip" class="chip chip-ai is-hidden"><span class="ai-dot"></span>考え中…</div>
+        <div class="hud-right">
+          <button id="btnHint" class="icon-btn" type="button" title="推理ヒント（犯人がいそうな場所を表示）" aria-pressed="false">🔍</button>
+          <button id="btnSound" class="icon-btn" type="button" title="サウンド">🔊</button>
+          <button id="btnMenu" class="icon-btn" type="button" title="メニュー">☰</button>
+        </div>
+      </div>
+      <div class="hud-panel">
+        <div id="roundBoard" class="round-board" aria-label="ラウンドボード"></div>
+        <div class="hud-panel-row">
+          <div id="heliChips" class="heli-chips"></div>
+          <div id="foundChips" class="found-chips" aria-label="発見した痕跡"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 下部バー -->
+    <footer id="bottomBar" class="bottom-bar is-hidden">
+      <div id="message" class="message"></div>
+      <div id="actions" class="actions"></div>
+    </footer>
+
+    <div id="toast" class="toast" role="status"></div>
+    <div id="banner" class="banner" aria-live="polite"><div class="banner-main"></div><div class="banner-sub"></div></div>
+    <div id="dim" class="dim"><div class="dim-inner"><div class="dim-eye">👀</div><div class="dim-text">警察は目を閉じて…<br><small>犯人が移動しています</small></div></div></div>
+
+    <!-- タイトル -->
+    <section id="titleOverlay" class="overlay title is-visible">
+      <div class="title-card">
+        <p class="title-kicker">街中を逃げ回る犯人を追跡！<span class="sep"> </span>鬼ごっこ × かくれんぼ</p>
+        <h1 class="logo"><span class="logo-en">CITY CHASE</span><span class="logo-ja">シティチェイス</span></h1>
+        <div class="mode-grid">
+          <button class="mode-card police" type="button" data-mode="police">
+            <span class="mode-icon">🚁</span>
+            <span class="mode-title">警察で遊ぶ</span>
+            <span class="mode-desc">ヘリ3機で犯人を見つけ出せ<br><small>AIが犯人</small></span>
+          </button>
+          <button class="mode-card thief" type="button" data-mode="thief">
+            <span class="mode-icon">🚗</span>
+            <span class="mode-title">犯人で遊ぶ</span>
+            <span class="mode-desc">11ラウンド逃げ切れ<br><small>AIが警察</small></span>
+          </button>
+          <button class="mode-card hotseat" type="button" data-mode="hotseat">
+            <span class="mode-icon">👥</span>
+            <span class="mode-title">みんなで対戦</span>
+            <span class="mode-desc">1台を交代で使う<br><small>2〜4人・犯人 vs 警察チーム</small></span>
+          </button>
+        </div>
+        <div class="difficulty">
+          <span class="diff-label">AIの強さ</span>
+          <div id="difficulty" class="segmented" role="radiogroup" aria-label="AIの強さ"></div>
+        </div>
+        <div class="title-links">
+          <button id="btnRules" class="btn ghost" type="button">📖 あそびかた</button>
+          <button id="btnTitleSound" class="btn ghost" type="button">🔊 サウンド ON</button>
+          <a class="btn ghost" href="../../pages/portal/portal.html">← ポータルへ</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 交代 -->
+    <section id="handoverOverlay" class="overlay handover is-hidden">
+      <div class="handover-card">
+        <div id="handoverIcon" class="handover-icon">🚗</div>
+        <h2 id="handoverTitle">犯人の番</h2>
+        <p id="handoverText">警察のみんなは目を閉じて！<br>犯人は画面を受け取ったら OK を押してね</p>
+        <button id="handoverBtn" class="btn primary big" type="button">OK</button>
+      </div>
+    </section>
+
+    <!-- リザルト -->
+    <section id="resultOverlay" class="overlay result is-hidden">
+      <div class="result-card">
+        <div id="resultBadge" class="result-badge">🚨</div>
+        <h2 id="resultTitle">逮捕！</h2>
+        <p id="resultText">警察チームの勝ち！</p>
+        <div id="resultStats" class="result-stats"></div>
+        <div class="result-actions">
+          <button id="btnRevealRoute" class="btn secondary" type="button">🗺️ 逃走ルートを見る</button>
+          <button id="btnReplay" class="btn primary" type="button">🔁 もう一回</button>
+          <button id="btnTitle" class="btn ghost" type="button">タイトルへ</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- メニュー -->
+    <section id="menuOverlay" class="overlay menu is-hidden">
+      <div class="menu-card">
+        <h2>メニュー</h2>
+        <button id="btnResume" class="btn primary big" type="button">▶ つづける</button>
+        <button id="btnMenuSound" class="btn secondary" type="button">🔊 サウンド ON</button>
+        <button id="btnMenuBloom" class="btn secondary" type="button">✨ 光のエフェクト ON</button>
+        <button id="btnMenuRules" class="btn secondary" type="button">📖 あそびかた</button>
+        <button id="btnMenuTitle" class="btn danger" type="button">タイトルにもどる（ゲーム終了）</button>
+      </div>
+    </section>
+
+    <!-- ルール -->
+    <section id="rulesOverlay" class="overlay rules is-hidden">
+      <div class="rules-card">
+        <div class="rules-head">
+          <h2>あそびかた</h2>
+          <button id="btnRulesClose" class="icon-btn" type="button" aria-label="閉じる">✕</button>
+        </div>
+        <div class="rules-body">
+          <section>
+            <h3>🎯 目的</h3>
+            <p><b class="t-police">警察チーム</b>は、街のビルのどこかに隠れた<b class="t-thief">犯人の車</b>を <b>11ラウンド以内</b>に見つけたら勝ち。<br><b class="t-thief">犯人</b>は、見つからずに 11ラウンド逃げ切ったら勝ち！</p>
+          </section>
+          <section>
+            <h3>🏙️ 街のつくり</h3>
+            <ul>
+              <li>ビルは <b>5×5 = 25棟</b>（高いビル10・低いビル15）。配置は毎回ランダム</li>
+              <li>道が交わる <b>交差点は16か所</b>。ヘリコプターは交差点の上に止まる（1か所に1機）</li>
+              <li>犯人の車はビルの下に隠れる</li>
+            </ul>
+          </section>
+          <section>
+            <h3>🔁 1ラウンドの流れ</h3>
+            <ol>
+              <li><b class="t-thief">犯人フェーズ</b>：警察は目を閉じる。犯人は <b>タテヨコとなり</b>のビルへ1つ動いて隠れ、そのラウンドの<b>痕跡コマ</b>を置く（1ラウンド目はどこでもOK）</li>
+              <li><b class="t-police">警察フェーズ</b>：3機のヘリがそれぞれ <b>「移動」か「捜索」</b>を1回ずつ</li>
+            </ol>
+            <ul>
+              <li><b>移動</b>：タテヨコとなりの交差点へ。ナナメは×。他のヘリがいる所は×</li>
+              <li><b>捜索</b>：交差点を囲む <b>4つのビル</b>から1つを持ち上げて中を見る</li>
+            </ul>
+          </section>
+          <section>
+            <h3>🔎 捜索でわかること</h3>
+            <ul>
+              <li><b>何もなし</b>：犯人はまだそのビルを通っていない</li>
+              <li><b>痕跡コマ</b>：犯人が<b>前に</b>通った！ コマはビルの上に置いて公開される</li>
+              <li><b>車</b>：<b class="t-police">逮捕！警察の勝ち</b></li>
+            </ul>
+            <p class="trace-legend">
+              <span class="tk yellow">1</span> 1ラウンド目（スタート地点）
+              <span class="tk blue">!</span> 2〜5・7〜11ラウンド目
+              <span class="tk red">!</span> 6ラウンド目（折り返し）
+            </p>
+            <p>犯人は <b>痕跡のあるビルには二度と入れない</b>ので、痕跡が見つかると逃げ道がどんどん絞られていきます。</p>
+          </section>
+          <section>
+            <h3>🏁 ゲームの終わり</h3>
+            <ul>
+              <li><b class="t-police">逮捕</b>：車を見つけた → 警察の勝ち</li>
+              <li><b class="t-thief">逃走成功</b>：11ラウンド目の警察フェーズが終わっても見つからない → 犯人の勝ち</li>
+              <li><b class="t-police">包囲</b>：犯人フェーズに動けるビルがない → 警察の勝ち</li>
+            </ul>
+          </section>
+          <section>
+            <h3>📱 このアプリでの操作</h3>
+            <ul>
+              <li><b>画面をドラッグ</b>で街を回転、<b>ピンチ／ホイール</b>でズーム</li>
+              <li><b class="t-police">警察</b>：ヘリをタップ → 青い交差点（移動）かオレンジのビル（捜索）をタップ</li>
+              <li><b class="t-thief">犯人</b>：赤く光るビルをタップ → 「ここに隠れる」</li>
+              <li><b>みんなで対戦</b>：画面を交代で使います。交代画面が出たら、見てはいけない人は目を閉じてね</li>
+              <li>🔍 ボタンで「推理ヒント」（犯人がいそうなビルを色で表示）が使えます</li>
+            </ul>
+          </section>
+          <p class="rules-credit">原作ボードゲーム: CITY CHASE（Martino Chiacchiera & Gabriele Mari / Korea Boardgames・日本語版 カワダ）のルールを再現したファンメイドのデジタル版です。</p>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>

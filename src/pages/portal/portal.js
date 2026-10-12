@@ -7,6 +7,14 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 
 const games = [
   {
+    id: 'city-chase',
+    title: 'シティチェイス',
+    desc: '夜の街でヘリ vs 逃走車！痕跡をたどる3D推理チェイス🚁',
+    color: '#0f1d4d',
+    icon: '🚁',
+    link: '/games/city-chase/'
+  },
+  {
     id: 'word-monsters',
     title: 'ワードモンスターズ',
     desc: '英語でこたえてモンスターを集めよう！図鑑つき英単語クイズ👾',
