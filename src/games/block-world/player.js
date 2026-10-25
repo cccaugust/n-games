@@ -65,7 +65,7 @@ export class Player {
     const eye = this.eye();
     this.headInWater = world.getBlock(Math.floor(eye.x), Math.floor(eye.y), Math.floor(eye.z)) === 14;
     this.sneaking = !!input.sneak && !this.flying;
-    this.sprinting = !!input.sprint && (input.move.z < -0.3) && !this.sneaking;
+    this.sprinting = !!input.sprint && (input.move.z < -0.2) && !this.sneaking;
     if (this.hurtTimer > 0) this.hurtTimer -= dt;
     if (this.autoJumpCooldown > 0) this.autoJumpCooldown -= dt;
 
@@ -76,9 +76,10 @@ export class Player {
     if (len > 0.001) {
       const nx = mx / Math.max(1, len), nz = mz / Math.max(1, len);
       const s = Math.sin(this.yaw), c = Math.cos(this.yaw);
-      // 前方ベクトル (-sin yaw, -cos yaw)、右ベクトル (cos yaw, -sin yaw)
-      fx = c * nx + (-s) * nz;
-      fz = -s * nx + (-c) * nz;
+      // 前方ベクトル F = (-sin yaw, -cos yaw)、右ベクトル R = (cos yaw, -sin yaw)
+      // nz は前が -1 なので、前方成分は F * (-nz)
+      fx = c * nx + s * nz;
+      fz = -s * nx + c * nz;
     }
 
     let speed;

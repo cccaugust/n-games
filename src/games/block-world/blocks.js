@@ -113,7 +113,7 @@ export const RECIPES = [
   { out: { id: B.PLANKS, count: 4 }, in: [{ id: B.LOG_SPRUCE, count: 1 }], hint: 'マツからも作れる' },
   { out: { id: B.STICK, count: 4 }, in: [{ id: B.PLANKS, count: 2 }], hint: 'たいまつの材料' },
   { out: { id: B.TORCH, count: 4 }, in: [{ id: B.STICK, count: 1 }, { id: B.COAL, count: 1 }], hint: '暗いところを照らす' },
-  { out: { id: B.CRAFTING_TABLE, count: 1 }, in: [{ id: B.PLANKS, count: 4 }], hint: 'かざり用' },
+  { out: { id: B.CRAFTING_TABLE, count: 1 }, in: [{ id: B.PLANKS, count: 4 }], hint: '置いて使うとクラフト画面が開く' },
   { out: { id: B.BOOKSHELF, count: 1 }, in: [{ id: B.PLANKS, count: 6 }], hint: 'おうちのかざり' },
   { out: { id: B.GLASS, count: 1 }, in: [{ id: B.SAND, count: 1 }, { id: B.COAL, count: 1 }], hint: '砂を焼いてガラスに' },
   { out: { id: B.STONE, count: 1 }, in: [{ id: B.COBBLE, count: 1 }, { id: B.COAL, count: 1 }], hint: '丸石を焼いて石に' },
