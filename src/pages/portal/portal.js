@@ -41,7 +41,7 @@ const games = [
   {
     id: 'corridor',
     title: 'コリドール',
-    desc: '壁で道をふさいで先にゴールせよ！戦略派の名作🚧',
+    desc: '壁で道をふさいで先にゴールせよ！2人対戦もCPU対戦も🚧',
     color: '#1f1d4a',
     icon: '🚧',
     link: '/games/corridor/'
