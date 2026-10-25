@@ -346,6 +346,14 @@ class Game {
     if (!this.isTouch) this.input.requestPointerLock();
   }
 
+  openCrafting() {
+    if (this.state !== 'playing' || !this.invUI) return;
+    audio.click();
+    this.invUI.open('craft');
+    this.input.setEnabled(false);
+    this.input.exitPointerLock();
+  }
+
   toggleInventory() {
     if (this.state !== 'playing' || !this.invUI) return;
     if (this.invUI.isOpen()) this.invUI.close();
@@ -595,7 +603,7 @@ class Game {
     cam.position.set(eye.x, eye.y, eye.z);
     cam.rotation.order = 'YXZ';
     cam.rotation.set(p.pitch, p.yaw, 0);
-    const targetFov = this.renderer.baseFov + p.fovBoost * 10 + (p.flying && p.sprinting ? 6 : 0);
+    const targetFov = this.renderer.baseFov + p.fovBoost * 14 + (p.flying && p.sprinting ? 6 : 0);
     if (Math.abs(cam.fov - targetFov) > 0.05) { cam.fov += (targetFov - cam.fov) * 0.2; cam.updateProjectionMatrix(); }
     this.renderer.setUnderwater(p.headInWater);
     this.els.waterOverlay.classList.toggle('is-on', p.headInWater);
@@ -653,6 +661,8 @@ class Game {
     if (wantPlace) {
       this.placeTimer = 0.25;
       const sel = this.inventory.selectedItem;
+      // 作業台：使うとクラフト画面が開く（しゃがみながらなら上に置ける）
+      if (hit && hit.id === B.CRAFTING_TABLE && !player.sneaking) { this.openCrafting(); return; }
       if (sel && getDef(sel.id).food) { this.eat(sel.id, true); return; }
       if (hit && sel && isBlock(sel.id)) this.placeBlock(hit, sel.id);
     }

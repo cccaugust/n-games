@@ -37,7 +37,7 @@ export class Input {
       this.keys.add(e.code);
       if (e.code === 'KeyW') {
         const now = performance.now();
-        if (now - this.lastW < 280) this.sprintToggle = true;
+        if (now - this.lastW < 380) this.sprintToggle = true;
         this.lastW = now;
       }
       if (e.code === 'Space') {
@@ -149,7 +149,7 @@ export class Input {
         ui.joyKnob.style.transform = `translate(calc(-50% + ${nx * cl}px), calc(-50% + ${ny * cl}px))`;
         const mag = Math.min(1, len / R);
         this.joy.x = nx * mag; this.joy.z = ny * mag;
-        this.joy.sprint = len > R * 1.35;
+        this.joy.sprint = len > R * 1.12;
       } else if (e.pointerId === this.look.id && this.look.active) {
         const L = this.look;
         const dx = e.clientX - L.lastX, dy = e.clientY - L.lastY;
@@ -214,7 +214,7 @@ export class Input {
       move: { x: mx, z: mz },
       jump: k.has('Space') || this.touchJump,
       sneak: k.has('ShiftLeft') || k.has('ShiftRight') || this.touchSneak,
-      sprint: k.has('ControlLeft') || k.has('ControlRight') || this.sprintToggle || this.joy.sprint,
+      sprint: k.has('ControlLeft') || k.has('ControlRight') || k.has('KeyR') || this.sprintToggle || this.joy.sprint,
       breakHeld: this.mouseBreak || this.touchBreak,
       placeHeld: this.mousePlace,
       placeTap: this.placeTap,
