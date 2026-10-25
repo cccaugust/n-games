@@ -7,6 +7,14 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 
 const games = [
   {
+    id: 'block-world',
+    title: 'ブロックワールド',
+    desc: 'ほって・つくって・ぼうけん！自由に遊べる3Dブロックの世界🧱',
+    color: '#2d7a3a',
+    icon: '🧱',
+    link: '/games/block-world/'
+  },
+  {
     id: 'city-chase',
     title: 'シティチェイス',
     desc: '夜の街でヘリ vs 逃走車！痕跡をたどる3D推理チェイス🚁',

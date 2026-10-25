@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b1020">
+  <title>ブロックワールド | N-Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <div id="scene" aria-label="3Dのブロックの世界"></div>
+    <div id="waterOverlay" class="fx-overlay water"></div>
+    <div id="hurtOverlay" class="fx-overlay hurt"></div>
+    <div id="darkOverlay" class="fx-overlay dark"></div>
+
+    <!-- タッチ操作レイヤー（視点ドラッグ / スティック） -->
+    <div id="touchLayer" class="touch-layer"></div>
+
+    <!-- HUD -->
+    <div id="hud" class="hud is-hidden">
+      <div class="crosshair" aria-hidden="true"><span></span><span></span></div>
+      <div class="hud-top">
+        <div class="hud-top-left">
+          <div id="timeChip" class="chip chip-time"><span id="timeIcon">☀️</span><strong id="timeText">6:00</strong></div>
+          <div id="coordsChip" class="chip chip-coords is-hidden">0, 0, 0</div>
+          <div id="modeChip" class="chip chip-mode is-hidden">✈ 飛行中</div>
+        </div>
+        <div class="hud-top-right">
+          <button id="btnInv" class="icon-btn" type="button" title="もちもの（E）" aria-label="もちもの">🎒</button>
+          <button id="btnPause" class="icon-btn" type="button" title="メニュー（Esc）" aria-label="メニュー">☰</button>
+        </div>
+      </div>
+      <div class="hud-bottom">
+        <div id="itemName" class="item-name"></div>
+        <div class="status-row">
+          <div id="hearts" class="hearts" aria-label="体力"></div>
+          <div id="bubbles" class="bubbles" aria-label="息"></div>
+        </div>
+        <div id="hotbar" class="hotbar" aria-label="ホットバー"></div>
+      </div>
+      <div id="toast" class="toast" role="status"></div>
+      <div id="pcHint" class="pc-hint">クリックして操作スタート</div>
+    </div>
+
+    <!-- タッチボタン -->
+    <div id="touchControls" class="touch-controls is-hidden">
+      <div id="joyBase" class="joy-base"><div id="joyKnob" class="joy-knob"></div></div>
+      <div class="touch-right">
+        <button id="btnBreak" class="touch-btn big" type="button" aria-label="こわす（長押し）">⛏</button>
+        <button id="btnPlace" class="touch-btn big" type="button" aria-label="おく">🧱</button>
+        <button id="btnJump" class="touch-btn jump" type="button" aria-label="ジャンプ">⬆</button>
+        <button id="btnSneak" class="touch-btn sneak" type="button" aria-label="しゃがむ / 下へ">⬇</button>
+      </div>
+    </div>
+
+    <!-- インベントリ -->
+    <div id="invPanel" class="overlay is-hidden">
+      <div class="dialog inv-dialog">
+        <div class="dialog-head">
+          <div class="tabs">
+            <button class="tab is-active" type="button" data-tab="items">もちもの</button>
+            <button class="tab" type="button" data-tab="craft">クラフト</button>
+          </div>
+          <h2 id="invTitle" class="dialog-title">もちもの</h2>
+          <button id="invClose" class="icon-btn" type="button" aria-label="とじる">✕</button>
+        </div>
+        <div id="invGrid" class="inv-grid"></div>
+        <div id="craftList" class="craft-list is-hidden"></div>
+        <div class="inv-hotbar-label">ホットバー</div>
+        <div id="invHotbar" class="inv-hotbar"></div>
+      </div>
+    </div>
+    <div id="cursorItem" class="cursor-item is-hidden"><img alt=""><span class="count"></span></div>
+
+    <!-- ローディング -->
+    <div id="loading" class="overlay solid is-visible">
+      <div class="loading-box">
+        <div class="loading-cube"><i></i><i></i><i></i></div>
+        <p id="loadingText">世界をつくっています…</p>
+        <div class="progress"><div id="loadingBar" class="progress-bar"></div></div>
+      </div>
+    </div>
+
+    <!-- タイトル -->
+    <section id="titleOverlay" class="overlay title is-hidden">
+      <div class="title-inner">
+        <h1 class="logo"><span class="logo-en">BLOCK WORLD</span><span class="logo-ja">ブロックワールド</span></h1>
+        <p class="title-sub">ほって・つくって・ぼうけんしよう！</p>
+        <div class="title-buttons">
+          <button id="btnPlay" class="btn primary xl" type="button">あそぶ</button>
+          <button id="btnHelpTitle" class="btn secondary" type="button">あそびかた</button>
+          <button id="btnSettingsTitle" class="btn secondary" type="button">せってい</button>
+        </div>
+        <a class="back-link" href="../../index.html">← ポータルへもどる</a>
+      </div>
+    </section>
+
+    <!-- ワールド選択 -->
+    <section id="worldsOverlay" class="overlay is-hidden">
+      <div class="dialog">
+        <div class="dialog-head"><h2 class="dialog-title">ワールドをえらぶ</h2><button class="icon-btn js-back-title" type="button" aria-label="もどる">✕</button></div>
+        <div id="worldList" class="world-list"></div>
+      </div>
+    </section>
+
+    <!-- 新しいワールド -->
+    <section id="newWorldOverlay" class="overlay is-hidden">
+      <div class="dialog">
+        <div class="dialog-head"><h2 class="dialog-title">新しいワールド</h2><button class="icon-btn js-back-worlds" type="button" aria-label="もどる">✕</button></div>
+        <label class="field"><span>なまえ</span><input id="worldName" type="text" maxlength="16" placeholder="マイワールド"></label>
+        <div class="mode-grid">
+          <button class="mode-card is-selected" type="button" data-mode="creative">
+            <span class="mode-icon">🧱</span><span class="mode-title">クリエイティブ</span><span class="mode-desc">ブロック無限・空も飛べる<br>自由につくろう</span>
+          </button>
+          <button class="mode-card" type="button" data-mode="survival">
+            <span class="mode-icon">⛏</span><span class="mode-title">サバイバル</span><span class="mode-desc">ほって集めてクラフト<br>夜はゾンビに注意！</span>
+          </button>
+        </div>
+        <label class="field"><span>シード（空なら おまかせ）</span><input id="worldSeed" type="text" maxlength="24" placeholder="すきな言葉や数字"></label>
+        <div class="dialog-actions"><button id="btnCreateWorld" class="btn primary xl" type="button">つくる！</button></div>
+      </div>
+    </section>
+
+    <!-- ポーズ -->
+    <section id="pauseOverlay" class="overlay is-hidden">
+      <div class="dialog narrow">
+        <h2 class="dialog-title center">ひとやすみ</h2>
+        <div class="menu-buttons">
+          <button id="btnResume" class="btn primary xl" type="button">つづける</button>
+          <button id="btnSettingsPause" class="btn secondary" type="button">せってい</button>
+          <button id="btnHelpPause" class="btn secondary" type="button">あそびかた</button>
+          <button id="btnSaveQuit" class="btn ghost" type="button">セーブしてタイトルへ</button>
+        </div>
+        <p id="saveInfo" class="save-info"></p>
+      </div>
+    </section>
+
+    <!-- 設定 -->
+    <section id="settingsOverlay" class="overlay is-hidden">
+      <div class="dialog">
+        <div class="dialog-head"><h2 class="dialog-title">せってい</h2><button class="icon-btn js-close-settings" type="button" aria-label="とじる">✕</button></div>
+        <div class="settings">
+          <label class="setting"><span>えがく きょり</span>
+            <select id="setRender"><option value="0">自動</option><option value="3">ちかい（3）</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">とおい（7）</option><option value="8">さいだい（8）</option></select></label>
+          <label class="setting"><span>視野のひろさ</span><input id="setFov" type="range" min="60" max="100" step="1"><output id="setFovOut"></output></label>
+          <label class="setting"><span>視点の速さ</span><input id="setSens" type="range" min="0.3" max="2.5" step="0.1"><output id="setSensOut"></output></label>
+          <label class="setting toggle"><span>サウンド</span><input id="setSound" type="checkbox"><i></i></label>
+          <label class="setting toggle"><span>音楽</span><input id="setMusic" type="checkbox"><i></i></label>
+          <label class="setting toggle"><span>いつも昼にする</span><input id="setDay" type="checkbox"><i></i></label>
+          <label class="setting toggle"><span>段差を自動でジャンプ</span><input id="setAutoJump" type="checkbox"><i></i></label>
+          <label class="setting toggle"><span>座標を表示</span><input id="setCoords" type="checkbox"><i></i></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- あそびかた -->
+    <section id="helpOverlay" class="overlay is-hidden">
+      <div class="dialog">
+        <div class="dialog-head"><h2 class="dialog-title">あそびかた</h2><button class="icon-btn js-close-help" type="button" aria-label="とじる">✕</button></div>
+        <div class="help">
+          <div class="help-col">
+            <h3>🖥 パソコン</h3>
+            <dl>
+              <dt>W A S D</dt><dd>うごく</dd>
+              <dt>マウス</dt><dd>見まわす</dd>
+              <dt>スペース</dt><dd>ジャンプ（2回おし: 飛行 ※クリエイティブ）</dd>
+              <dt>Shift</dt><dd>しゃがむ / 飛行中は下へ</dd>
+              <dt>Ctrl / W 2回</dt><dd>ダッシュ</dd>
+              <dt>左クリック</dt><dd>こわす（おしつづける）・なぐる</dd>
+              <dt>右クリック</dt><dd>おく・食べる</dd>
+              <dt>ホイール / 1〜9</dt><dd>ブロックをえらぶ</dd>
+              <dt>E</dt><dd>もちもの / クラフト</dd>
+              <dt>Esc</dt><dd>メニュー</dd>
+            </dl>
+          </div>
+          <div class="help-col">
+            <h3>📱 スマホ・タブレット</h3>
+            <dl>
+              <dt>左のスティック</dt><dd>うごく（大きくたおすとダッシュ）</dd>
+              <dt>右をドラッグ</dt><dd>見まわす</dd>
+              <dt>タップ</dt><dd>まんなかのブロックの横に おく</dd>
+              <dt>長おし / ⛏</dt><dd>こわす</dd>
+              <dt>🧱</dt><dd>おく</dd>
+              <dt>⬆</dt><dd>ジャンプ（2回おし: 飛行）</dd>
+              <dt>⬇</dt><dd>しゃがむ / 飛行中は下へ</dd>
+              <dt>🎒</dt><dd>もちもの / クラフト</dd>
+            </dl>
+          </div>
+          <div class="help-col wide">
+            <h3>🌟 ヒント</h3>
+            <ul>
+              <li>夜は暗くなるよ。<b>たいまつ</b>（棒 + 石炭）で明るくしよう</li>
+              <li>サバイバルでは <b>石炭鉱石</b> を見つけると、ガラスやレンガも作れる</li>
+              <li>ヒツジをなぐると <b>羊毛</b> がとれる。花で色をつけよう</li>
+              <li>高いところから落ちるとダメージ！ 水の中なら安全</li>
+              <li>ワールドは自動でセーブされる（3つまで）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- やられた -->
+    <section id="deathOverlay" class="overlay is-hidden">
+      <div class="dialog narrow death">
+        <h2 class="dialog-title center">やられてしまった…</h2>
+        <p class="death-sub">だいじょうぶ、もちものはそのまま！</p>
+        <div class="menu-buttons">
+          <button id="btnRespawn" class="btn primary xl" type="button">リスポーン</button>
+          <button id="btnDeathTitle" class="btn ghost" type="button">タイトルへ</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
