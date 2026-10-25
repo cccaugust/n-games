@@ -301,13 +301,60 @@
       border-color: #fde047;
       background: color-mix(in srgb, #fde047 14%, transparent);
     }
-    .colors-preview { display: flex; gap: 10px; justify-content: center; }
-    .cdot {
-      width: 28px; height: 28px; border-radius: 999px;
-      background: var(--c); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 60%, transparent);
-      transition: transform .2s ease, opacity .2s ease;
+    /* 順番ごとの色えらび */
+    #setup { place-items: start center; overflow-y: auto; overscroll-behavior: contain; }
+    #setup .modal { margin-block: auto; }
+    .setup-label {
+      font-size: 0.85rem; color: var(--muted); font-weight: 800; letter-spacing: 0.04em;
     }
-    .cdot.muted { opacity: 0.25; transform: scale(0.85); }
+    .color-picker { display: grid; gap: 8px; }
+    .color-row {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid color-mix(in srgb, var(--c) 45%, transparent);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      display: grid; gap: 6px;
+      transition: border-color .2s ease;
+    }
+    .color-row-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.9rem; font-weight: 700; color: var(--text);
+    }
+    .color-row-label b { color: var(--c); font-weight: 900; }
+    .color-row-dot {
+      width: 12px; height: 12px; border-radius: 999px; background: var(--c);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--c) 70%, transparent);
+      transition: background .2s ease;
+    }
+    .swatches { display: grid; grid-template-columns: repeat(6, minmax(0, 44px)); gap: 6px; }
+    .swatch {
+      position: relative;
+      width: 100%; aspect-ratio: 1; padding: 0;
+      border-radius: 999px;
+      border: 3px solid transparent;
+      background: var(--c);
+      display: grid; place-items: center;
+      font-size: 1.1rem; line-height: 1;
+      cursor: pointer;
+      transition: transform .15s ease, border-color .2s ease, opacity .2s ease, box-shadow .2s ease;
+    }
+    .swatch:hover { transform: translateY(-2px); }
+    .swatch:active { transform: scale(0.94); }
+    .swatch:focus-visible { outline: 3px solid #fde047; outline-offset: 2px; }
+    .swatch.selected {
+      border-color: #fff;
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 55%, transparent), 0 0 18px color-mix(in srgb, var(--c) 70%, transparent);
+      transform: scale(1.08);
+    }
+    .swatch.taken { opacity: 0.4; }
+    .swatch.taken:hover { opacity: 0.75; }
+    .swatch-owner {
+      position: absolute; right: -4px; top: -4px;
+      width: 18px; height: 18px; border-radius: 999px;
+      background: #0f172a; color: #fff; border: 2px solid var(--c);
+      font-size: 0.65rem; font-weight: 900;
+      display: grid; place-items: center;
+    }
 
     /* リザルト画面 */
     #result { place-items: start center; overflow-y: auto; overscroll-behavior: contain; }
@@ -413,6 +460,8 @@
     @media (max-width: 480px) {
       .picks { gap: 8px; }
       .pick { min-width: 76px; }
+      #setup .modal { padding: 18px 14px; }
+      .color-row { padding: 8px; }
     }
   </style>
 </head>
@@ -460,7 +509,8 @@
         <button class="count-btn" data-count="3">3<small>人</small></button>
         <button class="count-btn" data-count="4">4<small>人</small></button>
       </div>
-      <div id="colorsPreview" class="colors-preview" aria-hidden="true"></div>
+      <div class="setup-label">順番ごとに色をえらぼう（使用中の色をタップすると交換）</div>
+      <div id="colorPicker" class="color-picker"></div>
       <button class="btn primary" id="startBtn">はじめる</button>
     </div>
   </div>
