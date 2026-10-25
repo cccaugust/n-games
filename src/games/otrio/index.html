@@ -100,6 +100,14 @@
       display: flex; align-items: center; gap: 8px;
       font-weight: 800; font-size: 0.95rem;
     }
+    .pchip-name > span:nth-child(2) { white-space: nowrap; }
+    .pchip-order {
+      margin-left: auto; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 999px;
+      display: grid; place-items: center;
+      background: var(--c); color: #0b1024;
+      font-size: 0.75rem; font-weight: 900;
+    }
     .pchip-dot {
       width: 14px; height: 14px; border-radius: 999px; background: var(--c);
       box-shadow: 0 0 12px color-mix(in srgb, var(--c) 70%, transparent);
@@ -445,6 +453,38 @@
       background: color-mix(in srgb, var(--c) 14%, transparent);
     }
     .tally-chip b { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+    /* 次の順番 */
+    .order-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+    .order-quick .chip-btn {
+      border: 2px solid var(--line); background: rgba(255,255,255,0.04);
+      color: var(--text); border-radius: 999px; padding: 8px 12px;
+      min-height: 44px; font-size: 0.82rem; font-weight: 800;
+      cursor: pointer; transition: transform .12s ease, border-color .2s ease, background .2s ease;
+    }
+    .order-quick .chip-btn:hover { background: rgba(255,255,255,0.1); }
+    .order-quick .chip-btn:active { transform: scale(0.97); }
+    .order-quick .chip-btn:focus-visible { outline: 3px solid #fde047; outline-offset: 2px; }
+    .order-quick .chip-btn.active {
+      border-color: #fde047; background: color-mix(in srgb, #fde047 14%, transparent);
+    }
+    .order-quick .chip-btn[hidden] { display: none; }
+    .order-list { display: grid; gap: 6px; }
+    .order-row {
+      display: grid; grid-template-columns: auto 1fr 44px 44px; gap: 8px; align-items: center;
+      padding: 6px 8px; border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.04);
+      border-left: 4px solid var(--c);
+      font-size: 0.9rem; font-weight: 800;
+      animation: rise .18s ease;
+    }
+    .order-num {
+      width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center;
+      background: var(--c); color: #0b1024; font-weight: 900; font-size: 0.9rem;
+    }
+    .order-name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+    .order-name small { color: var(--muted); font-size: 0.72rem; font-weight: 700; }
+    .order-move { padding: 0; min-width: 44px; min-height: 44px; font-size: 0.9rem; }
+    .order-move:disabled { opacity: 0.3; cursor: not-allowed; }
     .result-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .result-actions .btn { padding: 10px 6px; }
     .result-open {
@@ -479,9 +519,9 @@
     <section id="players" class="players" aria-label="プレイヤー"></section>
 
     <div id="statusBar" class="status-bar">
-      <div id="status" class="status-text">プレイヤー1の番</div>
+      <div id="status" class="status-text">青の番</div>
       <div id="turnBadge" class="turn-badge" style="--c: var(--p1)">
-        <span>🎯</span><span id="turnLabel">P1</span>
+        <span>🎯</span><span id="turnLabel">1番目</span>
       </div>
       <button class="btn result-open" id="resultOpenBtn" type="button">📋 結果を見る</button>
     </div>
@@ -520,7 +560,7 @@
     <div id="resultDialog" class="result-dialog">
       <div class="result-head">
         <div id="resultEmoji" class="result-emoji">🎉</div>
-        <div id="resultTitle" class="result-title">プレイヤー1の勝ち！</div>
+        <div id="resultTitle" class="result-title">青の勝ち！</div>
         <div id="resultSub" class="result-sub">おめでとう！</div>
       </div>
 
@@ -543,6 +583,17 @@
       <section class="result-section" aria-label="通算成績">
         <div class="section-label"><span>通算成績</span><span id="tallyGames">0 試合</span></div>
         <div id="tally" class="tally"></div>
+      </section>
+
+      <section class="result-section" aria-label="次の順番">
+        <div class="section-label"><span>次の順番</span><span id="orderHint">色はそのまま</span></div>
+        <div id="orderQuick" class="order-quick" role="group" aria-label="順番のきめかた">
+          <button class="chip-btn" type="button" data-order="rotate">🔁 ひとつずらす</button>
+          <button class="chip-btn" type="button" data-order="winner-last">👑 勝った人を最後に</button>
+          <button class="chip-btn" type="button" data-order="shuffle">🎲 シャッフル</button>
+          <button class="chip-btn" type="button" data-order="same">そのまま</button>
+        </div>
+        <div id="orderList" class="order-list"></div>
       </section>
 
       <div class="result-actions">

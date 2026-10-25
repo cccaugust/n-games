@@ -12,23 +12,27 @@ const PALETTE = [
   { id: 'purple', color: '#a78bfa', name: '紫', icon: '🍇' },
 ];
 const DEFAULT_COLORS = ['blue', 'pink', 'green', 'yellow'];
-const PLAYER_NAMES = {
-  1: 'プレイヤー1',
-  2: 'プレイヤー2',
-  3: 'プレイヤー3',
-  4: 'プレイヤー4',
-};
 const ORDER_LABEL = { 1: '1番目', 2: '2番目', 3: '3番目', 4: '4番目' };
 
+// 「人」は色で固定。順番（1番目〜）はゲームごとに入れ替えられる
 function paletteOf(player) {
   const id = state.colors[player - 1];
   return PALETTE.find((c) => c.id === id) || PALETTE[player - 1];
+}
+function paletteById(id) {
+  return PALETTE.find((c) => c.id === id) || PALETTE[0];
+}
+function colorIdOf(player) {
+  return paletteOf(player).id;
 }
 function colorOf(player) {
   return paletteOf(player).color;
 }
 function iconOf(player) {
   return paletteOf(player).icon;
+}
+function nameOf(player) {
+  return paletteOf(player).name;
 }
 // CSS側（.ring.p1 など）が参照する --p1〜--p4 を現在の色に合わせる
 function applyPlayerColors() {
@@ -55,8 +59,10 @@ const state = {
   winInfo: null, // { winner, cells, type, rings: [{ idx, size }] }
   hoverCell: -1,
   moves: [], // [{ player, idx, size }] ふりかえり用の手順
-  tally: { games: 0, draws: 0, wins: {} }, // 通算成績（同じ人数で遊んでいる間だけ）
+  tally: { games: 0, draws: 0, wins: {} }, // 通算成績（色IDごと。同じメンバーで遊んでいる間だけ）
   replayStep: 0,
+  nextOrder: [], // 次のゲームの順番（色IDの配列）
+  nextOrderMode: 'rotate', // same | rotate | winner-last | shuffle | manual
 };
 
 // ----- DOM参照 -----
@@ -82,6 +88,9 @@ const replayInfo = document.getElementById('replayInfo');
 const statsEl = document.getElementById('stats');
 const tallyEl = document.getElementById('tally');
 const tallyGames = document.getElementById('tallyGames');
+const orderListEl = document.getElementById('orderList');
+const orderQuickEl = document.getElementById('orderQuick');
+const orderHintEl = document.getElementById('orderHint');
 
 const fxCanvas = document.getElementById('fx');
 const confettiCanvas = document.getElementById('confetti');
@@ -425,13 +434,13 @@ function endWithWinner(player) {
   SFX.win();
   launchConfetti();
   state.tally.games += 1;
-  state.tally.wins[player] = (state.tally.wins[player] || 0) + 1;
+  state.tally.wins[colorIdOf(player)] = (state.tally.wins[colorIdOf(player)] || 0) + 1;
   showEnded({
     color: colorOf(player),
     emoji: '🎉',
-    title: `${iconOf(player)} ${PLAYER_NAMES[player]}の勝ち！`,
+    title: `${iconOf(player)} ${nameOf(player)}の勝ち！`,
     sub: winTypeMessage(state.winInfo?.type),
-    status: `${iconOf(player)} ${PLAYER_NAMES[player]}の勝ち！`,
+    status: `${iconOf(player)} ${nameOf(player)}の勝ち！`,
   });
 }
 function endWithDraw() {
@@ -512,7 +521,8 @@ function buildPlayers() {
     chip.innerHTML = `
       <div class="pchip-name">
         <span class="pchip-dot"></span>
-        <span>${iconOf(p)} ${PLAYER_NAMES[p]}</span>
+        <span>${iconOf(p)} ${nameOf(p)}</span>
+        <span class="pchip-order" aria-label="${ORDER_LABEL[p]}" title="${ORDER_LABEL[p]}">${p}</span>
       </div>
       <div class="pchip-stock">
         <span class="stock-item"><span class="stock-ring s"></span><span data-stock="${p}-s">3</span></span>
@@ -608,8 +618,8 @@ function render() {
 
   // ステータス
   if (!state.ended) {
-    statusEl.textContent = `${iconOf(state.current)} ${PLAYER_NAMES[state.current]}の番`;
-    turnLabel.textContent = `P${state.current}`;
+    statusEl.textContent = `${iconOf(state.current)} ${nameOf(state.current)}の番`;
+    turnLabel.textContent = ORDER_LABEL[state.current];
     turnBadge.style.setProperty('--c', colorOf(state.current));
   }
 
@@ -656,7 +666,7 @@ function buildResult() {
     row.className = 'stat-row' + (isWinner ? ' winner' : '');
     row.style.setProperty('--c', colorOf(p));
     row.innerHTML = `
-      <span>${isWinner ? '👑' : iconOf(p)} ${PLAYER_NAMES[p]}</span>
+      <span>${isWinner ? '👑' : iconOf(p)} ${nameOf(p)}</span>
       <span class="stat-num">置いた <b>${placed}</b></span>
       <span class="stat-num">のこり <b>${left}</b></span>
     `;
@@ -670,7 +680,7 @@ function buildResult() {
     const chip = document.createElement('span');
     chip.className = 'tally-chip';
     chip.style.setProperty('--c', colorOf(p));
-    chip.innerHTML = `${iconOf(p)} P${p} <b>${state.tally.wins[p] || 0}</b>勝`;
+    chip.innerHTML = `${iconOf(p)} ${nameOf(p)} <b>${state.tally.wins[colorIdOf(p)] || 0}</b>勝`;
     tallyEl.appendChild(chip);
   }
   if (state.tally.draws > 0) {
@@ -680,6 +690,83 @@ function buildResult() {
     chip.innerHTML = `🤝 引き分け <b>${state.tally.draws}</b>`;
     tallyEl.appendChild(chip);
   }
+
+  // 次の順番（色はそのまま、順番だけ入れ替える）
+  setNextOrder('rotate');
+}
+
+// ----- 次の順番 -----
+function currentOrderIds() {
+  return state.colors.slice(0, state.numPlayers);
+}
+function proposeOrder(mode) {
+  const cur = currentOrderIds();
+  if (mode === 'rotate') return [...cur.slice(1), cur[0]];
+  if (mode === 'winner-last' && state.winInfo) {
+    const w = colorIdOf(state.winInfo.winner);
+    return [...cur.filter((id) => id !== w), w];
+  }
+  if (mode === 'shuffle') {
+    const arr = [...cur];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    // 2人以上なら「前と同じ」にならないように1回だけやり直す
+    if (arr.length > 1 && arr.every((id, i) => id === cur[i])) return [...arr.slice(1), arr[0]];
+    return arr;
+  }
+  return [...cur];
+}
+function setNextOrder(mode, ids) {
+  state.nextOrderMode = mode;
+  state.nextOrder = ids || proposeOrder(mode);
+  renderNextOrder();
+}
+function moveNextOrder(from, to) {
+  if (to < 0 || to >= state.nextOrder.length) return;
+  const arr = [...state.nextOrder];
+  const [item] = arr.splice(from, 1);
+  arr.splice(to, 0, item);
+  SFX.select();
+  setNextOrder('manual', arr);
+}
+function renderNextOrder() {
+  const cur = currentOrderIds();
+  const unchanged = state.nextOrder.every((id, i) => id === cur[i]);
+  orderHintEl.textContent = unchanged ? '前と同じ順番' : '色はそのまま・順番だけ変わるよ';
+
+  orderQuickEl.querySelectorAll('[data-order]').forEach((btn) => {
+    const mode = btn.dataset.order;
+    btn.classList.toggle('active', mode === state.nextOrderMode);
+    btn.setAttribute('aria-pressed', String(mode === state.nextOrderMode));
+    btn.hidden = mode === 'winner-last' && !state.winInfo;
+  });
+
+  orderListEl.innerHTML = '';
+  state.nextOrder.forEach((id, i) => {
+    const pal = paletteById(id);
+    const prevIdx = cur.indexOf(id);
+    const row = document.createElement('div');
+    row.className = 'order-row';
+    row.style.setProperty('--c', pal.color);
+    row.innerHTML = `
+      <span class="order-num">${i + 1}</span>
+      <span class="order-name"><span class="color-row-dot"></span>${pal.icon} ${pal.name}
+        ${prevIdx !== i ? `<small>（前は${ORDER_LABEL[prevIdx + 1]}）</small>` : ''}</span>
+      <button class="btn ghost order-move" type="button" data-dir="-1" aria-label="${pal.name}を前にする" ${i === 0 ? 'disabled' : ''}>▲</button>
+      <button class="btn ghost order-move" type="button" data-dir="1" aria-label="${pal.name}を後ろにする" ${i === state.nextOrder.length - 1 ? 'disabled' : ''}>▼</button>
+    `;
+    row.querySelectorAll('.order-move').forEach((btn) => {
+      btn.addEventListener('click', () => moveNextOrder(i, i + Number(btn.dataset.dir)));
+    });
+    orderListEl.appendChild(row);
+  });
+}
+function applyNextOrder() {
+  if (state.nextOrder.length !== state.numPlayers) return;
+  const rest = state.colors.filter((id) => !state.nextOrder.includes(id));
+  state.colors = [...state.nextOrder, ...rest];
 }
 
 function setReplayStep(step) {
@@ -720,7 +807,7 @@ function setReplayStep(step) {
     replayInfo.textContent = `✨ ${winTypeMessage(state.winInfo.type)}`;
     replayInfo.style.color = colorOf(state.winInfo.winner);
   } else {
-    replayInfo.textContent = `${iconOf(last.player)} ${PLAYER_NAMES[last.player]}が「${SIZE_LABEL[last.size]}」を置いた`;
+    replayInfo.textContent = `${iconOf(last.player)} ${nameOf(last.player)}が「${SIZE_LABEL[last.size]}」を置いた`;
     replayInfo.style.color = colorOf(last.player);
   }
   document.getElementById('replayPrev').disabled = step === 0;
@@ -728,6 +815,7 @@ function setReplayStep(step) {
 }
 
 // ----- セットアップUI -----
+let refreshSetup = () => {};
 function setupCountUI() {
   const countGrid = document.getElementById('countGrid');
   const colorPicker = document.getElementById('colorPicker');
@@ -784,6 +872,7 @@ function setupCountUI() {
   }
 
   renderColorPicker();
+  refreshSetup = renderColorPicker;
   countGrid.querySelectorAll('.count-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       countGrid.querySelectorAll('.count-btn').forEach((b) => b.classList.remove('active'));
@@ -810,15 +899,25 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 });
 document.getElementById('newBtn').addEventListener('click', () => {
   resultEl.classList.add('hidden');
+  refreshSetup();
   setupEl.classList.remove('hidden');
 });
 document.getElementById('resultMenuBtn').addEventListener('click', () => {
   resultEl.classList.add('hidden');
+  refreshSetup();
   setupEl.classList.remove('hidden');
 });
 document.getElementById('resultAgainBtn').addEventListener('click', () => {
   resultEl.classList.add('hidden');
+  applyNextOrder();
+  SFX.turn();
   reset(true);
+});
+orderQuickEl.querySelectorAll('[data-order]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    SFX.select();
+    setNextOrder(btn.dataset.order);
+  });
 });
 document.getElementById('resultBoardBtn').addEventListener('click', () => {
   resultEl.classList.add('hidden');
