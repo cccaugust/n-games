@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1b1f3a" />
+  <title>ねこぐんだん大戦争 | N-Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700;800;900&family=Outfit:wght@700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ===== タイトル ===== -->
+    <section id="screen-title" class="screen is-active">
+      <canvas id="titleCanvas" aria-hidden="true"></canvas>
+      <div class="title-inner">
+        <h1 class="logo"><span class="l1">ねこぐんだん</span><span class="l2">大戦争</span></h1>
+        <p class="title-sub">ねこを出して、てきの城をたおせ！</p>
+        <div class="title-actions">
+          <button id="btnStart" class="btn btn-primary btn-lg" type="button">▶ はじめる</button>
+          <button id="btnHowto" class="btn btn-ghost" type="button">あそびかた</button>
+        </div>
+      </div>
+      <div class="title-footer">
+        <a id="backLink" href="../../pages/portal/portal.html">&larr; ポータルへもどる</a>
+        <a id="btnReset" href="#" role="button">データをリセット</a>
+      </div>
+    </section>
+
+    <!-- ===== ステージ選択 ===== -->
+    <section id="screen-stages" class="screen">
+      <header class="topbar">
+        <button class="icon-btn" id="btnStagesBack" type="button" aria-label="タイトルへ">&larr;</button>
+        <h2>ステージをえらぶ</h2>
+        <span class="chip chip-xp">XP <b id="xpStages">0</b></span>
+      </header>
+      <div class="scroll">
+        <div class="stage-grid" id="stageGrid"></div>
+      </div>
+      <footer class="bottom-actions">
+        <button id="btnDeck" class="btn btn-secondary" type="button">🐱 ねこの強化・へんせい</button>
+      </footer>
+    </section>
+
+    <!-- ===== デッキ・強化 ===== -->
+    <section id="screen-deck" class="screen">
+      <header class="topbar">
+        <button class="icon-btn" id="btnDeckBack" type="button" aria-label="ステージ選択へ">&larr;</button>
+        <h2>ねこの強化・へんせい</h2>
+        <span class="chip chip-xp">XP <b id="xpDeck">0</b></span>
+      </header>
+      <div class="deck-bar" id="deckBar"></div>
+      <div class="deck-note" id="deckNote">出撃する ねこを 10体まで えらべるよ</div>
+      <div class="scroll">
+        <div class="castle-card" id="castleCard"></div>
+        <div id="unitList"></div>
+      </div>
+    </section>
+
+    <!-- ===== バトル ===== -->
+    <section id="screen-battle" class="screen">
+     <div class="battle-wrap">
+      <div class="battle-top">
+        <button class="icon-btn" id="btnPause" type="button" aria-label="ポーズ">❚❚</button>
+        <div class="stage-name" id="battleStageName">ステージ</div>
+        <button class="icon-btn speed" id="btnSpeed" type="button" aria-label="速さ">x1</button>
+        <button class="icon-btn" id="btnSound" type="button" aria-label="音">🔊</button>
+      </div>
+      <div class="battle-stage" id="battleStage">
+        <canvas id="battleCanvas"></canvas>
+        <div class="hud-money" id="hudMoney"><span class="yen">¥</span><b id="moneyNow">0</b><span class="cap">/ <span id="moneyCap">1000</span></span></div>
+        <div class="boss-bar" id="bossBar"><div class="boss-name" id="bossName"></div><div class="bar"><i id="bossFill"></i></div></div>
+        <div class="boss-banner" id="bossBanner">⚠ ボス出現！</div>
+        <button class="hud-mini" id="btnCenter" type="button" aria-label="最前線へ">◎</button>
+        <button class="hud-btn worker" id="btnWorker" type="button">
+          <span class="lbl">はたらきねこ</span>
+          <b id="workerLv">Lv 1</b>
+          <span class="cost" id="workerCost">¥60</span>
+        </button>
+        <button class="hud-btn cannon" id="btnCannon" type="button">
+          <span class="fill" id="cannonFill"></span>
+          <span class="lbl">ねこキャノン</span>
+          <b id="cannonText">じゅうでん中</b>
+        </button>
+        <div class="hint-toast" id="hintToast"></div>
+
+      </div>
+      <div class="deploy-bar" id="deployBar"></div>
+     </div>
+        <!-- 開始前 -->
+        <div class="overlay is-on" id="readyOverlay">
+          <div class="dialog">
+            <p id="readyNum">ステージ 1</p>
+            <h3 id="readyName">はじまりの草原</h3>
+            <div class="stage-hint" id="readyHint"></div>
+            <div class="actions">
+              <button class="btn btn-primary btn-lg" id="btnFight" type="button">たたかう！</button>
+              <button class="btn btn-secondary" id="btnReadyBack" type="button">ステージ選択へ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ポーズ -->
+        <div class="overlay" id="pauseOverlay">
+          <div class="dialog">
+            <h3>ポーズ中</h3>
+            <div class="setting-row"><span>効果音</span><button class="btn btn-sm toggle" id="togSfx" type="button">ON</button></div>
+            <div class="setting-row"><span>BGM</span><button class="btn btn-sm toggle" id="togBgm" type="button">ON</button></div>
+            <div class="actions">
+              <button class="btn btn-primary" id="btnResume" type="button">つづける</button>
+              <button class="btn btn-secondary" id="btnRetry" type="button">さいしょから</button>
+              <button class="btn btn-danger" id="btnGiveup" type="button">あきらめて もどる</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 結果 -->
+        <div class="overlay" id="resultOverlay">
+          <div class="dialog" id="resultDialog"></div>
+        </div>
+    </section>
+
+    <!-- ===== あそびかた ===== -->
+    <div class="overlay" id="howtoOverlay">
+      <div class="dialog howto">
+        <h3 style="text-align:center">あそびかた</h3>
+        <h4>もくひょう</h4>
+        <ul>
+          <li>左にある <b>てきの城</b> の HP を 0 にしたら かち！</li>
+          <li>右の <b>ねこ城</b> の HP が 0 になったら まけ…</li>
+        </ul>
+        <h4>やること</h4>
+        <ul>
+          <li>お金（¥）は 時間で ふえる。下のカードを タップして ねこを 出す</li>
+          <li><b>はたらきねこ</b> を レベルアップすると お金が はやく ふえる</li>
+          <li><b>ねこキャノン</b> は じゅうでんが たまったら 発射！ てき全体に ダメージ＋ふっとばし</li>
+          <li>画面を 左右に ドラッグすると 戦場を 見わたせる。◎ で 最前線に もどる</li>
+        </ul>
+        <h4>強くなる</h4>
+        <ul>
+          <li>ステージを クリアすると <b>XP</b> と 新しい ねこが 手に入る</li>
+          <li>XP で ねこや お城を <b>レベルアップ</b>！ デッキは 10体まで</li>
+          <li>★3 は 城に いちども ダメージを 受けずに クリア</li>
+        </ul>
+        <h4>PCのキー</h4>
+        <ul>
+          <li><kbd>1</kbd>〜<kbd>0</kbd> ねこを出す / <kbd>W</kbd> はたらきねこ / <kbd>Space</kbd> キャノン</li>
+          <li><kbd>←</kbd><kbd>→</kbd> 画面スクロール / <kbd>F</kbd> 倍速 / <kbd>P</kbd> ポーズ</li>
+        </ul>
+        <div class="actions"><button class="btn btn-primary" id="btnHowtoClose" type="button">とじる</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
