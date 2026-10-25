@@ -7,6 +7,14 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 
 const games = [
   {
+    id: 'neko-taisen',
+    title: 'ねこぐんだん大戦争',
+    desc: 'お金をためて ねこを出撃！てきの城をたおす にゃんこ系タワーディフェンス🐱⚔️',
+    color: '#e2651f',
+    icon: '🐱',
+    link: '/games/neko-taisen/'
+  },
+  {
     id: 'block-world',
     title: 'ブロックワールド',
     desc: 'ほって・つくって・ぼうけん！自由に遊べる3Dブロックの世界🧱',
