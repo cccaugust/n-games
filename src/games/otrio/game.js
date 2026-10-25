@@ -2,19 +2,40 @@
 
 const SIZES = ['s', 'm', 'l'];
 const SIZE_LABEL = { s: '小', m: '中', l: '大' };
-const PLAYER_COLORS = {
-  1: '#38bdf8', // 青
-  2: '#f472b6', // ピンク
-  3: '#34d399', // 緑
-  4: '#facc15', // 黄
-};
+// 選べる色（順番ごとに好きな色を割り当てる）
+const PALETTE = [
+  { id: 'blue', color: '#38bdf8', name: '青', icon: '🐬' },
+  { id: 'pink', color: '#f472b6', name: 'ピンク', icon: '🌸' },
+  { id: 'green', color: '#34d399', name: '緑', icon: '🌿' },
+  { id: 'yellow', color: '#facc15', name: '黄', icon: '⭐' },
+  { id: 'orange', color: '#fb923c', name: 'オレンジ', icon: '🍊' },
+  { id: 'purple', color: '#a78bfa', name: '紫', icon: '🍇' },
+];
+const DEFAULT_COLORS = ['blue', 'pink', 'green', 'yellow'];
 const PLAYER_NAMES = {
   1: 'プレイヤー1',
   2: 'プレイヤー2',
   3: 'プレイヤー3',
   4: 'プレイヤー4',
 };
-const PLAYER_ICONS = { 1: '🐬', 2: '🌸', 3: '🌿', 4: '⭐' };
+const ORDER_LABEL = { 1: '1番目', 2: '2番目', 3: '3番目', 4: '4番目' };
+
+function paletteOf(player) {
+  const id = state.colors[player - 1];
+  return PALETTE.find((c) => c.id === id) || PALETTE[player - 1];
+}
+function colorOf(player) {
+  return paletteOf(player).color;
+}
+function iconOf(player) {
+  return paletteOf(player).icon;
+}
+// CSS側（.ring.p1 など）が参照する --p1〜--p4 を現在の色に合わせる
+function applyPlayerColors() {
+  for (let p = 1; p <= 4; p++) {
+    document.documentElement.style.setProperty(`--p${p}`, colorOf(p));
+  }
+}
 
 const LINES = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -25,6 +46,7 @@ const LINES = [
 // ----- 状態 -----
 const state = {
   numPlayers: 2,
+  colors: [...DEFAULT_COLORS], // 順番(1番目〜)ごとの色ID
   current: 1,
   selectedSize: { 1: 's', 2: 's', 3: 's', 4: 's' },
   stock: {},
@@ -208,7 +230,9 @@ function resizeCanvas() {
 // ----- 紙吹雪 -----
 const confetti = [];
 function launchConfetti() {
-  const colors = Object.values(PLAYER_COLORS).concat(['#ffffff', '#fde047']);
+  const colors = [];
+  for (let p = 1; p <= state.numPlayers; p++) colors.push(colorOf(p));
+  colors.push('#ffffff', '#fde047');
   for (let i = 0; i < 140; i++) {
     confetti.push({
       x: Math.random() * window.innerWidth,
@@ -273,6 +297,7 @@ function reset(keepCount = true) {
   state.winInfo = null;
   state.hoverCell = -1;
   state.moves = [];
+  applyPlayerColors();
   statusBar.classList.remove('ended');
   resultEl.classList.add('hidden');
   buildPlayers();
@@ -335,8 +360,8 @@ function place(idx) {
   const boardRect = boardEl.getBoundingClientRect();
   const cx = rect.left - boardRect.left + rect.width / 2;
   const cy = rect.top - boardRect.top + rect.height / 2;
-  emitBurst(cx, cy, PLAYER_COLORS[player], 18);
-  emitRingPulse(cx, cy, PLAYER_COLORS[player]);
+  emitBurst(cx, cy, colorOf(player), 18);
+  emitRingPulse(cx, cy, colorOf(player));
   startFx();
 
   // 勝ち判定
@@ -402,11 +427,11 @@ function endWithWinner(player) {
   state.tally.games += 1;
   state.tally.wins[player] = (state.tally.wins[player] || 0) + 1;
   showEnded({
-    color: PLAYER_COLORS[player],
+    color: colorOf(player),
     emoji: '🎉',
-    title: `${PLAYER_ICONS[player]} ${PLAYER_NAMES[player]}の勝ち！`,
+    title: `${iconOf(player)} ${PLAYER_NAMES[player]}の勝ち！`,
     sub: winTypeMessage(state.winInfo?.type),
-    status: `${PLAYER_ICONS[player]} ${PLAYER_NAMES[player]}の勝ち！`,
+    status: `${iconOf(player)} ${PLAYER_NAMES[player]}の勝ち！`,
   });
 }
 function endWithDraw() {
@@ -482,12 +507,12 @@ function buildPlayers() {
   for (let p = 1; p <= state.numPlayers; p++) {
     const chip = document.createElement('div');
     chip.className = 'pchip';
-    chip.style.setProperty('--c', PLAYER_COLORS[p]);
+    chip.style.setProperty('--c', colorOf(p));
     chip.id = `pchip-${p}`;
     chip.innerHTML = `
       <div class="pchip-name">
         <span class="pchip-dot"></span>
-        <span>${PLAYER_ICONS[p]} ${PLAYER_NAMES[p]}</span>
+        <span>${iconOf(p)} ${PLAYER_NAMES[p]}</span>
       </div>
       <div class="pchip-stock">
         <span class="stock-item"><span class="stock-ring s"></span><span data-stock="${p}-s">3</span></span>
@@ -583,9 +608,9 @@ function render() {
 
   // ステータス
   if (!state.ended) {
-    statusEl.textContent = `${PLAYER_ICONS[state.current]} ${PLAYER_NAMES[state.current]}の番`;
+    statusEl.textContent = `${iconOf(state.current)} ${PLAYER_NAMES[state.current]}の番`;
     turnLabel.textContent = `P${state.current}`;
-    turnBadge.style.setProperty('--c', PLAYER_COLORS[state.current]);
+    turnBadge.style.setProperty('--c', colorOf(state.current));
   }
 
   // ピッカー
@@ -593,13 +618,13 @@ function render() {
     const s = btn.dataset.size;
     const p = state.current;
     const count = state.stock[p][s];
-    btn.style.setProperty('--c', PLAYER_COLORS[p]);
+    btn.style.setProperty('--c', colorOf(p));
     btn.classList.toggle('active', state.selectedSize[p] === s && !state.ended);
     btn.disabled = state.ended || count <= 0;
     const cnt = btn.querySelector(`[data-pickcount="${s}"]`);
     if (cnt) cnt.textContent = `×${count}`;
     const ringVis = btn.querySelector('.ring-vis');
-    if (ringVis) ringVis.style.borderColor = PLAYER_COLORS[p];
+    if (ringVis) ringVis.style.borderColor = colorOf(p);
   });
 
   updatePreview();
@@ -629,9 +654,9 @@ function buildResult() {
     const isWinner = state.winInfo?.winner === p;
     const row = document.createElement('div');
     row.className = 'stat-row' + (isWinner ? ' winner' : '');
-    row.style.setProperty('--c', PLAYER_COLORS[p]);
+    row.style.setProperty('--c', colorOf(p));
     row.innerHTML = `
-      <span>${isWinner ? '👑' : PLAYER_ICONS[p]} ${PLAYER_NAMES[p]}</span>
+      <span>${isWinner ? '👑' : iconOf(p)} ${PLAYER_NAMES[p]}</span>
       <span class="stat-num">置いた <b>${placed}</b></span>
       <span class="stat-num">のこり <b>${left}</b></span>
     `;
@@ -644,8 +669,8 @@ function buildResult() {
   for (let p = 1; p <= state.numPlayers; p++) {
     const chip = document.createElement('span');
     chip.className = 'tally-chip';
-    chip.style.setProperty('--c', PLAYER_COLORS[p]);
-    chip.innerHTML = `${PLAYER_ICONS[p]} P${p} <b>${state.tally.wins[p] || 0}</b>勝`;
+    chip.style.setProperty('--c', colorOf(p));
+    chip.innerHTML = `${iconOf(p)} P${p} <b>${state.tally.wins[p] || 0}</b>勝`;
     tallyEl.appendChild(chip);
   }
   if (state.tally.draws > 0) {
@@ -693,10 +718,10 @@ function setReplayStep(step) {
     replayInfo.style.color = '';
   } else if (isFinal) {
     replayInfo.textContent = `✨ ${winTypeMessage(state.winInfo.type)}`;
-    replayInfo.style.color = PLAYER_COLORS[state.winInfo.winner];
+    replayInfo.style.color = colorOf(state.winInfo.winner);
   } else {
-    replayInfo.textContent = `${PLAYER_ICONS[last.player]} ${PLAYER_NAMES[last.player]}が「${SIZE_LABEL[last.size]}」を置いた`;
-    replayInfo.style.color = PLAYER_COLORS[last.player];
+    replayInfo.textContent = `${iconOf(last.player)} ${PLAYER_NAMES[last.player]}が「${SIZE_LABEL[last.size]}」を置いた`;
+    replayInfo.style.color = colorOf(last.player);
   }
   document.getElementById('replayPrev').disabled = step === 0;
   document.getElementById('replayNext').disabled = step === total;
@@ -705,24 +730,66 @@ function setReplayStep(step) {
 // ----- セットアップUI -----
 function setupCountUI() {
   const countGrid = document.getElementById('countGrid');
-  const colorsPreview = document.getElementById('colorsPreview');
-  // 色プレビュー
-  function renderColorsPreview(n) {
-    colorsPreview.innerHTML = '';
-    for (let p = 1; p <= 4; p++) {
-      const dot = document.createElement('div');
-      dot.className = 'cdot' + (p > n ? ' muted' : '');
-      dot.style.setProperty('--c', PLAYER_COLORS[p]);
-      colorsPreview.appendChild(dot);
+  const colorPicker = document.getElementById('colorPicker');
+
+  // 順番ごとの色えらび
+  function renderColorPicker() {
+    colorPicker.innerHTML = '';
+    for (let p = 1; p <= state.numPlayers; p++) {
+      const row = document.createElement('div');
+      row.className = 'color-row';
+      row.style.setProperty('--c', colorOf(p));
+      const label = document.createElement('div');
+      label.className = 'color-row-label';
+      label.innerHTML = `<span class="color-row-dot"></span><span><b>${ORDER_LABEL[p]}</b> ${iconOf(p)} ${paletteOf(p).name}</span>`;
+      row.appendChild(label);
+
+      const swatches = document.createElement('div');
+      swatches.className = 'swatches';
+      swatches.setAttribute('role', 'radiogroup');
+      swatches.setAttribute('aria-label', `${ORDER_LABEL[p]}の色`);
+      PALETTE.forEach((c) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'swatch';
+        btn.style.setProperty('--c', c.color);
+        const mine = state.colors[p - 1] === c.id;
+        const usedBy = state.colors.findIndex((id, i) => id === c.id && i < state.numPlayers) + 1;
+        btn.classList.toggle('selected', mine);
+        btn.classList.toggle('taken', !mine && usedBy > 0);
+        btn.setAttribute('role', 'radio');
+        btn.setAttribute('aria-checked', String(mine));
+        btn.setAttribute('aria-label', `${c.name}${!mine && usedBy > 0 ? `（${ORDER_LABEL[usedBy]}が使用中・タップで交換）` : ''}`);
+        btn.title = !mine && usedBy > 0 ? `${ORDER_LABEL[usedBy]}と色を交換` : c.name;
+        btn.innerHTML = `<span class="swatch-icon">${c.icon}</span>${!mine && usedBy > 0 ? `<span class="swatch-owner">${usedBy}</span>` : ''}`;
+        btn.addEventListener('click', () => {
+          if (mine) return;
+          pickColor(p, c.id);
+        });
+        swatches.appendChild(btn);
+      });
+      row.appendChild(swatches);
+      colorPicker.appendChild(row);
     }
   }
-  renderColorsPreview(state.numPlayers);
+
+  // p番目の人に色を割り当てる。他の人が使っていたら入れ替え
+  function pickColor(p, colorId) {
+    const prev = state.colors[p - 1];
+    const otherIdx = state.colors.findIndex((id) => id === colorId);
+    if (otherIdx >= 0) state.colors[otherIdx] = prev;
+    state.colors[p - 1] = colorId;
+    SFX.select();
+    renderColorPicker();
+  }
+
+  renderColorPicker();
   countGrid.querySelectorAll('.count-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       countGrid.querySelectorAll('.count-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       state.numPlayers = Number(btn.dataset.count);
-      renderColorsPreview(state.numPlayers);
+      renderColorPicker();
       SFX.select();
     });
   });
@@ -777,6 +844,7 @@ const ro = new ResizeObserver(() => resizeCanvas());
 ro.observe(boardEl);
 
 // ----- 起動 -----
+applyPlayerColors();
 setupCountUI();
 state.stock = makeStock();
 buildPlayers();
